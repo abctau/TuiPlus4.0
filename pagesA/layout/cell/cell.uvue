@@ -1,0 +1,54 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-20" title='Cell 列表' sub-title="列表组件是一个用于展示项目列表的UI元素，支持自定义边框、图标和文本样式，以及hover效果。"></t-card>
+		<t-section main-class="mb-20" title='主题+type'></t-section>
+		<t-cell icon="map" title="欢迎使用Tui" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="i" effect="" main-class='mb-30 tdr' :disabled="true"
+			@click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="w" effect="" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="p" effect="" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="e" effect="" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-section main-class="mb-20" title='主题+effect'></t-section>
+		<t-cell icon="map" title="欢迎使用Tui" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="normal" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="dark" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="disabled" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="light" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="plain" main-class='mb-30 tdr' @click="onclick"></t-cell>
+		<t-section main-class="mb-20" title='主题+size'></t-section>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="normal" size="large" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="dark" size="medium" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="disabled" size="small" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="map" title="欢迎使用Tui" type="s" effect="light" size="mini" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="/static/tabbar/ui1.png" title="欢迎使用Tui" effect="normal" size="large" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="/static/tabbar/ui1.png" title="欢迎使用Tui" effect="dark" size="medium" main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="/static/tabbar/ui1.png" title="欢迎使用Tui" effect="disabled" size="small"
+			main-class='mb-30 tdr'></t-cell>
+		<t-cell icon="/static/tabbar/ui1.png" title="欢迎使用Tui" effect="light" size="mini" main-class='mb-30 tdr'></t-cell>
+		<t-section main-class="mb-20-tdb-tdr" title='图标+主题+插槽'></t-section>
+		<t-cell icon='/static/tabbar/ui1.png' main-class='mb-30 tdr' title="欢迎使用Tui" desc='+66' desc-class="c-red"></t-cell>
+		<t-cell icon='/static/tabbar/ui1.png' main-class='mb-30 tdr' title="欢迎使用Tui">
+			<template v-slot:right>
+				<t-button @click="onclick" type="s" size='mini'>取消</t-button>
+			</template>
+		</t-cell>
+		<t-section main-class="mb-20-tdb-tdr" title='自定义样式'></t-section>
+		<t-cell icon='integral' main-class='mb-30 p-30' title="欢迎使用Tui" type="p"></t-cell>
+		<t-cell icon='integral' main-class='mb-30 h-150 s-80 c-blue' title="欢迎使用Tui" type="s"></t-cell>
+		<t-section main-class="mb-30" title='组合卡片'></t-section>
+		<t-card main-class="mb-30 p-0" title="欢迎使用Tui" title-class="sfwb p-20"
+			sub-title-class="slh-60 sls-10 ato-l,t plr-20" sub-title="Tui是一个强大的UI库，提供了丰富的组件和灵活的配置，助力开发者快速构建高质量的用户界面。">
+			<t-cell main-class="ptb-30" icon='/static/grid/grid (1).png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/grid/grid (2).png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/grid/grid (3).png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/grid/grid (4).png' :border="true" title="欢迎使用Tui"></t-cell>
+		</t-card>
+	</t-page>
+</template>
+
+<script setup>
+	function onclick() {
+		console.log('欢迎使用Tui')
+	}
+</script>

@@ -1,0 +1,6 @@
+import { SlidetMenuListType } from './interface.uts'
+export const initSlidetMenuList = {
+	title: '',
+	id: '',
+	data: []
+} as SlidetMenuListType

@@ -1,0 +1,109 @@
+<template>
+	<t-row v-bind="extendsAttrs" :main-class="`faic ${extendsPadding} tvg ${mainClass}`" @click="mainOnclick">
+		<t-view v-if="line" :main-class="`w-8 h-26 r-10 mr-10 ${extendsBackgroundColor} ${lineClass}`"></t-view>
+		<t-row main-class="f fjcb">
+			<t-col main-class="">
+				<t-text :main-class="`s-${getFontSizeToValue}px sfwb ${titleClass}`" :text="title"></t-text>
+				<t-text v-if="subTitle!=''" :main-class="`o-0.8 mt-10 s-${getFontSizeToValue*0.9}px ${subTitleClass}`"
+					:text="subTitle"></t-text>
+			</t-col>
+			<t-row main-class="faic">
+				<t-text v-bind="extendsAttrs" size="small" :main-class="tagClass" type="info" :text="tag"></t-text>
+				<slot name="right"></slot>
+			</t-row>
+		</t-row>
+	</t-row>
+</template>
+<script setup>
+	/**
+	 * Section 标题
+	 * @date 2025-05-31 12:06:41
+	 * @author TanYuan
+	 * @description 创意标题栏，适用于展示创意作品、设计灵感的标题。
+	 * @example /pagesA/layout/section/section
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-section.html
+	 * @example /pagesA/layout/section/section
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：primary)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} tag 描述
+	 * @property {String} tagClass 描述样式
+	 * @property {String} title 标题
+	 * @property {String} titleClass 标题样式
+	 * @property {String} subTitle 副标题
+	 * @property {String} subTitleClass 副标题样式
+	 * @property {Boolean} line 是否显示底部线条(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} lineClass 线条样式
+	 * @event {Function} click 点击时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface SectionProps extends CommonProps {
+		tag : string
+		tagClass : string
+		type : string
+		title : string
+		titleClass : string
+		subTitle : string
+		subTitleClass : string
+		line : boolean
+		lineClass : string
+	}
+	const props = withDefaults(defineProps<SectionProps>(), {
+		path: '',
+		hover: false,
+		type: 'primary',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		tag: '',
+		tagClass: '',
+		title: '',
+		titleClass: '',
+		subTitle: '',
+		subTitleClass: '',
+		line: true,
+		lineClass: ''
+	});
+	const { extendsAttrs, extendsPadding, extendsBackgroundColor, getFontSizeToValue } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+</script>

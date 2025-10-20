@@ -1,0 +1,199 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`ov ${mainClass}`" v-if="opts.toMap().size>0">
+		<t-popup direction="center" main-class="ov b" content-class="ov" ref='formmodalpopup' :show-footer="false"
+			:closeable="false" @close="close" @transitionend="transitionend">
+			<t-col :main-class="`ov fais dr faic w-550 p-45 plr-60 ${formContentStyle}`">
+				<t-text v-bind="extendsAttrs" type="" main-class="sfwb" :text="formTitle"></t-text>
+				<t-text v-bind="extendsAttrs" type="" main-class="sta-c mt-15 slh-45 w-100%"
+					:text="formDescribe"></t-text>
+				<t-view main-class="w-100% mtb-40 faic ov">
+					<t-stepper v-if="formType=='stepper'" v-model="(opts['value'] as number)"
+						v-bind="formAttrs"></t-stepper>
+
+					<t-picker-date v-if="formType=='date'" v-model="(opts['value'] as string)" :embeddable="true"
+						main-class="w-100%" v-bind="formAttrs">
+					</t-picker-date>
+
+					<t-picker-city v-if="formType=='city'" v-model="(opts['value'] as string[])"
+						main-class="w-100%" :embeddable="true" v-bind="formAttrs">
+					</t-picker-city>
+
+					<t-picker-custom v-if="formType=='picker-custom'" v-model="(opts['value'] as string[])"
+						main-class="w-100%" :embeddable="true" v-bind="formAttrs">
+					</t-picker-custom>
+
+					<t-radio-group v-if="formType=='radio'" v-model="(opts['value'] as string)"
+						main-class="w-100% fl fww fjcc" v-bind="formAttrs">
+						<t-radio v-for="(k,i) in formList" :key="i" :value="`${k['value']}`">{{k['label']}}</t-radio>
+					</t-radio-group>
+
+					<t-checkbox-group v-if="formType=='checkbox'" v-model="(opts['value'] as string[])"
+						main-class="w-100% fl fww fjcc" v-bind="formAttrs">
+						<t-checkbox v-for="(k,i) in formList" :key="i"
+							:value="`${k['value']}`">{{k['label']}}</t-checkbox>
+					</t-checkbox-group>
+
+					<t-input v-if="formType=='input'" v-model="(opts['value'] as string)" main-class="bw-2px w-100%"
+						:border="true" v-bind="formAttrs" effect="plain">
+					</t-input>
+
+					<t-slider v-if="formType=='slider'" v-model="(opts['value'] as number[])" main-class="w-100% h-120"
+						v-bind="formAttrs">
+					</t-slider>
+
+					<t-rate v-if="formType=='rate'" v-model="(opts['value'] as string)" v-bind="formAttrs"></t-rate>
+
+					<t-code-input v-if="formType=='code'" v-model="(opts['value'] as string)"
+						v-bind="formAttrs"></t-code-input>
+
+					<t-switch v-if="formType=='switch'" v-model="(opts['value'] as boolean)"
+						v-bind="formAttrs"></t-switch>
+
+					<t-upload v-if="formType=='upload'" v-model="(opts['value'] as string[])"
+						v-bind="formAttrs"></t-upload>
+
+					<t-select v-if="formType=='select'" v-model="(opts['value'] as any)" main-class="w-260"
+						v-bind="formAttrs">
+						<t-select-option v-for="(k,i) in formList" :key="i" v-bind="k">
+						</t-select-option>
+					</t-select>
+
+					<t-picker-select v-if="formType=='pickerSelect'" v-model="(opts['value'] as any)"
+						main-class="w-100%" v-bind="formAttrs">
+					</t-picker-select>
+
+					<t-textarea v-if="formType=='textarea'" v-model="(opts['value'] as string)"
+						main-class="w-100% bw-2px" :border="true" v-bind="formAttrs" effect="plain"></t-textarea>
+
+					<t-color v-if="formType=='color'" v-model="(opts['value'] as string)" main-class="w-100%"
+						v-bind="formAttrs">
+					</t-color>
+
+					<t-calendar v-if="formType=='calendar'" v-model="(opts['value'] as string[])" main-class="w-100%"
+						v-bind="formAttrs"></t-calendar>
+
+					<t-cascader v-if="formType=='cascader'" v-model="(opts['value'] as string[])" main-class="w-100%"
+						v-bind="formAttrs"></t-cascader>
+
+					<t-file-manager v-if="formType=='fileManager'" v-model="(opts['value'] as UTSJSONObject[])"
+						main-class="w-100%" v-bind="formAttrs"></t-file-manager>
+
+				</t-view>
+				<t-button v-bind="extendsAttrs" main-class="r-100 w-100%" type="p"
+					@click="onConfirm">{{confirmText}}</t-button>
+				<t-view :main-class="`fc twhr-60 da db-n100 ${extendsBackgroundColor}`" :hover="true" @click="close">
+					<t-icon v-bind="extendsAttrs" name="close" :main-class="`sfwb ${extendsForegroundColor}`"></t-icon>
+				</t-view>
+			</t-col>
+		</t-popup>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * FormModal 动态表单
+	 * @date 2025-05-31 12:03:41
+	 * @author TanYuan
+	 * @description JSON配置,弹出编辑框的一种形式,attrs可绑定事件和ref,实现表单各组件的关联控制
+	 * @example /pagesA/form/form-edit/form-edit
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-form-modal.html
+	 * @example /pagesA/form/form-edit/form-edit
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} confirmText 提示框确认按钮的文本(默认：确认)
+	 * @event {Function} confirm 点击确认按钮时触发,返回填写的信息
+	 * @event {Function} cancel 取消填写
+	 */
+	import { TuiGuid } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface FormModalProps extends CommonProps {
+		confirmText : string
+	}
+	const props = withDefaults(defineProps<FormModalProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		confirmText: '确认'
+	});
+	const { extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['confirm', 'cancel'])
+	const formmodalpopup = ref<ComponentPublicInstance | null>(null)
+	const opts = shallowRef<UTSJSONObject>({})
+	function transitionend(e : boolean) {
+		if (!e) opts.value = {}
+	}
+	function onConfirm() {
+		formmodalpopup.value?.$callMethod('show')
+		emit('confirm', { name: opts.value['name'], value: opts.value['value'] })
+	}
+	function close() {
+		emit('cancel')
+		formmodalpopup.value?.$callMethod('show')
+	}
+	function show(option : UTSJSONObject) {
+		opts.value = option  
+		nextTick(() => {
+			formmodalpopup.value?.$callMethod('show')
+		})
+	}
+	const formList = computed(() : UTSJSONObject[] => {
+		return opts.value.getArray<UTSJSONObject>('list') ?? [] as UTSJSONObject[]
+	})
+	const formName = computed(() : string => {
+		return opts.value.getString('name') ?? ''
+	})
+	const formType = computed(() : string => {
+		return opts.value.getString('type') ?? ''
+	})
+	const formTitle = computed(() : string => {
+		return opts.value.getString('title') ?? ''
+	})
+	const formDescribe = computed(() : string => {
+		return opts.value.getString('describe') ?? ''
+	})
+	const formContentStyle = computed(() : string => {
+		return opts.value.getString('contentClass') ?? ''
+	})
+	const extendsAttrs = computed(() : UTSJSONObject => {
+		return {
+			hover: props.hover,
+			type: props.type,
+			disabled: props.disabled,
+			stop: props.stop,
+			effect: props.effect,
+			size: props.size,
+		}
+	})
+	const formAttrs = computed(() : UTSJSONObject => {
+		const a : UTSJSONObject = opts.value.getJSON('attrs') ?? ({} as UTSJSONObject)
+		const attr = UTSJSONObject.assign<UTSJSONObject>({}, extendsAttrs.value, a)
+		return attr!
+	})
+	defineExpose({ show })
+</script>

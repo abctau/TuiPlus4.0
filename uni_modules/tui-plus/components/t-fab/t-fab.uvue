@@ -1,0 +1,138 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`df twhr-100 z-999 ocr fc ov ${mainClass}`" :style="movePos"
+		@tuiTouchstart="ontuiTouchstart" @tuiTouchmove="ontuiTouchmove" @tuiTouchend="ontouchend">
+		<slot></slot>
+		<slot name="menu">
+			<t-view @click="menuevent"
+				:main-class="`twh-100% r-1000 bg-red fc ${extendsBackgroundColor} ${menuBoxClass}`">
+				<t-icon :name="expand?'close':'plus'"
+					:main-class="`${extendsForegroundColor} s-40 sfwb ${menuIconClass}`"></t-icon>
+			</t-view>
+		</slot>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Fab 悬浮按钮
+	 * @date 2025-05-31 12:03:16
+	 * @author TanYuan
+	 * @description 动态的展开和收起子菜单，支持多种展开方向，如垂直、水平以及圆形扩散，支持自由拖拽
+	 * @example /pagesA/basics/fab/fab
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-fab.html
+	 * @example /pagesA/basics/fab/fab
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} menuBoxClass 菜单按钮盒子的样式
+	 * @property {String} menuIconClass 图标样式
+	 * @property {Boolean} state 按钮的展开折叠的状态
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} direction=[row-left|row-right|column-top|colunm-bottom|round] 按钮组展开的方向(默认：row-left)
+	 * @value row-left 横向左侧展开
+	 * @value row-right 横向右侧展开
+	 * @value column-top 纵向上方展示
+	 * @value colunm-bottom 纵向下方展开
+	 * @value round 以圆形布局方式展开
+	 * @property {String} spacing 按钮之间的间距(默认：20rpx)
+	 * @property {Number} startRtateDeg 起始旋转角度(默认：1)
+	 * @property {Number} rotateDeg 旋转角度(默认：60)
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { CommonProps, useTuiThemes, FabGroupAttrsType } from '../../common/props/index.uts';
+	interface FabProps extends CommonProps {
+		menuBoxClass : string;
+		menuIconClass : string;
+		state : boolean;
+		direction : string;
+		spacing : string;
+		startRtateDeg : number;
+		rotateDeg : number;
+	}
+	const props = withDefaults(defineProps<FabProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		menuBoxClass: '',
+		menuIconClass: '',
+		state: false,
+		direction: 'row-left',
+		spacing: '20rpx',
+		startRtateDeg: 0,
+		rotateDeg: 60,
+	});
+	const { extendsAttrs, extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const expand = ref<boolean>(props.state);
+	const startX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranX = ref<number>(0);
+	const tranY = ref<number>(0);
+	const moveX = ref<number>(0);
+	const moveY = ref<number>(0);
+	const movePos = ref<string>('');
+	const total = ref<number>(1)
+
+	provide('expandState', expand)
+	provide('total', total)
+	provide('fabGroupAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		menuBoxClass: toRef<string>(() : string => props.menuBoxClass),
+		menuIconClass: toRef<string>(() : string => props.menuIconClass),
+		state: toRef<boolean>(() : boolean => props.state),
+		direction: toRef<string>(() : string => props.direction),
+		spacing: toRef<string>(() : string => props.spacing),
+		startRtateDeg: toRef<number>(() : number => props.startRtateDeg),
+		rotateDeg: toRef<number>(() : number => props.rotateDeg)
+	} as FabGroupAttrsType)
+
+	function ontuiTouchstart(e : TuiTouchEvent) {
+		startX.value = e.x
+		startY.value = e.y
+	}
+	function ontuiTouchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		tranX.value = e.x - startX.value + moveX.value
+		tranY.value = e.y - startY.value + moveY.value
+		movePos.value = `transform: translate(${tranX.value}px,${tranY.value}px)`
+	}
+	function ontouchend(e : TuiTouchEvent) {
+		moveX.value = tranX.value
+		moveY.value = tranY.value
+	}
+	function menuevent() {
+		expand.value = !expand.value
+	}
+</script>

@@ -1,0 +1,30 @@
+import { prng_newstate, rng_psize } from "./prng4";
+import { TuiArray } from '../../core/array'
+let rng_pool = new TuiArray();
+let rng_pptr : number = 0;
+let z = new Uint32Array(256);
+for (let t = 0; t < z.length; ++t) {
+	rng_pool.setValue(rng_pptr++, z[t] & 255)
+}
+function rng_get_byte() {
+	let rng_state = prng_newstate();
+	while (rng_pptr < rng_psize) {
+		let random = Math.floor(65536 * Math.random());
+		rng_pool.setValue(rng_pptr++, random & 255);
+	}
+	rng_state.init(rng_pool);
+	for (rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr) {
+		rng_pool.setValue(rng_pptr, 0);
+	}
+	rng_pptr = 0;
+	return rng_state.next();
+}
+
+export class SecureRandom {
+	constructor() { }
+	nextBytes(ba : number[]) {
+		for (let i = 0; i < ba.length; ++i) {
+			ba[i] = rng_get_byte();
+		}
+	}
+}

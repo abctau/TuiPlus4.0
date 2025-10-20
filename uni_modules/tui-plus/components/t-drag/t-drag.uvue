@@ -1,0 +1,193 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`${mainClass}`">
+		<t-animation v-for="(item,index) in modelValue" :key="index"
+			:main-class="`${activeIndex==index?'z-999':'z-0'} ${itemClass}`" ref="dragchildins">
+			<t-gesture main-class="twh-100%" @tuiTouchstart="($event:TuiTouchEvent)=>touchstart($event,index)"
+				@tuiTouchmove="($event:TuiTouchEvent)=>touchmove($event,index)"
+				@tuiTouchend="($event:TuiTouchEvent)=>touchend($event,index)"
+				@tuiTouchcancel="($event:TuiTouchEvent)=>touchend($event,index)">
+				<slot :item="item" :index="index"></slot>
+			</t-gesture>
+		</t-animation>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Drag 拖拽排序
+	 * @date 2025-05-31 12:03:00
+	 * @author TanYuan
+	 * @description 自研拖拽算法,丝滑不卡顿
+	 * @example /pagesA/layout/drag/drag
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-drag.html
+	 * @example /pagesA/layout/drag/drag
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} modelValue 绑定列表数组的值，时时更新数据的拖拽顺序
+	 * @property {String} itemClass 统一设置拖拽子组件的样式
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	type DragChildRect = {
+		width : number
+		height : number
+		x : number
+		y : number
+		left : number
+		right : number
+		top : number
+		bottom : number
+		sort : number
+	}
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface DragProps extends CommonProps {
+		modelValue : UTSJSONObject[]
+		itemClass : string
+	}
+	const dragchildins = ref<TAnimationComponentPublicInstance[]>([])
+
+	const props = withDefaults(defineProps<DragProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: [] as UTSJSONObject[],
+		itemClass: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue'])
+	const activeIndex = ref<number>(-1);
+	const childRect = ref<Map<number, DragChildRect>>(new Map());
+	const startX = ref<number>(0);
+	const startY = ref<number>(0);
+	const winTop = ref<number>(uni.getWindowInfo().windowTop);
+	const cacheF = ref<number>(-1);
+
+	function touchstart(e : TuiTouchEvent, index : number) {
+		e.event.preventDefault()
+		startX.value = e.x
+		startY.value = e.y
+		activeIndex.value = index
+		childRect.value.clear()
+		const childIns : TAnimationComponentPublicInstance[] = dragchildins.value
+		childIns.forEach((item : TAnimationComponentPublicInstance, index : number) => {
+			item.getInfo((rec : NodeInfo) => {
+				childRect.value.set(index, {
+					width: rec.width!,
+					height: rec.height!,
+					top: rec.top!,
+					bottom: rec.bottom!,
+					left: rec.left!,
+					right: rec.right!,
+					x: rec.left!,
+					y: rec.top!,
+					sort: index
+				} as DragChildRect)
+			})
+		})
+	}
+	function getDrabIndex(x : number, y : number) : number {
+		let f = -1
+		for (let i = 0; i < childRect.value.size; i++) {
+			const rect : DragChildRect = childRect.value.get(i)!
+			if (x > rect.x && y > rect.y && x < rect.x + rect.width && y < rect.y + rect.height) {
+				f = i
+				break;
+			}
+		}
+		return f
+	}
+	function dragElement(index : number) {
+		childRect.value.forEach((val : DragChildRect, key : number) => {
+			const ins : DragChildRect = childRect.value.get(key)!
+			const insAni : TAnimationComponentPublicInstance = dragchildins.value[key]
+			const ani = insAni.createAnimation({})
+			let tranX = 0
+			let tranY = 0
+			if (key > activeIndex.value && key <= index && activeIndex.value < index) {
+				const insPre : DragChildRect = childRect.value.get(key - 1)!
+				tranX = insPre.x - ins.x
+				tranY = insPre.y - ins.y
+			} else if (key < activeIndex.value && key >= index && activeIndex.value > index) {
+				const insNext : DragChildRect = childRect.value.get(key + 1)!
+				tranX = insNext.x - ins.x
+				tranY = insNext.y - ins.y
+			} else if (key != activeIndex.value) {
+				tranX = 0
+				tranY = 0
+			}
+			if (key != activeIndex.value) {
+				ani.translate(`${tranX}px`, `${tranY}px`).step({ duration: 300 })
+				insAni.exports()
+			}
+		})
+	}
+	function touchmove(e : TuiTouchEvent, index : number) {
+		e.event.preventDefault()
+		const tranX = e.x - startX.value
+		const tranY = e.y - startY.value
+		const ins : TAnimationComponentPublicInstance = dragchildins.value[index]
+		const ani = ins.createAnimation({})
+		ani.translate(`${tranX}px`, `${tranY}px`).step({ duration: 0 })
+		ins.exports()
+		const f = getDrabIndex(e.x, e.y - winTop.value)
+		if (f > -1 && f != cacheF.value) {
+			dragElement(f)
+		}
+		if (f != -1) cacheF.value = f
+	}
+	function touchend(e : TuiTouchEvent, index : number) {
+		const ins : DragChildRect = childRect.value.get(index)!
+		const allAni : TAnimationComponentPublicInstance[] = dragchildins.value;
+		const insAni : TAnimationComponentPublicInstance = allAni[index]
+		const ani = insAni.createAnimation({})
+		if (cacheF.value == activeIndex.value) {
+			ani.translate(`0px`, `0px`).step({ duration: 0 })
+			insAni.exports()
+		} else if (cacheF.value != -1) {
+			// let curins : DragChildRect = childRect.value.get(cacheF.value)!
+			// let tranX = curins.x - ins.x
+			// let tranY = curins.y - ins.y
+			// ani.translate(`${tranX}px`, `${tranY}px`).step({ duration: 0 })
+			// insAni.exports()
+			allAni.forEach((insd : TAnimationComponentPublicInstance) => {
+				const anis = insd.createAnimation({})
+				anis.translate(`0px`, `0px`).step({ duration: 0 })
+				insd.exports()
+			})
+			const copyArr = props.modelValue.slice()
+			copyArr.splice(activeIndex.value, 1)
+			copyArr.splice(cacheF.value, 0, props.modelValue[activeIndex.value])
+			nextTick(() => {
+				emit('update:modelValue', copyArr)
+			})
+		}
+		activeIndex.value = -1
+		cacheF.value = -1
+	}
+</script>

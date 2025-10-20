@@ -1,0 +1,226 @@
+<template>
+	<t-popover v-bind="extendsAttrsmain" type="" ref="selectpopover" :animationType="1" @change="popoverChange">
+		<template #button>
+			<t-row :main-class="`faic fjcb ${extendsRadius} tdp-${type},,lr`">
+				<t-icon :name="leftIcon" v-if="leftIcon!=''" v-bind="extendsAttrs"
+					:main-class="`mr-15 ats-1.3 ${leftIconClass}`"></t-icon>
+				<t-row main-class="f fww ptb-15">
+					<t-text v-if="selectValues.length==0" v-bind="extendsAttrs" :main-class="`mtb-5 ptb-8 ${textClass}`"
+						effect="disabled" text="请选择"></t-text>
+					<template v-else>
+						<t-row v-for="(item, index) in selectValues" :key="index"
+							:main-class="`mr-10 mtb-5 faic r-10 plr-10 ptb-8 tdb-${type},l ${labelBoxClass}`"
+							:hover="true">
+							<t-text v-bind="extendsAttrs" :main-class="labelClass" :text="item.label"></t-text>
+							<t-icon v-if="closeable" @click="onSelectItem(item)" name="close-circle-line"
+								v-bind="extendsAttrs" :stop="true" :main-class="`ml-4 ${closeableClass}`"></t-icon>
+						</t-row>
+					</template>
+				</t-row>
+				<t-icon v-if="rightIcon!=''" :name="rightIcon" v-bind="extendsAttrs" :main-class="arrowStyles"></t-icon>
+			</t-row>
+		</template>
+		<slot></slot>
+	</t-popover>
+</template>
+<script setup>
+	/**
+	 * Select 下拉选择
+	 * @date 2025-06-05 10:32:18
+	 * @author TanYuan
+	 * @description 下拉选择器，支持配置是否可清除、占位符、文本类名、图标类名、遮罩类名、绑定值、选项数据、下拉菜单类名等
+	 * @example /pagesA/form/select/select
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-select.html
+	 * @example /pagesA/form/select/select
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} popoverAttrs 下拉选择框的属性配置，t-popover的所有属性(默认：{})
+	 * @property {any} modelValue 双向绑定的值
+	 * @property {String} leftIcon 左侧图标
+	 * @property {String} leftIconClass 左侧图标样式
+	 * @property {String} rightIcon 右侧图标(默认：arrow-down)
+	 * @property {String} rightIconClass 右侧图标样式(默认： )
+	 * @property {Boolean} closeable 是否显示删除按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} textClass 请选择文字的样式
+	 * @property {String} labeBoxlClass 标签盒子的样式
+	 * @property {String} labelClass 选项文字的样式
+	 * @property {String} closeableClass 清除按钮的样式
+	 * @event {Function} change 值化生变化时触发 单选时返回字符，多选时返回字符串数组
+	 * @event {Function} open 展开时触发
+	 * @event {Function} close 折叠时触发
+	 */
+
+	type selectListItem = {
+		value : string
+		label : string
+	}
+	import { SelectProps, useTuiThemes, SelectAttrsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<SelectProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		popoverAttrs: {} as UTSJSONObject,
+		modelValue: '',
+		leftIcon: '',
+		textClass: '',
+		labelBoxClass: '',
+		labelClass: '',
+		closeableClass: '',
+		leftIconClass: '',
+		rightIcon: 'arrow-down',
+		rightIconClass: '',
+		closeable: true
+	});
+	const { extendsRadius, extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change', 'open', 'close'])
+	const instance = getCurrentInstance()?.proxy!
+	const selectpopover = ref<ComponentPublicInstance | null>(null)
+	const selectOptions = ref<selectListItem[]>([])
+	const values = ref<UTSJSONObject>({ modelValue: '' })
+	const popverState = ref<boolean>(false)
+
+	function popoverChange(e : boolean) {
+		popverState.value = e
+		nextTick(() => {
+			if (e) {
+				emit('open', props.modelValue)
+			} else {
+				emit('close', props.modelValue)
+			}
+		})
+	}
+	function deleteValues(key : string) {
+		if (typeof (values.value.modelValue) == 'string') {
+			values.value.set('modelValue', '')
+			emit('update:modelValue', '')
+			emit('change', '')
+		} else {
+			const val : string[] = (values.value.modelValue as string[]).slice()
+			let f : number = val.findIndex((item : string) : boolean => item == key)
+			if (f > -1) {
+				val.splice(f, 1)
+				values.value.set('modelValue', val)
+				emit('update:modelValue', val)
+				emit('change', val)
+			}
+		}
+	}
+	function onSelectItem(e : selectListItem) {
+		deleteValues(e.value)
+	}
+
+	const extendsAttrsmain = computed(() : UTSJSONObject => {
+		const def = {
+			path: props.path,
+			hover: props.hover,
+			type: props.type,
+			disabled: props.disabled,
+			stop: props.stop,
+			effect: props.effect,
+			size: props.size,
+			mainClass: props.mainClass,
+			nativeClass: props.nativeClass
+		}
+		return UTSJSONObject.assign(def, props.popoverAttrs) as UTSJSONObject
+	})
+	const arrowStyles = computed(() : string => {
+		return `atp-tr atd-100 ml-15 ${props.rightIconClass} ${popverState.value ? 'atr-180' : ''}`
+	})
+	const selectValues = computed(() : selectListItem[] => {
+		const val : selectListItem[] = []
+		if (typeof (values.value['modelValue']) == 'string') {
+			let f : selectListItem | null = selectOptions.value.find((item : selectListItem) : boolean => item.value == values.value['modelValue'])
+			if (f != null) val.push(f)
+		} else {
+			(values.value['modelValue'] as string[]).forEach((item : string) => {
+				let f : selectListItem | null = selectOptions.value.find((k : selectListItem) : boolean => k.value == item)
+				if (f != null) val.push(f)
+			})
+		}
+		return val
+	})
+
+	watch(() : any => props.modelValue, (val : any) => {
+		values.value.set('modelValue', val)
+	}, { immediate: true })
+
+	provide('provideModelValue', values)
+	provide('selectAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		popoverAttrs: toRef<UTSJSONObject>(() : UTSJSONObject => props.popoverAttrs),
+		modelValue: toRef<any>(() : any => props.modelValue),
+		leftIcon: toRef<string>(() : string => props.leftIcon),
+		textClass: toRef<string>(() : string => props.textClass),
+		labelBoxClass: toRef<string>(() : string => props.labelBoxClass),
+		labelClass: toRef<string>(() : string => props.labelClass),
+		closeableClass: toRef<string>(() : string => props.closeableClass),
+		leftIconClass: toRef<string>(() : string => props.leftIconClass),
+		rightIcon: toRef<string>(() : string => props.rightIcon),
+		rightIconClass: toRef<string>(() : string => props.rightIconClass),
+		closeable: toRef<boolean>(() : boolean => props.closeable),
+	} as SelectAttrsType)
+	provide('childChange', (state : boolean, value : string, key : string) => {
+		nextTick(() => {
+			if (typeof (values.value['modelValue']) == 'string') {
+				if (!state) {
+					selectpopover.value?.$callMethod('show')
+					nextTick(() => {
+						values.value.set('modelValue', key)
+						emit('update:modelValue', key)
+						emit('change', key)
+					})
+				}
+			} else {
+				const val : string[] = (values.value.modelValue as string[]).slice()
+				let f : number = val.findIndex((item : string) : boolean => item == key)
+				if (state) {
+					if (f > -1) val.splice(f, 1)
+				} else {
+					if (f == -1) val.push(key)
+				}
+				values.value.set('modelValue', val)
+				emit('update:modelValue', val)
+				emit('change', val)
+			}
+		})
+	})
+	provide('registerChildmethod', (key : string, value : string) => {
+		selectOptions.value.push({ value: key, label: value } as selectListItem)
+	})
+</script>

@@ -1,0 +1,78 @@
+<template>
+	<!-- #ifdef APP -->
+	<flow-item>
+		<slot></slot>
+	</flow-item>
+	<!-- #endif -->
+	<!-- #ifndef APP -->
+	<view :style="waterfallItemStyles" v-if="showview || isfirst" class="waterfallitems">
+		<slot></slot>
+	</view>
+	<!-- #endif -->
+</template>
+
+<script setup>
+	import { useStyle } from '../../common/model/style'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface WaterfallItemProps extends CommonProps { }
+	const props = withDefaults(defineProps<WaterfallItemProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+	});
+	// #ifndef APP-ANDROID || APP-IOS
+	let columnIndex : number = 0
+	let timer : number = 0
+	const isfirst = ref<boolean>(true)
+	const itemPos = ref<string>('')
+	const crossAxisCount = inject<Ref<number>>('crossAxisCount', ref<number>(2))
+	const mainAxisGap = inject<Ref<number>>('mainAxisGap', ref<number>(10))
+	const crossAxisGap = inject<Ref<number>>('crossAxisGap', ref<number>(10))
+	const padding = inject<Ref<number[]>>('padding', ref<number[]>([10, 10, 10, 10]))
+	const waterflowWidth = inject<Ref<number>>('waterflowWidth', ref<number>(0))
+	const childTop = inject<Ref<number>>('childTop', ref<number>(0))
+	const waterflowItemHeights = inject<Ref<number[]>>('waterflowItemHeights')
+	const updateHeight = inject<() => void>('updateHeight', () => { })
+	const itemtop = ref<number>(0)
+	const showview = computed(() : boolean => {
+		const d = itemtop.value - childTop.value
+		return d > -1000 && d < 1500
+	})
+	const itemWidth = computed(() : number => {
+		let w = (waterflowWidth.value - padding.value[1] - padding.value[3] - (mainAxisGap.value * (crossAxisCount.value - 1))) / crossAxisCount.value
+		return w < 0 ? 0 : w
+	})
+	const waterfallItemStyles = computed(() : string => {
+		let sty = useStyle(`da att-n3000px dlt-0 w-${itemWidth.value}px ${itemPos.value}`)
+		return sty
+	})
+	onMounted(() => {
+		getDomRect('.waterfallitems', instance).then((rect : NodeInfo) => {
+			clearTimeout(timer)
+			timer = setTimeout(() => {
+				const arr = waterflowItemHeights!.value
+				const maxValue = Math.min(...arr);
+				itemtop.value = maxValue
+				columnIndex = arr.indexOf(maxValue);
+				const height = rect.height!
+				arr[columnIndex] += (height + mainAxisGap.value)
+				updateHeight()
+				const tranX = padding.value[0] + (itemWidth.value * columnIndex) + (crossAxisGap.value * columnIndex)
+				itemPos.value = `att-${tranX}px,${Math.floor(maxValue)}px`
+				isfirst.value = false
+			}, 500)
+		})
+	})
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+	// #endif
+</script>

@@ -1,0 +1,133 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`${mainClass}`">
+		<t-popup direction="bottom" ref='popupbottom' :show-footer="true" :closeable="false" @cancel="defCancel"
+			@confirm="defConfirm" v-bind="popupAttrs">
+			<t-view main-class="tvg tdr-l,30,12 oh pb-130">
+				<t-view main-class="fl h-100 fjcb faic plr-30">
+					<t-text :hover="true" main-class="sfwb" @click="colorCancel">取消</t-text>
+					<t-text :main-class="`sfwb ${titleClass}`">{{title}}</t-text>
+					<t-text :hover="true" @click="colorConfirm" main-class="sfwb" :type="type">确认</t-text>
+				</t-view>
+				<t-calendar v-bind="$attrs" :closeValidate="true" :modelValue="dataValue" @change="cleanderChange"
+					@reset="calendarReset" main-class=""></t-calendar>
+			</t-view>
+		</t-popup>
+		<t-view @click="show">
+			<slot :value="modelValue">
+				<t-cell :desc="modelValue.length==0?label:modelValue.join('')" :border="false"
+					:main-class="labelClass"></t-cell>
+			</slot>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * PickerCalendar 日历
+	 * @date 2025-05-31 13:26:34
+	 * @author TanYuan
+	 * @description 最全UTS日历，支持农历显示、周日历月日历、是否仅显示当前月份、节日显示、节气显示、日期选择范围等。
+	 * @example /pagesA/form/calendar/calendar
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker-calendar.html
+	 * @example /pagesA/form/calendar/calendar
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} modelValue 双向绑定的值
+	 * @property {String} titleClass 标题样式
+	 * @property {String} title 标题(默认：日历)
+	 * @property {String} label 副标题(默认：请选择日期)
+	 * @property {String} labelClass 副标题样式
+	 * @property {UTSJSONObject} popupAttrs 支持t-popup的所有属性 
+	 * @event {Function} confirm 点击确认按钮时触发
+	 * @event {Function} change 双向绑定的值变化时触发
+	 * @event {Function} cancel 点击取消按钮时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerCalendarProps extends CommonProps {
+		modelValue : string[]
+		title : string
+		titleClass : string
+		label : string
+		labelClass : string
+		popupAttrs : UTSJSONObject
+	}
+	const props = withDefaults(defineProps<PickerCalendarProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: [] as string[],
+		title: '日历',
+		titleClass: '',
+		label: '请选择日期',
+		labelClass: '',
+		popupAttrs: {} as UTSJSONObject
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['confirm', 'change', 'cancel', 'update:modelValue', 'reset'])
+	const instance = getCurrentInstance()?.proxy!
+	const dataValue = ref<string[]>([])
+	const popupbottom = ref<ComponentPublicInstance | null>(null)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	watch(() : string[] => props.modelValue, (val : string[]) => {
+		dataValue.value = val
+	}, { immediate: true })
+
+	function calendarReset() {
+		emit('reset')
+	}
+
+	function show() {
+		popupbottom.value?.$callMethod('show')
+	}
+	function cleanderChange(e : string[]) {
+		dataValue.value = e
+	}
+	function defCancel() {
+		emit('cancel')
+	}
+	function colorCancel() {
+		emit('cancel')
+		show()
+	}
+	function defConfirm() {
+		emit('update:modelValue', dataValue.value)
+		emit('confirm', dataValue.value)
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function colorConfirm() {
+		emit('update:modelValue', dataValue.value)
+		emit('confirm', dataValue.value)
+		show()
+	}
+
+	defineExpose({ show })
+</script>

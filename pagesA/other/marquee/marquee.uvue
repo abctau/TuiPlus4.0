@@ -1,0 +1,98 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Marquee 跑马灯" sub-title="canvas绘制 用于文本的滚动展示，常用于公告或提示信息。"></t-card>
+		<t-marquee :list="list" :speed="0.5" main-class="tdr tdb mb-30"> </t-marquee>
+		<t-button type="primary" @click="add">增加数据测试</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	const list = ref<UTSJSONObject[][]>([
+		[
+			{
+				x: 0,
+				text: '1.张** 领取了500元',
+				color: '#666',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 20:00:00',
+				color: '#ccc',
+				fontSize: 16,
+			}
+		],
+		[
+			{
+				x: 0,
+				text: '2.李** 领取了400元',
+				color: '#ff0000',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 20:00:15',
+				color: '#ff5c67',
+				fontSize: 16,
+			}
+		],
+		[
+			{
+				x: 0,
+				text: '3.王** 领取了300元',
+				color: '#666',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 20:01:30',
+				color: '#ccc',
+				fontSize: 16,
+			}
+		],
+		[
+			{
+				x: 0,
+				text: '4.赵** 领取了600元',
+				color: '#666',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 20:02:45',
+				color: '#ccc',
+				fontSize: 16,
+			}
+		],
+		[
+			{
+				x: 0,
+				text: '5.刘** 领取了200元',
+				color: '#666',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 20:03:20',
+				color: '#ccc',
+				fontSize: 16,
+			}
+		]
+	])
+	function add() {
+		list.value.push([
+			{
+				x: 0,
+				text: '增加数据 领取了200元',
+				color: '#666',
+				fontSize: 16,
+			},
+			{
+				x: 170,
+				text: '2022-8-18 10:03:20',
+				color: '#ccc',
+				fontSize: 16,
+			}
+		])
+	}
+</script>

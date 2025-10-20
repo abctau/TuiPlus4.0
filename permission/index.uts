@@ -1,0 +1,58 @@
+import { TuiStore } from '@/uni_modules/tui-plus'
+import { loginPage, whitelist } from './config.uts'
+const store : UTSJSONObject = new TuiStore().value
+function navigateInterceptor(url : string) : boolean {
+	const _url = url.split('?')[0]
+	const token = store.token ?? ''
+	const isWhitelisted = whitelist.includes(_url)
+	if (token == '' && !isWhitelisted) {
+		uni.navigateTo({
+			url: loginPage
+		})
+		return false
+	}
+	return true
+}
+const navigateToInterceptor = {
+	invoke: (options : NavigateToOptions) => {
+		return navigateInterceptor(`${options.url}`)
+	},
+	fail: (err : NavigateToFail) => {
+		console.error('页面跳转失败:', err)
+	}
+} as AddInterceptorOptions
+
+const redirectToInterceptor = {
+	invoke: (options : RedirectToOptions) => {
+		return navigateInterceptor(`${options.url}`)
+	},
+	fail: (err : RedirectToFail) => {
+		console.error('页面跳转失败:', err)
+	}
+} as AddInterceptorOptions
+
+const reLaunchInterceptor = {
+	invoke: (options : ReLaunchOptions) => {
+		return navigateInterceptor(`${options.url}`)
+	},
+	fail: (err : ReLaunchFail) => {
+		console.error('页面跳转失败:', err)
+	}
+} as AddInterceptorOptions
+
+const switchTabInterceptor = {
+	invoke: (options : SwitchTabOptions) => {
+		return navigateInterceptor(`${options.url}`)
+	},
+	fail: (err : SwitchTabFail) => {
+		console.error('页面跳转失败:', err)
+	}
+} as AddInterceptorOptions
+export const TuiPermission = definePlugin({
+	install() {
+		uni.addInterceptor('navigateTo', navigateToInterceptor)
+		uni.addInterceptor('redirectTo', redirectToInterceptor)
+		uni.addInterceptor('reLaunch', reLaunchInterceptor)
+		uni.addInterceptor('switchTab', switchTabInterceptor)
+	}
+})

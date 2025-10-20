@@ -1,0 +1,171 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb mb-30" title='Tabbar 底部导航' sub-title="页面切换底部菜单"></t-card>
+		<t-section title='使用图片' main-class="tdr tdb mb-30"></t-section>
+		<t-tabbar main-class="tdr tdb mb-30" @change="onchange">
+			<template v-slot:default="{current,type}">
+				<t-row>
+					<t-tabbar-item v-for="(item,index) in tabList2" :key="index">
+						<t-icon :name="current.toString()==index.toString()?item.activeIcon:item.inactiveIcon"
+							main-class="s-45"></t-icon>
+						<t-text :type="current.toString()==index.toString()?type:'info'" :text="item.label"
+							main-class="mt-5"></t-text>
+					</t-tabbar-item>
+				</t-row>
+			</template>
+		</t-tabbar>
+		<t-section title='使用图标+切换主题' main-class="tdr tdb mb-30">
+		</t-section>
+		<t-tabbar type='e' main-class="df dlrb-0 bt-1px,s,#ccc ov" @change="onchange">
+			<template v-slot:default="{current,type}">
+				<t-row main-class="ov">
+					<t-tabbar-item v-for="(item,index) in tabList" :key="index">
+						<t-col main-class="fc dr ov">
+							<t-icon :type="current.toString()==index.toString()?type:'info'"
+								:name="current.toString()==index.toString()?item.activeIcon:item.inactiveIcon"
+								main-class="s-45"></t-icon>
+							<t-text :type="current.toString()==index.toString()?type:'info'" :text="item.label"
+								main-class="mt-5"></t-text>
+							<t-badge v-if="item.badgeValue>0" type="error" main-class="da dl-50 dt-n5"
+								:text="`${item.badgeValue}`"></t-badge>
+						</t-col>
+					</t-tabbar-item>
+				</t-row>
+			</template>
+		</t-tabbar>
+	</t-page>
+</template>
+
+<script>
+	type tabbarOptions = {
+		activeIcon : string
+		inactiveIcon : string
+		raised : boolean
+		label : string
+		badgeValue : number
+	}
+	export default {
+		data() {
+			return {
+				iconsrc: "email-fill",
+				current: 0,
+				tabList2: [{
+					activeIcon: '/static/tabbar/ui1.png',
+					inactiveIcon: '/static/tabbar/ui.png',
+					raised: false,
+					label: 'UI',
+					badgeValue: 0
+				},
+				{
+					activeIcon: '/static/tabbar/table1.png',
+					inactiveIcon: '/static/tabbar/table.png',
+					raised: false,
+					label: '图表',
+					badgeValue: 9999
+
+				},
+				{
+					activeIcon: '/static/tabbar/api1.png',
+					inactiveIcon: '/static/tabbar/api.png',
+					raised: true,
+					label: '插件',
+					badgeValue: 1
+				},
+				{
+					activeIcon: '/static/tabbar/template1.png',
+					inactiveIcon: '/static/tabbar/template.png',
+					raised: false,
+					label: '模版',
+					badgeValue: 0
+				},
+				{
+					activeIcon: '/static/tabbar/my1.png',
+					inactiveIcon: '/static/tabbar/my.png',
+					raised: false,
+					label: '我的',
+					badgeValue: 0
+				}] as tabbarOptions[],
+				tabList1: [{
+					activeIcon: '/static/tabbar/home_s.png',
+					inactiveIcon: '/static/tabbar/home.png',
+					raised: false,
+					label: '首页',
+					badgeValue: 0
+				},
+				{
+					activeIcon: '/static/tabbar/find_s.png',
+					inactiveIcon: '/static/tabbar/find.png',
+					raised: false,
+					label: '发现',
+					badgeValue: 9999
+
+				},
+				{
+					activeIcon: 'home-fill',
+					inactiveIcon: 'home',
+					raised: false,
+					label: '购物车',
+					badgeValue: 1
+				},
+				{
+					activeIcon: '/static/tabbar/msg_s.png',
+					inactiveIcon: '/static/tabbar/msg.png',
+					raised: false,
+					label: '消息',
+					badgeValue: 0
+				},
+				{
+					activeIcon: '/static/tabbar/me_s.png',
+					inactiveIcon: '/static/tabbar/me.png',
+					raised: false,
+					label: '我的',
+					badgeValue: 0
+				}] as tabbarOptions[],
+				tabList: [{
+					activeIcon: 'home-fill',
+					inactiveIcon: 'home',
+					raised: false,
+					label: '首页',
+					badgeValue: 0
+				},
+				{
+					activeIcon: 'play-circle-fill',
+					inactiveIcon: 'play-circle',
+					raised: false,
+					label: '发现',
+					badgeValue: 9999
+
+				},
+				{
+					activeIcon: 'bag-fill',
+					inactiveIcon: 'bag',
+					raised: false,
+					label: '购物车',
+					badgeValue: 1
+				},
+				{
+					activeIcon: 'email-fill',
+					inactiveIcon: 'email',
+					raised: false,
+					label: '消息',
+					badgeValue: 0
+				},
+				{
+					activeIcon: 'rmb-circle-fill',
+					inactiveIcon: 'rmb-circle',
+					raised: false,
+					label: '我的',
+					badgeValue: 0
+				}] as tabbarOptions[]
+			};
+		},
+		methods: {
+			onchange(e : number) {
+				console.log(e)
+			},
+			tabBarClick(index : number) {
+				this.current = index
+			}
+		}
+	}
+</script>

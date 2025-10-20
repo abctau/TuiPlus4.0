@@ -1,0 +1,239 @@
+import { TuiArray } from '../core/array'
+export function toUint32(num : number) : number {
+	const int32 = num | 0;
+	if (int32 < 0) {
+		return int32 + 4294967296;
+	}
+	return int32;
+}
+
+export function operationZero(n : number) : number {
+	let b : number = n | 0
+	// #ifdef APP-ANDROID
+	if (b == 2147483647) b = Math.floor(n) - 4294967296
+	// #endif
+	return b
+};
+
+export type CoreParseType = {
+	stringify : (e : WordArray) => string
+	parse : (e : string) => WordArray
+}
+
+export class WordArray {
+	words : TuiArray
+	sigBytes : number
+	constructor(words : TuiArray = new TuiArray(), sigBytes : number = -1) {
+		this.words = words;
+		if (sigBytes == -1) {
+			this.sigBytes = words.length * 4;
+		} else {
+			this.sigBytes = sigBytes;
+		}
+	}
+
+	static random = (nBytes : number) : WordArray => {
+		const words = new TuiArray();
+		const r = (m_w : number) => {
+			let _m_w = m_w;
+			let _m_z = 0x3ade68b1;
+			const mask = 0xffffffff;
+
+			return () => {
+				_m_z = (0x9069 * (_m_z & 0xFFFF) + (_m_z >> 0x10)) & mask;
+				_m_w = (0x4650 * (_m_w & 0xFFFF) + (_m_w >> 0x10)) & mask;
+				let result = ((_m_z << 0x10) + _m_w) & mask;
+				result /= 0x100000000;
+				result += 0.5;
+				return result * (Math.random() > 0.5 ? 1 : -1);
+			};
+		};
+		let rcache : number = Math.random()
+		for (let i = 0; i < nBytes; i += 4) {
+			const _r = r(rcache * 0x100000000);
+
+			rcache = _r() * 0x3ade67b7;
+			words.push((_r() * 0x100000000) | 0);
+		}
+
+		return new WordArray(words, nBytes);
+	};
+
+	toString(encoder : CoreParseType = Hex) : string {
+		return encoder.stringify(this);
+	}
+
+	concat(wordArray : WordArray) : WordArray {
+		const thisWords = this.words;
+		const thatWords = wordArray.words;
+		const thisSigBytes = this.sigBytes;
+		const thatSigBytes = wordArray.sigBytes;
+
+		this.clamp();
+
+		if ((thisSigBytes % 4) > 0) {
+			for (let i = 0; i < thatSigBytes; i += 1) {
+				const thatByte = (thatWords.getValue(i >>> 2) >>> (24 - (i % 4) * 8)) & 0xff;
+				const index = (thisSigBytes + i) >>> 2
+				thisWords.setValue(index, thisWords.getValue(index) | (thatByte << (24 - ((thisSigBytes + i) % 4) * 8)))
+			}
+		} else {
+			for (let i = 0; i < thatSigBytes; i += 4) {
+				thisWords.setValue((thisSigBytes + i) >>> 2, thatWords.getValue(i >>> 2))
+			}
+		}
+		this.sigBytes += thatSigBytes;
+		return this;
+	}
+
+	clamp() {
+		const { words, sigBytes } = this;
+		const index = sigBytes >>> 2
+		words.setValue(index, words.getValue(index) & (0xffffffff << (32 - (sigBytes % 4) * 8)))
+		words.adjustLength = Math.ceil(sigBytes / 4);
+	}
+}
+
+export const Hex : CoreParseType = {
+	stringify(wordArray : WordArray) : string {
+		const { words, sigBytes } = wordArray;
+		const hexChars : string[] = [];
+		for (let i = 0; i < sigBytes; i += 1) {
+			const bite = (words.getValue(i >>> 2) >>> (24 - (i % 4) * 8)) & 0xff;
+			hexChars.push((bite >>> 4).toString(16));
+			hexChars.push((bite & 0x0f).toString(16));
+		}
+		return hexChars.join('');
+	},
+
+	parse(hexStr : string) : WordArray {
+		const hexStrLength = hexStr.length;
+
+		const words = new TuiArray();
+		for (let i = 0; i < hexStrLength; i += 2) {
+			let index = i >>> 3
+			words.setValue(index, words.getValue(index) | (parseInt(hexStr.substring(i, 2), 16) << (24 - (i % 8) * 4)))
+		}
+		return new WordArray(words, hexStrLength / 2);
+	},
+};
+
+export const Latin1 : CoreParseType = {
+	stringify(wordArray : WordArray) : string {
+		const { words, sigBytes } = wordArray;
+
+		const latin1Chars : string[] = [];
+		for (let i = 0; i < sigBytes; i += 1) {
+			const bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+			latin1Chars.push(String.fromCharCode(bite));
+		}
+
+		return latin1Chars.join('');
+	},
+
+	parse(latin1Str : string) : WordArray {
+		const latin1StrLength = latin1Str.length;
+
+		const words = new TuiArray();
+		for (let i = 0; i < latin1StrLength; i += 1) {
+			const index = i >>> 2
+			words.setValue(index, (words.getValue(index) | ((latin1Str.charCodeAt(i)! & 0xff) << (24 - (i % 4) * 8))))
+			words[i >>> 2] |= (latin1Str.charCodeAt(i)! & 0xff) << (24 - (i % 4) * 8);
+		}
+		return new WordArray(words, latin1StrLength);
+	},
+};
+
+function unescapes(str : string) : string {
+	return str.replace(/%([0-9A-F]{2})/gi, function (match : string, p1 : string | null, offset : number, string : string) {
+		let a : string
+		a = `${p1}`
+		return String.fromCharCode(parseInt(a, 16));
+	});
+}
+function escapes(str : string) : string {
+	let result = '';
+	for (let i = 0; i < str.length; i++) {
+		let char : string = `${str[i]}`;
+		let code : number = str.charCodeAt(i)!;
+		if (code > 0xFF) {
+			result += '%' + code.toString(16).toUpperCase();
+		} else if (char == ' ') {
+			result += '+';
+		} else if (/[a-zA-Z0-9\-_.!~*'()]/.test(char)) {
+			result += char;
+		} else {
+			result += '%' + code.toString(16).toUpperCase();
+		}
+	}
+	return result;
+}
+export const Utf8 : CoreParseType = {
+	stringify(wordArray : WordArray) : string {
+		try {
+			return decodeURIComponent(escapes(Latin1.stringify(wordArray)))!;
+		} catch (e) {
+			throw new Error('Malformed UTF-8 data');
+		}
+	},
+	parse(utf8Str : string) : WordArray {
+		return Latin1.parse(unescapes(encodeURIComponent(utf8Str)!));
+	}
+};
+const parseLoop = (base64Str : string, base64StrLength : number, reverseMap : TuiArray) : WordArray => {
+	const words = new TuiArray();
+	let nBytes = 0;
+	for (let i = 0; i < base64StrLength; i += 1) {
+		if (i % 4 > 0) {
+			const bits1 = reverseMap.getValue(base64Str.charCodeAt(i - 1)!) << i % 4 * 2;
+			const bits2 = reverseMap.getValue(base64Str.charCodeAt(i)!) >>> 6 - i % 4 * 2;
+			const bitsCombined = bits1 | bits2;
+			const x : number = nBytes >>> 2
+			words.setValue(x, words.getValue(x) | (bitsCombined << 24 - nBytes % 4 * 8));
+			nBytes += 1;
+		}
+	}
+	return new WordArray(words, nBytes);
+};
+
+export const Base64 : CoreParseType = {
+	stringify(wordArray : WordArray) : string {
+		const { words, sigBytes } = wordArray;
+		const map : string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		wordArray.clamp();
+		const base64Chars : string[] = [];
+		for (let i = 0; i < sigBytes; i += 3) {
+			const byte1 = words.getValue(i >>> 2) >>> 24 - i % 4 * 8 & 255;
+			const byte2 = words.getValue(i + 1 >>> 2) >>> 24 - (i + 1) % 4 * 8 & 255;
+			const byte3 = words.getValue(i + 2 >>> 2) >>> 24 - (i + 2) % 4 * 8 & 255;
+			const triplet = byte1 << 16 | byte2 << 8 | byte3;
+			for (let j = 0; j < 4 && i + j * 0.75 < sigBytes; j += 1) {
+				base64Chars.push(map.charAt(triplet >>> 6 * (3 - j) & 63));
+			}
+		}
+		const paddingChar = map.charAt(64);
+		if (paddingChar != '') {
+			while (base64Chars.length % 4 > 0) {
+				base64Chars.push(paddingChar);
+			}
+		}
+		return base64Chars.join("");
+	},
+
+	parse(base64Str : string) : WordArray {
+		let base64StrLength : number = base64Str.length;
+		const map : string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		let reverseMap = new TuiArray();
+		for (let j = 0; j < map.length; j += 1) {
+			reverseMap.setValue(map.charCodeAt(j)!, j);
+		}
+		const paddingChar = map.charAt(64);
+		if (paddingChar != '') {
+			const paddingIndex = base64Str.indexOf(paddingChar);
+			if (paddingIndex != -1) {
+				base64StrLength = paddingIndex;
+			}
+		}
+		return parseLoop(base64Str, base64StrLength, reverseMap);
+	}
+};

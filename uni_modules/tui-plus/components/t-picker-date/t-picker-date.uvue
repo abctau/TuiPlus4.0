@@ -1,0 +1,172 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`${mainClass}`">
+		<picker-date v-if="embeddable" v-bind="extendsAttrs" :value="modelValue" :format="format" :range="range"
+			:show-unit="showUnit" @change="pcachange"></picker-date>
+		<t-popup v-else direction="bottom" ref='popupbottom' :show-footer="true" :closeable="false" @cancel="oncancel"
+			@confirm="onconfirm" v-bind="popupAttrs">
+			<t-view main-class="tvg tdr-l,,12 oh">
+				<t-view :main-class="`fc ${extendsPadding} tdb`">
+					<t-text v-bind="extendsAttrs" type="info" :main-class="`sfwb ${titleClass}`">{{title}}</t-text>
+				</t-view>
+				<picker-date v-if="!embeddable" :value="modelValue" :format="format" :range="range"
+					:show-unit="showUnit" @change="pcachange"></picker-date>
+			</t-view>
+		</t-popup>
+		<view v-if="!embeddable" @click="show">
+			<slot :value="modelValue" name="button">
+				<t-cell :desc="modelValue==''?label:modelValue" :border="false" :main-class="labelClass"></t-cell>
+			</slot>
+		</view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * PickerDate 日期-选择容器
+	 * @date 2025-05-31 12:05:34
+	 * @author TanYuan
+	 * @description Canvas绘制更快渲染速度,自研滚动算法不会在滚动结束的时候回弹，使用了虚拟列表原理,只会绘制需要滚动显示的数据,不用担心数据量大影响渲染速度
+	 * @example /pagesA/form/datetime-picker/datetime-picker
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker-date.html
+	 * @example /pagesA/form/datetime-picker/datetime-picker
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} showUnit 是否显示单位(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {any[][]} range 日期范围的配置，完整配置参考：	const dateRange = ref<any[][]>([
+		['year', '年', [1913, 2099]],
+		['month', '月', [1, 12]],
+		['date', '日', [1, 31]],
+		['hour', '时', [0, 23]], // 注意：小时通常是从0到23
+		['minute', '分', [0, 59]], // 注意：分钟和秒通常是从0开始
+		['second', '秒', [0, 59]] // 注意：这里我也假设了最大值为59，根据实际需要调整
+	]);(默认：[
+						['year', '年', [2010, 2040]],
+						['month', '月', [1, 12]],
+						['date', '日', [1, 31]]
+					])
+	 * @property {String} format 日期格式化模版(默认：yyyy-mm-dd hh:MM:ss)
+	 * @property {String} modelValue 双向绑定的值
+	 * @property {Boolean} embeddable 是否嵌入页面
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} title 标题(默认：日期)
+	 * @property {String} titleClass 标题样式
+	 * @property {String} label 标签(默认：请选择日期)
+	 * @property {String} labelClass 标签样式
+	 * @property {UTSJSONObject} popupAttrs 支持t-popup的所有属性 
+	 * @event {Function} confirm 点击确认时触发
+	 * @event {Function} change 值发生变化时触发，当嵌入页面的时候有效
+	 * @event {Function} cancel 点击取消时触发
+	 */
+
+	import { timeFormat } from '../../common/model/formart'
+	import pickerDate from './picker-date.uvue'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerDateProps extends CommonProps {
+		showUnit : boolean;
+		range : any[][];
+		format : string;
+		modelValue : string;
+		embeddable : boolean;
+		title : string;
+		titleClass : string;
+		label : string;
+		labelClass : string;
+		popupAttrs : UTSJSONObject
+	}
+
+	const props = withDefaults(defineProps<PickerDateProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		showUnit: true,
+		range: () => [
+			['year', '年', [2010, 2040]],
+			['month', '月', [1, 12]],
+			['date', '日', [1, 31]]
+		],
+		format: 'yyyy-mm-dd hh:MM:ss',
+		modelValue: '',
+		embeddable: false,
+		title: '日期',
+		titleClass: '',
+		label: '请选择日期',
+		labelClass: '',
+		popupAttrs: {} as UTSJSONObject
+	});
+	const { extendsAttrs, extendsPadding } = useTuiThemes(props)
+	const emit = defineEmits(['confirm', 'change', 'cancel', 'update:modelValue'])
+	const instance = getCurrentInstance()?.proxy!
+	const popupbottom = ref<ComponentPublicInstance | null>(null)
+	const dataTime = ref<UTSJSONObject>({})
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	function show() {
+		popupbottom.value?.$callMethod('show')
+	}
+	function getTimesValue(val : string[]) : string {
+		const dateObject = new Map<string, number>()
+		props.range.forEach((item : any[], index : number) => {
+			const key : string = `${item[0]}`
+			dateObject.set(key, parseInt(`${val[index]}`))
+		});
+		let s = ''
+		if (dateObject.get('year') != null) s += `${dateObject.get('year')}`
+		if (dateObject.get('month') != null) s += `-${dateObject.get('month')}`
+		if (dateObject.get('date') != null) s += `-${dateObject.get('date')}`
+		if (dateObject.get('hour') != null) s += ` ${dateObject.get('hour')}`
+		if (dateObject.get('minute') != null) s += `:${dateObject.get('minute')}`
+		if (dateObject.get('second') != null) s += `:${dateObject.get('second')}`
+		return timeFormat(s, props.format)
+	}
+	function pcachange(e : UTSJSONObject) {
+		const val = e['ids'] as string[]
+		const v = getTimesValue(val)
+		dataTime.value = e
+		dataTime.value.set('modelValue', v)
+		if (props.embeddable) {
+			emit('update:modelValue', v)
+			emit('change', e)
+		}
+	}
+	function oncancel() {
+		emit('cancel')
+	}
+	function onconfirm() {
+		const val = dataTime.value['ids'] as string[]
+		emit('update:modelValue', getTimesValue(val))
+		emit('confirm', dataTime.value)
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	defineExpose({
+		show
+	})
+</script>

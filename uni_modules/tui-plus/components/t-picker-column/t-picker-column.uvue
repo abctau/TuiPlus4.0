@@ -1,0 +1,349 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`f dr tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
+		@tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
+		<t-text v-if="showUnit" :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
+		<t-view main-class="dr f">
+			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
+			</t-canvas>
+			<slot></slot>
+			<t-view :main-class="`da di-0 fc ope-n pr-10px ${sorderIndex==0?'pl-10px':''}`">
+				<t-view :main-class="`h-${rowHeight}px w-100% bg-rgba(0,0,0,0.05) tdr`"></t-view>
+			</t-view>
+		</t-view>
+	</t-gesture>
+</template>
+
+<script setup>
+	/**
+	 * PickerColumn  选择容器
+	 * @date 2025-05-31 12:05:28
+	 * @author TanYuan
+	 * @description Picker的子组件，每一列的数据
+	 * @example /pagesA/layout/picker/picker
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker-column.html
+	 * @example /pagesA/layout/picker/picker
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject[]} list 数据源(默认：[])
+	 * @property {String} titleKey 标题字段的KEY(默认：title)
+	 * @property {String} indexKey 索引字段的key(默认：id)
+	 * @property {String} unit 单位， 如年 月 日，为空则不显示
+	 * @event {Function} change 值发生变化时触发
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { TuiRequestAnimationFrame, TuiCancelAnimationFrame } from '../../common/model/util'
+	import { CommonProps, PickerGroupAttrsType, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerColumnProps extends CommonProps {
+		list : UTSJSONObject[]
+		titleKey : string
+		indexKey : string
+		unit : string
+	}
+	const props = withDefaults(defineProps<PickerColumnProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as UTSJSONObject[],
+		titleKey: 'title',
+		indexKey: 'id',
+		unit: ''
+	});
+	const pickerGroupAttrs = inject<PickerGroupAttrsType>('pickerGroupAttrs')
+	const childChange = inject<(e : UTSJSONObject) => void>('childChange')
+	const childIndex = inject<Ref<number>>('childIndex')
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const CanvasContextIns = ref<CanvasContext | null>(null);
+	const centenX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranY = ref<number>(0);
+	const moveY = ref<number>(0);
+	const drawLoading = ref(false);
+	const maxW = ref<number>(0);
+	const animationTaskId = ref<number>(0);
+	const animationFrameId = ref<number>(0);
+	const acceleration = ref(-0.001);
+	const startTime = ref<number>(0);
+	const lastTime = ref<number>(0);
+	const velocity = ref<number>(0);
+	const scrollsDown = ref(false);
+	const isPressed = ref(false);
+	const sorderIndex = ref<number>(0);
+	const current = ref<number>(0);
+	const moveIndex = ref<number>(0);
+	sorderIndex.value = childIndex!.value
+	if (childIndex != null) childIndex.value++
+	let timer : number = 0;
+
+	const showUnit = computed(() : boolean => {
+		return pickerGroupAttrs?.showUnit?.value ?? false
+	})
+	const values = computed(() : string[] => {
+		return pickerGroupAttrs?.value.value ?? ([] as string[])
+	})
+	const columnValue = computed(() : string => {
+		return values.value.length > sorderIndex.value ? values.value[sorderIndex.value] : ''
+	})
+	const rowHeight = computed(() : number => {
+		return pickerGroupAttrs?.rowHeight?.value ?? 50
+	})
+	function draw() {
+		// if (drawLoading.value) return
+		// drawLoading.value = true
+		// drawLoading.value = false
+		try {
+			if (props.list.length > 0) {
+				const ctx = canvasCtx.value!
+				const w = ctx.canvas.offsetWidth
+				const h = ctx.canvas.offsetHeight
+				ctx.clearRect(0, 0, w + 5, h + 5);
+				ctx.textAlign = 'center'
+				ctx.font = `${16}px sans-serif`;
+				ctx.textBaseline = 'middle'
+				const dif = centenX.value / rowHeight.value + 1
+				let sx = Math.floor(moveIndex.value - dif)
+				if (sx < 0) sx = 0
+				let ex = Math.floor(moveIndex.value + dif) + 1
+				if (ex > props.list.length) ex = props.list.length
+				for (let i = sx; i < ex; i++) {
+					const item = props.list[i]
+					const y = (i * rowHeight.value) + tranY.value + centenX.value;
+					ctx.fillText(`${item[props.titleKey]}`, w / 2 - 5, y + rowHeight.value / 2);
+				}
+			}
+		} catch (error) {
+			//TODO handle the exception
+		}
+	}
+	function emitUpdateChange() {
+		if (props.list.length > 0) {
+			const cid = `${props.list[current.value][props.indexKey]}`
+			const cval = `${props.list[current.value][props.titleKey]}`
+			const dval : UTSJSONObject = { id: cid, value: cval, column: sorderIndex.value, index: current.value, item: props.list[current.value] }
+			if (childChange != null) childChange(dval)
+			emit('change', dval)
+		}
+	}
+	function drawIndex(x : number) {
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			try {
+				current.value = x
+				moveIndex.value = x
+				tranY.value = -(x * rowHeight.value)
+				moveY.value = tranY.value
+				emitUpdateChange()
+				draw()
+			} catch (e) {
+				// console.error('开启错误.',e)
+				// console.log('props.list[current.value]', props.list, current.value)
+			}
+		}, 50)
+	}
+	function drawValue(e : string) {
+		let x = props.list.findIndex((item : UTSJSONObject) => `${item[props.indexKey]}` == e)
+		if (x == -1) x = 0
+		drawIndex(x)
+	}
+	function touchstart(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		isPressed.value = true
+		startTime.value = new Date().getTime()
+		startY.value = e.y
+		maxW.value = -((props.list.length - 1) * rowHeight.value)
+		if (maxW.value > 0) maxW.value = 0
+	}
+	function touchmove(e : TuiTouchEvent) {
+		tranY.value = e.y - startY.value + moveY.value
+		if (tranY.value > 0) tranY.value = 0
+		if (tranY.value < maxW.value) tranY.value = maxW.value
+		if (tranY.value != 0 && tranY.value != maxW.value) e.event.preventDefault()
+		moveIndex.value = Math.floor(Math.abs(tranY.value) / rowHeight.value) + 1
+		draw()
+	}
+	function scrollTran(goal : number, duration : number) {
+		// 获取元素当前的位置信息
+		const startX = tranY.value
+		if (startX == goal) {
+			return
+		} //无需滚动
+		// 计算目标位置
+		const targetX = goal;
+		// 计算距离
+		const distance = targetX - startX;
+		// 计算开始时间
+		const startTime = new Date().getTime();
+
+		// 定义动画函数
+		function animateScroll() {
+			const currentTime : number = new Date().getTime();
+			const timeElapsed = currentTime - startTime;
+			const progress = timeElapsed / (duration);
+
+			// 使用缓动函数来模拟摩擦减速效果
+			// 这里使用了简单的线性缓动，可以根据需要使用更复杂的缓动函数
+			//先慢后快
+			// const easing = (t : number) : number => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+			//模拟  ease-out 动画 先快后慢
+			const easing = (t : number) : number => {
+				return 1 - Math.pow(1 - t, 3);
+			};
+
+			// 计算当前滚动位置
+			const currentX = startX + distance * easing(Math.min(progress, 1));
+			// 设置元素的滚动位置
+			tranY.value = currentX
+			moveIndex.value = Math.floor(Math.abs(tranY.value) / rowHeight.value) + 1
+			draw()
+			// 如果滚动未到达目标位置，继续动画
+			if (progress < 1 && currentX != targetX && !isPressed.value) {
+				if (animationFrameId.value != 0) TuiCancelAnimationFrame(animationFrameId.value)
+				animationFrameId.value = TuiRequestAnimationFrame(() => {
+					animateScroll()
+				})
+			} else {
+				moveY.value = tranY.value
+				// 滚动到达目标位置，清除动画帧
+				if (animationFrameId.value != 0) {
+					TuiCancelAnimationFrame(animationFrameId.value);
+					animationFrameId.value = 0;
+				}
+			}
+		};
+		// 开始动画
+		animationFrameId.value = TuiRequestAnimationFrame(() => {
+			animateScroll()
+		})
+	}
+	function touchend(e : TuiTouchEvent) {
+		isPressed.value = false
+		moveY.value = tranY.value
+		lastTime.value = new Date().getTime()
+		const duration = lastTime.value - startTime.value
+		const distance = e.y - startY.value
+		velocity.value = Math.abs(distance) / duration
+		scrollsDown.value = distance < 0
+		if (distance != 0 && velocity.value > 0.3 && tranY.value != 0 && tranY.value != maxW.value) {
+			let addMoveY = (1000 * velocity.value)
+			if (!scrollsDown.value) addMoveY = -addMoveY
+			let mY = tranY.value - addMoveY
+			if (mY > 0) mY = 0
+			if (mY < maxW.value) mY = maxW.value
+			const delta = Math.abs(mY)
+			const index = scrollsDown.value ? Math.ceil(delta / rowHeight.value) : Math.floor((delta / rowHeight.value))
+			const pos = rowHeight.value * index
+			let dur = Math.floor(Math.abs(Math.abs(tranY.value) - pos) * 2)
+			if (dur < 300) dur = 300
+			current.value = index
+			moveIndex.value = index
+			scrollTran(-pos, dur)
+		} else {
+			const delta = Math.abs(tranY.value)
+			const index = scrollsDown.value ? Math.ceil(delta / rowHeight.value) : Math.floor((delta / rowHeight.value))
+			const pos = rowHeight.value * index
+			let dur = Math.floor(Math.abs(Math.abs(tranY.value) - pos) * 2)
+			if (dur < 300) dur = 300
+			current.value = index
+			moveIndex.value = index
+			scrollTran(-pos, dur)
+		}
+		if (distance != 0) emitUpdateChange()
+	}
+	function canvasInit(ctx : CanvasContext) {
+		CanvasContextIns.value = ctx
+		canvasCtx.value = ctx.getContext('2d')
+		centenX.value = Math.floor((canvasCtx.value!.canvas.offsetHeight - rowHeight.value) / 2)
+		//初始化值
+		if (columnValue.value != '') {
+			drawValue(columnValue.value)
+		} else {
+			drawIndex(0)
+		}
+	}
+	function animateScroll() {
+		const currentTime = new Date().getTime();
+		const deltaTime = currentTime - lastTime.value;
+		lastTime.value = currentTime;
+		// 更新位置
+		const difupdatepos = velocity.value * deltaTime + 0.5 * acceleration.value * deltaTime * deltaTime
+		tranY.value = tranY.value + (scrollsDown.value ? -difupdatepos : difupdatepos)
+
+		if (tranY.value > 0) {
+			tranY.value = 0
+			moveY.value = 0
+			draw()
+			return
+		}
+		if (tranY.value < maxW.value) {
+			tranY.value = maxW.value
+			moveY.value = tranY.value
+			draw()
+			return
+		}
+		draw()
+		// 更新速度
+		velocity.value += acceleration.value * deltaTime;
+		// 检查是否停止滚动
+		if (Math.abs(velocity.value) > 0.01 && !isPressed.value) {
+			if (animationTaskId.value != 0) TuiCancelAnimationFrame(animationTaskId.value)
+			animationTaskId.value = TuiRequestAnimationFrame(() => {
+				animateScroll()
+			})
+		} else {
+			velocity.value = 0
+			moveY.value = tranY.value
+			if (animationTaskId.value != 0) {
+				TuiCancelAnimationFrame(animationTaskId.value)
+				animationTaskId.value = 0
+			}
+		}
+	}
+	watch(values, (e : string[], o : string[],) => {
+		if (e.length > sorderIndex.value && o.length > sorderIndex.value) {
+			if (e[sorderIndex.value] != o[sorderIndex.value]) {
+				drawValue(columnValue.value)
+			}
+		} else {
+			drawValue(columnValue.value)
+		}
+	})
+	watch(() : UTSJSONObject[] => props.list, (val : UTSJSONObject[]) => {
+		let x = val.findIndex((item : UTSJSONObject) => item[props.indexKey] == columnValue.value)
+		if (x == -1) x = 0
+		drawIndex(x)
+	})
+
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+</script>

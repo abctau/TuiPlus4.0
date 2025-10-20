@@ -1,0 +1,187 @@
+<template>
+	<t-page title='过渡动画' main-class="p-30 ov">
+		<t-card title="Animation" sub-title="弥补X环境没有uni.createAnimation动画支持，本组件，支持IOS，安卓 小程序 WEB 鸿蒙，使用简单"
+			main-class="mb-30"></t-card>
+
+		<t-view main-class="fc ptb-50 ov z-2">
+			<t-animation main-class="twhr-200 tdb-s b-10px,s,red fc" ref="animationins1"
+				@transitionend="transitionend1">
+				<t-text main-class="c-#fff">循环示例</t-text>
+			</t-animation>
+		</t-view>
+
+		<t-view main-class="fc ptb-50 ov">
+			<t-animation main-class="twh-200 bg-blue tdr b-10px,s,#2979ff ov" ref="animationins"
+				@transitionend="transitionend">
+
+			</t-animation>
+		</t-view>
+		<t-button type="p" main-class="mt-30" @click="whAni1" :border="false">宽高</t-button>
+		<!-- #ifndef MP-WEIXIN -->
+		<t-button type="p" main-class="mt-30" @click="whAni2" :border="false">margin</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni4" :border="false">padding</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni7" :border="false">border-color</t-button>
+		<!-- #endif -->
+		<t-button type="p" main-class="mt-30" @click="whAni3" :border="false">left,top,bottom,right</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni5" :border="false">opacity</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni6" :border="false">background-color</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni8" :border="false">rotate</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni9" :border="false">scale</t-button>
+		<t-button type="p" main-class="mt-30" @click="whAni10" :border="false">translate</t-button>
+	</t-page>
+
+</template>
+
+<script>
+	import { getRandomInt } from '@/uni_modules/tui-plus'
+	export default {
+		data() {
+			return {
+
+			};
+		},
+		mounted() {
+			this.$nextTick(() => {
+				this.whAni()
+			})
+		},
+		methods: {
+			whAni() {
+				const ins = (this.$refs['animationins1'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.translateY('50rpx').step()
+				ani.translateY('0rpx').step()
+				ani.rotateX(360).translateY('150rpx').step()
+				ani.rotateX(0).step()
+				ani.rotateY(360).step()
+				ani.rotateY(0).step()
+				ani.rotateZ(360).step()
+				ani.rotateZ(0).step()
+				ani.scale(1).translate('-150rpx').step()
+				ani.scale(0.5).translate('0px').step()
+				ani.scale(0.8).translateY('-150rpx').step()
+				ani.scale(1).translateY('0px').step()
+				ins.exports()
+			},
+			whAni1() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.width(this.getRandRpx() + 'rpx').height(this.getRandRpx() + 'rpx').step()
+				ani.width(100 + 'rpx').height(100 + 'rpx').step()
+				ani.width(this.getRandRpx() + 'rpx').height(this.getRandRpx() + 'rpx').step()
+				ani.width(100 + 'rpx').height(100 + 'rpx').step()
+				ins.exports()
+			},
+			whAni2() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.margin(this.getRandRpx() + 'rpx').step()
+				ani.margin('0').step()
+				ani.marginTop(this.getRandRpx() + 'rpx').step()
+				ani.marginTop('0').step()
+				ani.marginBottom(this.getRandRpx() + 'rpx').step()
+				ani.marginBottom('0').step()
+				ani.marginLeft(this.getRandRpx() + 'rpx').step()
+				ani.marginLeft('0').step()
+				ani.marginRight(this.getRandRpx() + 'rpx').step()
+				ani.marginRight('0').step()
+				ins.exports()
+			},
+			whAni3() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.right(this.getRandRpx() + 'rpx').step()
+				ani.right('0').step()
+				ins.exports()
+			},
+			whAni4() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.padding(this.getRandRpx() + 'rpx').step()
+				ani.padding('0').step()
+				ins.exports()
+			},
+			whAni5() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.opacity(0.1).step()
+				ani.opacity(1).step()
+				ins.exports()
+			},
+			whAni6() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.backgroundColor('#000').step()
+				ani.backgroundColor('#f56c6c').step()
+				ins.exports()
+			},
+			whAni7() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.borderColor('#0055ff').step()
+				ani.borderColor('#ff007f').step()
+				ins.exports()
+			},
+			whAni8() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.rotate(360).step()
+				ani.rotate(0).step()
+				ani.rotateX(360).step()
+				ani.rotateX(0).step()
+				ani.rotateY(360).step()
+				ani.rotateY(0).step()
+				ani.rotateZ(360).step()
+				ani.rotateZ(0).step()
+				ins.exports()
+			},
+			whAni9() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.scale(1.5).step()
+				ani.scale(0.5).step()
+				ani.scale(1).step()
+				ani.scaleX(1.5).step()
+				ani.scaleX(0.5).step()
+				ani.scaleX(1).step()
+				ani.scaleY(1.5).step()
+				ani.scaleY(0.5).step()
+				ani.scaleY(1).step()
+				ins.exports()
+			},
+			whAni10() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.translate('150rpx').step()
+				ani.translate('0').step()
+				ani.translateX('150rpx').step()
+				ani.translateX('0').step()
+				ani.translateY('150rpx').step()
+				ani.translateY('0px').step()
+				ins.exports()
+			},
+			transitionend1() {
+				this.whAni()
+			},
+			transitionend() {
+				// console.log('动画结束')
+			},
+			getRandRpx() : string {
+				return `${getRandomInt(100, 200)}`
+			},
+			//其它用法参考
+			ani1() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.scale(2, 2).rotate(45).step()
+				ins.exports()
+			},
+			ani2() {
+				const ins = (this.$refs['animationins'] as TAnimationComponentPublicInstance)
+				const ani = ins.createAnimation({})
+				ani.scale(1, 1).rotate(0).step()
+				ins.exports()
+			}
+		}
+	}
+</script>

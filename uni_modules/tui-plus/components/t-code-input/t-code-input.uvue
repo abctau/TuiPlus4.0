@@ -1,0 +1,189 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="codeInputStyles" @click="setInputfocus">
+		<input :auto-focus="autoFocus" :value="inputValue" @input="onInput" :focus="inputfocus" :type="inputType"
+			style="opacity: 0;position: absolute;left:-200%" :maxlength="maxlength" @focus="onFocus" @blur="onBlur" />
+		<t-row>
+			<t-row
+				:main-class="`${codeInputItemBoxStyles} ${number==maxlength?'mr-0':''} ${borderShowState(number)?activeItemItemBoxClass:inactiveItemItemBoxClass}`"
+				v-for="number in maxlength" :key="number">
+				<t-text v-if="inputValue.length>=number" v-bind="extendsAttrs"
+					:main-class="`sfwb ${extendsSc} ${textClass}`" :text="getTextValue(number)"></t-text>
+				<t-row v-if="cursorShowState(number)" :main-class="codeInputCursorStyles"></t-row>
+			</t-row>
+		</t-row>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * CodeInput 验证码输入
+	 * @date 2025-05-31 12:02:32
+	 * @author TanYuan
+	 * @description 组件用于输入验证码的高交互性组件，具有以下功能亮点：支持自定义样式、光标动画效果、显示或隐藏输入字符，适用于各种验证场景。使用场景包括登录、注册、身份验证等需要用户输入验证码的界面
+	 * @example /pagesA/form/code-input/code-input
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-code-input.html
+	 * @example /pagesA/form/code-input/code-input
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} editBoxClass 编辑框例子的样式
+	 * @property {Number} maxlength 最大输入长度(默认：6)
+	 * @property {String} dotSymbol 输入字符的替换占位字符
+	 * @property {String} dotSymbolClass 替换占位字符的样式
+	 * @property {String} modelValue 验证码输入的值
+	 * @property {Boolean} autoFocus 是否自动获取焦点
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} cursorClass 光标样式
+	 * @property {String} textClass 文本样式
+	 * @property {String} itemBoxClass 子盒子的样式
+	 * @property {String} activeItemItemBoxClassClass 当前正在输入的元素的盒子样式
+	 * @property {String} inactiveItemItemBoxClassClass 当前未输入状态元素的盒子样式(默认：b-2px,s,#ccc)
+	 * @property {String} inputType=[text|number|idcard|digit|tel|safe-password|nickname] 输入框inputinput的类型 ，同官方input的type(默认：text)
+	 * @value text 文本输入键盘
+	 * @value number 数字输入键盘
+	 * @value idcard 身份证输入键盘
+	 * @value digit 带小数点数字输入键盘
+	 * @value tel 电话输入键盘
+	 * @value safe-password 密码安全输入键盘
+	 * @value nickname 昵称输入键盘
+	 * @event {Function} change 输入框的值化生变化时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface CodeInputProps extends CommonProps {
+		path : string;
+		hover : boolean;
+		type : string;
+		disabled : boolean;
+		stop : boolean;
+		effect : string;
+		size : string;
+		mainClass : string;
+		nativeClass : string;
+		editBoxClass : string;
+		maxlength : number;
+		dotSymbol : string;
+		dotSymbolClass : string;
+		modelValue : string;
+		autoFocus : boolean;
+		cursorClass : string;
+		textClass : string;
+		itemBoxClass : string;
+		activeItemItemBoxClass : string;
+		inactiveItemItemBoxClass : string;
+		inputType : string;
+	}
+	const props = withDefaults(defineProps<CodeInputProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		editBoxClass: '',
+		maxlength: 6,
+		dotSymbol: '',
+		dotSymbolClass: '',
+		modelValue: '',
+		autoFocus: false,
+		cursorClass: '',
+		textClass: '',
+		itemBoxClass: '',
+		activeItemItemBoxClass: '',
+		inactiveItemItemBoxClass: 'b-2px,s,#ccc',
+		inputType: 'text',
+	});
+
+	const { extendsAttrs, getFontSizeToValue, extendsBackgroundColor, extendsRadius, extendsSc, getBorderToValue } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const inputfocus = ref<boolean>(false)
+	const inputValue = ref<string>('')
+	const cursorState = ref<boolean>(true)
+	const timer = ref<number>(0)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	if (props.autoFocus) inputfocus.value = true
+
+	watch(
+		() : string => props.modelValue,
+		(newVal : string) => {
+			let str : string = newVal
+			if (newVal.length > props.maxlength) {
+				str = str.substring(0, props.maxlength);
+			}
+			inputValue.value = str;
+		},
+		{ immediate: true }
+	)
+	const codeInputCursorStyles = computed(() : string => {
+		let sty = `atp-o atd-1000 w-${Math.round(getFontSizeToValue.value * 0.2)}px r-5 h-${getFontSizeToValue.value}px ${extendsBackgroundColor.value}`
+		sty += ` ${cursorState.value ? 'o-1' : 'o-0'} ${props.cursorClass}`
+		return sty
+	})
+	const codeInputItemBoxStyles = computed(() : string => {
+		let sty = `twh-${Math.round(getFontSizeToValue.value * 2.5)}px r-10 fc mr-10 b-2px,s,${getBorderToValue.value} ${extendsRadius.value} bw-2px `
+		sty += `${props.itemBoxClass}`
+		return sty
+	})
+	const codeInputStyles = computed(() : string => {
+		let sty = `dr ${props.mainClass}`
+		return sty
+	})
+
+	function borderShowState(e : number) : boolean {
+		return e < inputValue.value.length + 2
+	}
+	function cursorShowState(e : number) : boolean {
+		return (e == inputValue.value.length + 1 || (e == props.maxlength && inputValue.value.length == props.maxlength)) && inputfocus.value == true
+	}
+	function onInput(e : UniInputEvent) {
+		inputValue.value = e.detail.value
+		emit('change', inputValue.value)
+		emit('update:modelValue', inputValue.value)
+	}
+	function setInputfocus() {
+		inputfocus.value = true
+	}
+	function getTextValue(e : number) : string {
+		let val : string = inputValue.value.charAt(e - 1)
+		if (val != '' && props.dotSymbol != '') val = props.dotSymbol
+		return val
+	}
+	function onBlur() {
+		clearInterval(timer.value)
+		inputfocus.value = false
+		itemValidate()
+	}
+	function onFocus() {
+		clearInterval(timer.value)
+		timer.value = setInterval(() => {
+			if (inputfocus.value) cursorState.value = !cursorState.value
+		}, 800)
+	}
+	onUnmounted(() => {
+		clearInterval(timer.value)
+	})
+</script>

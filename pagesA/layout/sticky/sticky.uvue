@@ -1,0 +1,30 @@
+<template>
+	<t-page>
+		<t-col main-class="p-30">
+			<t-card main-class="mb-30" title='Sticky粘性布局'
+				sub-title="Sticky粘性布局，用于实现元素在页面滚动时固定在指定位置，支持自定义z-index和top值，简单易用。"></t-card>
+			<t-sticky main-class="w-690" :scrollTop="scrollTop" :stickyTop="0">
+				<t-view>
+					<t-button type="p" main-class="w-100%">欢迎使用Tui</t-button>
+				</t-view>
+			</t-sticky>
+			<t-col v-for="i in 3" :key="i" main-class="h-500 tdr tdb mb-30"></t-col>
+			<t-sticky sticky-top="100rpx" main-class="mb-30" :stickyTop="50" :scrollTop="scrollTop">
+				<t-button type="p" text-class="f" main-class="w-690">Tui是一个强大的UI库，提供了丰富的组件和灵活的配置。</t-button>
+			</t-sticky>
+			<t-col v-for="i in 5" :key="i" main-class="h-500 tdr tdb mb-30"></t-col>
+			<t-sticky sticky-top="200rpx" main-class="mb-30" :stickyTop="120" :scrollTop="scrollTop">
+				<t-button type="p">快速导航：首页 | 优惠券 | 会员中心 | 客服支持</t-button>
+			</t-sticky>
+			<t-col v-for="i in 5" :key="i" main-class="h-800 tdr tdb mb-30"></t-col>
+		</t-col>
+	</t-page>
+</template>
+<script setup>
+	const scrollTop = ref<number>(0)
+	onPageScroll((e : OnPageScrollOptions) => {
+		scrollTop.value = e.scrollTop
+	})
+	import { TuiGuid } from '@/uni_modules/tui-plus';
+	const guid = ref(TuiGuid(20))
+</script>

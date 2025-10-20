@@ -1,0 +1,163 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl faic ${extendsRadius} ${extendsBackgroundColor} ${mainClass}`">
+		<t-view v-if="prefixIcon!=''" :main-class="`fc tdp-${size},,lr h-100% ${extendsBackgroundColor}`">
+			<t-icon :name="prefixIcon" :main-class="`${extendsSfc} ${prefixClass}`"></t-icon>
+		</t-view>
+		<template v-if="step">
+			<swiper :autoplay="true" :interval="interval" :duration="duration" :disable-touch="true" :circular="true"
+				:vertical="vertical" :style="[`width:100%;height:100%;`]">
+				<swiper-item v-for="(item,index) in barList" :key="index"
+					style="align-items: center;display: flex;flex-direction: row;">
+					<t-text :main-class="`${extendsSfc} tdp-${size},,tb`" :text="item" :lines="1"></t-text>
+				</swiper-item>
+			</swiper>
+		</template>
+		<t-view v-else :main-class="`f h-100% fl ${extendsPadding}`" @initFinished="contentInit">
+			<t-animation main-class="fl w-200000" ref="animationins" @transitionend="transitionend">
+				<t-text v-for="(item,index) in barList" :key="index" @click="select(index)" @initFinished="initFinished"
+					:main-class="`${extendsSfc} ${index<barList.length-1?'mr-'+contentW+'px':''}`" :text="item"
+					:lines="1"></t-text>
+			</t-animation>
+		</t-view>
+		<t-view v-if="suffixIcon!=''" :main-class="`fc tdp-${size},,lr h-100% ${extendsBackgroundColor}`">
+			<t-icon :name="suffixIcon" :main-class="`${extendsSfc} ${suffixClass}`"></t-icon>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * NoticeBar 通知栏
+	 * @date 2025-07-06 16:41:20
+	 * @author TanYuan
+	 * @description 支持多种主题、尺寸和滚动模式，适用于在应用中展示重要通知或公告信息。
+	 * @example /pagesA/basics/notice-bar/notice-bar
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-notice-bar.html
+	 * @example /pagesA/basics/notice-bar/notice-bar
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：info)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} barList 消息列表(默认：[])
+	 * @property {Number} interval 滚动间隔，单位为毫秒(默认：100)
+	 * @property {Number} duration 滚动持续时间，单位为毫秒	(默认：12000)
+	 * @property {Boolean} vertical 是否纵向滚动
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} step 是否步进滚动
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} prefixIcon 前置图标的名称
+	 * @property {String} prefixClass 前置图标的样式
+	 * @property {String} suffixIcon 后置图标的名称
+	 * @property {String} suffixClass 后置图标的样式
+	 * @property {Number} speed 公告滚动速度。横向滚动时生效(默认：1)
+	 * @event {Function} select 点击公告时触发，返回当前点击公告的索引
+	 */
+
+	import { getPx } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import type { PropType } from 'vue';
+
+	interface NoticeBarProps extends CommonProps {
+		type : string
+		barList : string[]
+		interval : number
+		speed : number
+		duration : number
+		vertical : boolean
+		step : boolean
+		prefixIcon : string
+		prefixClass : string
+		suffixIcon : string
+		suffixClass : string
+	}
+
+	const props = withDefaults(defineProps<NoticeBarProps>(), {
+		path: '',
+		hover: false,
+		type: 'info',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		barList: ['加载中'] as string[],
+		interval: 3000,
+		speed: 0.05,
+		duration: 12000,
+		vertical: false,
+		step: false,
+		prefixIcon: '',
+		prefixClass: '',
+		suffixIcon: '',
+		suffixClass: ''
+	});
+	const { extendsAttrs, extendsRadius, extendsBackgroundColor, extendsSfc, extendsPadding } = useTuiThemes(props)
+	const emit = defineEmits(['select'])
+	const contentW = ref<number>(0)
+	const totalW = ref<number>(0)
+	let timer = 0
+	const animationins = ref<TAnimationComponentPublicInstance | null>(null)
+	function select(index : number) {
+		emit('select', index)
+	}
+	function initFinished(rect : NodeInfo) {
+		totalW.value += rect.width!
+	}
+	function contentInit(rect : NodeInfo) {
+		contentW.value = Math.floor(rect.width!)
+	}
+	function tranEl(dur : number, tranX : number) {
+		const ins = animationins.value!
+		const ani = ins.createAnimation({})
+		ani.translateX(tranX + 'px').step({
+			duration: dur
+		})
+		ins.exports()
+	}
+	function transitionend() {
+		tranEl(0, contentW.value)
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			const len = props.barList.length - 1
+			const w = (totalW.value + (contentW.value * len))
+			tranEl(Math.floor(w / props.speed), -w)
+		}, 300)
+	}
+	watch(() : string[] => props.barList, (val : string[]) => {
+		if (val.length > 0) {
+			nextTick(() => {
+				if (!props.step) {
+					clearTimeout(timer)
+					timer = setTimeout(() => {
+						const len = props.barList.length - 1
+						const w = (totalW.value + (contentW.value * len))
+						tranEl(Math.floor(w / props.speed), -w)
+					}, 300)
+				}
+			})
+		}
+	}, { immediate: true })
+	onActivated(() => {
+		transitionend()
+	})
+</script>

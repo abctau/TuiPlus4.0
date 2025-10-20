@@ -1,0 +1,115 @@
+<template>
+	<t-avoid-menu>
+		<t-view main-class="w-100% fjcb fl ov z-999 mt-30">
+			<t-view main-class="tpg h-100% w-100 z-1 fc" @click="showmenu">
+				<t-icon :hover="true" name="list" main-class="s-48 sfwb"></t-icon>
+			</t-view>
+			<t-animation ref="animationins" main-class="ov f fl">
+				<t-row main-class="fjcb w-100% faic" @click="popupshow">
+					<t-row :hover="true">
+						<t-text main-class="sfwb mr-30 s-40">Tui-Plus</t-text>
+						<t-button size="mini" type="primary" :border="true" effect="plain"
+							main-class="plr-10 ptb-5 r-10" text-class="sfwb s-28">4.0.0</t-button>
+					</t-row>
+					<t-icon :hover="true" name="search" main-class="s-50 sfwb ov"></t-icon>
+				</t-row>
+				<t-row main-class="tdb faic r-20 h-70 ov w-100%">
+					<t-input main-class="f pl-0" placeholder-style="s-28" effect="plain" v-model="inputVal"
+						:focus="focus" @blur="blur" input-class="s-30" placeholder="请输入组件名称" size="small"
+						prefix-icon="search" clear-class="sfwb s-29"
+						prefix-class="sfwb ml-26 mt-2 mr-18 s-38"></t-input>
+				</t-row>
+			</t-animation>
+			<t-view main-class="tpg h-100% w-100 z-1 fc" @click="setting">
+				<t-icon name="setting" main-class="s-40 sfwb"></t-icon>
+			</t-view>
+		</t-view>
+		<t-popup direction="center" ref='popupins' :closeable="false" type="primary" content-class="r-50">
+			<t-view main-class="w-600 ptb-30">
+				<t-grid :column="3" main-class="w-600">
+					<t-grid-item v-for="(item,index) in options" :key="index" @click="select(item)"
+						:icon="`/static/grid/${item.icon}.png`" :label="item.label" type="error"></t-grid-item>
+				</t-grid>
+			</t-view>
+		</t-popup>
+		<t-popup direction="left" ref='popupleftins'>
+			<t-view main-class="w-600 h-100%">
+				<tui-theme></tui-theme>
+			</t-view>
+		</t-popup>
+	</t-avoid-menu>
+</template>
+<script setup>
+	import { TuiTreeData, sleep } from '@/uni_modules/tui-plus'
+	const emit = defineEmits(['select', 'blur'])
+	const animationins = ref<TAnimationComponentPublicInstance | null>(null)
+	const popupins = ref<ComponentPublicInstance | null>(null)
+	const popupleftins = ref<ComponentPublicInstance | null>(null)
+	const focus = ref<boolean>(false)
+	const inputVal = ref<string>('')
+	const selectValue = ref<string>('')
+	type SelectOptions = {
+		value : string
+		label : string
+		icon : string
+	}
+	const options = ref<SelectOptions[]>([{
+		value: 'all',
+		label: '全部',
+		icon: 'grid (8)'
+	}, {
+		value: 'basics',
+		label: '基础组件',
+		icon: 'grid (1)'
+	}, {
+		value: 'form',
+		label: '表单组件',
+		icon: 'grid (2)'
+	}, {
+		value: 'layout',
+		label: '布局组件',
+		icon: 'grid (3)'
+	}, {
+		value: 'feedback',
+		label: '反馈组件',
+		icon: 'grid (4)'
+	}, {
+		value: 'navigation',
+		label: '导航组件',
+		icon: 'grid (5)'
+	}, {
+		value: 'other',
+		label: '其它组件',
+		icon: 'grid (6)'
+	}])
+	function showmenu() {
+		popupins.value?.$callMethod('show')
+	}
+	function select(e : SelectOptions) {
+		selectValue.value = e.value
+		showmenu()
+		emit('select', e.value)
+	}
+	function popupshow() {
+		const ins = animationins.value!
+		const ani = ins.createAnimation({ duration: 100 })
+		ani.translateX('-100%').step()
+		ins.exports()
+		sleep(500).then(() => {
+			focus.value = true
+		})
+	}
+	function blur() {
+		const ins = animationins.value!
+		const ani = ins.createAnimation({})
+		ani.translateX('0px').step()
+		ins.exports()
+		sleep(500).then(() => {
+			focus.value = false
+			emit('blur', inputVal.value)
+		})
+	}
+	function setting() {
+		popupleftins.value?.$callMethod('show')
+	}
+</script>

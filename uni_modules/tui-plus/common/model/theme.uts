@@ -1,0 +1,454 @@
+import { addUnit } from './util.uts'
+import defaultTheme from '../config/theme.json'
+export type TuiSkinTheme = {
+	id : string,
+	name : string,
+	unit : string,
+	infonormal : string,
+	infodark : string,
+	infodisabled : string,
+	infolight : string,
+	primarynormal : string,
+	primarydark : string,
+	primarydisabled : string,
+	primarylight : string,
+	successnormal : string,
+	successdark : string,
+	successdisabled : string,
+	successlight : string,
+	warningnormal : string,
+	warningdark : string,
+	warningdisabled : string,
+	warninglight : string,
+	errornormal : string,
+	errordark : string,
+	errordisabled : string,
+	errorlight : string,
+	colornormal : string,
+	colordark : string,
+	colordisabled : string,
+	colorlight : string,
+	colorinverse : string,
+	bgcolorview : string,
+	bgcolorpage : string,
+	borderbase : string,
+	borderlight : string,
+	borderlighter : string,
+	borderextralight : string,
+	radiuslarge : number,
+	radiusmedium : number,
+	radiussmall : number,
+	radiusmini : number,
+	marginlarge : number,
+	marginmedium : number,
+	marginsmall : number,
+	marginmini : number,
+	paddinglarge : number,
+	paddingmedium : number,
+	paddingsmall : number,
+	paddingmini : number,
+	sizelarge : number,
+	sizemedium : number,
+	sizesmall : number,
+	sizemini : number
+}
+const cacheTheme = `${uni.getStorageSync('skinTheme')}` != '' ? uni.getStorageSync('skinTheme') : defaultTheme
+export const skinTheme = reactive<TuiSkinTheme>(JSON.parse<TuiSkinTheme>(JSON.stringify(cacheTheme)) as TuiSkinTheme)
+function borderType(type : string) : string {
+	if (type == '') return 'base'
+	const f = type.slice(0, 2)
+	let t = 'base'
+	switch (f) {
+		case 'b':
+			t = 'base'
+			break;
+		case 'l':
+			t = 'light'
+			break;
+		case 'lr':
+			t = 'lighter'
+			break;
+		case 'e':
+			t = 'extralight'
+			break;
+		default:
+			break;
+	}
+	return t
+}
+
+function colorType(type : string) : string {
+	let t = 'normal'
+	if (type == '') return t
+	const f = type.charAt(0)
+	switch (f) {
+		case 'n':
+			t = 'normal'
+			break;
+		case 'c':
+			t = 'content'
+			break;
+		case 'g':
+			t = 'grey'
+			break;
+		case 'p':
+			t = 'placeholder'
+			break;
+		default:
+			break;
+	}
+	return t
+}
+function getType(type : string) : string {
+	let t = ''
+	if (type == '') return t
+	const f = type.charAt(0)
+	switch (f) {
+		case 'i':
+			t = 'info'
+			break;
+		case 'p':
+			t = 'primary'
+			break;
+		case 's':
+			t = 'success'
+			break;
+		case 'w':
+			t = 'warning'
+			break;
+		case 'e':
+			t = 'error'
+			break;
+		default:
+			break;
+	}
+	return t
+}
+function sizeType(type : string) : string {
+	if (type == '') return 'medium'
+	const f = type.slice(0, 2)
+	let t = 'medium'
+	switch (f) {
+		case 'mi':
+			t = 'mini'
+			break;
+		case 'm':
+		case 'me':
+			t = 'medium'
+			break;
+		case 's':
+		case 'sm':
+			t = 'small'
+			break;
+		case 'l':
+		case 'la':
+			t = 'large'
+			break;
+		default:
+			break;
+	}
+	return t
+}
+function efType(type : string) : string {
+	if (type == '') return 'normal'
+	const f = type.slice(0, 2)
+	let t = 'normal'
+	switch (f) {
+		case 'di':
+			t = 'disabled'
+			break;
+		case 'n':
+		case 'no':
+			t = 'normal'
+			break;
+		case 'd':
+		case 'da':
+			t = 'dark'
+			break;
+		case 'l':
+		case 'li':
+			t = 'light'
+			break;
+		case 'p':
+		case 'pl':
+			t = 'plain'
+			break;
+		default:
+			break;
+	}
+	return t
+}
+function addPrefix(pre : string, value : string, ispre : boolean = true) : string {
+	if (ispre) return `${pre}:${value};`
+	return value
+}
+export function b(type : string = '', effect : string = 'normal', bgcolor : string = '', ispre : boolean = true) : string {
+	return getBackgroundColor(getType(type), efType(effect), bgcolor, ispre)
+}
+/**
+ * 获取主题背景色
+ * @param {string} [type=''] - 背景类型，可选值为 'dark' 或空字符串（默认）
+ * @param {boolean} [plain=false] - 是否为纯色背景
+ * @param {boolean} [ispre=false] - true返回background-color:#000000格式，false返回#00000格式
+ * @returns {string} - 返回颜色值或CSS字符串
+ */
+function getBackgroundColor(type : string = '', effect : string = 'normal', bgcolor : string = '', ispre : boolean = true) : string {
+	let ef = 'normal'
+	if (effect != '') ef = effect
+	const pre = 'background-color'
+	if (bgcolor != '') return addPrefix(pre, bgcolor, ispre)
+	let bg : string
+	if (type == '') {
+		bg = ef == 'plain' ? 'transparent' : skinTheme.bgcolorview
+	} else {
+		if (ef == 'plain') {
+			bg = 'transparent'
+		} else {
+			bg = `${skinTheme[`${type}${ef}`]}`
+		}
+	}
+	return addPrefix(pre, bg, ispre)
+}
+export function c(type : string = '', effect : string = 'normal', textcolor : string = '', ispre : boolean = true) : string {
+	return getTextColor(getType(type), efType(effect), textcolor, ispre)
+}
+function getTextColor(type : string = '', effect : string = 'normal', textcolor : string = '', ispre : boolean = true) : string {
+	let ef = 'normal'
+	if (effect != '') ef = effect
+	const pre = 'color'
+	if (textcolor != '') return addPrefix(pre, textcolor, ispre)
+	let color : string
+	if (type == '') {
+		color = skinTheme.colornormal
+	} else {
+		if (ef == 'plain' || ef == 'light') {
+			color = `${skinTheme[`${type}normal`]}`
+		} else {
+			color = skinTheme.colorinverse
+		}
+	}
+	return addPrefix(pre, color, ispre)
+}
+
+function getThemeTextColor(type : string = '', effect : string = 'normal', textcolor : string = '', ispre : boolean = true,) : string {
+	let ef = 'normal'
+	let _type = type == '' ? 'color' : type
+	if (effect != '') ef = effect
+	const pre = 'color'
+	if (textcolor != '') return addPrefix(pre, textcolor, ispre)
+	let _color : string
+	if (ef == 'plain') {
+		_color = skinTheme.colornormal
+	} else {
+		_color = `${skinTheme[`${_type}${ef}`]}`
+	}
+	return addPrefix(pre, _color, ispre)
+}
+
+export function ttc(type : string = '', effect : string = 'normal', textcolor : string = '', ispre : boolean = true,) : string {
+	return getThemeTextColor(getType(type), efType(effect), textcolor, ispre)
+}
+function borderColorFormat(color : string, option : string = '') : string {
+	if (option == '') return `border:1px solid ${color};`
+	let s = ''
+	const sarr = option.split('')
+	sarr.forEach((item) => {
+		switch (item) {
+			case 'l':
+				s += `border-left:1px solid ${color};`
+				break;
+			case 't':
+				s += `border-top:1px solid ${color};`
+				break;
+			case 'r':
+				s += `border-right:1px solid ${color};`
+				break;
+			case 'b':
+				s += `border-bottom:1px solid ${color};`
+				break;
+		}
+	})
+	return s
+}
+//增加选项四条边分别设置
+function getBorderColor(type : string = '', effect : string = 'normal', color : string = '', option : string = '', ispre : boolean = true) : string {
+	let ef = 'normal'
+	if (effect != '') ef = effect
+	const cur = skinTheme
+	let _color : string
+	if (color != '') {
+		_color = color
+	} else {
+		if (type == '') {
+			_color = cur.borderlight
+		} else {
+			_color = `${cur[`${getType(type)}${ef == 'plain' ? 'normal' : ef}`]}`
+		}
+	}
+	return ispre ? borderColorFormat(_color, option) : _color
+}
+export function bc(type : string = '', effect : string = 'normal', color : string = '', option : string = '', ispre : boolean = true) : string {
+	return getBorderColor(getType(type), efType(effect), color, option, ispre)
+}
+
+function RadiusFormat(radios : string, option : string = '') : string {
+	if (option == '') return `border-radius:${radios};`
+	let s = ''
+	const sarr = option.split('')
+	sarr.forEach((item) => {
+		switch (item) {
+			case '1':
+				s += `border-top-left-radius:${radios};`
+				break;
+			case '2':
+				s += `border-top-right-radius:${radios};`
+				break;
+			case '3':
+				s += `border-bottom-right-radius:${radios};`
+				break;
+			case '4':
+				s += `border-bottom-left-radius:${radios};`
+				break;
+		}
+	})
+	return s
+
+}
+
+function getBordeRadius(type : string = 'medium', size : string = '', option : string = '', ispre : boolean = true) : string {
+	let _type = sizeType(type)
+	let _size = size == '' ? `${skinTheme[`radius${_type}`]}` : size
+	let radios = addUnit(_size)
+	return ispre ? RadiusFormat(radios, option) : `${radios}`
+}
+
+export function ra(type : string = 'medium', size : string = '', option : string = '', ispre : boolean = true) : string {
+	return getBordeRadius(type, size, option, ispre)
+}
+
+function sizeStyleFormat(pre : string, size : string, option : string = '') : string {
+	if (option == '') return `${pre}:${size};`
+	let s = ''
+	const sarr = option.split('')
+	sarr.forEach((item) => {
+		switch (item) {
+			case 't':
+				s += `${pre}-top:${size};`
+				break;
+			case 'b':
+				s += `${pre}-bottom:${size};`
+				break;
+			case 'l':
+				s += `${pre}-left:${size};`
+				break;
+			case 'r':
+				s += `${pre}-right:${size};`
+				break;
+		}
+	})
+	return s
+}
+function getPaddingSize(type : string = 'medium', size : string = "", option : string = '', ispre : boolean = true) : string {
+	let _type = type == '' ? 'medium' : type
+	let _size = size == '' ? `${skinTheme[`padding${_type}`]}` : size
+	_size = addUnit(_size)
+	return ispre ? sizeStyleFormat('padding', _size, option) : `${_size}`
+}
+
+export function ps(type : string = 'medium', size : string = "", option : string = '', ispre : boolean = true) : string {
+	return getPaddingSize(sizeType(type), size, option, ispre)
+}
+
+function getMarginSize(type : string = 'medium', size : string = "", option : string = '', ispre : boolean = true) : string {
+	let _type = type == '' ? 'medium' : type
+	let _size = size == '' ? `${skinTheme[`margin${_type}`]}` : size
+	_size = addUnit(_size)
+	return ispre ? sizeStyleFormat('margin', _size, option) : `${_size}`
+}
+
+export function ms(type : string = 'medium', size : string = "", option : string = '', ispre : boolean = true) : string {
+	return getMarginSize(sizeType(type), size, option, ispre)
+}
+
+function getTextSize(type : string = 'medium', size : string = "", ispre : boolean = true) : string {
+	let _type = type == '' ? 'medium' : type
+	let _size = size == '' ? `${skinTheme[`size${_type}`]}` : size
+	_size = addUnit(_size)
+	return ispre ? `font-size:${_size};` : `${_size}`
+}
+
+export function pts(type : string = 'medium', size : string = "", ispre : boolean = true) : string {
+	return getTextSize(sizeType(type), size, ispre)
+}
+
+export function pg(bgcolor : string = '', ispre : boolean = true) : string {
+	const _bgcolor = bgcolor != '' ? bgcolor : skinTheme.bgcolorpage
+	return ispre ? `background-color:${_bgcolor};` : `${_bgcolor}`
+}
+
+export function vg(bgcolor : string = '', ispre : boolean = true) : string {
+	const _bgcolor = bgcolor != '' ? bgcolor : skinTheme.bgcolorview
+	return ispre ? `background-color:${_bgcolor};` : `${_bgcolor}`
+}
+
+export function TuiCreateTheme() : TuiSkinTheme {
+	return JSON.parse<TuiSkinTheme>(JSON.stringify(defaultTheme)) as TuiSkinTheme
+}
+export class TuiTheme {
+	create() : TuiSkinTheme {
+		return TuiCreateTheme()
+	}
+	getCurSkinTheme() : TuiSkinTheme {
+		let cur = uni.getStorageSync('skinTheme')
+		if (cur != '') {
+			return JSON.parse<TuiSkinTheme>(JSON.stringify(cur)) as TuiSkinTheme
+		} else {
+			return TuiCreateTheme()
+		}
+	}
+	updateCurSkinTheme(e : TuiSkinTheme) {
+		uni.setStorageSync('skinTheme', e)
+		for (let key in e) {
+			skinTheme[key] = e[key]
+		}
+	}
+	add(e : TuiSkinTheme) {
+		let list = this.getCachethemeList()
+		let f = list.findIndex((item : TuiSkinTheme) : boolean => item.id == e.id)
+		if (f == -1) list.push(e)
+		uni.setStorageSync('skinthemelist', list)
+	}
+	remove(id : string) {
+		let list = this.getCachethemeList()
+		let newList = list.filter((item : TuiSkinTheme) : boolean => item.id != id);
+		uni.setStorageSync('skinthemelist', newList)
+	}
+	update(id : string, e : TuiSkinTheme) {
+		let list = this.getCachethemeList();
+		let newList = list.map((item) : TuiSkinTheme => {
+			if (item.id == id) {
+				return e;
+			}
+			return item;
+		});
+		uni.setStorageSync('skinthemelist', newList);
+	}
+	getCachethemeList() : TuiSkinTheme[] {
+		let list : TuiSkinTheme[] = []
+		const c = uni.getStorageSync('skinthemelist')
+		if (`${c}` != '') {
+			list = JSON.parse<TuiSkinTheme[]>(JSON.stringify(c)) as TuiSkinTheme[]
+		}
+		return list
+	}
+	getTheme(e : string) : TuiSkinTheme {
+		const list = this.getCachethemeList()
+		const them = list.find((item : TuiSkinTheme) : boolean => item.id == e)
+		if (them != null) {
+			return them as TuiSkinTheme
+		} else {
+			return this.create()
+		}
+	}
+
+}

@@ -1,0 +1,47 @@
+<template>
+	<t-page :scrollDisabled="true" main-class="twh-100% dr">
+		<t-signature main-class="twh-100% bg-#F6F0DE" ref="signatures" type="p" :lineSize="3"></t-signature>
+		<t-button main-class="da atr-90 mt-60" type="error" @click="quit">退出</t-button>
+		<t-row main-class="da db-30 dl-n270 atr-90 mb-280">
+			<t-button main-class="mr-30" type="error" @click="clear">清空</t-button>
+			<t-button main-class="mr-30" type="warning" @click="undo">撤消</t-button>
+			<t-button main-class="mr-30" type="success" @click="redo">恢复</t-button>
+			<t-button main-class="mr-30" type="primary" @click="save">确定</t-button>
+		</t-row>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				signEl: null as TSignatureComponentPublicInstance | null
+			}
+		},
+		methods: {
+			quit() {
+				uni.navigateBack()
+			},
+			clear() {
+				const sign = this.signEl as TSignatureComponentPublicInstance
+				sign.clear()
+			},
+			undo() {
+				const sign = this.signEl as TSignatureComponentPublicInstance
+				sign.undo()
+			},
+			redo() {
+				const sign = this.signEl as TSignatureComponentPublicInstance
+				sign.redo()
+			},
+			save() {
+				const sign = this.signEl as TSignatureComponentPublicInstance
+				sign.save().then((res : string) => {
+					uni.previewImage({ urls: [res] })
+				})
+			}
+		},
+		mounted() {
+			this.signEl = this.$refs['signatures'] as TSignatureComponentPublicInstance
+		}
+	}
+</script>

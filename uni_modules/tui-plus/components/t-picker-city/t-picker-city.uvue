@@ -1,0 +1,142 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`${mainClass}`">
+		<picker-city v-if="embeddable" v-bind="extendsAttrs" :value="modelValue" :list="list"
+			@change="pcachange"></picker-city>
+		<t-popup v-else direction="bottom" ref='popupbottom' :show-footer="true" :closeable="false" @cancel="oncancel"
+			@confirm="onconfirm" v-bind="popupAttrs">
+			<t-view main-class="tvg tdr-l,,12 oh">
+				<t-view :main-class="`fc ${extendsPadding} tdb`">
+					<t-text v-bind="extendsAttrs" :main-class="`sfwb ${titleClass}`">{{title}}</t-text>
+				</t-view>
+				<picker-city :value="modelValue" :list="list" @change="pcachange"></picker-city>
+			</t-view>
+		</t-popup>
+		<view v-if="!embeddable" @click="show">
+			<slot :value="vals" name="button">
+				<t-cell :title="title" :title-class="titleClass" :desc="vals.length==0?placeholder:vals.join('-')"
+					:border="border" :main-class="labelClass"></t-cell>
+			</slot>
+		</view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * PickerCity 城市选择
+	 * @date 2025-05-31 12:05:22
+	 * @author TanYuan
+	 * @description 自带全国城市数据的Picker选择组件
+	 * @example /pagesA/form/pca-picker/pca-picker
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker-city.html
+	 * @example /pagesA/form/pca-picker/pca-picker
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} embeddable 是否嵌入页面。默认为弹窗模式
+	 * @value true 是
+	 * @value false 否
+	 * @property {any} modelValue 双向绑定的值(默认：{ ids: [] as string[], values: [] as string[] } as UTSJSONObject)
+	 * @property {any} list 城市数据源
+	 * @property {String} title 标题(默认：地区)
+	 * @property {String} titleClass 标题样式
+	 * @property {String} labelClass 副标题样式
+	 * @property {UTSJSONObject} popupAttrs 支持t-popup的所有属性 
+	 * @event {Function} confirm 点击确认按钮时触发
+	 * @event {Function} change 双向绑定的值变化时触发
+	 * @event {Function} cancel 点击取消按钮时触发
+	 */
+
+	import pickerCity from './picker-city.uvue'
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerCityProps extends CommonProps {
+		border : boolean;
+		embeddable : boolean;
+		modelValue : string[];
+		list : UTSJSONObject[];
+		title : string;
+		titleClass : string;
+		labelClass : string;
+		placeholder : string;
+		popupAttrs : UTSJSONObject
+	}
+
+	const props = withDefaults(defineProps<PickerCityProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		border: false,
+		embeddable: false,
+		modelValue: [] as string[],
+		list: [] as Array<UTSJSONObject>,
+		title: '',
+		titleClass: '',
+		labelClass: '',
+		placeholder: '请选择',
+		popupAttrs: {} as UTSJSONObject
+	});
+	const popupbottom = ref<ComponentPublicInstance | null>(null)
+	const { extendsAttrs, extendsPadding } = useTuiThemes(props)
+	const emit = defineEmits(['confirm', 'change', 'cancel', 'update:modelValue'])
+	const vals = ref<string[]>([])
+	const ids = ref<string[]>([])
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	function getValues(e : string[]) : string[] {
+		let v : string[] = []
+		e.forEach((item : string, index : number) => {
+			let f = props.list.find((k : UTSJSONObject) : boolean => `${k['code']}` == item)
+			if (f != null) v.push(f.getString('name') ?? 'null')
+		})
+		return v
+	}
+	function show() {
+		popupbottom.value?.$callMethod('show')
+	}
+	function pcachange(e : UTSJSONObject) {
+		ids.value = e.getArray<string>('ids') ?? []
+		if (props.embeddable) emit('update:modelValue', ids.value)
+		emit('change', e)
+	}
+	function oncancel() {
+		emit('cancel')
+	}
+	function onconfirm() {
+		vals.value = getValues(ids.value)
+		emit('update:modelValue', ids.value)
+		emit('confirm', { values: vals.value, ids: ids.value })
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	watch(() : UTSJSONObject[] => props.list, (e : UTSJSONObject[]) => {
+		if (!props.embeddable) vals.value = getValues(props.modelValue)
+	})
+	watch(() : string[] => props.modelValue, (e : string[]) => {
+		if (!props.embeddable) vals.value = getValues(e)
+	}, { immediate: true })
+	defineExpose({ show })
+</script>

@@ -1,0 +1,25 @@
+export class TuiSleep {
+	timer : number = 0;
+	dur : number = 500
+	constructor(time : number = 500) {
+		this.dur = time;
+	}
+	call(callback : () => void) {
+		this.clear();
+		this.timer = setTimeout(() => {
+			callback();
+		}, this.dur);
+	}
+	clear() {
+		if (this.timer != 0) {
+			clearTimeout(this.timer)
+			this.timer = 0
+		}
+	}
+	get duration() : number {
+		return this.dur;
+	}
+	set duration(time : number) {
+		this.dur = time
+	}
+}

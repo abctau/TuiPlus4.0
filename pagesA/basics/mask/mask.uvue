@@ -1,0 +1,30 @@
+<template>
+	<t-page>
+		<t-mask ref='mask' :transition="transition" :duration="500" />
+		<t-card main-class="mltr-30" title="Mask 遮罩层" sub-title=" 遮罩组件，轻巧覆盖于页面之上，有效锁定用户焦点，确保重要内容得以凸显和专注。"></t-card>
+		<t-group title="基础演示">
+			<t-button @click="onClick(true)" type="p" @change='change'>{{show?'关闭':'打开'}}</t-button>
+		</t-group>
+		<t-group title="不使用过渡动画">
+			<t-button @click="onClick(false)" type="p">{{show?'关闭':'打开'}}</t-button>
+		</t-group>
+		<t-group>
+			<t-button @click="nvto" type="p">返回主页</t-button>
+		</t-group>
+	</t-page>
+</template>
+<script setup>
+	const show = ref(false)
+	const mask = ref<ComponentPublicInstance | null>(null)
+	const transition = ref(true)
+	function onClick(type : boolean) {
+		transition.value = type
+		mask.value?.$callMethod('show')
+	}
+	function change(e : boolean) {
+		show.value = e
+	}
+	function nvto() {
+		uni.navigateBack()
+	}
+</script>

@@ -1,0 +1,45 @@
+<template>
+	<t-page title='骨架屏'>
+		<t-card main-class='mlrt-30' title="Skeleton"
+			sub-title="canvas绘制,首屏加载更快,采用JSON数据配置Canvas画布绘制,减少过多DOM渲染影响首屏加载"></t-card>
+		<introduction title="基础功能">
+			<t-skeleton :option="option" main-class="h-270 tdb tdp tdr"></t-skeleton>
+		</introduction>
+		<introduction title="显示头像占位">
+			<t-skeleton :option="option1" main-class="h-270 tdb tdp tdr"></t-skeleton>
+		</introduction>
+		<introduction title="显示头像占位">
+			<t-skeleton :option="option2" main-class="h-270 tdb tdp tdr"></t-skeleton>
+		</introduction>
+		<introduction title="关闭动画">
+			<t-skeleton :animate="false" :option="option1" main-class="h-270 tdb tdp tdr"></t-skeleton>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				option: [
+					{ type: 'rect', x: 2, y: 2, width: 0.9, height: 20 },
+					{ type: 'rect', x: 2, y: 32, width: 0.7, height: 20 },
+					{ type: 'rect', x: 2, y: 62, width: 0.5, height: 20 },
+					{ type: 'rect', x: 2, y: 92, width: 0.3, height: 20 },
+				],
+				option1: [
+					{ type: 'circle', x: 18, y: 22, radius: 16 },
+					{ type: 'rect', x: 44, y: 6, width: 1, height: 20 },
+					{ type: 'rect', x: 44, y: 32, width: 1, height: 20 },
+					{ type: 'rect', x: 44, y: 62, width: 1, height: 50 },
+				],
+				option2: [
+					{ type: 'rect', x: 2, y: 2, width: 0.1, height: 30 },
+					{ type: 'rect', x: 42, y: 2, width: 1, height: 20 },
+					{ type: 'rect', x: 42, y: 32, width: 1, height: 20 },
+					{ type: 'rect', x: 42, y: 62, width: 1, height: 50 },
+				]
+			};
+		}
+	}
+</script>

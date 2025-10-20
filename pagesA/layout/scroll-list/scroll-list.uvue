@@ -1,0 +1,77 @@
+<template>
+	<t-page>
+		<t-card main-class="mlrt-30" title="ScrollList 滑动列表" sub-title="滑动组件提供水平滚动功能，支持自定义指示器样式,兼容PC环境鼠标滑动">
+
+		</t-card>
+		<introduction title="基础功能">
+			<t-scroll-list>
+				<template v-for="(item,index) in list" :key="index">
+					<t-col main-class="faic mr-20 tdr b-1px,s,#eaeaea tdp bran">
+						<t-image :src="`/pagesA/static/image/goods/${item.thumb}`" main-class="twh-150"></t-image>
+						<t-text main-class="sfwb slhm-2">{{item.name}}</t-text>
+						<t-text :text="`${item['price']}`" type="error" main-class="slhm-2" mode="price"></t-text>
+					</t-col>
+				</template>
+			</t-scroll-list>
+		</introduction>
+		<introduction title="不显示指示器">
+			<t-scroll-list :indicator="false">
+				<template v-for="(item,index) in list" :key="index">
+					<t-col main-class="faic mr-20 tdr b-1px,s,#eaeaea tdp">
+						<t-image :src="`/pagesA/static/image/goods/${item.thumb}`" main-class="twh-150"></t-image>
+						<t-text main-class="sfwb slhm-2">{{item.name}}</t-text>
+						<t-text :text="`${item['price']}`" type="error" main-class="slhm-2" mode="price"></t-text>
+					</t-col>
+				</template>
+			</t-scroll-list>
+		</introduction>
+		<introduction title="宫格">
+			<t-scroll-list>
+				<t-grid :column="4" main-class="w-690">
+					<t-grid-item v-for="i in 8" :key="i" :icon="`/static/grid/grid (${i}).png`"
+						:label="`功能${i}`"></t-grid-item>
+				</t-grid>
+				<t-grid :column="4" main-class="w-690">
+					<t-grid-item v-for="i in 8" :key="i" :icon="`/static/grid/grid (${i}).png`"
+						:label="`功能${i+8}`"></t-grid-item>
+				</t-grid>
+			</t-scroll-list>
+		</introduction>
+	</t-page>
+</template>
+<script setup>
+	import { getRandomInt } from '@/uni_modules/tui-plus'
+	const list = ref<UTSJSONObject[]>([{
+		name: '手机',
+		thumb: '4.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '数码',
+		thumb: '6.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '食品',
+		thumb: '3.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '电器',
+		thumb: '2.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '百货',
+		thumb: '7.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '男装',
+		thumb: '1.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '家具',
+		thumb: '8.png',
+		price: getRandomInt(100, 200)
+	}, {
+		name: '鞋包',
+		thumb: '5.png',
+		price: getRandomInt(100, 200)
+	}])
+</script>

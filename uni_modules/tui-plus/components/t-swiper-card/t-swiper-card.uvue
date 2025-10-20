@@ -1,0 +1,318 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`ocr-g h-320 ${mainClass}`" @tuiTouchstart="touchStart"
+		@initFinished="initFinished" @tuiTouchmove="touchMove" @tuiTouchend="touchEnd" @tuiTouchcancel="touchEnd">
+		<t-view :main-class="swiperItemBoxStyles" :style="tranPos">
+			<view class="swiperbox" :style="swiperItemStyles(index).value" v-for="(item,index) in cloneList"
+				:key="index">
+				<slot :item="item" :index="index"></slot>
+			</view>
+		</t-view>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Swiper 轮播
+	 * @date 2025-05-31 12:07:34
+	 * @author TanYuan
+	 * @description 弥补swiper组件APP端不支持previousMargin,nextMargin,无法实现卡片布局 画廊布局的痛点
+	 * @example /pagesA/layout/swiper/swiper
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-swiper.html
+	 * @example /pagesA/layout/swiper/swiper
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} indicatorDots 是否显示指示点
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} indicatorActiveColor 当前选项指示点的样式(默认：rgba(0,0,0,0.2))
+	 * @property {String} indicatorDotsClass 其它指示点样式
+	 * @property {Boolean} autoplay 是否自动播放
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} current 	当前激活的轮播项索引(默认：1)
+	 * @property {Number} interval 播放间隔时间，单位为毫秒(默认：3000)
+	 * @property {Number} duration 动画持续时间，单位为毫秒(默认：500)
+	 * @property {Boolean} circular 是否循环播放(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} previousMargin 前间距(默认：0)
+	 * @property {String} nextMargin 后间距(默认：0)
+	 * @property {Boolean} disableTouch 是否禁用触摸
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} vertical 是否纵向显示
+	 * @value true 是
+	 * @value false 否
+	 * @property {Array} list 卡片数据
+	 */
+	import { EasingOption, TuiEasing, TuiSwiperEventDetail, TuiSwiperEvent } from '@/uni_modules/tui-plus'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { useStyle } from '../../common/model/style.uts';
+	import { getPx, addUnit } from '../../common/model/util.uts';
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { ComputedRef } from 'vue'
+	interface SwiperProps extends CommonProps {
+		list : UTSJSONObject[];
+		indicatorDots : boolean;
+		indicatorDotsClass : string;
+		indicatorActiveColor : string;
+		autoplay : boolean;
+		current : number;
+		interval : number;
+		duration : number;
+		circular : boolean;
+		previousMargin : string;
+		nextMargin : string;
+		disableTouch : boolean;
+		vertical : boolean;
+	}
+
+	const props = withDefaults(defineProps<SwiperProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as UTSJSONObject[],
+		indicatorDots: false,
+		indicatorDotsClass: '',
+		indicatorActiveColor: 'rgba(0,0,0,0.2)',
+		autoplay: false,
+		current: 0,
+		interval: 3000,
+		duration: 500,
+		circular: true,
+		previousMargin: '0',
+		nextMargin: '0',
+		disableTouch: false,
+		vertical: false
+	});
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['animationfinish', 'change'])
+	const boxSize = ref<number>(0)
+	const itemSize = ref<number>(0)
+	const start = ref<number>(0)
+	const tran = ref<number>(0)
+	const move = ref<number>(0)
+	const current = ref<number>(props.current)
+	const maxTran = ref<number>(0)
+	const minTran = ref<number>(0)
+	const tranPos = ref<string>('')
+	let scrollTran : (e : number) => void = () => { }
+	let source : string = 'autoplay'
+	let timer : number = 0
+	let animationInstance : TuiEasing | null = null
+	const cloneList = computed(() : UTSJSONObject[] => {
+		const arr : UTSJSONObject[] = []
+		if (props.circular && props.list.length > 0) arr.push(props.list[props.list.length - 1])
+		arr.push(...props.list)
+		if (props.circular && props.list.length > 0) arr.push(props.list[0])
+		return arr
+	})
+
+	const swiperItemBoxStyles = computed(() : string => {
+		let sty = 'ov'
+		sty += ` ${props.vertical ? 'fv w-100%' : 'fl h-100%'}`
+		return sty
+	})
+
+	const totalSize = computed(() : number => {
+		return itemSize.value * cloneList.value.length
+	})
+	const previousMarginNumber = computed(() : number => {
+		return getPx(addUnit(props.previousMargin))
+	})
+	const nextMarginNumber = computed(() : number => {
+		return getPx(addUnit(props.nextMargin))
+	})
+	function translateMove(e : number) {
+		if (props.vertical) {
+			tranPos.value = `transform: translateY(${e}px)`
+		} else {
+			tranPos.value = `transform: translateX(${e}px)`
+		}
+	}
+	function tranCuurentMove(e : number) {
+		const a = props.circular ? e + 1 : e
+		move.value = -(a * itemSize.value)
+		if (props.circular) move.value += previousMarginNumber.value
+		scrollTran(move.value)
+	}
+	function autoplay() {
+		source = 'autoplay'
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			let len = props.list.length - 1
+			if (current.value == len) {
+				tran.value = 0
+				translateMove(tran.value)
+				current.value = 0
+			} else {
+				current.value++
+			}
+			tranCuurentMove(current.value)
+		}, props.interval)
+	}
+	scrollTran = (dis : number) => {
+		const d = dis - tran.value
+		const s = tran.value
+		animationInstance = new TuiEasing({
+			timing: 'easeOut',
+			duration: props.duration,
+			onProcess: function (process : number) {
+				tran.value = s + (d * process)
+				translateMove(tran.value)
+			},
+			onAnimationFinish: function onAnimationFinish() {
+				const touc = {
+					detail: {
+						current: current.value,
+						source: source
+					} as TuiSwiperEventDetail,
+					type: 'animationfinish',
+				} as TuiSwiperEvent
+				emit('animationfinish', touc)
+				clearTimeout(timer)
+				if (props.autoplay) {
+					timer = setTimeout(() => {
+						autoplay()
+					}, props.interval)
+				}
+			}
+		} as EasingOption);
+	}
+	function swiperItemStyles(index : number) : ComputedRef<string> {
+		const itemstyles = computed(() : string => {
+			const i = props.circular ? index - 1 : index
+			let sty = `oh twh-100% atp-tr atd-500 ${props.vertical ? 'h' : 'w'}-${itemSize.value}px`
+			sty += ` ${i == current.value ? 'ats-1' : 'ats-0.9'}`
+			return useStyle(sty)
+		})
+		return itemstyles
+	}
+	function touchStart(e : TuiTouchEvent) {
+		if (props.disableTouch) return
+		source = 'touch'
+		animationInstance?.stop()
+		start.value = props.vertical ? e.y : e.x
+		maxTran.value = -(totalSize.value - boxSize.value)
+	}
+	function touchMove(e : TuiTouchEvent) {
+		if (props.disableTouch) return
+		e.event.preventDefault()
+		const x = props.vertical ? e.y : e.x
+		const difX = x - start.value
+		tran.value = difX + move.value
+		if (tran.value > minTran.value) tran.value = minTran.value
+		if (tran.value < maxTran.value) tran.value = maxTran.value
+		translateMove(tran.value)
+	}
+	function touchEnd(e : TuiTouchEvent) {
+		if (props.disableTouch) return
+		move.value = tran.value
+		let cur = current.value
+		const s = props.vertical ? e.y : e.x
+		const dif = s - start.value
+		if (Math.abs(dif) > 10) {
+			cur = Math.floor(Math.abs(tran.value) / itemSize.value)
+			if (props.circular) {
+				if (dif > 0) {
+					cur--
+					if (cur < 0) {
+						tran.value = -(props.list.length * itemSize.value) + tran.value
+						cur = props.list.length - 1
+						translateMove(tran.value)
+					}
+				} else {
+					if (cur >= props.list.length) {
+						const d : number = itemSize.value - (-(maxTran.value - tran.value))
+						tran.value = -(itemSize.value - (boxSize.value - d))
+						if (tran.value > minTran.value) tran.value = minTran.value
+						translateMove(tran.value)
+						cur = 0
+					}
+				}
+
+			} else {
+				if (dif > 0) {
+					cur++
+					if (cur > 0) cur--
+				} else if (dif < 0) {
+					if (cur < props.list.length - 1) cur++
+				}
+			}
+		}
+		current.value = cur
+		tranCuurentMove(cur)
+	}
+	function initFinished(rect : NodeInfo) {
+		boxSize.value = Math.floor(props.vertical ? rect.height! : rect.width!)
+		itemSize.value = Math.floor(boxSize.value - previousMarginNumber.value - nextMarginNumber.value)
+		const a = props.circular ? props.current + 1 : props.current
+		move.value = -(a * itemSize.value)
+		tran.value = move.value
+		if (props.circular) move.value += previousMarginNumber.value
+		translateMove(move.value)
+		if (props.autoplay) {
+			timer = setTimeout(() => {
+				autoplay()
+			}, props.interval)
+		}
+	}
+	watch(current, (e : number) => {
+		const touc = {
+			detail: {
+				current: e,
+				source: source,
+			} as TuiSwiperEventDetail,
+			type: 'change',
+		} as TuiSwiperEvent
+		emit('change', touc)
+	})
+	watch(() : number => props.current, (e : number) => {
+		const len = props.list.length - 1
+		let cur = e
+		if (cur < 0) cur = 0
+		if (cur > len) cur = len
+		if (cur != current.value) {
+			current.value = cur
+			tranCuurentMove(cur)
+		}
+	})
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+</script>
+<style>
+	/* #ifdef MP */
+	.swiperbox view {
+		width: 100%;
+		height: 100%;
+	}
+
+	/* #endif */
+</style>

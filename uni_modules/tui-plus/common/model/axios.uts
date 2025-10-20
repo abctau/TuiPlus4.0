@@ -1,0 +1,195 @@
+import { MD5 } from '../encrypt/crypto/md5'
+type HttpMethods = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+export class TuiAxios {
+	reqConfig : Map<string, any> = new Map<string, any>()
+	task : null | RequestTask = null
+	requestInterceptor : any | null = null
+	responseInterceptor : any | null = null
+	constructor(reqconfig : UTSJSONObject) {
+		reqconfig.toMap().forEach((val, key) => {
+			const field = key.toString()
+			if (val != null) this.reqConfig.set(field, val)
+		})
+	}
+	private processData(data : any) : any {
+		let _data : any = data;
+		try {
+			if (typeof data == 'string') {
+				_data = data;
+			} else if (typeof data == 'object') {
+				_data = JSON.parseObject(JSON.stringify(data))!;
+			} else {
+				_data = JSON.parseObject(JSON.stringify(data))!;
+			}
+		} catch (error) {
+			// Handle the error if necessary
+		}
+		return _data;
+	}
+	private http(method : HttpMethods, path : string, data : any) : Promise<UTSJSONObject> {
+		return new Promise((
+			resolve : (res : UTSJSONObject) => void,
+			reject : (err : UniError) => void
+		) => {
+			const requestInterceptorFun = this.requestInterceptor as (e : Map<string, any>) => void
+			this.reqConfig.set('path', path)
+			this.reqConfig.set('method', method)
+			this.reqConfig.set('data', data)
+			requestInterceptorFun(this.reqConfig)
+			uni.request({
+				url: path,
+				method,
+				data: data,
+				header: this.reqConfig.get('header') as UTSJSONObject,
+				timeout: this.reqConfig.get('timeout') as number,
+				success: (res : RequestSuccess<any>) => {
+					if (res.statusCode == 200) {
+						const responseInterceptorFun = this.responseInterceptor as (res : UTSJSONObject, resolve : (res : UTSJSONObject) => void, reject : (err : UniError) => void) => void
+						responseInterceptorFun({ data: res.data, statusCode: res.statusCode, header: res.header, cookies: res.cookies, config: { method, path, data } }, resolve, reject)
+					} else {
+						let error = new UniError("http", res.statusCode, `${(res.data as UTSJSONObject)['message']}`);
+						error.data = data
+						reject(error)
+					}
+				},
+				fail(er : RequestFail) {
+					let error = new UniError("responseInterceptor", er.errCode, er.errMsg);
+					error.data = er.data
+					error.cause = er.cause
+					reject(error)
+				}
+			});
+		})
+	}
+	abort() {
+		this.task?.abort()
+	}
+	joinUrl(path : string) : string {
+		const baseUrl = this.reqConfig.get('baseURL') as string;
+		let url : string
+		if (path.startsWith('http://') || path.startsWith('https://')) {
+			url = path
+		} else {
+			url = baseUrl + path
+		}
+		return url
+	}
+	requestWithCache(method : HttpMethods, path : string, data : any, cache : boolean) : Promise<UTSJSONObject> {
+		return new Promise((
+			resolve : (res : UTSJSONObject) => void,
+			reject : (err : any | null) => void
+		) => {
+			const _data = this.processData(data);
+			const url = this.joinUrl(path);
+			let dataString = typeof _data == 'string' ? `${_data}` : JSON.stringify(_data);
+			const md5str = MD5(url + dataString);
+			if (cache) {
+				const cachedData = `${uni.getStorageSync(md5str)}`
+				if (cachedData != '') {
+					resolve(JSON.parse<UTSJSONObject>(cachedData)!);
+					return
+				}
+			}
+			this.http(method, url, data).then((rst : UTSJSONObject) => {
+				if (cache) uni.setStorageSync(md5str, JSON.stringify(rst));
+				resolve(rst);
+			}).catch((er : any | null) => {
+				reject(er)
+			})
+		})
+	}
+	put<T = UTSJSONObject>(path : string, data : any = {}, cache : boolean = false) : Promise<T> {
+		return new Promise((
+			resolve : (res : T) => void,
+			reject : (err : any | null) => void
+		) => {
+			this.requestWithCache('PUT', path, data, cache).then((rst : UTSJSONObject) => {
+				resolve(JSON.parse<T>(JSON.stringify(rst)) as T)
+			}).catch((er : any | null) => {
+				reject(er)
+			})
+		})
+	}
+	delete<T = UTSJSONObject>(path : string, data : any = {}, cache : boolean = false) : Promise<T> {
+		return new Promise((
+			resolve : (res : T) => void,
+			reject : (err : any | null) => void
+		) => {
+			this.requestWithCache('DELETE', path, data, cache).then((rst : UTSJSONObject) => {
+				resolve(JSON.parse<T>(JSON.stringify(rst)) as T)
+			}).catch((er : any | null) => {
+				reject(er)
+			})
+		})
+	}
+	post<T = UTSJSONObject>(path : string, data : any = {}, cache : boolean = false) : Promise<T> {
+		return new Promise((
+			resolve : (res : T) => void,
+			reject : (err : any | null) => void
+		) => {
+			this.requestWithCache('POST', path, data, cache).then((rst : UTSJSONObject) => {
+				resolve(JSON.parse<T>(JSON.stringify(rst)) as T)
+			}).catch((er : any | null) => {
+				reject(er)
+			})
+		})
+	}
+	get<T = UTSJSONObject>(path : string, data : any = {}, cache : boolean = false) : Promise<T> {
+		return new Promise((
+			resolve : (res : T) => void,
+			reject : (err : any | null) => void
+		) => {
+			this.requestWithCache('GET', path, data, cache).then((rst : UTSJSONObject) => {
+				resolve(JSON.parse<T>(JSON.stringify(rst)) as T)
+			}).catch((er : any | null) => {
+				reject(er)
+			})
+		})
+	}
+	upload(path : string, filePath : string, data : any = {}) : Promise<UTSJSONObject> {
+		return new Promise((
+			resolve : (res : UTSJSONObject) => void,
+			reject : (err : any | null) => void
+		) => {
+			const requestInterceptorFun = this.requestInterceptor as (e : Map<string, any>) => void
+			this.reqConfig.set('path', path)
+			this.reqConfig.set('data', data)
+			requestInterceptorFun(this.reqConfig)
+			let header_clone : UTSJSONObject = {}
+			const header = this.reqConfig.get('header') as UTSJSONObject
+			header.toMap().forEach((value, key) => {
+				if (key != 'Content-Type') header_clone.set(key, value)
+			})
+			uni.uploadFile({
+				url: this.joinUrl(path),
+				filePath: filePath,
+				name: 'file',
+				formData: data as UTSJSONObject,
+				header: header_clone,
+				timeout: this.reqConfig.get('timeout') as number,
+				success: (res : UploadFileSuccess) => {
+					let _data : any | null
+					try {
+						_data = JSON.parse(res.data)
+					} catch (e) {
+						_data = res.data
+					}
+					if (res.statusCode == 200) {
+						const responseInterceptorFun = this.responseInterceptor as (res : UTSJSONObject, resolve : (res : UTSJSONObject) => void, reject : (err : UniError) => void) => void
+						responseInterceptorFun({ data: _data, statusCode: res.statusCode, config: { method: 'upload', path, data } }, resolve, reject)
+					} else {
+						let error = new UniError("upload", res.statusCode, `${_data}`);
+						error.data = data
+						reject(error)
+					}
+				},
+				fail(er : UploadFileFail) {
+					let error = new UniError("responseInterceptor", er.errCode, er.errMsg);
+					error.data = er.data
+					error.cause = er.cause
+					reject(error)
+				}
+			})
+		})
+	}
+}

@@ -1,0 +1,171 @@
+<template>
+	<t-view :main-class="`w-100%`">
+		<t-view v-if="placeholder">
+			<t-status-bar></t-status-bar>
+			<t-view :main-class="`h-44px ${mainClass}`">
+			</t-view>
+		</t-view>
+		<t-view :main-class="`z-1 w-100% ${extendsBackgroundColor} ${mainClass} ${fixed?'df dlt-0':''}`">
+			<t-status-bar></t-status-bar>
+			<t-view v-bind="extendsAttrs" :main-class="`fl faic fjcb plr-30 h-44px`">
+				<t-row :main-class="`ws-100 fai z-1 ${backViewClass}`" @click="backup" :stop="true">
+					<slot name="left">
+						<t-icon v-if="showBack" :name="backIcon"
+							:main-class="`ats-1.2 ${extendsForegroundColor} ${backIconClass}`"></t-icon>
+						<t-text v-if="backText!=''" :text="backText"
+							:main-class="`${extendsForegroundColor} ${backTextClass}`"></t-text>
+					</slot>
+				</t-row>
+				<t-view :main-class="`da dlt-0 h-100% w-100% fc ${titleViewClass}`">
+					<slot name="center">
+						<t-text v-if="title!=''" :text="title"
+							:main-class="`sfwb ${extendsForegroundColor} ${titleClass}`"></t-text>
+					</slot>
+				</t-view>
+				<t-view :main-class="`ov fl ${rightViewClass} ws-100 h-100% fjce faic z-1`" @click="iconSelect">
+					<slot name="right">
+						<t-icon v-if="rightIcon!=''" :name="rightIcon" :hover="true"
+							:main-class="`ats-1.2 ${extendsForegroundColor} ${rightIconClass}`"></t-icon>
+						<t-text v-if="rightText!=''" :text="rightText" :hover="true"
+							:main-class="`ml-15 ${extendsForegroundColor} ${rightTextClass}`"></t-text>
+					</slot>
+				</t-view>
+				<t-line v-if="border" :type="type" main-class="da dlb-0"></t-line>
+			</t-view>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Navbar 导航栏
+	 * @date 2025-05-31 12:04:56
+	 * @author TanYuan
+	 * @description 自定义导航栏,支持透明背景,渐变背景
+	 * @example /pagesA/layout/navbar/navbar
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-navbar.html
+	 * @example /pagesA/layout/navbar/navbar
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} title 导航中间标题文本
+	 * @property {String} titleViewClass 标题文本盒子的样式
+	 * @property {String} titleClass 标题文本的样式
+	 * @property {Boolean} showBack 是否显示返回按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} backViewClass 返回按钮盒子的样式
+	 * @property {String} backIconClass 返回按钮图标的样式
+	 * @property {String} backTextClass undefined
+	 * @property {String} rightViewClass 右侧容器盒子的样式
+	 * @property {String} rightIconClass 右侧图标的样式
+	 * @property {String} rightTextClass 右侧文字的样式
+	 * @property {Boolean} safeAreaInsetTop 是否在顶部使用安全区域嵌入(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} placeholder 是否占位防止塌陷(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} fixed 是否固定定位(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} border 是否显示边框
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} backIcon 返回按钮的图标(默认：arrow-left)
+	 * @property {String} backText 返回按钮的文本
+	 * @property {String} rightIcon 右侧图标
+	 * @property {String} rightText 右侧文本
+	 * @property {Boolean} autoBack 是否自动处理返回动作(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} back 当点击返回按钮时触发
+	 * @event {Function} rightClick 当点击右侧区域时触发
+	 */
+
+	import { TuiAutoBack } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface NavbarProps extends CommonProps {
+		title : string
+		titleViewClass : string
+		titleClass : string
+		showBack : boolean
+		backViewClass : string
+		backIconClass : string
+		backTextClass : string
+		rightViewClass : string
+		rightIconClass : string
+		rightTextClass : string
+		safeAreaInsetTop : boolean
+		placeholder : boolean
+		fixed : boolean
+		border : boolean
+		backIcon : string
+		backText : string
+		rightIcon : string
+		rightText : string
+		autoBack : boolean
+	}
+
+	const props = withDefaults(defineProps<NavbarProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		title: '',
+		titleViewClass: '',
+		titleClass: '',
+		showBack: true,
+		backViewClass: '',
+		backIconClass: '',
+		backTextClass: '',
+		rightViewClass: '',
+		rightIconClass: '',
+		rightTextClass: '',
+		safeAreaInsetTop: true,
+		placeholder: true,
+		fixed: true,
+		border: false,
+		backIcon: 'arrow-left',
+		backText: '',
+		rightIcon: '',
+		rightText: '',
+		autoBack: true
+	});
+	const { extendsBackgroundColor, extendsAttrs, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['back', 'rightClick'])
+	const statusBarHeight : number = uni.getSystemInfoSync().statusBarHeight
+	function backup() : void {
+		if (props.backIcon == '' && props.backText == '') return
+		emit('back')
+		if (props.autoBack) TuiAutoBack.value(null)
+	}
+	function iconSelect() : void {
+		if (props.rightIcon == '' && props.rightText == '') return
+		emit('rightClick')
+	}
+</script>

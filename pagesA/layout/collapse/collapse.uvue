@@ -1,0 +1,88 @@
+<template>
+	<t-page main-class='p-30'>
+		<t-card main-class='mb-30' title="Collapse 折叠面板"
+			sub-title="多种折叠模式,折叠面板组件适用于需要节省空间或按需展示信息的场景，如FAQ问答、用户设置选项、表单折叠区域等，能够提供清晰且结构化的用户界面。"></t-card>
+		<t-section title="基础使用+禁用展示+默认展示" main-class="tdr tdb mb-30"></t-section>
+		<t-collapse :values="['2','3']" main-class="tdr tdb mb-30 oh">
+			<template v-for="item in list1" :key="item.id">
+				<t-collapse-item :title="item.title" :value="item.id" icon="" label="测试" :disabled="item.disabled">
+					<t-text main-class="s-28 slh-45 sls-5">
+						{{item.value}}
+					</t-text>
+				</t-collapse-item>
+			</template>
+		</t-collapse>
+		<t-section title="禁用边框+手风琴模式" main-class="tdr tdb mb-30"></t-section>
+		<t-collapse :values="['2','3']" main-class="tdr tdb mb-30 oh" :border="true" :accordion="true">
+			<template v-for="item in list2" :key="item.id">
+				<t-collapse-item :title="item.title" :value="item.id" icon="" label="测试" :disabled="item.disabled">
+					<t-text main-class="s-28 slh-45 sls-5">
+						{{item.value}}
+					</t-text>
+				</t-collapse-item>
+			</template>
+		</t-collapse>
+		<view style="height: 300px;"></view>
+	</t-page>
+</template>
+
+<script setup>
+	type collItem = {
+		title : string
+		id : string,
+		value : string
+		disabled : boolean
+	}
+	const list1 = ref<collItem[]>([
+		{
+			title: '产品介绍',
+			id: '1',
+			value: "详细介绍产品的功能、特点和优势，帮助用户快速了解产品。",
+			disabled: false
+		},
+		{
+			title: '安装指南',
+			id: '2',
+			value: "提供详细的安装步骤和注意事项，确保用户正确安装产品。",
+			disabled: false
+		},
+		{
+			title: '快速入门',
+			id: '3',
+			value: "简明扼要的入门教程，帮助新用户快速上手使用产品。",
+			disabled: false
+		},
+		{
+			title: '常见问题',
+			id: '4',
+			value: "汇总常见问题及解答，帮助用户解决使用过程中遇到的问题。",
+			disabled: false
+		}
+	] as collItem[])
+	const list2 = ref<collItem[]>([
+		{
+			title: '高级功能',
+			id: '1',
+			value: "介绍产品的高级功能和使用技巧，提升用户的使用体验。",
+			disabled: false
+		},
+		{
+			title: '定制开发',
+			id: '2',
+			value: "提供定制开发的指南和示例，满足用户的个性化需求。",
+			disabled: false
+		},
+		{
+			title: '集成教程',
+			id: '3',
+			value: "详细讲解如何将产品集成到现有系统中，简化集成过程。",
+			disabled: false
+		},
+		{
+			title: '技术支持',
+			id: '4',
+			value: "提供技术支持渠道和联系方式，确保用户在需要时获得帮助。",
+			disabled: false
+		}
+	] as collItem[])
+</script>

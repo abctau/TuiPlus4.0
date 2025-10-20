@@ -1,0 +1,94 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fv faic p-30 ${isFixed?'df dlbr-0':''}${mainClass}`"
+		@click="mainOnclick">
+		<template v-if="navigate.length>0">
+			<t-view main-class="fl">
+				<t-text v-bind="extendsAttrs" v-for="(item,index) in navigate" :key="index"
+					:main-class="`plr-20 mtb-30 ${index < navigate.length - 1?'br-1px,s,#b2b2b2':''}`" :hover="true"
+					:text="`${item['text']}`"></t-text>
+			</t-view>
+		</template>
+		<t-text v-for="(k,i) in text" :main-class="`c-#b2b2b2 mb-10 ${textClass}`" :text="k" :key="i"></t-text>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Footer 页眉页脚
+	 * @date 2025-05-31 12:03:25
+	 * @author TanYuan
+	 * @description 页脚组件提供了一个固定的页面底部区域，用于显示辅助信息、导航链接或版权声明。其功能亮点包括：支持自定义样式和文本，可固定在页面底部，且可以包含多个可点击的导航项。使用场景包括：在网站或应用的底部提供额外的导航选项，显示版权信息，或放置其他辅助性内容。
+	 * @example /pagesA/basics/footer/footer
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-footer.html
+	 * @example /pagesA/basics/footer/footer
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} text 显示的内容
+	 * @property {UTSJSONObject[]} navigate 导航配置(默认：[])
+	 * @property {String} textClass 内容样式
+	 * @property {Boolean} isFixed 是否固定定位
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} click 点击时触发
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface FooterProps extends CommonProps {
+		text : string[]
+		navigate : UTSJSONObject[]
+		textClass : string
+		isFixed : boolean
+	}
+
+	const props = withDefaults(defineProps<FooterProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		text: ['Copyright © 2024'] as string[],
+		navigate: [] as UTSJSONObject[],
+		textClass: '',
+		isFixed: false
+	});
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+</script>

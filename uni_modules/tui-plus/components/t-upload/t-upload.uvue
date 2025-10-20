@@ -1,0 +1,196 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl fww ${mainClass}`">
+		<t-view :main-class="`w-100% dr mr-10 ${uploadItemBoxStyles} ${itemBoxClass}`" v-for="(item,index) in imageList"
+			@click="onPreviewImage(index)" :key="index">
+			<t-image main-class="twh-100%" :preview="false" :loading="false"
+				:src="(item.path != '' && item.path != null) ? `${item.path}` : `${item.url}`"></t-image>
+			<t-view v-if="closed" :main-class="uploadCloseBoxStyles" :stop="true" @click="close(index)">
+				<t-icon v-bind="extendsAttrs" :main-class="`mt-n2 ${extendsForegroundColor}`"
+					:name="closeIcon"></t-icon>
+			</t-view>
+			<t-view v-if="item.status!=null"
+				:main-class="`da fl fc dlbr-0 h-40 ${extendsBackgroundColor} ${stateBoxClass}`">
+				<slot name="state">
+					<t-icon v-if="item.getString('status.icon') !=null && item.getString('status.icon') !=''"
+						size="mini" :main-class="`${extendsForegroundColor}`"
+						:name="`${item.getString('status.icon')}`"></t-icon>
+					<t-text size="mini" :main-class="`${extendsForegroundColor}`"
+						:text="`${item.getString('status.text')}`"></t-text>
+				</slot>
+			</t-view>
+		</t-view>
+		<t-view v-if="imageList.length < count" :main-class="`${uploadItemBoxStyles} ${itemBoxClass}`"
+			@click="chooseFile">
+			<slot name="icon">
+				<t-icon v-bind="extendsAttrs" :main-class="uploadItemAddIconStyles" :name="icon"></t-icon>
+			</slot>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Upload 上传
+	 * @date 2025-05-31 12:08:19
+	 * @author TanYuan
+	 * @description 公返回文件选择上传列表，上传逻辑需要自己编写，示例为支持宝云扩展存储上传,可判断是否重复上传,节省扩展存储空间,上传逻辑需要自己编写,组件返回上传列表和文件文件哈希值,这里演示的是阿里云扩展存储上传文件,详细实现见模版个人资料头像上传
+	 * @example /pagesA/form/upload/upload
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-upload.html
+	 * @example /pagesA/form/upload/upload
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject[]} modelValue 选中文件列表(默认：[])
+	 * @property {String} closeIcon 移除图片的图标名称(默认：close-fill)
+	 * @property {String} closeIconClass 移除图标的样式
+	 * @property {string[]} sourceType=[camera|album] 图片或视频拾取模式(默认：['album', 'camera'])
+	 * @value camera 从相机选择
+	 * @value album 从本地相册选择
+	 * @property {String} icon 图标(默认：add-fill)
+	 * @property {String} iconClass 图标样式
+	 * @property {String} itemBoxClass 每一项盒子的样式
+	 * @property {Number} count 最大上传数量 -1不限制(默认：1)
+	 * @property {string[]} sizeType=[original |compressed ] 压缩模式(默认：['original ','compressed '])
+	 * @value original  图
+	 * @value compressed  压缩图
+	 * @property {Boolean} closed 是否显示关闭图标(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} previewImage 是否预览(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} stateBoxClass 状态进度显示盒子的样式
+	 * @event {Function} change 选择文件变化时触发
+	 */
+
+	import { TuiChooseImage } from '../../common/model/upload'
+	import { getStyleProperty } from '../../common/model/style'
+	import { ra } from '../../common/model/theme'
+	import { getPx } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface UploadProps extends CommonProps {
+		modelValue : UTSJSONObject[]
+		type : string
+		closeIcon : string
+		closeIconClass : string
+		sourceType : string[]
+		icon : string
+		iconClass : string
+		itemBoxClass : string
+		count : number
+		sizeType : string[]
+		closed : boolean
+		previewImage : boolean
+		stateBoxClass : string
+	}
+
+	const props = withDefaults(defineProps<UploadProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: [] as UTSJSONObject[],
+		closeIcon: 'close-fill',
+		closeIconClass: '',
+		sourceType: ['album', 'camera'] as string[],
+		icon: 'add-fill',
+		iconClass: '',
+		itemBoxClass: '',
+		count: 1,
+		sizeType: ['original', 'compressed'] as string[],
+		closed: true,
+		previewImage: true,
+		stateBoxClass: ''
+	})
+
+	const { extendsAttrs, extendsForegroundColor, extendsBackgroundColor, getFontSizeToValue, extendsRadius } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	const imageList = ref<Array<UTSJSONObject>>([])
+
+	const boxSize = computed(() : number => {
+		return getFontSizeToValue.value
+	})
+	const uploadCloseBoxStyles = computed(() : string => {
+		const radius : number = Math.round(getPx(ra(props.size, getStyleProperty(props.itemBoxClass, 'border-radius'), '', false)))
+		return `fc da dtr-0 twh-${Math.round(boxSize.value + 2)}px r3-${radius}px ${extendsBackgroundColor.value}`
+	})
+	const uploadItemAddIconStyles = computed(() : string => {
+		let sty = `s-${Math.round(boxSize.value * 1.5)}px ${props.iconClass}`
+		return sty
+	})
+	const uploadItemBoxStyles = computed(() : string => {
+		let sty = `oh fc tdb-i,l ${extendsRadius.value} twh-${Math.round(boxSize.value * 5)}px `
+		if (props.type == '') sty += `tbc-${props.type},l`
+		return sty
+	})
+
+	watch(() : UTSJSONObject[] => props.modelValue, (val : UTSJSONObject[]) => {
+		imageList.value = val.slice()
+	}, { immediate: true })
+
+	const close = (index : number) => {
+		imageList.value.splice(index, 1)
+		emit('update:modelValue', imageList.value)
+		emit('change', imageList.value)
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+
+	const onPreviewImage = (index : number) => {
+		const images : string[] = imageList.value.map((item : UTSJSONObject) => `${item.path ?? item.url}`)
+		if (props.previewImage) {
+			uni.previewImage({
+				current: index,
+				loop: true,
+				urls: images
+			})
+		}
+	}
+
+	const chooseFile = () => {
+		if (imageList.value.length < props.count || props.count <= 0) {
+			let dc = props.count - imageList.value.length
+			if (props.count <= 0) dc = 9
+			TuiChooseImage(dc, props.sourceType, props.sizeType).then((rst : Array<UTSJSONObject>) => {
+				if (props.count > 0) {
+					const arr = rst.slice(0, dc)
+					imageList.value.push(...arr)
+				} else {
+					imageList.value.push(...rst)
+				}
+				emit('update:modelValue', imageList.value)
+				emit('change', imageList.value)
+				nextTick(() => {
+					itemValidate()
+				})
+			})
+		}
+	}
+</script>

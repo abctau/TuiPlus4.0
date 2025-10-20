@@ -1,0 +1,58 @@
+<template>
+	<t-page title="评分">
+		<t-card title="评分组件" main-class="tdr tdb mltr-30"
+			sub-title="灵活多变，支持自定义评分星数，设定评分下限，并提供半星评分选项，以精细反映评价。用户可通过简单的触摸滑动或鼠标拖动-"></t-card>
+		<introduction title="基础功能-type">
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal"></t-rate>
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" type="success"></t-rate>
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" type="error"></t-rate>
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" type="primary"></t-rate>
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" type="warning"></t-rate>
+		</introduction>
+		<introduction title="基础功能-size">
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" size="large" type="success"></t-rate>
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" size="medium" type="error"></t-rate>
+			<t-rate main-class="tdr tdb tdp mb-30" v-model="rateVal" size="small" type="primary"></t-rate>
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" size="mini" type="warning"></t-rate>
+		</introduction>
+		<introduction title="修改颜色">
+			<t-rate main-class="tdr tdb tdp s-80" v-model="rateVal" activeClass="c-#2979FF"
+				inactiveClass="c-#55aa00"></t-rate>
+		</introduction>
+		<introduction title="设置大小80rpx">
+			<t-rate main-class="tdr tdb tdp s-80" v-model="rateVal" activeIcon="heart-fill" inactiveIcon="heart"
+				activeClass="c-#2979FF"></t-rate>
+		</introduction>
+		<introduction title="设置间距10rpx">
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" activeClass="c-#2979FF" icon-class="mr-20"></t-rate>
+		</introduction>
+		<introduction title="未选中星星颜色">
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" activeClass="c-#2979FF"
+				inactiveClass="c-#2979FF"></t-rate>
+		</introduction>
+		<introduction title="最小选择3分">
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal1" activeClass="#2979FF" :minCount="3"></t-rate>
+		</introduction>
+		<introduction title="只读">
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" type="error" :readonly="true"></t-rate>
+		</introduction>
+		<introduction title="禁用">
+			<t-rate main-class="tdr tdb tdp" v-model="rateVal" activeClass="#2979FF" :disabled="true"></t-rate>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				rateVal: -10,
+				rateVal1: 1,
+				icon: 'star',
+			};
+		},
+		methods: {
+
+		}
+	}
+</script>

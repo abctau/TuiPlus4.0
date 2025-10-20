@@ -1,0 +1,16 @@
+{
+    "id": "sequence-frame",
+    "name": "图片序列帧",
+    "displayName": "图片序列帧",
+    "version": "1",
+    "description": "一个由多张图片形成的动画",
+    "keywords": [
+        "小程序，h5,app图片序列帧，"
+    ],
+    "dcloudext": {
+        "category": [
+            "前端组件",
+            "通用组件"
+        ]
+    }
+}

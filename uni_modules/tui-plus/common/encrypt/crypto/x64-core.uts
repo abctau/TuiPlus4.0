@@ -1,0 +1,32 @@
+import { TuiArray } from '../core/array'
+import { WordArray } from './core';
+export class X64Word {
+	high : number
+	low : number
+	constructor(high : number, low : number) {
+		this.high = high;
+		this.low = low;
+	}
+}
+
+export class X64WordArray {
+	words : X64Word[]
+	sigBytes : number
+	constructor(words : X64Word[] = [], sigBytes : number = words.length * 8) {
+		this.words = words;
+		this.sigBytes = sigBytes;
+	}
+	toX32() : WordArray {
+		// Shortcuts
+		const x64Words = this.words;
+		const x64WordsLength = x64Words.length;
+		// Convert
+		const x32Words = new TuiArray();
+		for (let i = 0; i < x64WordsLength; i += 1) {
+			const x64Word = x64Words[i];
+			x32Words.push(x64Word.high);
+			x32Words.push(x64Word.low);
+		}
+		return new WordArray(x32Words, this.sigBytes)
+	}
+}

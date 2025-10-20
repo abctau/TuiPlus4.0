@@ -1,0 +1,147 @@
+<template>
+	<t-view v-bind="extendsAttrs">
+		<slot></slot>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Form 表单
+	 * @date 2025-05-31 12:03:29
+	 * @author TanYuan
+	 * @description 表单验证规则可后端控制, 支持form-item点击映射到input获取到焦点提升用户体验 支持表单下任意组件参与布局,支持自定义函数表单验证，支持自定义数据校验,长度校验证,数据大小判断 支持重置
+	 * @example /pagesA/form/form/form
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-form.html
+	 * @example /pagesA/form/form/form
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} showLabel 统一设置表单子组合是否显示标题，优先级低于子组件。(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} headerClass 标题盒子的样式，优先级低于子组件。
+	 * @property {String} direction=[row|column] 统一设置表单子项的布局方向中，优先级低于子组件(默认：row)
+	 * @value row flex 横向布局
+	 * @value column 纵向布局
+	 * @property {any} rules 表单的验证规则 
+	 * @property {String} rulesClass 验证失败提示文字的样式
+	 * @property {String} labelClass 标题标签的样式
+	 * @property {String} childClass 统一设置子组件样式，如果子组件有自己的样式则合并，优先级低于子组件。
+	 * @property {String} requiredAsterisk 必填时的提示符 如*(默认：*)
+	 * @property {String} requiredAsteriskClass 必填提示符的样式(默认：mt-10)
+	 * @property {Boolean} hideRequiredAsterisk 是否隐藏必填文本
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showMessage 是否显示验证信息(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} bottomLine 是否显示底部线条
+	 * @value true 是
+	 * @value false 否
+	 * @property {UTSJSONObject} model 表单绑定的对象
+	 */
+	import { formValidation, formValidationType } from '../../common/utils/index'
+	import { CommonProps, TromGroupAttrsType, useTuiThemes } from '../../common/props/index.uts';
+	import { TuiDeepClone } from '../../common/model/util.uts';
+	export interface FromProps extends CommonProps {
+		headerClass : string;
+		showLabel : boolean;
+		direction : string;
+		rules : UTSJSONObject;
+		rulesClass : string;
+		labelClass : string;
+		childClass : string;
+		requiredAsterisk : string;
+		requiredAsteriskClass : string;
+		hideRequiredAsterisk : boolean;
+		showMessage : boolean;
+		bottomLine : boolean;
+		model : UTSJSONObject
+	}
+
+	const props = withDefaults(defineProps<FromProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		headerClass: '',
+		showLabel: true,
+		direction: 'row',
+		rules: {} as UTSJSONObject,
+		rulesClass: '',
+		labelClass: '',
+		childClass: '',
+		requiredAsterisk: '*',
+		requiredAsteriskClass: 'mt-10',
+		hideRequiredAsterisk: false,
+		showMessage: true,
+		bottomLine: false,
+		model: {} as UTSJSONObject
+	});
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['reset'])
+	const chaildValidate = ref<formValidationType[]>([])
+	const formValue : UTSJSONObject = TuiDeepClone(props.model) as UTSJSONObject
+	provide('fromGroupAttrs', {
+		model: toRef<UTSJSONObject>(() : UTSJSONObject => props.model),
+		childClass: toRef<string>(() : string => props.childClass),
+		direction: toRef<string>(() : string => props.direction),
+		requiredAsterisk: toRef<string>(() : string => props.requiredAsterisk),
+		requiredAsteriskClass: toRef<string>(() : string => props.requiredAsteriskClass),
+		bottomLine: toRef<boolean>(() : boolean => props.bottomLine),
+		hideRequiredAsterisk: toRef<boolean>(() : boolean => props.hideRequiredAsterisk),
+		labelClass: toRef<string>(() : string => props.labelClass),
+		rules: toRef<UTSJSONObject>(() : UTSJSONObject => props.rules),
+		rulesClass: toRef<string>(() : string => props.rulesClass),
+		headerClass: toRef<string>(() : string => props.headerClass),
+		showLabel: toRef<boolean>(() : boolean => props.showLabel),
+	} as TromGroupAttrsType)
+	provide('chaildValidate', chaildValidate)
+	function validate() : boolean {
+		let state : boolean = true
+		let vali : formValidationType[] = []
+		props.model.toMap().forEach((val, key) => {
+			const v : formValidationType = formValidation(key, val, (props.rules as UTSJSONObject).getArray<UTSJSONObject>(key) ?? ([] as UTSJSONObject[]))
+			if (!v.validation) {
+				vali.push(v)
+				state = false
+			}
+		})
+		chaildValidate.value = vali
+		return state
+	}
+	function reset() {
+		formValue.toMap().forEach((val, key) => {
+			props.model.set(key, TuiDeepClone(val))
+		})
+		chaildValidate.value = [] as formValidationType[]
+	}
+	defineExpose({
+		validate,
+		reset
+	})
+</script>

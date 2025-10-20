@@ -1,0 +1,375 @@
+import { ChartOptions, ChartOptionsLegend, ChartOptionsSeries, ChartOptionsSeriesData, ChartOptionsSubTitle, ChartOptionsTitle, ChartOptionsXAxis, ChartOptionsYAxis, ChartOptionsYAxisData, ChartOptionsMapSeriesProperties, ChartOptionsMapSeriesPropertiesParent, ChartOptionsMapSeriesGeometry } from "./type";
+import { extraInit } from './extrainit.uts'
+export function seriesDataInit(e : UTSJSONObject) : ChartOptionsSeriesData {
+	const series_data = new ChartOptionsSeriesData()
+	if (e['name'] != null) series_data.name = e.getString('name')!
+	if (e['value'] != null) series_data.value = e.getNumber('value')!
+	if (e['color'] != null) series_data.color = e.getString('color')!
+	if (e['labelText'] != null) series_data.labelText = e.getString('labelText')!
+	if (e['labelShow'] != null) series_data.labelShow = e.getBoolean('labelShow')!
+	if (e['centerText'] != null) series_data.centerText = e.getString('centerText')!
+	if (e['centerTextSize'] != null) series_data.centerTextSize = e.getNumber('centerTextSize')!
+	if (e['centerTextColor'] != null) series_data.centerTextColor = e.getString('centerTextColor')!
+	return series_data
+}
+export function seriesInit(e : UTSJSONObject, type : string = '') : ChartOptionsSeries {
+	const series = new ChartOptionsSeries()
+	if (e['index'] != null) series.index = e.getNumber('index')!
+	if (e['name'] != null) series.name = e.getString('name')!
+	if (e['legendText'] != null) series.legendText = e.getString('legendText')!
+	if (e['show'] != null) series.show = e.getBoolean('show')!
+	if (e['color'] != null) series.color = e.getString('color')!
+	if (e['fillOpacity'] != null) series.fillOpacity = e.getNumber('fillOpacity')!
+	if (e['textColor'] != null) series.textColor = e.getString('textColor')!
+	if (e['textSize'] != null) series.textSize = e.getNumber('textSize')!
+	if (e['textOffset'] != null) series.textOffset = e.getNumber('textOffset')!
+	if (e['linearIndex'] != null) series.linearIndex = e.getNumber('linearIndex')!
+	if (e['type'] != null) series.type = e.getString('type')!
+	if (e['disableLegend'] != null) series.disableLegend = e.getBoolean('disableLegend')!
+	if (e['connectNulls'] != null) series.connectNulls = e.getBoolean('connectNulls')!
+	if (e['setShadow'] != null) series.setShadow = e.getArray('setShadow') as string[]
+	if (e['linearColor'] != null) series.linearColor = e.getArray('linearColor') as string[][]
+	if (e['style'] != null) series.style = e.getAny('style') as "curve" | "straight"
+	if (e['addPoint'] != null) series.addPoint = e.getBoolean('addPoint')!
+	if (e['lineType'] != null) series.lineType = e.getAny('lineType') as "solid" | "dash"
+	if (e['dashLength'] != null) series.dashLength = e.getNumber('dashLength')!
+	if (e['pointShape'] != null) series.pointShape = e.getAny('pointShape') as "diamond" | "circle" | "triangle" | "square" | "none"
+	if (e['legendShape'] != null) series.legendShape = e.getAny('legendShape') as "diamond" | "circle" | "triangle" | "square" | "none" | "rect" | "line"
+	if (e['formatter'] != null) series.formatter = e.getAny('formatter')!
+	if (e['format'] != null) series.format = e.getString('format')!
+	if (e['rotate'] != null) series.rotate = e.getBoolean('rotate')!
+	if (e['seriesMA'] != null) {
+		const seriesmas : ChartOptionsSeries[] = []
+		const data = e.getArray('seriesMA') as UTSJSONObject[]
+		data.forEach((item : UTSJSONObject) => {
+			seriesmas.push(seriesInit(item))
+		})
+		series.seriesMA = seriesmas
+	}
+	if (e['data'] != null) {
+		if (type == 'scatter' || type == 'bubble' || type == 'candle') {
+			series.dataArr = e.getArray('data') as number[][]
+		} else {
+			const seriesdata : ChartOptionsSeriesData[] = []
+			const data = e.getArray('data') as UTSJSONObject[]
+			data.forEach((item : UTSJSONObject) => {
+				seriesdata.push(seriesDataInit(item))
+			})
+			series.data = seriesdata
+		}
+	}
+	if (type == 'map') {
+		if (e['properties'] != null) {
+			series.properties = mapSeriesPropertiesInit(e.getJSON('properties')!)
+		}
+		if (e['geometry'] != null) {
+			series.geometry = mapSeriesGeometryInit(e.getJSON('geometry')!)
+		}
+	}
+	return series
+}
+//x轴数据解析
+export function xAxisInit(e : UTSJSONObject) : ChartOptionsXAxis {
+	const xAxis : ChartOptionsXAxis = new ChartOptionsXAxis();
+	if (e['disabled'] != null) xAxis.disabled = e.getBoolean('disabled')!;
+	if (e['axisLine'] != null) xAxis.axisLine = e.getBoolean('axisLine')!;
+	if (e['axisLineColor'] != null) xAxis.axisLineColor = e.getString('axisLineColor')!;
+	if (e['calibration'] != null) xAxis.calibration = e.getBoolean('calibration')!;
+	if (e['fontColor'] != null) xAxis.fontColor = e.getString('fontColor')!;
+	if (e['fontSize'] != null) xAxis.fontSize = e.getNumber('fontSize')!;
+	if (e['lineHeight'] != null) xAxis.lineHeight = e.getNumber('lineHeight')!;
+	if (e['marginTop'] != null) xAxis.marginTop = e.getNumber('marginTop')!;
+	if (e['rotateLabel'] != null) xAxis.rotateLabel = e.getBoolean('rotateLabel')!;
+	if (e['rotateAngle'] != null) xAxis.rotateAngle = e.getNumber('rotateAngle')!;
+	if (e['labelCount'] != null) xAxis.labelCount = e.getNumber('labelCount')!;
+	if (e['itemCount'] != null) xAxis.itemCount = e.getNumber('itemCount')!;
+	if (e['boundaryGap'] != null) xAxis.boundaryGap = e.getString('boundaryGap') as 'center' | 'justify';
+	if (e['disableGrid'] != null) xAxis.disableGrid = e.getBoolean('disableGrid')!;
+	if (e['splitNumber'] != null) xAxis.splitNumber = e.getNumber('splitNumber')!;
+	if (e['gridColor'] != null) xAxis.gridColor = e.getString('gridColor')!;
+	if (e['gridType'] != null) xAxis.gridType = e.getString('gridType') as 'solid' | 'dash';
+	if (e['dashLength'] != null) xAxis.dashLength = e.getNumber('dashLength')!;
+	if (e['gridEval'] != null) xAxis.gridEval = e.getNumber('gridEval')!;
+	if (e['scrollShow'] != null) xAxis.scrollShow = e.getBoolean('scrollShow')!;
+	if (e['scrollAlign'] != null) xAxis.scrollAlign = e.getString('scrollAlign') as 'left' | 'right';
+	if (e['scrollColor'] != null) xAxis.scrollColor = e.getString('scrollColor')!;
+	if (e['scrollBackgroundColor'] != null) xAxis.scrollBackgroundColor = e.getString('scrollBackgroundColor')!;
+	if (e['min'] != null) xAxis.min = e.getNumber('min')!;
+	if (e['max'] != null) xAxis.max = e.getNumber('max')!;
+	if (e['title'] != null) xAxis.title = e.getString('title')!;
+	if (e['titleFontSize'] != null) xAxis.titleFontSize = e.getNumber('titleFontSize')!;
+	if (e['titleOffsetY'] != null) xAxis.titleOffsetY = e.getNumber('titleOffsetY')!;
+	if (e['titleOffsetX'] != null) xAxis.titleOffsetX = e.getNumber('titleOffsetX')!;
+	if (e['titleFontColor'] != null) xAxis.titleFontColor = e.getString('titleFontColor')!;
+	if (e['formatter'] != null) xAxis.formatter = e.getAny('formatter')!;
+	if (e['format'] != null) xAxis.format = e.getString('format')!;
+	if (e['data'] != null) {
+		const xAxis_data : ChartOptionsYAxisData[] = []
+		const data = e.getArray('data') as UTSJSONObject[]
+		data.forEach((item : UTSJSONObject) => {
+			xAxis_data.push(yAxisDataInit(item))
+		})
+		xAxis.data = xAxis_data
+	}
+	return xAxis;
+}
+
+export function yAxisDataInit(e : UTSJSONObject) : ChartOptionsYAxisData {
+	const yAxis_data : ChartOptionsYAxisData = new ChartOptionsYAxisData();
+	if (e['type'] != null) yAxis_data.type = e.getString('type')!;
+	if (e['position'] != null) yAxis_data.position = e.getString('position') as 'left' | 'right' | 'center';
+	if (e['disabled'] != null) yAxis_data.disabled = e.getBoolean('disabled')!;
+	if (e['axisLine'] != null) yAxis_data.axisLine = e.getBoolean('axisLine')!;
+	if (e['axisLineColor'] != null) yAxis_data.axisLineColor = e.getString('axisLineColor')!;
+	if (e['calibration'] != null) yAxis_data.calibration = e.getBoolean('calibration')!;
+	if (e['fontColor'] != null) yAxis_data.fontColor = e.getString('fontColor')!;
+	if (e['fontSize'] != null) yAxis_data.fontSize = e.getNumber('fontSize')!;
+	if (e['textAlign'] != null) yAxis_data.textAlign = e.getString('textAlign') as 'left' | 'right' | 'center';
+	if (e['title'] != null) yAxis_data.title = e.getString('title')!;
+	if (e['titleFontSize'] != null) yAxis_data.titleFontSize = e.getNumber('titleFontSize')!;
+	if (e['titleOffsetY'] != null) yAxis_data.titleOffsetY = e.getNumber('titleOffsetY')!;
+	if (e['titleOffsetX'] != null) yAxis_data.titleOffsetX = e.getNumber('titleOffsetX')!;
+	if (e['titleFontColor'] != null) yAxis_data.titleFontColor = e.getString('titleFontColor')!;
+	if (e['min'] != null) yAxis_data.min = e.getNumber('min')!;
+	if (e['max'] != null) yAxis_data.max = e.getNumber('max')!;
+	if (e['tofix'] != null) yAxis_data.tofix = e.getNumber('tofix')!;
+	if (e['unit'] != null) yAxis_data.unit = e.getString('unit')!;
+	if (e['formatter'] != null) yAxis_data.formatter = e.getAny('formatter')!;
+	if (e['format'] != null) yAxis_data.format = e.getString('format')!;
+	return yAxis_data;
+}
+
+
+export function yAxisInit(e : UTSJSONObject) : ChartOptionsYAxis {
+	const yAxis : ChartOptionsYAxis = new ChartOptionsYAxis();
+	if (e['disabled'] != null) yAxis.disabled = e.getBoolean('disabled')!;
+	if (e['disableGrid'] != null) yAxis.disableGrid = e.getBoolean('disableGrid')!;
+	if (e['splitNumber'] != null) yAxis.splitNumber = e.getNumber('splitNumber')!;
+	if (e['gridType'] != null) yAxis.gridType = e.getString('gridType') as 'solid' | 'dash';
+	if (e['dashLength'] != null) yAxis.dashLength = e.getNumber('dashLength')!;
+	if (e['gridColor'] != null) yAxis.gridColor = e.getString('gridColor')!;
+	if (e['padding'] != null) yAxis.padding = e.getNumber('padding')!;
+	if (e['showTitle'] != null) yAxis.showTitle = e.getBoolean('showTitle')!;
+	if (e['gridSet'] != null) yAxis.gridSet = e.getString('gridSet')!;
+	if (e['fontColor'] != null) yAxis.fontColor = e.getString('fontColor')!;
+	if (e['data'] != null) {
+		const yAxis_data : ChartOptionsYAxisData[] = []
+		const data = e.getArray('data') as UTSJSONObject[]
+		data.forEach((item : UTSJSONObject) => {
+			yAxis_data.push(yAxisDataInit(item))
+		})
+		yAxis.data = yAxis_data
+	}
+	return yAxis;
+}
+
+export function legendInit(e : UTSJSONObject) : ChartOptionsLegend {
+	const legend = new ChartOptionsLegend();
+	if (e['show'] != null) legend.show = e.getBoolean('show')!;
+	if (e['position'] != null) legend.position = e.getString('position') as 'bottom' | 'top' | 'left' | 'right';
+	if (e['float'] != null) legend.float = e.getString('float') as 'center' | 'left' | 'right' | 'top' | 'bottom';
+	if (e['padding'] != null) legend.padding = e.getNumber('padding')!;
+	if (e['margin'] != null) legend.margin = e.getNumber('margin')!;
+	if (e['backgroundColor'] != null) legend.backgroundColor = e.getString('backgroundColor')!;
+	if (e['borderColor'] != null) legend.borderColor = e.getString('borderColor')!;
+	if (e['borderWidth'] != null) legend.borderWidth = e.getNumber('borderWidth')!;
+	if (e['fontSize'] != null) legend.fontSize = e.getNumber('fontSize')!;
+	if (e['fontColor'] != null) legend.fontColor = e.getString('fontColor')!;
+	if (e['lineHeight'] != null) legend.lineHeight = e.getNumber('lineHeight')!;
+	if (e['hiddenColor'] != null) legend.hiddenColor = e.getString('hiddenColor')!;
+	if (e['itemGap'] != null) legend.itemGap = e.getNumber('itemGap')!;
+	return legend;
+}
+export function titleInit(e : UTSJSONObject) : ChartOptionsTitle {
+	const title = new ChartOptionsTitle();
+	if (e['name'] != null) title.name = e.getString('name')!;
+	if (e['fontSize'] != null) title.fontSize = e.getNumber('fontSize')!;
+	if (e['color'] != null) title.color = e.getString('color')!;
+	if (e['offsetX'] != null) title.offsetX = e.getNumber('offsetX')!;
+	if (e['offsetY'] != null) title.offsetY = e.getNumber('offsetY')!;
+	return title;
+}
+
+export function subtitleInit(e : UTSJSONObject) : ChartOptionsSubTitle {
+	const subtitle = new ChartOptionsSubTitle();
+	if (e['name'] != null) subtitle.name = e.getString('name')!;
+	if (e['fontSize'] != null) subtitle.fontSize = e.getNumber('fontSize')!;
+	if (e['color'] != null) subtitle.color = e.getString('color')!;
+	if (e['offsetX'] != null) subtitle.offsetX = e.getNumber('offsetX')!;
+	if (e['offsetY'] != null) subtitle.offsetY = e.getNumber('offsetY')!;
+	return subtitle;
+}
+export function mapSeriesPropertiesParentInit(e : UTSJSONObject) : ChartOptionsMapSeriesPropertiesParent {
+	const parent = new ChartOptionsMapSeriesPropertiesParent()
+	if (e['adcode'] != null) parent.adcode = e.getNumber('adcode')!
+	return parent
+}
+export function mapSeriesPropertiesInit(e : UTSJSONObject) : ChartOptionsMapSeriesProperties {
+	const mapSeriesProperties = new ChartOptionsMapSeriesProperties()
+	if (e['adcode'] != null) mapSeriesProperties.adcode = e.getNumber('adcode')!
+	if (e['name'] != null) mapSeriesProperties.name = e.getString('name')!
+	if (e['center'] != null) mapSeriesProperties.center = e.getArray('center') as number[]
+	if (e['centroid'] != null) mapSeriesProperties.centroid = e.getArray('centroid') as number[]
+	if (e['childrenNum'] != null) mapSeriesProperties.childrenNum = e.getNumber('childrenNum')!
+	if (e['level'] != null) mapSeriesProperties.level = e.getString('level')!
+	if (e['subFeatureIndex'] != null) mapSeriesProperties.subFeatureIndex = e.getNumber('subFeatureIndex')!
+	if (e['acroutes'] != null) mapSeriesProperties.acroutes = e.getArray('acroutes') as number[]
+	if (e['parent'] != null) {
+		mapSeriesProperties.parent = mapSeriesPropertiesParentInit(e.getJSON('parent')!)
+	}
+	return mapSeriesProperties
+}
+export function mapSeriesGeometryInit(e : UTSJSONObject) : ChartOptionsMapSeriesGeometry {
+	const geometry = new ChartOptionsMapSeriesGeometry()
+	if (e['type'] != null) geometry.type = e.getString('type')!;
+	if (e['coordinates'] != null) geometry.coordinates = e.getArray('coordinates') as number[][][][];
+	return geometry
+}
+export function optionsInit(e : UTSJSONObject) : ChartOptions {
+	const opts = new ChartOptions()
+	opts.canvasContext = e['canvasContext'] as CanvasContext
+	opts.context = e['context'] as CanvasRenderingContext2D
+	if (e['type'] != null) opts.type = e.getString('type')!
+	if (opts.type == 'gauge') {
+		if (e['categories'] != null) {
+			const categoriesObj : ChartOptionsSeriesData[] = []
+			const cate : UTSJSONObject[] = e.getArray('categories') as UTSJSONObject[]
+			cate.forEach((item : UTSJSONObject) => {
+				const child = seriesDataInit(item)
+				categoriesObj.push(child)
+			})
+			opts.categoriesObj = categoriesObj
+		}
+	} else {
+		if (e['categories'] != null) opts.categories = e.getArray('categories') as string[]
+	}
+	if (e['width'] != null) opts.width = e.getNumber('width')!
+	if (e['height'] != null) opts.height = e.getNumber('height')!
+
+	if (e['canvas2d'] != null) opts.canvas2d = e.getBoolean('canvas2d')!
+	if (e['pixelRatio'] != null) opts.pixelRatio = e.getNumber('pixelRatio')!
+	if (e['animation'] != null) opts.animation = e.getBoolean('animation')!
+	if (e['timing'] != null) opts.timing = e.getAny('timing') as "easeOut" | "easeIn" | "easeInOut" | "linear"
+	if (e['duration'] != null) opts.duration = e.getNumber('duration')!
+	if (e['rotate'] != null) opts.rotate = e.getBoolean('rotate')!
+	if (e['rotateLock'] != null) opts.rotateLock = e.getBoolean('rotateLock')!
+	if (e['background'] != null) opts.background = e.getString('background')!
+	if (e['color'] != null) opts.color = e.getArray('color') as string[]
+	if (e['padding'] != null) opts.padding = e.getArray('padding') as number[]
+	if (e['fontSize'] != null) opts.fontSize = e.getNumber('fontSize')!
+	if (e['fontColor'] != null) opts.fontColor = e.getString('fontColor')!
+	if (e['dataLabel'] != null) opts.dataLabel = e.getBoolean('dataLabel')!
+	if (e['dataPointShape'] != null) opts.dataPointShape = e.getBoolean('dataPointShape')!
+	if (e['dataPointShapeType'] != null) opts.dataPointShapeType = e.getAny('dataPointShapeType') as "solid" | "hollow"
+	if (e['touchMoveLimit'] != null) opts.touchMoveLimit = e.getNumber('touchMoveLimit')!
+	if (e['enableScroll'] != null) opts.enableScroll = e.getBoolean('enableScroll')!
+	if (e['enableMarkLine'] != null) opts.enableMarkLine = e.getBoolean('enableMarkLine')!
+	if (e['scrollPosition'] != null) opts.scrollPosition = e.getAny('scrollPosition') as "left" | "right" | "current"
+	if (e['xOffset'] != null) opts.xOffset = e.getNumber('xOffset')!
+	if (e['yOffset'] != null) opts.yOffset = e.getNumber('yOffset')!
+	if (e['tapLegend'] != null) opts.dataLabel = e.getBoolean('tapLegend')!
+	opts.legend.fontSize = opts.fontSize
+	opts.legend.lineHeight = opts.fontSize
+	opts.legend.fontColor = opts.fontColor
+	opts.yAxis.dashLength = 4 * opts.pixelRatio
+	if (e['series'] != null) {
+		const series : ChartOptionsSeries[] = []
+		const series_data = e.getArray('series') as UTSJSONObject[]
+		series_data.forEach((item : UTSJSONObject) => {
+			series.push(seriesInit(item, opts.type))
+		})
+		opts.series = series
+	}
+	if (e['xAxis'] != null) {
+		opts.xAxis = xAxisInit(e.getJSON('xAxis')!)
+	}
+	if (e['yAxis'] != null) {
+		opts.yAxis = yAxisInit(e.getJSON('yAxis')!)
+	}
+	if (e['legend'] != null) {
+		opts.legend = legendInit(e.getJSON('legend')!)
+	}
+	if (e['title'] != null) {
+		opts.title = titleInit(e.getJSON('title')!)
+	}
+	if (e['subtitle'] != null) {
+		opts.subtitle = subtitleInit(e.getJSON('subtitle')!)
+	}
+	if (e['extra'] != null) {
+		opts.extra = extraInit(e.getJSON('extra')!)
+	}
+	return opts
+}
+export function updateOptions(_opts : ChartOptions, e : UTSJSONObject) {
+	const opts = _opts
+	if (e['type'] != null) opts.type = e.getString('type')!
+	if (opts.type == 'gauge') {
+		if (e['categories'] != null) {
+			const categoriesObj : ChartOptionsSeriesData[] = []
+			const cate : UTSJSONObject[] = e.getArray('categories') as UTSJSONObject[]
+			cate.forEach((item : UTSJSONObject) => {
+				const child = seriesDataInit(item)
+				categoriesObj.push(child)
+			})
+			opts.categoriesObj = categoriesObj
+		}
+	} else {
+		if (e['categories'] != null) opts.categories = e.getArray('categories') as string[]
+	}
+	if (e['width'] != null) opts.width = e.getNumber('width')!
+	if (e['height'] != null) opts.height = e.getNumber('height')!
+
+	if (e['canvas2d'] != null) opts.canvas2d = e.getBoolean('canvas2d')!
+	if (e['pixelRatio'] != null) opts.pixelRatio = e.getNumber('pixelRatio')!
+	if (e['animation'] != null) opts.animation = e.getBoolean('animation')!
+	if (e['timing'] != null) opts.timing = e.getAny('timing') as "easeOut" | "easeIn" | "easeInOut" | "linear"
+	if (e['duration'] != null) opts.duration = e.getNumber('duration')!
+	if (e['rotate'] != null) opts.rotate = e.getBoolean('rotate')!
+	if (e['rotateLock'] != null) opts.rotateLock = e.getBoolean('rotateLock')!
+	if (e['background'] != null) opts.background = e.getString('background')!
+	if (e['color'] != null) opts.color = e.getArray('color') as string[]
+	if (e['padding'] != null) opts.padding = e.getArray('padding') as number[]
+	if (e['fontSize'] != null) opts.fontSize = e.getNumber('fontSize')!
+	if (e['fontColor'] != null) opts.fontColor = e.getString('fontColor')!
+	if (e['dataLabel'] != null) opts.dataLabel = e.getBoolean('dataLabel')!
+	if (e['dataPointShape'] != null) opts.dataPointShape = e.getBoolean('dataPointShape')!
+	if (e['dataPointShapeType'] != null) opts.dataPointShapeType = e.getAny('dataPointShapeType') as "solid" | "hollow"
+	if (e['touchMoveLimit'] != null) opts.touchMoveLimit = e.getNumber('touchMoveLimit')!
+	if (e['enableScroll'] != null) opts.enableScroll = e.getBoolean('enableScroll')!
+	if (e['enableMarkLine'] != null) opts.enableMarkLine = e.getBoolean('enableMarkLine')!
+	if (e['scrollPosition'] != null) opts.scrollPosition = e.getAny('scrollPosition') as "left" | "right" | "current"
+	if (e['xOffset'] != null) opts.xOffset = e.getNumber('xOffset')!
+	if (e['yOffset'] != null) opts.yOffset = e.getNumber('yOffset')!
+	if (e['tapLegend'] != null) opts.dataLabel = e.getBoolean('tapLegend')!
+	opts.legend.fontSize = opts.fontSize
+	opts.legend.lineHeight = opts.fontSize
+	opts.legend.fontColor = opts.fontColor
+	opts.yAxis.dashLength = 4 * opts.pixelRatio
+	if (e['series'] != null) {
+		const series : ChartOptionsSeries[] = []
+		const series_data = e.getArray('series') as UTSJSONObject[]
+		series_data.forEach((item : UTSJSONObject) => {
+			series.push(seriesInit(item, opts.type))
+		})
+		opts.series = series
+	}
+	if (e['xAxis'] != null) {
+		opts.xAxis = xAxisInit(e.getJSON('xAxis')!)
+	}
+	if (e['yAxis'] != null) {
+		opts.yAxis = yAxisInit(e.getJSON('yAxis')!)
+	}
+	if (e['legend'] != null) {
+		opts.legend = legendInit(e.getJSON('legend')!)
+	}
+	if (e['title'] != null) {
+		opts.title = titleInit(e.getJSON('title')!)
+	}
+	if (e['subtitle'] != null) {
+		opts.subtitle = subtitleInit(e.getJSON('subtitle')!)
+	}
+	if (e['extra'] != null) {
+		opts.extra = extraInit(e.getJSON('extra')!)
+	}
+	return opts
+}

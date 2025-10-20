@@ -1,0 +1,42 @@
+<template>
+	<t-picker v-bind="extendsAttrs" :main-class="`${mainClass} m-0 p-0`" :value="value" @change="pcaChange">
+		<t-picker-column v-for="(item,index) in list" :key="index" :list="item" :title-key="titleKey"
+			:index-key="indexKey" :unit="unit" @change="itemChange(item,index)"></t-picker-column>
+	</t-picker>
+</template>
+
+<script setup>
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerCustomProps extends CommonProps {
+		value : string[]
+		list : UTSJSONObject[][]
+		titleKey : string
+		indexKey : string
+		unit : string
+	}
+	const props = withDefaults(defineProps<PickerCustomProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		value: [] as string[],
+		list: [] as UTSJSONObject[][],
+		titleKey: 'title',
+		indexKey: 'id',
+		unit: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'columnChange'])
+
+	function pcaChange(e : UTSJSONObject) {
+		emit('change', e)
+	}
+	function itemChange(item : UTSJSONObject[], index : number) {
+		emit('columnChange', { item, index })
+	}
+</script>

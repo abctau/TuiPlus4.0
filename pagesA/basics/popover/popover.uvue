@@ -1,0 +1,124 @@
+<template>
+	<t-page title="气泡框" :scrollDisabled="false" main-class='f p-30'>
+		<t-card title='Popover 气泡框' main-class="mb-30 tdr tdb" sub-title="点击时展示关联信息"></t-card>
+		<t-card title="提示" main-class="mb-30" size="l" type="e"
+			sub-title="要注意层级控制，层级写在组件内部在安卓端不生效，请注意参考官方文档正确使用（https://doc.dcloud.net.cn/uni-app-x/css/z-index.html）"></t-card>
+		<t-popover placement="bottom" type="p" main-class="z-1 mb-30" :animationType="1">
+			<t-button type="primary">动画类型</t-button>
+			<!-- <template v-slot:content>
+				<t-col main-class="tdp">
+					<t-cell icon="map" title="欢迎使用Tui" type="w" effect=""></t-cell>
+					<t-cell icon="map" title="欢迎使用Tui" type="p" effect=""></t-cell>
+					<t-cell icon="map" title="欢迎使用Tui" type="e" effect=""></t-cell>
+					<t-cell icon="map" title="欢迎使用Tui" type="s" effect=""></t-cell>
+				</t-col>
+			</template> -->
+		</t-popover>
+		<t-section title="弹出方向" main-class="mb-30"></t-section>
+		<t-row main-class="fv c-f8f8f8 fjcb">
+			<t-view>
+				<t-row main-class='fjcc mb-30 ov'>
+					<t-popover placement="bottom-start" type='s' main-class="mlr-25 ov z-3" content-class="w-300"
+						tips-size="10px">
+						<template #button>
+							<t-button type="primary">下左</t-button>
+						</template>
+					</t-popover>
+					<t-popover placement="bottom" main-class="mlr-25 ov z-2" type="w" content-class="w-300">
+						<template #button>
+							<t-button type="primary">下中</t-button>
+						</template>
+					</t-popover>
+					<t-popover placement="bottom-end" type='e' @select="select" main-class="mlr-25 ov z-1"
+						content-class="w-300">
+						<template #button>
+							<t-button type="primary">下右</t-button>
+						</template>
+					</t-popover>
+				</t-row>
+				<t-row main-class=''>
+					<t-col main-class="f fais">
+						<t-popover placement="right-start" type="primary" content-class="w-300">
+							<template #button>
+								<t-button type="primary">右上</t-button>
+							</template>
+						</t-popover>
+						<t-popover placement="right" style="margin:25rpx 0" type="error" content-class="w-300">
+							<template #button>
+								<t-button type="primary">右中</t-button>
+							</template>
+						</t-popover>
+						<t-popover placement="right-end" type="warning" content-class="w-300">
+							<template #button>
+								<t-button type="primary">右下</t-button>
+							</template>
+						</t-popover>
+					</t-col>
+					<t-col main-class="f faie">
+						<t-popover placement="left-start" type="success" content-class="w-300">
+							<template #button>
+								<t-button type="primary">左上</t-button>
+							</template>
+						</t-popover>
+						<t-popover placement="left" style="margin:25rpx 0" type="primary" content-class="w-300">
+							<template #button>
+								<t-button type="primary">左中</t-button>
+							</template>
+						</t-popover>
+						<t-popover placement="left-end" type="error" content-class="w-300">
+							<template #button>
+								<t-button type="primary">左下</t-button>
+							</template>
+						</t-popover>
+					</t-col>
+				</t-row>
+				<t-row main-class='fjcc mt-30 ov'>
+					<t-popover placement="top-start" type="warning" main-class="ov z-3" content-class="w-300">
+						<template #button>
+							<t-button type="primary">上左</t-button>
+						</template>
+					</t-popover>
+					<t-popover placement="top" main-class="mlr-25 ov z-3" type="primary" content-class="w-300">
+						<template #button>
+							<t-button type="primary">上中</t-button>
+						</template>
+					</t-popover>
+					<t-popover placement="top-end" type="warning" main-class="ov z-3" content-class="w-300">
+						<template #button>
+							<t-button type="primary">上右</t-button>
+						</template>
+					</t-popover>
+				</t-row>
+			</t-view>
+		</t-row>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				items: [{
+					title: '新建顾客',
+					icon: 'man-add-fill'
+				}, {
+					title: '新建预约',
+					icon: 'calendar-fill'
+				}, {
+					title: '新建回访',
+					icon: 'phone-fill'
+				}, {
+					title: '扫一扫',
+					icon: 'scan'
+				}]
+			}
+		},
+		methods: {
+			submit() {
+				(this.$refs['popover'] as ComponentPublicInstance).$callMethod('onShowPop')
+			},
+			select(e : UTSJSONObject) {
+				console.log(e)
+			}
+		}
+	}
+</script>

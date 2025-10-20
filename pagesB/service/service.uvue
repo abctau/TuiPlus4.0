@@ -1,0 +1,11 @@
+<template>
+	<t-page main-class="p-30">
+		<t-button path="/pagesB/im/im" main-class="mb-30" type="primary">售前服务群</t-button>
+		<t-button path="/pagesB/im/im" main-class="mb-30" type="primary">售后服务群</t-button>
+		<t-button path="/pagesB/im/im" main-class="mb-30" type="primary">超级VIP（24小时服务）群</t-button>
+	</t-page>
+</template>
+
+<script setup>
+
+</script>

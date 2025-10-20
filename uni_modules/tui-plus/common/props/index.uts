@@ -1,0 +1,564 @@
+import { useStyle, TuiTextStyle, TuiPmStyle, getStyleProperty } from '../model/style'
+import { b, c, bc, ra, ms, ps, pts, pg, vg, ttc } from '../model/theme'
+import { getPx } from '../model/util'
+import { computed, Ref, ComputedRef } from 'vue'
+export interface CommonProps {
+	path : string
+	hover : boolean
+	type : string
+	disabled : boolean
+	stop : boolean
+	effect : string
+	size : string
+	mainClass : string
+	nativeClass : string
+}
+export type TypeUseThemes = {
+	extendsAttrs : ComputedRef<UTSJSONObject>
+	extendsStyle : ComputedRef<string>
+	extendsPageColor : ComputedRef<string>
+	extendsViewColor : ComputedRef<string>
+	extendsViewStyle : ComputedRef<string>
+	extendsViewFilterPmStyle : ComputedRef<string>
+	extendsTextStyle : ComputedRef<string>
+	extendsFontSizeToSize : ComputedRef<string>
+	extendsFontSizeToSizeRadio : ComputedRef<string>
+	extendsDisabled : ComputedRef<string>
+	extendsColor : ComputedRef<string>
+	extendsFontSize : ComputedRef<string>
+	extendsBackgroundColor : ComputedRef<string>
+	extendsForegroundColor : ComputedRef<string>
+	extendsBorder : ComputedRef<string>
+	extendsRadius : ComputedRef<string>
+	extendsPadding : ComputedRef<string>
+	extendsFontSizeToTwh : ComputedRef<string>
+	extendsFontSizeToTwhr : ComputedRef<string>
+	extendsSc : ComputedRef<string>
+	extendsSfc : ComputedRef<string>
+	extendsSfcb : ComputedRef<string>
+	extendsBr : ComputedRef<string>
+	extendsPrbs : ComputedRef<string>
+	extendsPrb : ComputedRef<string>
+	extendsRb : ComputedRef<string>
+	extendsBp : ComputedRef<string>
+	extendsPr : ComputedRef<string>
+	extendsPbr : ComputedRef<string>
+	extendsMargin : ComputedRef<string>
+	getRadiusToValue : ComputedRef<number>
+	getPaddingToValue : ComputedRef<number>
+	getFontSizeToValue : ComputedRef<number>
+	getColorToValue : ComputedRef<string>
+	getBackgroundToValue : ComputedRef<string>
+	getForegColorToValue : ComputedRef<string>
+	getBorderToValue : ComputedRef<string>
+	themeDisabled : ComputedRef<string>
+	themeColor : ComputedRef<string>
+	themeFontSize : ComputedRef<string>
+	themeBackgroundColor : ComputedRef<string>
+	themeForegroundColor : ComputedRef<string>
+	themeBorder : ComputedRef<string>
+	themeRadius : ComputedRef<string>
+	themePadding : ComputedRef<string>
+	themeMargin : ComputedRef<string>
+	themePage : ComputedRef<string>
+	themeView : ComputedRef<string>
+}
+export function useTuiThemes(props : CommonProps) : TypeUseThemes {
+	const extendsAttrs = computed(() : UTSJSONObject => {
+		return {
+			path: props.path,
+			hover: props.hover,
+			type: props.type,
+			disabled: props.disabled,
+			stop: props.stop,
+			effect: props.effect,
+			size: props.size,
+			mainClass: props.mainClass,
+			nativeClass: props.nativeClass
+		}
+	})
+
+	const getFontSizeToValue = computed(() => Math.round(getPx(pts(props.size, getStyleProperty(props.mainClass, 'font-size'), false))))
+
+	const extendsStyle = computed(() => useStyle(props.mainClass))
+
+	const extendsPageColor = computed(() => useStyle('tpg'))
+
+	const extendsViewColor = computed(() => useStyle('tvg'))
+
+	const extendsViewStyle = computed(() => useStyle(props.mainClass, TuiTextStyle, true))
+
+	const extendsViewFilterPmStyle = computed(() => useStyle(props.mainClass, TuiPmStyle, true))
+
+	const extendsTextStyle = computed(() => useStyle(props.mainClass, TuiTextStyle))
+
+	const extendsFontSizeToSize = computed(() => useStyle(`twh-${getFontSizeToValue.value}px`))
+
+	const extendsFontSizeToSizeRadio = computed(() => useStyle(`twhr-${getFontSizeToValue.value}px`))
+
+	const extendsDisabled = computed(() => props.disabled ? 'ope-n o-0.5' : '')
+
+	const extendsColor = computed(() => `tqc-${props.type},${props.effect},${getStyleProperty(props.mainClass, 'color')}`)
+
+	const extendsFontSize = computed(() => `tts-${props.size},${getStyleProperty(props.mainClass, 'font-size')}`)
+
+	const extendsBackgroundColor = computed(() => `tdb-${props.type},${props.effect}`)
+
+	const extendsForegroundColor = computed(() => `tdc-${props.type},${props.effect},${getStyleProperty(props.mainClass, 'color')}`)
+
+	const extendsBorder = computed(() => `tbc-${props.type},${props.effect}`)
+
+	const extendsRadius = computed(() => `tdr-${props.size}`)
+
+	const extendsPadding = computed(() => `tdp-${props.size}`)
+
+	const extendsFontSizeToTwh = computed(() => `twh-${getFontSizeToValue.value}px`)
+
+	const extendsFontSizeToTwhr = computed(() => `twhr-${getFontSizeToValue.value}px`)
+
+	const extendsSc = computed(() => `${extendsColor.value} ${extendsFontSize.value}`)
+
+	const extendsSfc = computed(() => `${extendsForegroundColor.value} ${extendsFontSize.value}`)
+
+	const extendsSfcb = computed(() => `${extendsForegroundColor.value} ${extendsFontSize.value} ${extendsBackgroundColor.value}`)
+
+	const extendsBr = computed(() => `${extendsBorder.value} ${extendsRadius.value}`)
+
+	const extendsPr = computed(() => `${extendsRadius.value} ${extendsPadding.value}`)
+
+	const extendsPrb = computed(() => `${extendsBackgroundColor.value} ${extendsPr.value}`)
+
+	const extendsPrbs = computed(() => `${extendsPrb.value} ${extendsFontSize.value}`)
+
+	const extendsRb = computed(() => `${extendsBackgroundColor.value} ${extendsRadius.value}`)
+
+	const extendsBp = computed(() => `${extendsBackgroundColor.value} ${extendsPadding.value}`)
+
+	const extendsPbr = computed(() => `${extendsRadius.value} ${extendsPadding.value} ${extendsBorder.value}`)
+
+	const extendsMargin = computed(() => `tdm-${props.size}`)
+
+	const getRadiusToValue = computed(() => Math.round(getPx(ra(props.size, getStyleProperty(props.mainClass, 'border-radius'), '1234', false))))
+
+	const getPaddingToValue = computed(() => Math.round(getPx(ps(props.size, getStyleProperty(props.mainClass, 'padding'), '1234', false))))
+
+	const getColorToValue = computed(() => ttc(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), false))
+
+	const getBackgroundToValue = computed(() => b(props.type, props.effect, getStyleProperty(props.mainClass, 'background-color'), false))
+
+	const getForegColorToValue = computed(() => c(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), false))
+
+	const getBorderToValue = computed(() => bc(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), '', false))
+
+	const themeDisabled = computed(() => props.disabled ? 'opacity:0.5;pointer-events: none;' : '')
+
+	const themeColor = computed(() => ttc(props.type, props.effect))
+
+	const themeFontSize = computed(() => pts(props.size))
+
+	const themeBackgroundColor = computed(() => b(props.type, props.effect))
+
+	const themeForegroundColor = computed(() => c(props.type, props.effect))
+
+	const themeBorder = computed(() => bc(props.type, props.effect))
+
+	const themeRadius = computed(() => ra(props.size))
+
+	const themePadding = computed(() => ps(props.size))
+
+	const themeMargin = computed(() => ms(props.size))
+
+	const themePage = computed(() => pg())
+
+	const themeView = computed(() => vg())
+	return {
+		extendsAttrs,
+		extendsStyle,
+		extendsPageColor,
+		extendsViewColor,
+		extendsViewStyle,
+		extendsViewFilterPmStyle,
+		extendsTextStyle,
+		extendsFontSizeToSize,
+		extendsFontSizeToSizeRadio,
+		extendsDisabled,
+		extendsColor,
+		extendsFontSize,
+		extendsBackgroundColor,
+		extendsForegroundColor,
+		extendsBorder,
+		extendsRadius,
+		extendsPadding,
+		extendsFontSizeToTwh,
+		extendsFontSizeToTwhr,
+		extendsSc,
+		extendsSfc,
+		extendsSfcb,
+		extendsBr,
+		extendsPrbs,
+		extendsPrb,
+		extendsRb,
+		extendsBp,
+		extendsPr,
+		extendsPbr,
+		extendsMargin,
+		getRadiusToValue,
+		getPaddingToValue,
+		getFontSizeToValue,
+		getColorToValue,
+		getBackgroundToValue,
+		getForegColorToValue,
+		getBorderToValue,
+		themeDisabled,
+		themeColor,
+		themeFontSize,
+		themeBackgroundColor,
+		themeForegroundColor,
+		themeBorder,
+		themeRadius,
+		themePadding,
+		themeMargin,
+		themePage,
+		themeView
+	}
+}
+
+export interface CheckboxGroupProps extends CommonProps {
+	modelValue : string[];
+	childClass : string;
+	transition : boolean;
+	duration : number;
+	labelClass : string;
+	icon : string;
+	iconBoxClass : string;
+	activeClass : string;
+	inactiveClass : string;
+	iconClass : string;
+	activeIconClass : string;
+	inactiveIconClass : string;
+	activeLabelClass : string;
+	inactiveLabelClass : string;
+	mode : string;
+	border : boolean;
+}
+
+export interface TabsProps extends CommonProps {
+	current : number
+	barClass : string
+	scrollable : boolean
+	rightIcon : string
+	rightIconClass : string
+}
+
+export interface TableProps extends CommonProps {
+	tables : UTSJSONObject[];
+	contentClass : string;
+	headerClass : string;
+	border : boolean;
+	labelClass : string;
+	borderClass : string;
+	stripe : boolean;
+	stripeColor : string;
+	emptyText : string;
+	rowKey : string;
+	checkIds : string[];
+}
+
+export interface SubsectionProps extends CommonProps {
+	current : number
+	barClass : string
+}
+
+export interface StepsProps extends CommonProps {
+	direction : string;
+	current : number;
+	activeColor : string;
+	activeIcon : string;
+	activeIconClass : string;
+	barClass : string;
+	indexClass : string;
+	inactiveColor : string;
+	showIndex : boolean;
+	isEvenlyDistributed ?: boolean;
+}
+
+export interface SelectProps extends CommonProps {
+	popoverAttrs : UTSJSONObject;
+	modelValue : any;
+	leftIcon : string;
+	textClass : string;
+	labelBoxClass : string;
+	labelClass : string;
+	closeableClass : string;
+	leftIconClass : string;
+	rightIcon : string;
+	rightIconClass : string;
+	closeable : boolean;
+}
+
+export interface PickerProps extends CommonProps {
+	rowHeight : number
+	value : string[]
+	showUnit : boolean
+}
+
+export interface TreeProps extends CommonProps {
+	selects : string[];
+	folds : string[];
+	list : UTSJSONObject[];
+	accordion : boolean;
+	load : (e : UTSJSONObject) => Promise<UTSJSONObject[]>
+	showCheckbox : boolean
+	lazy : boolean
+	showAddButton : boolean
+	addIcon : string
+	addIconClass : string
+	showEditButton : boolean
+	editIcon : string
+	editIconClass : string
+	showDeleteButton : boolean
+	deleteIcon : string
+	deleteIconClass : string
+	rowHeight : number
+	idKey : string
+	labelKey : string
+	disabledKey : string
+	childrenKey : string
+}
+
+export type GridGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	column : Ref<number>
+	childClass : Ref<string>
+	childIconClass : Ref<string>
+	childLabelClass : Ref<string>
+}
+
+export type TromGroupAttrsType = {
+	model : Ref<UTSJSONObject>
+	childClass : Ref<string>
+	direction : Ref<string>
+	requiredAsterisk : Ref<string>
+	requiredAsteriskClass : Ref<string>
+	bottomLine : Ref<boolean>
+	hideRequiredAsterisk : Ref<boolean>
+	labelClass : Ref<string>
+	rules : Ref<UTSJSONObject>
+	rulesClass : Ref<string>
+	headerClass : Ref<string>
+	showLabel : Ref<boolean>
+}
+export type CheckBoxGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	modelValue : Ref<string[]>
+	childClass : Ref<string>
+	transition : Ref<boolean>
+	duration : Ref<number>
+	labelClass : Ref<string>
+	icon : Ref<string>
+	iconBoxClass : Ref<string>
+	activeClass : Ref<string>
+	inactiveClass : Ref<string>
+	iconClass : Ref<string>
+	activeIconClass : Ref<string>
+	inactiveIconClass : Ref<string>
+	activeLabelClass : Ref<string>
+	inactiveLabelClass : Ref<string>
+	mode : Ref<string>
+	border : Ref<boolean>
+}
+export type RadioGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	modelValue : Ref<string>
+	childClass : Ref<string>
+	transition : Ref<boolean>
+	duration : Ref<number>
+	labelClass : Ref<string>
+	icon : Ref<string>
+	iconBoxClass : Ref<string>
+	activeClass : Ref<string>
+	inactiveClass : Ref<string>
+	iconClass : Ref<string>
+	activeIconClass : Ref<string>
+	inactiveIconClass : Ref<string>
+	activeLabelClass : Ref<string>
+	inactiveLabelClass : Ref<string>
+	mode : Ref<string>
+	border : Ref<boolean>
+}
+export type CollapseAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	rowContentClass : Ref<string>
+	rowRightIconClass : Ref<string>
+	rowBoxClass : Ref<string>
+	rowHeaderBoxClass : Ref<string>
+	rowTitleClass : Ref<string>
+	rowLabelClass : Ref<string>
+	rowIconClass : Ref<string>
+	borderClass : Ref<string>
+	border : Ref<boolean>
+	accordion : Ref<boolean>
+	values : Ref<string[]>
+}
+
+export type FabGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	menuBoxClass : Ref<string>
+	menuIconClass : Ref<string>
+	state : Ref<boolean>
+	direction : Ref<string>
+	spacing : Ref<string>
+	startRtateDeg : Ref<number>
+	rotateDeg : Ref<number>
+}
+export type SelectAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	popoverAttrs : Ref<UTSJSONObject>
+	modelValue : Ref<any>
+	leftIcon : Ref<string>
+	textClass : Ref<string>
+	labelBoxClass : Ref<string>
+	labelClass : Ref<string>
+	closeableClass : Ref<string>
+	leftIconClass : Ref<string>
+	rightIcon : Ref<string>
+	rightIconClass : Ref<string>
+	closeable : Ref<boolean>
+}
+
+export type PickerGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	rowHeight : Ref<number>
+	value : Ref<string[]>
+	showUnit : Ref<boolean>
+}
+export type SubsectionGroupPropsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	current : Ref<number>
+	barClass : Ref<string>
+}
+export type TabsGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	current : Ref<number>
+	barClass : Ref<string>
+	scrollable : Ref<boolean>
+	rightIcon : Ref<string>
+	rightIconClass : Ref<string>
+}
+
+export type TableGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	tables : Ref<UTSJSONObject[]>
+	contentClass : Ref<string>
+	headerClass : Ref<string>
+	border : Ref<boolean>
+	labelClass : Ref<string>
+	borderClass : Ref<string>
+	stripe : Ref<boolean>
+	stripeColor : Ref<string>
+	emptyText : Ref<string>
+	rowKey : Ref<string>
+	checkIds : Ref<string[]>
+}
+
+export type StepsGroupAttrsType = {
+	path : Ref<string>
+	hover : Ref<boolean>
+	type : Ref<string>
+	disabled : Ref<boolean>
+	stop : Ref<boolean>
+	effect : Ref<string>
+	size : Ref<string>
+	mainClass : Ref<string>
+	nativeClass : Ref<string>
+	direction : Ref<string>
+	current : Ref<number>
+	activeColor : Ref<string>
+	activeIcon : Ref<string>
+	activeIconClass : Ref<string>
+	barClass : Ref<string>
+	indexClass : Ref<string>
+	inactiveColor : Ref<string>
+	showIndex : Ref<boolean>
+	isEvenlyDistributed : Ref<boolean>
+}

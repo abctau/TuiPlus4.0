@@ -1,0 +1,89 @@
+<template>
+	<t-page title="获取验证码">
+		<t-card title="Code 验证码" main-class="mltr-30"
+			sub-title="获取验证码组件用于在表单中提供一种倒计时功能，通常用于发送短信验证码的场景。它的功能亮点包括：开始倒计时后显示剩余时间，倒计时结束后允许重新获取验证码。使用场景包括：注册、登录、找回密码等需要验证用户手机号的场合。组件还提供了自定义边框、大小和提示文本的选项。"></t-card>
+		<introduction title="通过方法控制">
+			<t-col main-class="mb-30 tdr tdb tdp">
+				<t-code main-class="mb-20 s-34 sfwb w-100% slh-50" type="p" ref="smscode"></t-code>
+				<t-row>
+					<t-button main-class="f" @click="codestop" type="e">结束</t-button>
+					<t-button main-class="f ml-30" type="p" @click="codestart">开始</t-button>
+				</t-row>
+			</t-col>
+		</introduction>
+		<introduction title="基础样式+主题+size">
+			<t-row main-class='fww tdr tdb pltr-15'>
+				<t-code size="large" main-class="mrb-15" type="success"></t-code>
+				<t-code size="medium" main-class="mrb-15" type="error"></t-code>
+				<t-code size="small" main-class="mrb-15" type="primary"></t-code>
+				<t-code size="mini" main-class="mrb-15" type="warning"></t-code>
+			</t-row>
+		</introduction>
+		<introduction title="镂空">
+			<t-row main-class='fww'>
+				<t-code size="large" effect="plain" main-class="mrb-15" type="success" :border="true"></t-code>
+				<t-code size="medium" effect="plain" main-class="mrb-15" type="error" :border="true"></t-code>
+				<t-code size="small" effect="plain" main-class="mrb-15" type="primary" :border="true"></t-code>
+				<t-code size="mini" effect="plain" main-class="mrb-15" type="warning" :border="true"></t-code>
+			</t-row>
+		</introduction>
+		<introduction title="不显示边框">
+			<t-row main-class='fww'>
+				<t-code size="large" effect="plain" main-class="mrb-15" type="success" :border="false"></t-code>
+				<t-code size="medium" effect="plain" main-class="mrb-15" type="error" :border="false"></t-code>
+				<t-code size="small" effect="plain" main-class="mrb-15" type="primary" :border="false"></t-code>
+				<t-code size="mini" effect="plain" main-class="mrb-15" type="warning" :border="false"></t-code>
+			</t-row>
+		</introduction>
+		<introduction title="设置宽高文字大小">
+			<t-row main-class='fww'>
+				<t-code :main-class="sty"></t-code>
+				<t-code :main-class="sty" type="success"></t-code>
+				<t-code :main-class="sty" type="error"></t-code>
+				<t-code :main-class="sty" type="primary"></t-code>
+				<t-code :main-class="sty" type="warning"></t-code>
+			</t-row>
+		</introduction>
+
+		<introduction title="自定义样式覆盖主题">
+			<t-row main-class='fww'>
+				<t-code main-class="w-200 h-80 slh-80 p-0 mrb-15 s-30"></t-code>
+				<t-code type="error" main-class="s-50 mrb-15"></t-code>
+				<t-code type="primary" main-class="c-red mrb-15"></t-code>
+				<t-code type="warning" main-class="s-40"></t-code>
+			</t-row>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				sty: 'w-250 h-80 slh-80 mrb-15 p-0 plr-10 s-35'
+			};
+		},
+		methods: {
+			codestart() {
+				const vn = this.$refs['smscode'] as ComponentPublicInstance
+				vn.$callMethod('start')
+			},
+			codestop() {
+				const vn = this.$refs['smscode'] as ComponentPublicInstance
+				vn.$callMethod('stops')
+			},
+			test() {
+
+			},
+			start() {
+				console.log('倒计时开始')
+			},
+			end() {
+				console.log('倒计时结束')
+			},
+			change(e : number) {
+				console.log(e)
+			},
+		}
+	}
+</script>

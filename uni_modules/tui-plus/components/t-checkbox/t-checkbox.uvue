@@ -1,0 +1,313 @@
+<template>
+	<t-view :main-class="checkMainStyle" :stop="stop" :disabled="disabled" @click="wrapper">
+		<template v-if="modeMerge=='checkbox'">
+			<t-row :main-class="checkBoxStyles">
+				<t-row :main-class="checkViewStyles">
+					<t-icon :main-class="checkIconStyles" :name="icon"></t-icon>
+				</t-row>
+			</t-row>
+			<t-text :text="label" :main-class="checkLabelClass" :hover="true">
+				<slot></slot>
+			</t-text>
+		</template>
+		<template v-if="modeMerge=='button'">
+			<t-button :hover="true" :type="check_state?typeMerge:'i'" :effect="check_state?effectMerge:'l'"
+				:main-class="checkButtonStyles" :text-class="checkLabelClass">
+				<slot>
+					{{label}}
+				</slot>
+			</t-button>
+		</template>
+		<template v-if="modeMerge=='cell'">
+			<t-text :text="label" :main-class="checkLabelClass" :hover="true">
+				<slot></slot>
+			</t-text>
+			<t-row :main-class="checkBoxStyles">
+				<t-row :main-class="checkViewStyles">
+					<t-icon :main-class="checkIconStyles" :name="icon"></t-icon>
+				</t-row>
+			</t-row>
+		</template>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Checkbox 多选-复选框
+	 * @date 2025-05-31 12:02:16
+	 * @author TanYuan
+	 * @description 选择多个选项。组件支持自定义样式、状态和事件自定义图标，适用于各种表单场景，提升用户体验和操作便捷性。
+	 * @example /pagesA/form/checkbox/checkbox
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-checkbox.html
+	 * @example /pagesA/form/checkbox/checkbox
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} transition 是否开启图标动画
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} duration 图标动画时间(默认：200)
+	 * @property {Boolean} border 是否显示边框(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} checked 是否被选中
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} value 当前选中的值
+	 * @property {String} label 标签
+	 * @property {String} labelClass 标签的样式
+	 * @property {String} icon 图标(默认：check-fill)
+	 * @property {String} iconBoxClass 图标盒子的样式
+	 * @property {String} activeClass 被选中时的样式
+	 * @property {String} inactiveClass 未选中时的样式
+	 * @property {String} iconClass 图标样式
+	 * @property {String} activeIconClass 被选中是图标的样式
+	 * @property {String} inactiveIconClass 未被选中时图标的样式
+	 * @property {String} activeLabelClass 被选中是标签的样式
+	 * @property {String} inactiveLabelClass 未被选中是标签的样式
+	 * @property {String} mode=[checkbox|cell|button] 筛选框的样式(默认：checkbox)
+	 * @value checkbox 复选框框样式
+	 * @value cell 列表模式
+	 * @value button 按钮模式
+	 * @event {Function} change 复选框状态变化时触发
+	 */
+	import { pts } from '../../common/model/theme'
+	import { getPx } from '../../common/model/util'
+	import { getStyleProperty } from '../../common/model/style'
+	import { CommonProps, useTuiThemes, CheckBoxGroupAttrsType } from '../../common/props/index.uts';
+	interface CheckboxProps extends CommonProps {
+		transition : boolean;
+		duration : number;
+		border : boolean;
+		checked : boolean;
+		value : string;
+		label : string;
+		labelClass : string;
+		icon : string;
+		iconBoxClass : string;
+		activeClass : string;
+		inactiveClass : string;
+		iconClass : string;
+		activeIconClass : string;
+		inactiveIconClass : string;
+		activeLabelClass : string;
+		inactiveLabelClass : string;
+		mode : string;
+	}
+
+	const props = withDefaults(defineProps<CheckboxProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		transition: false,
+		duration: 200,
+		border: true,
+		checked: false,
+		value: '',
+		label: '',
+		labelClass: '',
+		icon: 'check-fill',
+		iconBoxClass: '',
+		activeClass: '',
+		inactiveClass: '',
+		iconClass: '',
+		activeIconClass: '',
+		inactiveIconClass: '',
+		activeLabelClass: '',
+		inactiveLabelClass: '',
+		mode: 'checkbox'
+	});
+	const emit = defineEmits(['change', 'select'])
+	const CheckGroupAttrs = inject<CheckBoxGroupAttrsType | null>('CheckGroupAttrs', null)
+	const selectedValues = inject<Ref<string[]> | null>('selectedValues', null)
+	let def_state : boolean 
+	if (selectedValues?.value == null) {
+		def_state = props.checked
+	} else {
+		def_state = selectedValues.value.includes(props.value)
+	}
+	const check_state = ref<boolean>(def_state)
+
+	const typeMerge = computed(() : string => {
+		return props.type != '' ? props.type : CheckGroupAttrs?.type?.value ?? ''
+	})
+
+	const modeMerge = computed(() : string => {
+		return props.mode != 'checkbox' ? props.mode : CheckGroupAttrs?.mode?.value ?? 'checkbox'
+	})
+
+	// 计算属性
+	const borderMerge = computed(() : boolean => {
+		return !props.border ? props.border : CheckGroupAttrs?.border?.value ?? false
+	})
+
+	const classMerge = computed(() : string => {
+		return `${CheckGroupAttrs?.childClass?.value ?? ''} ${props.mainClass}`
+	})
+
+	const hoverMerge = computed(() : boolean => {
+		return props.hover ? props.hover : CheckGroupAttrs?.hover?.value ?? false
+	});
+
+	const effectMerge = computed(() : string => {
+		return props.effect != '' ? props.effect : CheckGroupAttrs?.effect?.value ?? ''
+	});
+
+	const sizeMerge = computed(() : string => {
+		return props.size != '' ? props.size : CheckGroupAttrs?.size?.value ?? ''
+	});
+
+	const transitionMerge = computed(() : boolean => {
+		return props.transition ? props.transition : CheckGroupAttrs?.transition?.value ?? false
+	});
+
+	const durationMerge = computed(() : number => {
+		return props.duration != 200 ? props.duration : CheckGroupAttrs?.duration?.value ?? 200
+	});
+
+	const labelClassMerge = computed(() : string => {
+		return props.labelClass != '' ? props.labelClass : CheckGroupAttrs?.labelClass?.value ?? ''
+	});
+
+	const iconMerge = computed(() : string => {
+		return props.icon != 'check-fill' ? props.icon : CheckGroupAttrs?.icon?.value ?? 'check-fill'
+	});
+
+	const activeClassMerge = computed(() : string => {
+		return props.activeClass != '' ? props.activeClass : CheckGroupAttrs?.activeClass?.value ?? ''
+	});
+
+	const inactiveClassMerge = computed(() : string => {
+		return props.inactiveClass != '' ? props.inactiveClass : CheckGroupAttrs?.inactiveClass?.value ?? ''
+	});
+
+	const iconClassMerge = computed(() : string => {
+		return props.iconClass != '' ? props.iconClass : CheckGroupAttrs?.iconClass?.value ?? ''
+	});
+
+	const iconBoxClassMerge = computed(() : string => {
+		return props.iconBoxClass != '' ? props.iconBoxClass : CheckGroupAttrs?.iconBoxClass?.value ?? ''
+	});
+
+	const activeIconClassMerge = computed(() : string => {
+		return props.activeIconClass != '' ? props.activeIconClass : CheckGroupAttrs?.activeIconClass?.value ?? ''
+	});
+
+	const inactiveIconClassMerge = computed(() : string => {
+		return props.inactiveIconClass != '' ? props.inactiveIconClass : CheckGroupAttrs?.inactiveIconClass?.value ?? ''
+	});
+
+	const activeLabelClassMerge = computed(() : string => {
+		return props.activeLabelClass != '' ? props.activeLabelClass : CheckGroupAttrs?.activeLabelClass?.value ?? ''
+	});
+
+	const inactiveLabelClassMerge = computed(() : string => {
+		return props.inactiveLabelClass != '' ? props.inactiveLabelClass : CheckGroupAttrs?.inactiveLabelClass?.value ?? ''
+	});
+
+	const extendsBackgroundColor = computed(() => `tdb-${typeMerge.value},${effectMerge.value}`)
+	const getFontSizeToValue = computed(() => Math.round(getPx(pts(sizeMerge.value, getStyleProperty(classMerge.value, 'font-size'), false))))
+	const extendsBorder = computed(() => `tbc-${typeMerge.value},${effectMerge.value}`)
+	const extendsFontSize = computed(() => `tts-${sizeMerge.value},${getStyleProperty(classMerge.value, 'font-size')}`)
+	const extendsForegroundColor = computed(() => `tdc-${typeMerge.value},${effectMerge.value},${getStyleProperty(classMerge.value, 'color')}`)
+	const extendsPadding = computed(() => `tdp-${sizeMerge.value}`)
+
+	const checkLabelClass = computed(() : string => {
+		let state_sty = check_state.value ? activeLabelClassMerge.value : inactiveLabelClassMerge.value
+		return `${extendsFontSize.value} ${labelClassMerge.value} ${state_sty}`
+	})
+	const checkButtonStyles = computed(() : string => {
+		let state_sty = check_state.value ? activeClassMerge.value : inactiveClassMerge.value
+		let sty = `${iconBoxClassMerge.value} ${state_sty}`
+		return sty
+	})
+	const checkBoxStyles = computed(() : string => {
+		let state_sty = check_state.value ? `${typeMerge.value == '' ? 'bw-1px bc-#ccc' : 'bw-0px'} ${extendsBackgroundColor.value} ${activeClassMerge.value}` : `bw-1px bc-#ccc ${inactiveClassMerge.value}`
+		let sty = 'bs '
+		if (modeMerge.value == 'checkbox') sty += 'mr-14 '
+		sty += `twh-${Math.round(getFontSizeToValue.value * 1.6)}px r-10 ${extendsBorder.value} ${state_sty} ${iconBoxClassMerge.value} `
+		return sty
+	})
+	const checkViewStyles = computed(() : string => {
+		let sty = `fc twh-100% `
+		if (transitionMerge.value) sty += `atp-tr atd-${durationMerge.value} attf `
+		sty += `ats-${check_state.value ? 1 : 0}`
+		return sty
+	})
+	const checkIconStyles = computed(() : string => {
+		let state_sty = check_state.value ? activeIconClassMerge.value : inactiveIconClassMerge.value
+		let sty = `${extendsFontSize.value} ${extendsForegroundColor.value} ${iconClassMerge.value} ${state_sty}`
+		return sty
+	})
+	const checkMainStyle = computed(() : string => {
+		let sty : string = ''
+		switch (modeMerge.value) {
+			case 'checkbox':
+				sty += `fl faic ${extendsPadding.value}`
+				break;
+			case 'cell':
+				sty += `fl fjcb ${extendsPadding.value} `
+				if (borderMerge.value) sty += 'bb-1rpx,s,#f5f5f5'
+				break;
+			default:
+				break;
+		}
+		sty += ` ${classMerge.value}`
+		return sty
+	})
+	function wrapper() {
+		check_state.value = !check_state.value
+		if (selectedValues != null) {
+			let f = selectedValues.value.findIndex((item : string) => item == props.value)
+			if (check_state.value) {
+				if (f == -1) selectedValues.value.push(props.value)
+			} else {
+				if (f > -1) selectedValues.value.splice(f, 1)
+			}
+		}
+		nextTick(() => {
+			emit('select', check_state.value)
+		})
+	}
+	watch(
+		check_state,
+		(e : boolean) => {
+			emit('change', e)
+		},
+		{ immediate: false },
+	)
+	watch(
+		() : boolean => props.checked,
+		(val : boolean) => {
+			if (selectedValues?.value == null) check_state.value = val
+		},
+		{ immediate: false }
+	)
+	watch(() : string[] | null => selectedValues?.value as string[] | null, (e : string[] | null) => {
+		if (e != null) check_state.value = e.includes(props.value)
+	}, { immediate: true, deep: true })
+</script>

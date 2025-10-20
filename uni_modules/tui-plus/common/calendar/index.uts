@@ -1,0 +1,265 @@
+import { Lunar } from './calendar.uts'
+import { CalendarDateType, LunarInfoType } from '@/uni_modules/tui-plus'
+export class Calendar {
+	private lunar : Lunar
+	private startDate : string = ''
+	private endDate : string = ''
+	constructor() {
+		this.lunar = new Lunar()
+	}
+	init(startDate : string, endDate : string) {
+		this.startDate = startDate
+		this.endDate = endDate
+	}
+	getFestival(time : CalendarDateType) : string {
+		const cal = `${time.month}-${time.date}`
+		const lun = `${time.IMonthCn}${time.IDayCn}`
+		let v = this.lunar.festivals.get(cal)
+		if (v == null) v = this.lunar.festivals.get(lun)
+		if (v == null) v = time.IDayCn
+		return `${v}`
+	}
+	getDateInfo(time : string = '') : CalendarDateType {
+		const nowDate = this.getDate(time)
+		const lunar = this.getlunar(nowDate.year, nowDate.month, nowDate.date)
+		const item : CalendarDateType = nowDate
+		item.data = lunar
+		return item
+	}
+	getWeeks(dateData : string = '', viewMode : string) : Array<Array<CalendarDateType>> {
+		if (viewMode == 'week') return this._getWeekDays(dateData)
+		const dateObj = this.getDate(dateData)
+		const year = dateObj.year
+		const month = dateObj.month
+		let firstDay = new Date(year, month - 1, 0).getDay()
+		// 获取本月天数
+		let currentDay = new Date(year, month, 0).getDate()
+		// 上个月末尾几天
+		const lastMonthDays = this._getLastMonthDays(firstDay, dateObj)
+		// 本月天数
+		const currentMonthDys = this._currentMonthDys(currentDay, dateObj)
+		// 本月剩余天数
+		const surplus = 42 - (lastMonthDays.length + currentMonthDys.length)
+		// 下个月开始几天
+		const nextMonthDays = this._getNextMonthDays(surplus, dateObj)
+		// const weeks = []
+
+		// 本月所有日期格子合并
+		let days : Array<CalendarDateType> = []
+		for (let i = 0; i < lastMonthDays.length; i++) {
+			const item = lastMonthDays[i]
+			days.push(item)
+		}
+		for (let i = 0; i < currentMonthDys.length; i++) {
+			const item = currentMonthDys[i]
+			days.push(item)
+		}
+		for (let i = 0; i < nextMonthDays.length; i++) {
+			const item = nextMonthDays[i]
+			days.push(item)
+		}
+		let weeks : Array<Array<CalendarDateType>> = []
+		// 拼接数组  上个月开始几天 + 本月天数+ 下个月开始几天
+		for (let i = 0; i < days.length; i += 7) {
+			const item : Array<CalendarDateType> = days.slice(i, i + 7)
+			weeks.push(item);
+		}
+		return weeks
+	}
+	/**
+		 * 获取任意日期的一周
+		 */
+	_getWeekDays(dateData : string = '') : Array<Array<CalendarDateType>> {
+		const dateObj = this.getDate(dateData)
+		let dateArr : Array<CalendarDateType> = [];
+		let oneDayTime = 1000 * 60 * 60 * 24
+
+		const dateDataArr = dateObj.fullDate.split(" ")[0].split("-");
+		let today = new Date(parseInt(dateDataArr[0]), parseInt(dateDataArr[1]) - 1, parseInt(dateDataArr[2]));
+
+		// 获取这个日期是星期几
+		let todayDay : number = today.getDay() != 0 ? today.getDay() : 7;
+		//  减去星期求出这周的起始日期
+		let startDate : Date = new Date(today.getTime() - oneDayTime * (todayDay - 1));
+
+		for (let i = 0; i < 7; i++) {
+			let temp = new Date(startDate.getTime() + i * oneDayTime)
+			let newDate = this.getDate(`${temp.getFullYear()}-${temp.getMonth() + 1}-${temp.getDate()}`)
+			dateArr.push(newDate)
+		}
+
+		return [dateArr];
+	}
+
+	/**
+	 * 获取上月剩余天数
+	 */
+	_getLastMonthDays(firstDay : number, full : CalendarDateType) : Array<CalendarDateType> {
+		let dateArr : Array<CalendarDateType> = []
+		for (let i = firstDay; i > 0; i--) {
+			const month = full.month - 1
+			const beforeDate = new Date(full.year, month, -i + 1).getDate()
+			let nowDate = full.year + '-' + month + '-' + beforeDate
+
+			let item : CalendarDateType = this.getDate(nowDate)
+			item.disabled = true
+
+			dateArr.push(item)
+		}
+		return dateArr
+	}
+
+	/**
+	 * 获取本月天数
+	 */
+	_currentMonthDys(dateData : number, full : CalendarDateType) : Array<CalendarDateType> {
+
+		let dateArr : Array<CalendarDateType> = []
+		for (let i = 1; i <= dateData; i++) {
+			let nowDate = full.year + '-' + full.month + '-' + i
+			let item : CalendarDateType = this.getDate(nowDate)
+			// item.disabled = false
+			dateArr.push(item)
+		}
+		return dateArr
+	}
+
+	/**
+	 * 获取下月天数
+	 */
+	_getNextMonthDays(surplus : number, full : CalendarDateType) : Array<CalendarDateType> {
+		let dateArr : Array<CalendarDateType> = []
+		for (let i = 1; i < surplus + 1; i++) {
+			const month = full.month + 1
+			let nowDate = full.year + '-' + month + '-' + i
+			let item : CalendarDateType = this.getDate(nowDate)
+			item.disabled = true
+
+			dateArr.push(item)
+		}
+		return dateArr
+	}
+
+	/**
+	 * 计算阴历日期显示
+	 */
+	getlunar(year : number, month : number, date : number) : LunarInfoType {
+		return this.lunar.solar2lunar(year, month, date)
+	}
+
+
+	/**
+	 * 获取任意时间
+	 */
+	getDate(date : string = '', AddDayCount : number = 0, str : string = 'day') : CalendarDateType {
+		let dd : Date = new Date()
+		if (date != '') {
+			const datePart = date.split(" ");
+			const dateData = datePart[0].split("-");
+			const year = parseInt(dateData[0])
+			const month = parseInt(dateData[1])
+			const day = parseInt(dateData[2])
+
+			dd = new Date(year, month - 1, day)
+		}
+
+		switch (str) {
+			case 'day':
+				dd.setDate(dd.getDate() + AddDayCount);
+				break;
+			case 'week':
+				dd.setDate(dd.getDate() + (AddDayCount * 7))
+				break;
+			case 'month':
+				dd.setMonth(dd.getMonth() + AddDayCount);
+				break;
+			case 'year':
+				dd.setFullYear(dd.getFullYear() + AddDayCount);
+				break;
+		}
+
+		const y = dd.getFullYear();
+		const m = dd.getMonth() + 1;
+		const d = dd.getDate();
+
+		let nowDate = y + '-' + m + '-' + d
+		const lunarData = this.getlunar(y, m, d)
+		// 检查日期是否超过设定的范围
+		let disableBefore = true
+		let disableAfter = true
+		if (this.startDate != '') {
+			disableBefore = this.dateCompare(this.startDate, nowDate)
+		}
+		if (this.endDate != '') {
+			disableAfter = this.dateCompare(nowDate, this.endDate)
+		}
+
+
+		// 获取星期几
+		let week : number = dd.getDay() != 0 ? dd.getDay() : 7;
+		//星座
+		let astro : string = this.lunar.toAstro(m, d)
+		//生肖
+		let zodiac : string = this.lunar.getAnimal(y)
+
+		var firstNode = this.lunar.getTerm(y, (m * 2 - 1))
+		// 天干地支处理
+		var sm = m - 1
+		// 计算干支纪年
+		const gzYear = this.lunar.toGanZhiYear(y)
+		// 依据12节气修正干支月
+		let gzMonth = this.lunar.toGanZhi((y - 1900) * 12 + m + 11)
+		if (d >= firstNode) {
+			gzMonth = this.lunar.toGanZhi((y - 1900) * 12 + m + 12)
+		}
+		// 日柱 当月一日与 1900/1/1 相差天数
+		var dayCyclical = Date.UTC(y, sm, 1, 0, 0, 0, 0) / 86400000 + 25567 + 10
+		var gzDay = this.lunar.toGanZhi(dayCyclical + d - 1)
+
+
+		const dataObj : CalendarDateType = {
+			lYear: lunarData.lYear,
+			lMonth: lunarData.lMonth,
+			lDay: lunarData.lDay,
+			IMonthCn: lunarData.IMonthCn,
+			IDayCn: lunarData.IDayCn,
+			fullDate: nowDate,
+			year: y,
+			month: m,
+			date: d,
+			day: dd.getDay() + 1,
+			week,
+			astro,
+			zodiac,
+			gzYear,
+			gzMonth,
+			gzDay,
+			// lunar: lunarData.IDayCn,
+			is_today: lunarData.isToday,
+			disabled: !(disableBefore && disableAfter),
+		}
+
+		return dataObj
+	}
+
+	/**
+	 * 比较时间大小
+	*/
+	dateCompare(startDate : string, endDate : string) : boolean {
+		if (startDate == '' || endDate == '') return false;
+		// 将时间字符拆分成数组
+		let startDateArr = startDate.split(/[-/]/).map((item) : number => parseInt(item));
+		let endDateArr = endDate.split(/[-/]/).map((item) : number => parseInt(item));
+		// 计算截止时间
+		let newStartDate = new Date(startDateArr[0], startDateArr[1] - 1, startDateArr[2])
+		// 计算详细项的截止时间
+		let newEndDate = new Date(endDateArr[0], endDateArr[1] - 1, endDateArr[2])
+
+		if (newStartDate.getTime() <= newEndDate.getTime()) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+}

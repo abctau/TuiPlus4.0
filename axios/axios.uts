@@ -1,0 +1,43 @@
+import config from '../config/config.uts'
+import { TuiStore, TuiAxios } from '@/uni_modules/tui-plus'
+const store : UTSJSONObject = new TuiStore().value
+const reqIns = new TuiAxios({
+	baseURL: config.baseUrl,
+	timeout: 6000,
+	header: {
+		appid: config.appSelect
+	}
+})
+
+//请求拦截处理
+reqIns.requestInterceptor = (config : Map<string, any>) => {
+	const token = store.token ?? ''
+	const header = config.get('header') as UTSJSONObject
+	header.set('token', token)
+	config.set('header', header)
+}
+
+//响应拦截处理
+reqIns.responseInterceptor = (res : UTSJSONObject, resolve : (res : UTSJSONObject) => void, reject : (err : UniError) => void) => {
+	if (typeof (res.data) == 'string') {
+		resolve({ data: res.data })
+		return
+	}
+	const resp : UTSJSONObject = res.data as UTSJSONObject
+	const code : number = resp.getNumber('code') as number
+	const method = res.getString('config.method')
+	if (method == 'upload') {
+		resolve(resp)
+		return
+	}
+	if (code == 0) {
+		resolve(resp)
+	} else {
+		const message : string = `${resp.getString('message')}`
+		let error = new UniError("responseInterceptor", code, message);
+		error.data = resp
+		reject(error)
+	}
+}
+
+export default reqIns

@@ -1,0 +1,27 @@
+<script lang="uts">
+	import { TuiRegisterFontFamily } from '@/uni_modules/tui-plus'
+	import TuiFont from './config/font.json'
+	import imFont from './config/uni-im-icons.json'
+	export default {
+		onLaunch: function () {
+			TuiRegisterFontFamily(TuiFont)
+			TuiRegisterFontFamily(imFont)
+		},
+		onShow: function () { },
+		onHide: function () { },
+		onExit: function () { },
+	}
+</script>
+<style>
+	/* #ifdef WEB */
+	* {
+		user-select: auto !important;
+	}
+
+	/* #endif */
+	/* #ifdef MP-WEIXIN */
+	page {
+		background-color: #f8f8f8;
+	}
+	/* #endif */
+</style>

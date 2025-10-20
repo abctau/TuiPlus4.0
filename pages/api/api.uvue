@@ -1,0 +1,17 @@
+<template>
+	<t-page title='接口工具' :scrollDisabled="true">
+		<toos-list :toos="toos"></toos-list>
+	</t-page>
+</template>
+<script setup>
+	import { TuiApi } from '@/api'
+	const toos = ref<UTSJSONObject[]>([])
+	onLoad((_) => {
+		TuiApi('utsapiplus', {}, true).then(res => {
+			toos.value = res.getArray('data') as UTSJSONObject[]
+		})
+	})
+</script>
+<style lang="scss" scoped>
+
+</style>

@@ -1,0 +1,29 @@
+const groupTimer = new Map<string, number>()
+const cacheViewHeight = reactive(new Map<string, number>())
+export const asyncViewHeight = reactive(new Map<string, number>())
+export function updateGroupHeight(group : string, height : number) {
+	let h : number = cacheViewHeight.get(group) ?? 0
+	if (height > h) cacheViewHeight.set(group, height)
+	let timer = groupTimer.get(group) ?? 0
+	clearTimeout(timer)
+	timer = setTimeout(() => {
+		let hh : number = cacheViewHeight.get(group) ?? 0
+		if (hh > 0) asyncViewHeight.set(group, hh)
+	}, 200)
+	groupTimer.set(group, timer)
+}
+
+export function removeGroupKeys(group : string) {
+	let timer = groupTimer.get(group) ?? 0
+	clearTimeout(timer)
+	cacheViewHeight.delete(group)
+	asyncViewHeight.delete(group)
+}
+
+export function clearGroupKeys() {
+	groupTimer.forEach((timer) => {
+		clearTimeout(timer)
+	})
+	cacheViewHeight.clear()
+	asyncViewHeight.clear()
+}

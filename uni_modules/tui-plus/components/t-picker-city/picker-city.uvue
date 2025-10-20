@@ -1,0 +1,52 @@
+<template>
+	<t-picker v-bind="extendsAttrs" :main-class="`${mainClass} m-0 p-0`" :value="value" @change="pcaChange">
+		<t-picker-column :list="province" title-key="name" index-key="code" @change="provinceChange"></t-picker-column>
+		<t-picker-column :list="city" title-key="name" index-key="code" @change="cityChange"></t-picker-column>
+		<t-picker-column :list="area" title-key="name" index-key="code"></t-picker-column>
+	</t-picker>
+</template>
+
+<script setup>
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerCityProps extends CommonProps {
+		value : string[]
+		list : UTSJSONObject[]
+	}
+	const props = withDefaults(defineProps<PickerCityProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		value: [] as string[],
+		list: [] as UTSJSONObject[]
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+
+	const city = ref<UTSJSONObject[]>([])
+	const area = ref<UTSJSONObject[]>([])
+
+	function getParentList(parentId : number) : UTSJSONObject[] {
+		return props.list.filter((item : UTSJSONObject) : boolean => `${item['parentid']}` == `${parentId}`);
+	}
+
+	function pcaChange(e : UTSJSONObject) {
+		emit('change', e)
+	}
+	function provinceChange(e : UTSJSONObject) {
+		const val : number = parseInt(`${e['id']}`)
+		city.value = getParentList(val)
+	}
+	function cityChange(e : UTSJSONObject) {
+		const val : number = parseInt(`${e['id']}`)
+		area.value = getParentList(val)
+	}
+	const province = computed(() : UTSJSONObject[] => {
+		return getParentList(0)
+	})
+</script>

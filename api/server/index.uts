@@ -1,0 +1,21 @@
+import axios from '../../axios/axios.uts'
+import { WorTaskResponse } from './interface'
+export function getSidebarMenulist(data : any = {}, cache : boolean = false) : Promise<UTSJSONObject> {
+	return axios.get('getSidebarMenulist', data, cache)
+}
+export function getUploadFileOptions(data : any = {}, cache : boolean = false) : Promise<UTSJSONObject> {
+	return axios.post('getUploadFileOptionsplus', data, cache)
+}
+
+export function updateFileStatus(data : any = {}, cache : boolean = false) : Promise<UTSJSONObject> {
+	return axios.post('updateFileStatus', data, cache)
+}
+
+export function alipayCloudUpload(data : any = {}) : Promise<UTSJSONObject> {
+	const options = data as UTSJSONObject
+	return axios.upload(`${options.getString('uploadFileOptions.url')}`, `${options['path']}`, options.getJSON('uploadFileOptions.formData') as UTSJSONObject)
+}
+
+export function getWorTask(data : any = {}, cache : boolean = false) : Promise<WorTaskResponse> {
+	return axios.post<WorTaskResponse>('getWorTask', data, cache)
+}

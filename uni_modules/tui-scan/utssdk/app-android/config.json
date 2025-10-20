@@ -1,0 +1,15 @@
+{
+	"minSdkVersion": "23",
+	"dependencies": [
+		"androidx.camera:camera-camera2:1.2.1",
+		"androidx.camera:camera-core:1.2.1",
+		"androidx.camera:camera-lifecycle:1.2.1",
+		"androidx.camera:camera-view:1.2.1",
+		"com.google.mlkit:barcode-scanning:17.2.0",
+		"androidx.constraintlayout:constraintlayout:1.1.0",
+		"androidx.databinding:databinding-runtime:7.4.0",
+		"androidx.recyclerview:recyclerview:1.0.0",
+		"androidx.activity:activity:1.2.0",
+		"androidx.appcompat:appcompat:1.1.0"
+	]
+}

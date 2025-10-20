@@ -1,0 +1,97 @@
+<template>
+	<t-page title="头像">
+		<t-card main-class="mlrt-30" title="Avatar 头像" sub-title="背景随机色文字头像,头像组,丰富主题样式"></t-card>
+		<introduction title="基础演示">
+			<t-avatar :src="src"></t-avatar>
+		</introduction>
+		<introduction title="头像形状">
+			<t-row main-class="plr-30">
+				<t-avatar :src="src" main-class="mr-30"></t-avatar>
+				<t-avatar main-class="r-10 mr-30 r-10" :src="src"></t-avatar>
+				<t-avatar main-class="r-30 mr-30" :src="src"></t-avatar>
+			</t-row>
+		</introduction>
+		<introduction title="头像尺寸">
+			<t-row main-class="plr-30">
+				<t-avatar main-class="mr-30" :src="src"></t-avatar>
+				<t-avatar main-class="twh-100 mr-30 r-10" :src="src"></t-avatar>
+				<t-avatar main-class="twh-150 mr-30" :src="src"></t-avatar>
+			</t-row>
+		</introduction>
+		<introduction title="图标头像">
+			<t-row main-class="plr-30 faic">
+				<t-avatar icon="star-fill" main-class="mr-30 twh-50 r-10"></t-avatar>
+				<t-avatar icon="star-fill" main-class="mr-30 s-45"></t-avatar>
+				<t-avatar icon="red-packet-fill" main-class="s-100 mr-30 r-10"></t-avatar>
+			</t-row>
+		</introduction>
+		<introduction title="文字头像">
+			<t-row main-class="plr-30 fww">
+				<t-avatar text="周" main-class="twh-80 mr-30"></t-avatar>
+				<t-avatar text="吴" main-class="twh-80 mr-30"></t-avatar>
+				<t-avatar text="郑" main-class="twh-80 mr-30"></t-avatar>
+				<t-avatar text="王" main-class="twh-80 mr-30"></t-avatar>
+				<t-avatar text="张" main-class="twh-80 mr-30"></t-avatar>
+			</t-row>
+		</introduction>
+		<introduction title="文字头像">
+			<t-row main-class="plr-30 fww">
+				<t-avatar text="周" main-class="mrb-30"></t-avatar>
+				<t-avatar text="吴" main-class="mrb-30"></t-avatar>
+				<t-avatar text="郑" main-class="mrb-30"></t-avatar>
+				<t-avatar text="王" main-class="mrb-30"></t-avatar>
+				<t-avatar text="张" main-class="mrb-30"></t-avatar>
+			</t-row>
+		</introduction>
+		<introduction title="头像组">
+			<t-avatar-group :maxCount="3" :list="urls">
+				<template v-slot:default="{item}">
+					<t-avatar-item :src="`${item}`"></t-avatar-item>
+				</template>
+			</t-avatar-group>
+		</introduction>
+		<introduction title="头像组-样式设置">
+			<t-avatar-group :maxCount="4" main-class="tdr tdb tdp" :list="urls">
+				<template v-slot:default="{item}">
+					<t-avatar-item :src="`${item}`" main-class="twh-120 ml-n80"></t-avatar-item>
+				</template>
+			</t-avatar-group>
+		</introduction>
+		<introduction title="头像组-混合使用">
+			<t-avatar-group :list="urls1">
+				<template v-slot:default="{item}">
+					<t-avatar-item v-if="`${(item as UTSJSONObject)['type']}`=='text'"
+						:text="`${(item as UTSJSONObject)['value']}`"></t-avatar-item>
+					<t-avatar-item v-if="`${(item as UTSJSONObject)['type']}`=='icon'"
+						:icon="`${(item as UTSJSONObject)['value']}`"></t-avatar-item>
+					<t-avatar-item v-if="`${(item as UTSJSONObject)['type']}`=='image'"
+						:src="`${(item as UTSJSONObject)['value']}`"></t-avatar-item>
+				</template>
+			</t-avatar-group>
+		</introduction>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				sty: ['margin-right:30rpx;margin-bottom:20rpx;'],
+				src: '/pagesA/static/image/avatar.jpeg',
+				urls1: [
+					{ type: 'text', value: '张' },
+					{ type: 'text', value: '李' },
+					{ type: 'icon', value: 'red-packet-fill' },
+					{ type: 'image', value: '/pagesA/static/image/avatar/1.jpg' },
+				],
+				urls: [
+					'/pagesA/static/image/avatar/1.jpg',
+					'/pagesA/static/image/avatar/2.jpg',
+					'/pagesA/static/image/avatar/3.jpg',
+					'/pagesA/static/image/avatar/4.jpg',
+					'/pagesA/static/image/avatar/5.jpg',
+					'/pagesA/static/image/avatar/6.jpg',
+				]
+			};
+		}
+	}
+</script>

@@ -1,0 +1,6 @@
+// 该模块为模拟生成数据的接口，请求工具的使用请参考server和use中的代码，支持传入泛型处理
+import axios from '../axios/axios.uts'
+
+export function TuiApi(path : string, data : any = {}, cache : boolean = false) : Promise<UTSJSONObject> {
+	return axios.post(path, data, cache)
+}

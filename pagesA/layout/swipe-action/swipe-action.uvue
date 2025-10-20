@@ -1,0 +1,51 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class='mb-30' title="SwiperAction 左滑操作栏" sub-title="向右滑动来显示隐藏的操作按钮,向左滑动关闭选项">
+		</t-card>
+		<t-section title="基础功能" main-class="mb-30"></t-section>
+		<t-swipe-action @change="onchange" main-class="mb-30">
+			<t-col main-class="tdr tdb oh">
+				<t-cell icon='/pagesA/static/grid/grid (8).png' :border="false" icon-class="s-45" title="王者荣耀/51分钟前" />
+				<t-col main-class='tdb'>
+					<t-text main-class="sfwb s-30">【十连必得皮肤】快来抽取好运</t-text>
+					<t-text main-class="slh-85" :lines="1">【玉镖夺魁】活动火热进行中！参与活动投掷十次</t-text>
+				</t-col>
+			</t-col>
+			<template v-slot:buttons>
+				<t-row main-class="h-100% w-350 faic">
+					<t-icon :hover="true" name="setting" type='primary' main-class="s-80 f sta-r"></t-icon>
+					<t-icon :hover="true" name="trash" type='error' main-class="s-80 f sta-c"></t-icon>
+				</t-row>
+			</template>
+		</t-swipe-action>
+		<t-section title="默认展开" main-class="mb-30"></t-section>
+		<t-swipe-action :state='true' main-class="mb-30 tdr">
+			<t-cell icon='/pagesA/static/grid/grid (4).png' :border="false" icon-class="s-45" title="中国建设银行/23分钟前" />
+			<t-col main-class='plr-20 tdb'>
+				<t-text main-class="sfwb s-30">做任务得5元立减现金！</t-text>
+				<t-text main-class="slh-85" :lines="1">就医不带卡，只需要医保码。开通医保电子凭证可领</t-text>
+			</t-col>
+			<template v-slot:buttons>
+				<t-row main-class="h-100%">
+					<t-button main-class="h-100% r-0 w-150" type="p">编辑</t-button>
+					<t-button main-class="h-100% r-0 w-150" type='e'>删除</t-button>
+				</t-row>
+			</template>
+		</t-swipe-action>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {}
+		},
+		onLoad() {
+
+		},
+		methods: {
+			onchange(e : boolean) {
+				console.log(e)
+			}
+		}
+	}
+</script>

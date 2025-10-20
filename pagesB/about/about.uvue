@@ -1,0 +1,21 @@
+<template>
+	<t-page>
+		<t-col main-class="bir-#0356fa,#05abff p-50 tdb fc h-350 dr">
+			<t-avatar main-class="bgn s-100" icon="cube"></t-avatar>
+			<t-text main-class="mt-20 z-999 c-#fff" size="large">TUI</t-text>
+			<t-image src="/static/my/qbg.png" main-class="da dlb-0 h-250 ope-n w-100%"></t-image>
+		</t-col>
+		<t-cell icon='/static/grid/grid (1).png' title-class="sfwb" icon-class="s-50" main-class="h-180" :border="true"
+			title="官方文档" sub-title="https://life.yundie.xyz/t-uvue-ui/docs/" @click="cellclick"></t-cell>
+		<t-cell icon='/static/grid/grid (2).png' title-class="sfwb" icon-class="s-50" main-class="h-180" :border="true"
+			title="官方邮箱" sub-title="abctau@163.com"></t-cell>
+		<t-cell icon='/static/grid/grid (3).png' title-class="sfwb" icon-class="s-50" main-class="h-180" :border="true"
+			title="客服热线" sub-title="15623584663"></t-cell>
+	</t-page>
+</template>
+<script setup>
+	// import { TuiOpenSchema } from '@/uni_modules/tui-plus'
+	function cellclick() {
+		// TuiOpenSchema('https://life.yundie.xyz/t-uvue-ui/docs/')
+	}
+</script>

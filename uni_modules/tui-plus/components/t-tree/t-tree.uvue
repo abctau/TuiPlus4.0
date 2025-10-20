@@ -1,0 +1,167 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fv tvg ${mainClass}`">
+		<template v-for="(item,index) in list" :key="`${item[idKey]}`">
+			<t-tree-item v-bind="extendsTreeChildAttrs" :item-data="item" ref="treeitemins" @edit="edit" @delete="del"
+				@add="add" :sort-index="index"></t-tree-item>
+		</template>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Tree 树
+	 * @date 2025-05-31 12:08:15
+	 * @author TanYuan
+	 * @description 功能强大,多级节点展开、折叠、选择、懒加载，支持插槽灵活布局,并具有丰富的样式定制和事件响应能力
+	 * @example /pagesA/layout/tree/tree
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-tree.html
+	 * @example /pagesA/layout/tree/tree
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {string[]} selects 选中项ID集合(默认：[])
+	 * @property {string[]} folds 默认展开的ID集合设置(默认：[])
+	 * @property {any} list 数据源
+	 * @property {Boolean} accordion 是否开启手风琴模式
+	 * @value true 是
+	 * @value false 否
+	 * @property {function} load 懒加载函数(默认：()=>void)
+	 * @property {Boolean} showCheckbox 是否显示选择框(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} lazy 是否开启懒加载
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showAddButton 是否显示增加按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} addIcon 增加按钮图标(默认：plus-circle)
+	 * @property {String} addIconClass 增加按钮样式
+	 * @property {Boolean} showEditButton 是否显示编辑按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} editIcon 编辑按钮图标(默认：edit-pen)
+	 * @property {String} editIconClass 编辑按钮图标样式
+	 * @property {Boolean} showDeleteButton 是否显示删除按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} deleteIcon 删除按钮图标(默认：trash)
+	 * @property {String} deleteIconClass 删除按钮图标样式
+	 * @property {Number} rowHeight 每行的高度单位px(默认：50)
+	 * @event {Function} change 选中状态变化时触发
+	 * @event {Function} delete 点击删除时触发
+	 * @event {Function} edit 点击编辑时触发
+	 * @event {Function} add 点击新增、添加时触发
+	 */
+	import { TreeProps, useTuiThemes } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<TreeProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		selects: [] as string[],
+		folds: [] as string[],
+		list: [] as UTSJSONObject[],
+		accordion: false,
+		load: (_ : UTSJSONObject) => Promise.resolve([] as UTSJSONObject[]),
+		showCheckbox: true,
+		lazy: false,
+		showAddButton: true,
+		addIcon: 'plus-circle',
+		addIconClass: '',
+		showEditButton: true,
+		editIcon: 'edit-pen',
+		editIconClass: '',
+		showDeleteButton: true,
+		deleteIcon: 'trash',
+		deleteIconClass: '',
+		rowHeight: 50,
+		idKey: 'id',
+		labelKey: 'label',
+		disabledKey: 'disabled',
+		childrenKey: 'children'
+	});
+	const extendsTreeChildAttrs = computed(() : UTSJSONObject => {
+		return {
+			path: props.path,
+			hover: props.hover,
+			type: props.type,
+			disabled: props.disabled,
+			stop: props.stop,
+			effect: props.effect,
+			size: props.size,
+			mainClass: props.mainClass,
+			nativeClass: props.nativeClass,
+			selects: props.selects,
+			folds: props.folds,
+			list: props.list,
+			accordion: props.accordion,
+			load: props.load,
+			showCheckbox: props.showCheckbox,
+			lazy: props.lazy,
+			showAddButton: props.showAddButton,
+			addIcon: props.addIcon,
+			addIconClass: props.addIconClass,
+			showEditButton: props.showEditButton,
+			editIcon: props.editIcon,
+			editIconClass: props.editIconClass,
+			showDeleteButton: props.showDeleteButton,
+			deleteIcon: props.deleteIcon,
+			deleteIconClass: props.deleteIconClass,
+			rowHeight: props.rowHeight,
+			idKey: props.idKey,
+			labelKey: props.labelKey,
+			disabledKey: props.disabledKey,
+			childrenKey: props.childrenKey
+		}
+	})
+	const { extendsAttrs, getFontSizeToValue } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'edit', 'delete', 'add'])
+	const treeitemins = ref<ComponentPublicInstance[]>([])
+	function treeInstance(e : boolean) {
+		treeitemins.value.forEach((item : ComponentPublicInstance) => {
+			item.$callMethod('partenUpdateChaildCheck', e)
+		})
+	}
+	provide('partentAccordion', (id : string) => {
+		treeitemins.value.forEach((item : ComponentPublicInstance) => {
+			item.$callMethod('accordionFolds', id)
+		})
+	})
+	function edit(e : UTSJSONObject) {
+		emit('edit', e)
+	}
+	function del(e : UTSJSONObject) {
+		emit('delete', e)
+	}
+	function add(e : UTSJSONObject) {
+		emit('add', e)
+	}
+	watch(() : string[] => props.selects, (e : string[]) => {
+		emit('change', e)
+	}, { deep: true })
+	defineExpose({ treeInstance })
+</script>

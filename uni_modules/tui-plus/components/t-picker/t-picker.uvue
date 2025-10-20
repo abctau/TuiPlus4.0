@@ -1,0 +1,111 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl oh dr h-500 ${mainClass}`">
+		 <slot></slot>
+		<t-view main-class="fv da di-0 ope-n z-1">
+			<t-view v-if="showUnit" :main-class="`h-${rowHeight}px`">
+			</t-view>
+			<t-view main-class="f bit-rgba(255,255,255,0.6),rgba(255,255,255,0.95)"></t-view>
+			<t-view :main-class="`h-${rowHeight}px`">
+				<t-view></t-view>
+			</t-view>
+			<t-view main-class="f bib-rgba(255,255,255,0.6),rgba(255,255,255,0.95)"></t-view>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Picker  选择容器
+	 * @date 2025-05-31 12:05:15
+	 * @author TanYuan
+	 * @description Canvas绘制更快渲染速度,自研滚动算法不会在滚动结束的时候回弹，使用了虚拟列表原理,只会绘制需要滚动显示的数据,不用担心数据量大影响渲染速度
+	 * @example /pagesA/layout/picker/picker
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker.html
+	 * @example /pagesA/layout/picker/picker
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} rowHeight 行高(默认：50)
+	 * @property {string[]} value 绑定的值，为数组，每个元素对应一列的选中值(默认：[])
+	 * @property {Boolean} showUnit 是否显示单位
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} change 当列的选中值发生变化时触发
+	 */
+
+	import { PickerProps, useTuiThemes, PickerGroupAttrsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<PickerProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		rowHeight: 50,
+		value: [] as string[],
+		showUnit: false
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const valueMap = new Map<number, UTSJSONObject>()
+	const childIndex = ref<number>(0)
+	let timer : number = 0
+	const idsstring = ref('')
+	provide('childIndex', childIndex)
+	provide('pickerGroupAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		rowHeight: toRef<number>(() : number => props.rowHeight),
+		value: toRef<string[]>(() : string[] => props.value),
+		showUnit: toRef<boolean>(() : boolean => props.showUnit),
+	} as PickerGroupAttrsType)
+	provide('childChange', (e : UTSJSONObject) => {
+		const column : number = e.getNumber('column')!
+		valueMap.set(column, e)
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			const values : string[] = []
+			const ids : string[] = []
+			valueMap.forEach((val : UTSJSONObject) => {
+				ids.push(val.getString('id')!)
+				values.push(val.getString('value')!)
+			})
+			const s : string = ids.join()
+			if (s == idsstring.value) return
+			idsstring.value = ids.join()
+			emit('change', { values, ids, data: e })
+		}, 100)
+	})
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+</script>

@@ -1,0 +1,165 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl faic ${mainClass}`">
+		<t-scroll :main-class="tabsStyles" ref="tabsins" direction="horizontal" :scroll-left="scrollleft"
+			:loadmore="false" :refresherEnabled="false" @click="mainOnclick">
+			<slot></slot>
+			<t-view :main-class="tabsBarStyle" @initFinished="initFinished">
+				<slot name="bar"></slot>
+			</t-view>
+		</t-scroll>
+		<slot name="right">
+			<t-icon v-if="rightIcon!=''" v-bind="extendsAttrs" :name="rightIcon" :main-class="rightIconClass"></t-icon>
+		</slot>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Tabs 标签导航
+	 * @date 2025-05-31 12:07:56
+	 * @author TanYuan
+	 * @description 组织和管理多个页面的切换
+	 * @example /pagesA/layout/tabs/tabs
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-tabs.html
+	 * @example /pagesA/layout/tabs/tabs
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} barClass 滑块的样式
+	 * @property {Number} current 当前滑块所在的索引(默认：1)
+	 * @property {Boolean} scrollable 是否可滚动
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} rightIcon 右侧图标名称
+	 * @property {String} rightIconClass 右侧图标的样式
+	 * @event {Function} change 当标签切换时触发
+	 * @event {Function} click 点击时触发
+	 */
+	import { getPx } from '../../common/model/util';
+	import { useStyle, getStyleProperty } from '../../common/model/style';
+	import { TabsProps, useTuiThemes, TabsGroupAttrsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<TabsProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		current: 0,
+		barClass: '',
+		scrollable: false,
+		rightIcon: '',
+		rightIconClass: '',
+	});
+	const tabsins = ref<ComponentPublicInstance | null>(null)
+	const cur = ref<number>(props.current)
+	const scrollleft = ref<number>(0)
+	const childNodeInfo = new Map<number, NodeInfo>()
+	const curLeft = ref<number>(0)
+	const curWidth = ref<number>(0)
+	const boxLeft = ref<number>(0)
+	const barHeight = ref<number>(0)
+
+	const { extendsAttrs, getFontSizeToValue, extendsBackgroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'click'])
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+
+	function initFinished(e : NodeInfo) {
+		barHeight.value = e.height!
+	}
+	function setBarRect(index : number) {
+		tabsins.value?.$callMethod('getInfo', (rect : NodeInfo) => {
+			const curRect = childNodeInfo.get(index)!
+			const cl = curRect.left!
+			const cw = curRect.width!
+			const boxwidth = rect.width!
+			const boxleft = rect.left!
+			curLeft.value = Math.round(cl)
+			curWidth.value = Math.round(cw)
+			boxLeft.value = boxleft
+			const centerleft = curLeft.value - ((boxwidth - curWidth.value) / 2) - boxleft
+			scrollleft.value = centerleft
+		})
+	}
+	const scrollHeight = computed(() : number => {
+		const s = Math.floor(getFontSizeToValue.value * 3)
+		return s
+	})
+	const tabsStyles = computed(() : string => {
+		return `ov h-${scrollHeight.value}px dr fl f`
+	})
+	const tabsBarStyle = computed(() : string => {
+		let barW = Math.round(getPx(getStyleProperty(props.barClass, 'width')))
+		if (barW == 0) barW = Math.round(curWidth.value * 0.5)
+		const tranL = Math.round((curLeft.value - boxLeft.value) + ((curWidth.value - barW) / 2))
+		let sty = `atp-tr atd-200 da w-50 h-${getFontSizeToValue.value * 0.3}px r-15 w-30 dt-${scrollHeight.value - barHeight.value}px ${extendsBackgroundColor.value}`
+		return `${sty} w-${barW}px ${props.barClass} attx-${tranL}px`
+	})
+
+	watch(() : number => props.current, (e : number) => {
+		cur.value = e
+		setBarRect(e)
+	}, { immediate: true })
+	provide('tabsGroupAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		current: toRef<number>(() : number => props.current),
+		barClass: toRef<string>(() : string => props.barClass),
+		scrollable: toRef<boolean>(() : boolean => props.scrollable),
+		rightIcon: toRef<string>(() : string => props.rightIcon),
+		rightIconClass: toRef<string>(() : string => props.rightIconClass)
+	} as TabsGroupAttrsType)
+	provide('partenCurrent', cur)
+	provide('childChange', (value : number) => {
+		cur.value = value
+		setBarRect(cur.value)
+		emit('change', cur.value)
+	})
+	provide('initNodesInfo', (key : number, nodeinfo : NodeInfo) => {
+		childNodeInfo.set(key, nodeinfo)
+		if (key == cur.value) setBarRect(cur.value)
+	})
+</script>

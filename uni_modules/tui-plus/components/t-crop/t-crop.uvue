@@ -1,0 +1,307 @@
+<template>
+	<t-gesture main-class="twh-100%" @tuiTouchstart="touchstart" @tuiTouchmove="touchmove" @tuiTouchend="touchend">
+		<t-canvas main-class="twh-200px da o-0" ref="clipcanvas" @initFinished="previewInitFinished"></t-canvas>
+		<t-canvas main-class="twh-100% da" @initFinished="canvasInit"></t-canvas>
+		<t-canvas main-class="twh-100% mask" @initFinished="maskCanvasInit">
+		</t-canvas>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Crop 裁剪
+	 * @date 2025-05-31 12:02:51
+	 * @author TanYuan
+	 * @description Canvas实现,PC端支持鼠标滚轮,支持手势缩放移动等-开放旋转缩放导出等API,详细布局需要自定义实现
+	 * @example /pagesA/other/crop/crop
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-crop.html
+	 * @example /pagesA/other/crop/crop
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} src 裁剪的图片地址
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	type typeRectStyle = {
+		left : number
+		top : number
+		width : number
+		height : number
+	}
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface CropProps extends CommonProps {
+		src : string
+	}
+	const props = withDefaults(defineProps<CropProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		src: ''
+	});
+	const clipcanvas = ref<TCanvasComponentPublicInstance | null>(null)
+	const canvasPreviewCtx = ref<CanvasRenderingContext2D | null>(null);
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const canvasMaskCtx = ref<CanvasRenderingContext2D | null>(null);
+	const canvasContext = ref<CanvasContext | null>(null);
+	let timer : number = 0;
+	const scaleSize = ref<number>(1);
+	const rotateDeg = ref<number>(0);
+	const startX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranX = ref<number>(0);
+	const tranY = ref<number>(0);
+	const moveX = ref<number>(0);
+	const moveY = ref<number>(0);
+	const imgWidth = ref<number>(0);
+	const imgHeight = ref<number>(0);
+	const canvasWidth = ref<number>(0);
+	const canvasHeight = ref<number>(0);
+	const scale = ref<number>(0);
+	const imgX = ref<number>(0);
+	const imgY = ref<number>(0);
+	const startDistance = ref<number>(0);
+	const startScaleSize = ref<number>(0);
+	const startAngle = ref<number>(0);
+	const startRotateDeg = ref<number>(0);
+	const rectStyle = ref<typeRectStyle>({
+		left: 0,
+		top: 0,
+		width: 0,
+		height: 0,
+	});
+	const imageWidth = ref<number>(0);
+	const imageHeight = ref<number>(0);
+	function drawImage() {
+		const ctx = canvasCtx.value!;
+		let image = canvasContext.value!.createImage();
+		// #ifdef WEB
+		(image as any).crossOrigin = 'anonymous';
+		// #endif
+		image.src = props.src;
+		image.onload = () => {
+			// 图片的原始宽度和高度
+			imgWidth.value = imageWidth.value;
+			imgHeight.value = imageHeight.value;
+			const margin = 15;
+			// canvas的宽度和高度
+			canvasWidth.value = ctx.canvas.offsetWidth;
+			canvasHeight.value = ctx.canvas.offsetHeight;
+
+			// 计算缩放后的图片宽度和高度，确保图片完整显示并保持边距
+			const scaleWidth = canvasWidth.value - margin * 2;
+			const scaleHeight = canvasHeight.value - margin * 2;
+			scale.value = Math.min(scaleWidth / imgWidth.value, scaleHeight / imgHeight.value);
+			imgX.value = (canvasWidth.value - (imgWidth.value * scale.value)) / 2;
+			imgY.value = (canvasHeight.value - (imgHeight.value * scale.value)) / 2;
+			// 保存当前画布状态
+			const newWidth = imgWidth.value * (scale.value * scaleSize.value);
+			const newHeight = imgHeight.value * (scale.value * scaleSize.value);
+			ctx.save();
+			ctx.clearRect(0, 0, canvasWidth.value, canvasHeight.value)
+			// 将坐标原点移动到画布中心
+			ctx.translate(canvasWidth.value / 2 - tranX.value, canvasHeight.value / 2 - tranY.value);
+			// 定义旋转的角度（）
+			const radians = rotateDeg.value * Math.PI / 180;
+
+			// 执行旋转
+			ctx.rotate(radians);
+
+			// 绘制图片，需要考虑旋转后的坐标变化
+			ctx.drawImage(image, -newWidth / 2, -newHeight / 2, newWidth, newHeight);
+
+			// 恢复画布状态
+			ctx.restore();
+		};
+	}
+	// #ifdef WEB
+	function whell(e) {
+		if (e.wheelDelta > 0) {
+			zoom(-0.01)
+		} else {
+			zoom(0.01)
+		}
+	}
+	// #endif
+	function imageInit() {
+		uni.getImageInfo({
+			src: props.src,
+			success: (res) => {
+				imageWidth.value = res.width
+				imageHeight.value = res.height
+				drawImage()
+			}
+		});
+	}
+	function touchstart(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		const touches = e.event.touches
+		if (touches.length == 1) {
+			startX.value = e.x
+			startY.value = e.y
+		} else if (touches.length > 1) {
+			let x = touches[1].clientX - touches[0].clientX
+			let y = touches[1].clientY - touches[0].clientY
+			startDistance.value = Math.sqrt(x * x + y * y);
+			startScaleSize.value = scaleSize.value
+			startAngle.value = Math.atan2(x, y) * (180 / Math.PI);
+			startRotateDeg.value = rotateDeg.value
+		}
+
+	}
+	function touchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		const touches = e.event.touches
+		if (touches.length == 1) {
+			tranX.value = startX.value - e.x + moveX.value
+			tranY.value = startY.value - e.y + moveY.value
+			const imgwidth = imgWidth.value * scale.value
+			const imgheight = imgHeight.value * scale.value
+			const maxTranX = (rectStyle.value.left - imgX.value) + ((imgwidth * (scaleSize.value - 1)) / 2)
+			const maxTranY = rectStyle.value.top - imgY.value + ((imgheight * (scaleSize.value - 1)) / 2)
+
+			if (Math.abs(tranX.value) > maxTranX) tranX.value = maxTranX * (tranX.value > 0 ? 1 : -1)
+			if (Math.abs(tranY.value) > maxTranY) tranY.value = maxTranY * (tranY.value > 0 ? 1 : -1)
+			drawImage()
+		} else if (touches.length > 1) {
+			let x = touches[1].clientX - touches[0].clientX
+			let y = touches[1].clientY - touches[0].clientY
+			const distance = Math.sqrt(x * x + y * y);
+			scaleSize.value = startScaleSize.value + (0.005 * (distance - startDistance.value))
+			const currentAngle = Math.atan2(x, y) * (180 / Math.PI);
+			rotateDeg.value = startRotateDeg.value + (startAngle.value - currentAngle);
+			drawImage()
+		}
+	}
+	function touchend(e : TuiTouchEvent) {
+		moveX.value = tranX.value
+		moveY.value = tranY.value
+	}
+	function takeSnapshot() : Promise<string> {
+		return new Promise((
+			resolve : (res : string) => void
+		) => {
+			const ICtx = canvasCtx.value!
+			const ctx = canvasPreviewCtx.value!
+			const dpr = uni.getWindowInfo().pixelRatio;
+			let imageData = ICtx.getImageData(rectStyle.value.left * dpr, rectStyle.value.top * dpr, rectStyle.value.width * dpr, rectStyle.value.height * dpr)
+			ctx.clearRect(0, 0, ctx.canvas.offsetWidth, ctx.canvas.offsetHeight)
+			ctx.putImageData(imageData, 0, 0, 0, 0, 200 * dpr, 200 * dpr)
+			clearTimeout(timer)
+			timer = setTimeout(() => {
+				const ins = clipcanvas.value!
+				ins.toDataURL().then((res : string) => {
+					resolve(res)
+				})
+			}, 16)
+		})
+	}
+	function previewInitFinished(ctx : CanvasContext) {
+		canvasPreviewCtx.value = ctx.getContext('2d')
+	}
+	function drawMask() {
+		const ctx = canvasMaskCtx.value!
+		const margin = 15;
+		// canvas的宽度和高度
+		const cw = ctx.canvas.offsetWidth;
+		const ch = ctx.canvas.offsetHeight;
+		canvasWidth.value = cw
+		canvasHeight.value = ch
+		// 计算缩放后的图片宽度和高度，确保图片完整显示并保持边距
+		const scaleHeight = ch - margin - margin;
+		// 设置矩形框的宽度和高度
+		const rectWidth = 200; // 矩形框的宽度
+		const rectHeight = 200; // 矩形框的高度
+
+		// 计算矩形框的起始坐标，使其位于画布中心
+		const rectX = (cw - rectWidth) / 2;
+		const rectY = (ch - rectHeight) / 2;
+
+		// 绘制矩形框
+		ctx.lineWidth = 3;
+		ctx.globalAlpha = 1;
+		ctx.strokeStyle = 'white';
+		ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+		rectStyle.value = {
+			left: rectX,
+			top: rectY,
+			width: rectWidth,
+			height: rectHeight,
+		} as typeRectStyle
+		ctx.strokeStyle = 'black';
+		ctx.globalAlpha = 0.5;
+		ctx.fillRect(0, 0, cw, rectY);
+		ctx.fillRect(0, rectY, rectX, rectHeight);
+		ctx.fillRect(0, rectY + rectHeight, cw, scaleHeight - rectHeight - rectY);
+		ctx.fillRect(rectX + rectWidth, rectY, cw - rectWidth - rectX, rectHeight);
+
+		ctx.globalAlpha = 1;
+		ctx.strokeStyle = 'red';
+		ctx.moveTo(rectX + 15, rectY);
+		ctx.lineTo(rectX, rectY);
+		ctx.lineTo(rectX, rectY + 15);
+		ctx.moveTo(rectX + rectWidth - 15, rectY);
+		ctx.lineTo(rectX + rectWidth, rectY);
+		ctx.lineTo(rectX + rectWidth, rectY + 15);
+		ctx.moveTo(rectX + 15, rectY + rectHeight);
+		ctx.lineTo(rectX, rectY + rectHeight);
+		ctx.lineTo(rectX, rectY + rectHeight - 15);
+		ctx.moveTo(rectX + rectWidth - 15, rectY + rectHeight);
+		ctx.lineTo(rectX + rectWidth, rectY + rectHeight);
+		ctx.lineTo(rectX + rectWidth, rectY + rectHeight - 15);
+		ctx.stroke()
+	}
+	function maskCanvasInit(ctx : CanvasContext) {
+		canvasMaskCtx.value = ctx.getContext('2d')
+		drawMask()
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+		canvasContext.value = ctx
+		imageInit()
+	}
+
+	function zoom(scale : number) {
+		scaleSize.value += scale
+		if (scaleSize.value < 0.1) scaleSize.value = 0.1
+		drawImage()
+	}
+	function rotate() {
+		rotateDeg.value += 90
+		if (rotateDeg.value == 360) rotateDeg.value = 0
+		drawImage()
+	}
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+
+	defineExpose({
+		takeSnapshot,
+		rotate,
+		zoom
+	})
+</script>

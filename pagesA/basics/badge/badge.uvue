@@ -1,0 +1,52 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Badge 徽标"
+			sub-title="徽标组件用于显示数量提示或状态标识，支持多种尺寸和显示方式，适用于消息提醒、购物车数量等场景。"></t-card>
+		<t-section main-class="mb-30" title="基础功能-type-size-effect展示"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-badge main-class="mr-15" text="99"></t-badge>
+			<t-badge main-class="mr-15" type="primary" size="small" text="9"></t-badge>
+			<t-badge main-class="mr-15" type="success" size="m" text="99"></t-badge>
+			<t-badge main-class="mr-15" type="error" size="l" text="99"></t-badge>
+			<t-badge main-class="mr-15" type="p" effect='l' size="l" text="99"></t-badge>
+		</t-row>
+		<t-section main-class="mb-30" title="自定义颜色主题"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-badge main-class="c-red plr-20 s-50 mr-10" type="success" text="99"></t-badge>
+			<t-badge main-class="bg-blue plr-20 s-45" type="success" text="99"></t-badge>
+		</t-row>
+		<t-section main-class="mb-30" title="自定义样式-直角边"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-badge main-class="r-50px,50px,50px,0 mr-15" text="86"></t-badge>
+			<t-badge main-class="r-50px,50px,0,50px mr-15" type="success" text="56"></t-badge>
+			<t-badge main-class="r-50px,0,50px,50px mr-15" type="error" text="45"></t-badge>
+			<t-badge main-class="r-0,50px,50px,50px mr-15" type="error" text="68"></t-badge>
+			<t-badge main-class="r-50px,50px,50px,0 mr-15" type="warning" text="73"></t-badge>
+		</t-row>
+		<t-section main-class="mb-30" title="显示圆点-主题size-自字义大小s-40"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-badge :dot="true" main-class="mr-15 s-40" type="error">1</t-badge>
+			<t-badge :dot="true" main-class="mr-15" size="large" type="success">1</t-badge>
+			<t-badge :dot="true" main-class="mr-15" size="medium" type="error">1</t-badge>
+			<t-badge :dot="true" main-class="mr-15" size="small" type="p">1</t-badge>
+			<t-badge :dot="true" main-class="mr-15" size="mini" type="warning">1</t-badge>
+		</t-row>
+		<t-section main-class="mb-30" title="微标数显示方式"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-badge mode="ellipsis" text="5132"></t-badge>
+			<t-badge type="primary" main-class="mr-15" mode="ellipsis" text="5132"></t-badge>
+			<t-badge type="success" main-class="mr-15" mode="overflow" text="1011"></t-badge>
+			<t-badge type="error" main-class="mr-15" mode="limit" text="1500"></t-badge>
+			<t-badge type="warning" main-class="mr-15" mode="limit" text="45187"></t-badge>
+		</t-row>
+		<t-section main-class="mb-30" title="定位"></t-section>
+		<t-row main-class="faic tdb tdr tdp mb-30">
+			<t-row main-class="bg-#ccc twh-100 r-10 ov dr mr-80 fais">
+				<t-badge type="error" main-class="da dr-n10 dt-n5" text="56556"></t-badge>
+			</t-row>
+			<t-row main-class="bg-#ccc twh-100 r-10 ov dr fais">
+				<t-badge type="error" main-class="da dr-n10 dt-n5" :dot="true" text="5132"></t-badge>
+			</t-row>
+		</t-row>
+	</t-page>
+</template>

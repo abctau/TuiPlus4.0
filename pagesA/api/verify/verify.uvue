@@ -1,0 +1,77 @@
+<template>
+	<t-page title="验证工具">
+		<t-card title='数据校验' sub-title="常用表单验证" main-class="mltr-30"></t-card>
+		<introduction title="isURL(URL验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isURL('https://www.example.com')=>{{isURLResult}}</t-text>
+		</introduction>
+		<introduction title="isNumber(数字验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isNumber('1234567890')=>{{isNumberResult}}</t-text>
+		</introduction>
+		<introduction title="isAbc(字母验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isAbc('ABC')=>{{isAbcResult}}</t-text>
+		</introduction>
+		<introduction title="isAbcNum(字母或数字验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isAbcNum('ABC123')=>{{isAbcNumResult}}</t-text>
+		</introduction>
+		<introduction title="isChinese(中文验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isChinese('你好')=>{{isChineseResult}}</t-text>
+		</introduction>
+		<introduction title="isEmail(邮箱验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isEmail('example@example.com')=>{{isEmailResult}}</t-text>
+		</introduction>
+		<introduction title="isPhone(电话验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isPhone('13800138000')=>{{isPhoneResult}}</t-text>
+		</introduction>
+		<introduction title="isLandline(固定电话验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isLandline('010-12345678')=>{{isLandlineResult}}</t-text>
+		</introduction>
+		<introduction title="isIdcard(身份证号码验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isIdcard('11010519900101001X')=>{{isIdcardResult}}</t-text>
+		</introduction>
+		<introduction title="isImage(图片验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isImage('image.jpg')=>{{isImageResult}}</t-text>
+		</introduction>
+		<introduction title="isVideo(视频验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isVideo('video.mp4')=>{{isVideoResult}}</t-text>
+		</introduction>
+		<introduction title="isCarNo(车牌号验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isCarNo('京A12345')=>{{isCarNoResult}}</t-text>
+		</introduction>
+		<introduction title="isEven(奇偶数验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isEven(2)=>{{isEvenResult}}</t-text>
+		</introduction>
+		<introduction title="isRGB(RGB颜色值验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isRGB(255, 0, 0)=>{{isRGBResult}}</t-text>
+		</introduction>
+		<introduction title="isHSV(HSV颜色值验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isHSV(159, 1, 0.74)=>{{isHSVResult}}</t-text>
+		</introduction>
+		<introduction title="isHSL(HSL颜色值验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isHSL(159, 1, 0.74)=>{{isHSLResult}}</t-text>
+		</introduction>
+		<introduction title="isColor(颜色值验证)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">isColor('red')=>{{isColorResult}}</t-text>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+	import { isURL, isNumber, isAbc, isAbcNum, isChinese, isEmail, isPhone, isLandline, isIdcard, isImage, isVideo, isCarNo, isEven, isRGB, isHSV, isHSL, isColor } from '@/uni_modules/tui-plus';
+	const isURLResult = isURL('https://www.example.com');
+	const isNumberResult = isNumber('1234567890');
+	const isAbcResult = isAbc('ABC');
+	const isAbcNumResult = isAbcNum('ABC123');
+	const isChineseResult = isChinese('你好');
+	const isEmailResult = isEmail('example@example.com');
+	const isPhoneResult = isPhone('13800138000');
+	const isLandlineResult = isLandline('010-12345678');
+	const isIdcardResult = isIdcard('11010519900101001X');
+	const isImageResult = isImage('image.jpg');
+	const isVideoResult = isVideo('video.mp4');
+	const isCarNoResult = isCarNo('京A12345');
+	const isEvenResult = isEven(2);
+	const isRGBResult = isRGB(255, 0, 0);
+	const isHSVResult = isHSV(159, 1, 0.74);
+	const isHSLResult = isHSL(159, 1, 0.74);
+	const isColorResult = isColor('red');
+</script>

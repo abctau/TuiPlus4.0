@@ -1,0 +1,316 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`f tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
+		@tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
+		<t-text v-if='showUnit' :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
+		<t-view main-class="dr f">
+			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
+			</t-canvas>
+			<slot></slot>
+			<t-view :main-class="`da di-0 fc ope-n pr-10px ${sorderIndex==0?'pl-10px':''}`">
+				<t-view :main-class="`h-${rowHeight}px w-100% bg-rgba(0,0,0,0.05) tdr`"></t-view>
+			</t-view>
+		</t-view>
+	</t-gesture>
+</template>
+
+<script setup>
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { TuiRequestAnimationFrame, TuiCancelAnimationFrame } from '../../common/model/util'
+	import { CommonProps, useTuiThemes, PickerGroupAttrsType } from '../../common/props/index.uts';
+	type TuiPikcerData = {
+		id : string
+		title : string
+		partenid : string
+	}
+	interface PickerRangeProps extends CommonProps {
+		range : number[]
+		unit : string
+	}
+	const props = withDefaults(defineProps<PickerRangeProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		range: [] as number[],
+		unit: ''
+	});
+
+	const pickerGroupAttrs = inject<PickerGroupAttrsType>('pickerGroupAttrs')
+	const childChange = inject<(e : UTSJSONObject) => void>('childChange')
+	const childIndex = inject<Ref<number>>('childIndex')
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const CanvasContextIns = ref<CanvasContext | null>(null);
+	const centenX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranY = ref<number>(0);
+	const moveY = ref<number>(0);
+	const drawLoading = ref<boolean>(false);
+	const maxW = ref<number>(0);
+	const animationTaskId = ref<number>(0);
+	const animationFrameId = ref<number>(0);
+	const acceleration = ref<number>(-0.001);
+	const startTime = ref<number>(0);
+	const lastTime = ref<number>(0);
+	const velocity = ref<number>(0);
+	const scrollsDown = ref<boolean>(false);
+	const isPressed = ref<boolean>(false);
+	const sorderIndex = ref<number>(0);
+	const current = ref<number>(-2);
+	const moveIndex = ref<number>(0);
+	let timer : number = 0;
+	sorderIndex.value = childIndex!.value
+	if (childIndex != null) childIndex.value++
+	const showUnit = computed(() : boolean => {
+		return pickerGroupAttrs?.showUnit?.value ?? false
+	})
+	const rangeLenth = computed(() : number => {
+		return props.range[1] - props.range[0]
+	})
+	const values = computed(() : string[] => {
+		return pickerGroupAttrs?.value?.value ?? ([] as string[])
+	})
+	const columnValue = computed(() : string => {
+		return values.value.length > sorderIndex.value ? values.value[sorderIndex.value] : ''
+	})
+
+	const rowHeight = computed(() : number => {
+		return pickerGroupAttrs?.rowHeight?.value ?? 50
+	})
+	function draw() {
+		try {
+			if (drawLoading.value) return
+			drawLoading.value = true
+			if (rangeLenth.value > 0) {
+				const ctx = canvasCtx.value!
+				const w = ctx.canvas.offsetWidth
+				const h = ctx.canvas.offsetHeight
+				ctx.clearRect(0, 0, w, h);
+				ctx.textAlign = 'center'
+				ctx.font = `${16}px sans-serif`;
+				ctx.textBaseline = 'middle'
+				const dif = centenX.value / rowHeight.value + 1
+				let sx = Math.floor(moveIndex.value - dif)
+				if (sx < 0) sx = 0
+				let ex = Math.floor(moveIndex.value + dif)
+				if (ex > rangeLenth.value) ex = rangeLenth.value
+				let drawX = sx
+				for (let i = sx + props.range[0]; i <= ex + props.range[0]; i++) {
+					const y = (drawX * rowHeight.value) + tranY.value + centenX.value;
+					ctx.fillText(i.toString().padStart(2, '0'), w / 2 - 5, y + rowHeight.value / 2);
+					drawX++
+				}
+			}
+			drawLoading.value = false
+		} catch (error) { }
+	}
+	function emitUpdateChange() {
+		if (rangeLenth.value > 0) {
+			const cid = `${props.range[0] + current.value}`
+			const cval = `${props.range[0] + current.value}`
+			const citem = { 'unit': props.unit, range: props.range }
+			const dval : UTSJSONObject = { id: cid, value: cval, column: sorderIndex.value, index: current.value, item: citem }
+			if (childChange != null) childChange(dval)
+			emit('change', dval)
+		}
+	}
+	function drawIndex(x : number) {
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			try {
+				current.value = x
+				moveIndex.value = x
+				tranY.value = -(x * rowHeight.value)
+				moveY.value = tranY.value
+				emitUpdateChange()
+				draw()
+			} catch (e) {
+				console.error('错误.')
+			}
+
+		}, 50)
+	}
+	function drawValue(e : string) {
+		let x : number = 0
+		const v : number = parseInt(e)
+		if (v >= props.range[0] && v <= props.range[1]) x = v - props.range[0]
+		drawIndex(x)
+	}
+	function animateScroll() {
+		const currentTime = new Date().getTime();
+		const deltaTime = currentTime - lastTime.value;
+		lastTime.value = currentTime;
+		// 更新位置
+		const difupdatepos = velocity.value * deltaTime + 0.5 * acceleration.value * deltaTime * deltaTime
+		tranY.value = tranY.value + (scrollsDown.value ? -difupdatepos : difupdatepos)
+
+		if (tranY.value > 0) {
+			tranY.value = 0
+			moveY.value = 0
+			draw()
+			return
+		}
+		if (tranY.value < maxW.value) {
+			tranY.value = maxW.value
+			moveY.value = tranY.value
+			draw()
+			return
+		}
+		draw()
+		// 更新速度
+		velocity.value += acceleration.value * deltaTime;
+		// 检查是否停止滚动
+		if (Math.abs(velocity.value) > 0.01 && !isPressed.value) {
+			if (animationTaskId.value != 0) TuiCancelAnimationFrame(animationTaskId.value)
+			animationTaskId.value = TuiRequestAnimationFrame(() => {
+				animateScroll()
+			})
+		} else {
+			velocity.value = 0
+			moveY.value = tranY.value
+			if (animationTaskId.value != 0) {
+				TuiCancelAnimationFrame(animationTaskId.value)
+				animationTaskId.value = 0
+			}
+		}
+	}
+	function scrollTran(goal : number, duration : number) {
+		// 获取元素当前的位置信息
+		const startX = tranY.value
+		if (startX == goal) {
+			// props.emitScrollend()
+			return
+		} //无需滚动
+		// 计算目标位置
+		const targetX = goal;
+		// 计算距离
+		const distance = targetX - startX;
+		// 计算开始时间
+		const startTime = new Date().getTime();
+
+		// 定义动画函数
+		function animateScroll() {
+			const currentTime : number = new Date().getTime();
+			const timeElapsed = currentTime - startTime;
+			const progress = timeElapsed / (duration);
+
+			// 使用缓动函数来模拟摩擦减速效果
+			// 这里使用了简单的线性缓动，可以根据需要使用更复杂的缓动函数
+			//先慢后快
+			// const easing = (t : number) : number => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+			//模拟  ease-out 动画 先快后慢
+			const easing = (t : number) : number => {
+				return 1 - Math.pow(1 - t, 3);
+			};
+
+			// 计算当前滚动位置
+			const currentX = startX + distance * easing(Math.min(progress, 1));
+			// 设置元素的滚动位置
+			tranY.value = currentX
+			moveIndex.value = Math.floor(Math.abs(tranY.value) / rowHeight.value) + 1
+			draw()
+			// 如果滚动未到达目标位置，继续动画
+			if (progress < 1 && currentX != targetX && !isPressed.value) {
+				if (animationFrameId.value != 0) TuiCancelAnimationFrame(animationFrameId.value);
+				animationFrameId.value = TuiRequestAnimationFrame(() => {
+					animateScroll()
+				})
+			} else {
+				moveY.value = tranY.value
+				// 滚动到达目标位置，清除动画帧
+				if (animationFrameId.value != 0) {
+					TuiCancelAnimationFrame(animationFrameId.value);
+					animationFrameId.value = 0;
+				}
+			}
+		};
+		// 开始动画
+		animationFrameId.value = TuiRequestAnimationFrame(() => {
+			animateScroll()
+		})
+	}
+	function touchstart(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		isPressed.value = true
+		startTime.value = new Date().getTime()
+		startY.value = e.y
+		maxW.value = -((rangeLenth.value) * rowHeight.value)
+		if (maxW.value > 0) maxW.value = 0
+	}
+	function touchmove(e : TuiTouchEvent) {
+		tranY.value = e.y - startY.value + moveY.value
+		if (tranY.value > 0) tranY.value = 0
+		if (tranY.value < maxW.value) tranY.value = maxW.value
+		if (tranY.value != 0 && tranY.value != maxW.value) e.event.preventDefault()
+		moveIndex.value = Math.floor(Math.abs(tranY.value) / rowHeight.value) + 1
+		draw()
+	}
+	function touchend(e : TuiTouchEvent) {
+		isPressed.value = false
+		moveY.value = tranY.value
+		lastTime.value = new Date().getTime()
+		const duration = lastTime.value - startTime.value
+		const distance = e.y - startY.value
+		velocity.value = Math.abs(distance) / duration
+		scrollsDown.value = distance < 0
+		if (distance != 0 && velocity.value > 0.3 && tranY.value != 0 && tranY.value != maxW.value) {
+			let addMoveY = (1000 * velocity.value)
+			if (!scrollsDown.value) addMoveY = -addMoveY
+			let mY = tranY.value - addMoveY
+			if (mY > 0) mY = 0
+			if (mY < maxW.value) mY = maxW.value
+			const delta = Math.abs(mY)
+			const index = scrollsDown.value ? Math.ceil(delta / rowHeight.value) : Math.floor((delta / rowHeight.value))
+			const pos = rowHeight.value * index
+			let dur = Math.floor(Math.abs(Math.abs(tranY.value) - pos) * 2)
+			if (dur < 300) dur = 300
+			current.value = index
+			moveIndex.value = index
+			scrollTran(-pos, dur)
+		} else {
+			const delta = Math.abs(tranY.value)
+			const index = scrollsDown.value ? Math.ceil(delta / rowHeight.value) : Math.floor((delta / rowHeight.value))
+			const pos = rowHeight.value * index
+			let dur = Math.floor(Math.abs(Math.abs(tranY.value) - pos) * 2)
+			if (dur < 300) dur = 300
+			current.value = index
+			moveIndex.value = index
+			scrollTran(-pos, dur)
+		}
+		if (distance != 0) emitUpdateChange()
+	}
+	function canvasInit(ctx : CanvasContext) {
+		CanvasContextIns.value = ctx
+		canvasCtx.value = ctx.getContext('2d')
+		centenX.value = Math.floor((canvasCtx.value!.canvas.offsetHeight - rowHeight.value) / 2)
+		//初始化值
+		if (columnValue.value != '') {
+			drawValue(columnValue.value)
+		} else {
+			current.value = 0
+			moveIndex.value = 0
+			draw()
+		}
+	}
+	watch(values, (e : string[], o : string[]) => {
+		if (e[sorderIndex.value] != o[sorderIndex.value]) {
+			drawValue(columnValue.value)
+		}
+	})
+	watch(() : number[] => props.range, (e : number[]) => {
+		let x : number = current.value
+		if (x > rangeLenth.value) x = rangeLenth.value
+		drawIndex(x)
+	})
+	onUnmounted(() => {
+		clearTimeout(timer)
+	})
+</script>

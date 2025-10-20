@@ -1,0 +1,169 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`w-100% tdp-${size},,t tvg ${mainClass}`">
+		<t-row main-class="r-1500 oh mlrb-25">
+			<t-input v-bind="extendsAttrs" v-model="searchQuery" type="info" main-class="f ptb-20 r-0 pl-30" effect="l"
+				@input="oninput" @clear="clear" placeholder="请输入关键词" :disable-form="true"></t-input>
+			<t-text v-bind="extendsAttrs" :hover="true" @click="fuzzySearch"
+				:main-class="`plr-40 faic sta-c ${extendsBackgroundColor} ${extendsForegroundColor}`">搜索</t-text>
+		</t-row>
+		<t-view>
+			<template v-if="viewList.length>0">
+				<t-radio-group v-if="singled" v-bind="extendsAttrs" main-class="" :modelValue="modelValue" mode="cell"
+					icon="checkbox-blank-circle-fill" @change="onChange">
+					<t-list :refresher-enabled="false" :loadmore="false" :main-class="`h-600 ${contentClass}`">
+						<t-list-item v-for="(item,index) in viewList" :key="`${item[valueKey]}`"
+							:disabled="item.getBoolean('disabled')??false">
+							<t-row main-class="faic fjcb">
+								<t-radio main-class="w-100%"
+									:value="`${item[valueKey]}`">{{`${item[labelKey]}`}}</t-radio>
+							</t-row>
+						</t-list-item>
+					</t-list>
+				</t-radio-group>
+				<t-checkbox-group v-else v-bind="extendsAttrs" mode="cell" icon="checkbox-blank-circle-fill"
+					:modelValue="cloneValues" @change="onChange" main-class="">
+					<t-list :refresher-enabled="false" :loadmore="false" :main-class="`h-600 ${contentClass}`">
+						<t-list-item v-for="(item) in viewList" :key="`${item[valueKey]}`"
+							:disabled="item.getBoolean('disabled')??false">
+							<t-row main-class="faic fjcb">
+								<t-checkbox main-class="w-100%"
+									:value="`${item[valueKey]}`">{{`${item[labelKey]}`}}</t-checkbox>
+							</t-row>
+						</t-list-item>
+					</t-list>
+				</t-checkbox-group>
+			</template>
+			<t-empty v-else title="暂无数据" main-class="w-100% h-100%" image-class="w-288 h-189 mt-n100"
+				title-class="s-32"></t-empty>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { TuiDeepClone } from '../../common/model/util.uts';
+	interface PickerSelectChildProps extends CommonProps {
+		modelValue : any;
+		valueKey : string;
+		labelKey : string;
+		list : UTSJSONObject[];
+		remote : boolean;
+		remoteMethod ?: (id : string) => Promise<UTSJSONObject[]>;
+		contentClass : string;
+		embeddable : boolean;
+	}
+
+	const props = withDefaults(defineProps<PickerSelectChildProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: 'large',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: '',
+		valueKey: 'value',
+		labelKey: 'label',
+		embeddable: false,
+		list: [] as UTSJSONObject[],
+		remote: false,
+		remoteMethod: null,
+		contentClass: ''
+	});
+	const { extendsAttrs, extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change', 'initValue'])
+	const searchQuery = ref<string>('')
+	const searchList = ref<UTSJSONObject[]>([])
+	const isSearch = ref<boolean>(false)
+	const viewList = computed(() : UTSJSONObject[] => {
+		return isSearch.value ? searchList.value : props.list;
+	})
+	const singled = computed(() : boolean => {
+		return typeof (props.modelValue) == 'string'
+	})
+	let cloneValues = ref<any>([] as string[])
+	if (props.embeddable) {
+		cloneValues.value = props.modelValue
+	} else {
+		cloneValues.value = singled.value ? props.modelValue! : TuiDeepClone(props.modelValue)!
+	}
+	function initValue() {
+		if (!props.embeddable) {
+			if (typeof (props.modelValue) == 'string') {
+				const mval = props.modelValue as string
+				const v = searchList.value.filter((food : UTSJSONObject) => `${food.value}` == mval).map((fod : UTSJSONObject) => `${fod.label}`);
+				emit('initValue', v)
+			} else {
+				const mval = props.modelValue as string[]
+				const v = searchList.value.filter((food : UTSJSONObject) => mval.includes(`${food.value}`)).map((fod : UTSJSONObject) => `${fod.label}`);
+				emit('initValue', v)
+			}
+			if (typeof (props.modelValue) == 'object') cloneValues.value = TuiDeepClone(props.modelValue) as string[]
+		} else {
+			cloneValues.value = props.modelValue
+		}
+	}
+	function fuzzySearch() {
+		if (props.remote) {
+			props.remoteMethod!(searchQuery.value).then((res : UTSJSONObject[]) => {
+				searchList.value = res
+				isSearch.value = true
+				initValue()
+			})
+		} else {
+			const f = viewList.value.filter((item : UTSJSONObject) : boolean => {
+				return (`${item[props.labelKey]}`).toLocaleLowerCase().includes(searchQuery.value.toLocaleLowerCase())
+			})
+			searchList.value = f
+			isSearch.value = true
+			initValue()
+		}
+	}
+	function clear() {
+		if (props.remote) {
+			searchQuery.value = ''
+			fuzzySearch()
+		} else {
+			isSearch.value = false
+		}
+	}
+	function oninput(e : UniInputEvent) {
+		if (e.detail.value == '') {
+			if (props.remote) {
+				searchQuery.value = ''
+				fuzzySearch()
+			} else {
+				isSearch.value = false
+			}
+		}
+	}
+	watch(() : any => props.modelValue, (e : any) => {
+		initValue()
+	}, { deep: true })
+	function onChange(e : any) {
+		let values : string[]
+		let labels : string[] = []
+		if (typeof (e) == 'string') {
+			values = [`${e}`]
+			const f = viewList.value.find((k : UTSJSONObject) => `${k[props.valueKey]}` == `${e}`)
+			if (f != null) {
+				labels.push(`${f[props.labelKey]}`)
+			}
+		} else {
+			const vids = e as string[]
+			values = [...vids]
+			vids.forEach((item : string) => {
+				const f = viewList.value.find((k : UTSJSONObject) => {
+					return `${k[props.valueKey]}` == item
+				})
+				if (f != null) {
+					labels.push(`${f[props.labelKey]}`)
+				}
+			})
+		}
+		emit('change', { values, labels })
+	}
+	fuzzySearch()
+</script>

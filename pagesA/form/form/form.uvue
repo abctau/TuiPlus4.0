@@ -1,0 +1,636 @@
+<template>
+	<t-page title="表单" main-class="p-30" :loading="true" :waiting="1500">
+		<t-lazy>
+			<t-card title="Form 表单" main-class="mb-30" sub-title="支持自定义数据校验,长度校验证,数据大小判断 支持重置"></t-card>
+			<t-card title="亮点-功能强大-逐帧渲染原理不卡页面" main-class="mb-30"
+				sub-title="表单验证规则可后端控制, 支持form-item点击映射到input获取到焦点提升用户体验 支持表单下任意组件参与布局,支持自定义函数表单验证"></t-card>
+		</t-lazy>
+		<t-form main-class="tdr tdb tdp ov" :disabled="disabled" ref="ruleForm" :rules="rules" child-class="ptb-20"
+			:model="formData" direction="row">
+			<t-form-item label="活动名称" prop="name">
+				<t-input v-model="(formData.name as string)" main-class="f sta-r pr-0" placeholder="请输入活动名称" effect=""
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="活动区域" prop="region">
+				<t-radio-group v-model="(formData.region as string)" main-class="f fl fww fjce" child-class="p-0 ml-10">
+					<t-radio v-for="(item,index) in regionList" :key="index" :value="((index).toString())"
+						type="primary">{{item}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="活动产品" prop="checkbox">
+				<t-checkbox-group :main-class="`f fl fww fjce`" type="p" v-model="(formData.checkbox as string[])"
+					icon="checkbox-blank-circle-fill" child-class="p-0 ml-15" :transition="false">
+					<t-checkbox value="1">苹果</t-checkbox>
+					<t-checkbox value="2">香蕉</t-checkbox>
+					<t-checkbox value="3">橙子</t-checkbox>
+				</t-checkbox-group>
+			</t-form-item>
+			<t-form-item label="验证码" prop="tcodeinput">
+				<t-code-input main-class="" v-model="(formData.tcodeinput as string)" type="primary" dotSymbol=""
+					:maxlength="4"></t-code-input>
+			</t-form-item>
+			<t-form-item label="手机号(自定义函数校验测试)" prop="phone" direction="column">
+				<t-input v-model="(formData.phone as string)" :maxlength="11" main-class="f" effect="plain"
+					placeholder="请输入手机号" :border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="评分" prop="trate">
+				<t-rate v-model="(formData.trate as number)" main-class="s-60" type="primary"></t-rate>
+			</t-form-item>
+			<t-form-item label="开关" prop="tswitch">
+				<t-switch v-model="(formData.tswitch as boolean)" type="primary" activeIcon="volume-up"
+					inactiveIcon="volume-off"></t-switch>
+			</t-form-item>
+			<t-form-item label="图片上传" prop="tupload">
+				<t-upload v-model="(formData.tupload as string[])" :count="1"></t-upload>
+			</t-form-item>
+			<!-- <t-form-item label="下拉选择(select)-适用于PC端" prop="tselectval" direction="column" main-class="ov z-999">
+				<t-select v-model="(formData.tselectval as string[])" main-class="ov z-999 tdr">
+					<t-select-option v-for="(item,index) in selectOptions" :key="index" :label="item.label"
+						:value="item.value">
+					</t-select-option>
+				</t-select>
+			</t-form-item> -->
+			<t-form-item label="院系" prop="school">
+				<t-picker-custom main-class="f" v-model="(formData.school as string[])" title="请选择院系"
+					:list="school_list">
+				</t-picker-custom>
+			</t-form-item>
+			<t-form-item label="PickerSelect" prop="pickerselectval">
+				<t-picker-select v-model="(formData.pickerselectval as any)" :list="selectlist" valueKey="value"
+					labelKey="label" main-class="f">
+				</t-picker-select>
+			</t-form-item>
+			<t-form-item label="步进器" prop="tnumberbox" main-class="ov">
+				<t-stepper v-model="(formData.tnumberbox as number)" type="s"></t-stepper>
+			</t-form-item>
+			<t-form-item label="slider" prop="slider">
+				<t-slider main-class="f h-160 mb-30 " direction="horizontal" :min="0" :max="500" type="p" blockSize="60"
+					:disabled="false" :showValue="true" trackSize="20" v-model="(formData.slider as number[])"
+					showMode="after" />
+			</t-form-item>
+			<t-form-item label="颜色选择器" prop="color" :bottomLine="false" direction="row">
+				<t-picker-color main-class="" v-model="(formData.color as string)">
+				</t-picker-color>
+			</t-form-item>
+			<t-form-item label="活动时间" prop="activityTime">
+				<t-picker-date main-class="f" v-model="(formData.activityTime as string)" format="yyyy-mm-dd">
+					<!-- 以下为插槽的用法
+					<template v-slot:default="{value}">
+						<t-cell :desc="(value as string[]).length==0?'请选择':(value as string[]).join('')"
+							:border="false"></t-cell>
+					</template> -->
+				</t-picker-date>
+			</t-form-item>
+			<t-form-item label="活动地点" prop="pca">
+				<t-picker-city main-class="" v-model="(formData.pca as string[])" :list="list" title="">
+				</t-picker-city>
+			</t-form-item>
+			{{formData.desc}}
+			<t-form-item label="活动内容" prop="textarea" :bottomLine="false" direction="col">
+				<t-textarea placeholder="请输入活动内容" v-model="(formData.textarea as string)" effect="plain"
+					:border="true"></t-textarea>
+			</t-form-item>
+			<!-- <t-form-item label="日历测试" prop="calendar" :bottomLine="false" direction="col" :show-label="false">
+				<t-calendar :selected="selected" v-model="(formData.calendar as string[])" main-class=""
+					:vertical="false"></t-calendar>
+			</t-form-item> -->
+			<t-form-item label="弹窗日历" prop="calendar1">
+				<t-picker-calendar mode="single" :vertical="false" main-class="f"
+					v-model="(formData.calendar1 as string[])">
+					<!-- 以下为插槽的用法
+					<template v-slot:default="{value}">
+						<t-cell :desc="(value as string[]).length==0?'请选择':(value as string[]).join('')"
+							:border="false"></t-cell>
+					</template> -->
+				</t-picker-calendar>
+			</t-form-item>
+			<t-form-item label="级联表单" prop="cascader" direction="col" :show-label="false">
+				<t-cascader v-model="(formData.cascader  as string[])" type="p" :option="cascaderlist"></t-cascader>
+			</t-form-item>
+			<t-form-item label="文件选择" prop="filemanager" direction="col" :show-label="false">
+				<t-file-manager type="p" v-model="(formData.filemanager  as UTSJSONObject[])"
+					main-class=""></t-file-manager>
+			</t-form-item>
+		</t-form>
+		<t-lazy>
+			<t-col main-class="mt-30 p-30 tdr tdb">
+				<t-button main-class="mb-30" type="primary" @click="submitForm">提交</t-button>
+				<t-button main-class="mb-30" type="s" @click="resetForm">重置</t-button>
+				<t-button type="error" @click="disabled=!disabled">{{disabled?'取消禁用':'禁用表单'}}</t-button>
+			</t-col>
+		</t-lazy>
+	</t-page>
+</template>
+<script>
+	import { TuiApi } from '@/api'
+	import { TuiColorChangeEvent, isPhone, TuiPickerCityChange } from '@/uni_modules/tui-plus'
+	type SelectOptions = {
+		value : string
+		label : string
+		disabled ?: boolean
+	}
+	export default {
+		data() {
+			return {
+				disabled: false,
+				list: [] as UTSJSONObject[],
+				rowsSize: [['35rpx', '600rpx'], ['35rpx', '300rpx'], ['35rpx', '500rpx'], ['35rpx', '400rpx']],
+				apiloading: false,
+				regionList: ['北京', '上海', '重庆'],
+				activeTitle: "请选择活动时间",
+				calendarTitle: "请选择日历",
+				calendarOpen: false,
+				loadings: false,
+				citys: [] as string[],
+				formData: {
+					name: '',
+					desc: '',
+					region: '',
+					activityTime: '',
+					checkbox: [] as string[],
+					tcodeinput: '',
+					tnumberbox: 4,
+					trate: 0,
+					tswitch: true,
+					tupload: [] as string[],
+					tselectval: [] as string[],
+					calendar: ['2025-3-18', '2025-3-28'],
+					calendar1: [] as string[],
+					pca: [] as string[],
+					school: [] as string[],
+					textarea: '',
+					slider: [10, 60, 300],
+					color: '#f56c6c',
+					phone: '',
+					cascader: [] as string[],
+					filemanager: [] as UTSJSONObject[],
+					pickerselectval: ''
+				} as UTSJSONObject,
+				school_list: [
+					[
+						{ "id": "1", "title": "北京大学文学院" },
+						{ "id": "2", "title": "清华大学历史学院" },
+						{ "id": "3", "title": "复旦大学哲学院" },
+						{ "id": "4", "title": "中国人民大学法学院" },
+						{ "id": "5", "title": "上海交通大学经济学院" },
+						{ "id": "6", "title": "浙江大学管理学院" },
+						{ "id": "7", "title": "南京大学教育学院" },
+						{ "id": "8", "title": "北京外国语大学外国语学院" },
+						{ "id": "9", "title": "武汉大学数学科学学院" },
+						{ "id": "10", "title": "华中科技大学物理学院" },
+						{ "id": "11", "title": "西安交通大学化学学院" },
+						{ "id": "12", "title": "四川大学生命科学学院" },
+						{ "id": "13", "title": "电子科技大学计算机科学与技术学院" },
+						{ "id": "14", "title": "北京邮电大学信息科学与技术学院" },
+						{ "id": "15", "title": "南京师范大学地理科学学院" },
+						{ "id": "16", "title": "同济大学环境学院" },
+						{ "id": "17", "title": "北京师范大学心理学院" },
+						{ "id": "18", "title": "华东师范大学体育学院" },
+						{ "id": "19", "title": "中央美术学院美术学院" },
+						{ "id": "20", "title": "中央音乐学院音乐学院" }
+					]
+				],
+				fiellist: [{
+					name: '驾驶证'
+				}, {
+					name: '身份证',
+				}] as UTSJSONObject[],
+				fiellist1: [{
+					name: '合同一',
+				}, {
+					name: '合同二',
+				}] as UTSJSONObject[],
+				selectlist: [{
+					value: '选项1',
+					label: '黄金糕'
+				}, {
+					value: '选项2',
+					label: '双皮奶',
+					disabled: true
+				}, {
+					value: '选项3',
+					label: '蚵仔煎'
+				}, {
+					value: '选项4',
+					label: '龙须面'
+				}, {
+					value: '选项5',
+					label: '北京烤鸭'
+				}],
+				selectOptions: [{
+					value: '选项1',
+					label: '黄金糕'
+				}, {
+					value: '选项2',
+					label: '双皮奶',
+					disabled: true
+				}, {
+					value: '选项3',
+					label: '蚵仔煎'
+				}, {
+					value: '选项4',
+					label: '龙须面'
+				}, {
+					value: '选项5',
+					label: '北京烤鸭'
+				}] as SelectOptions[],
+				rules: {
+					school: [{ type: 'required', message: '院系不能为空' }],
+					phone: [
+						{ type: 'required', message: '手机号不能为空' },
+						// { type: 'length', min: 11, max: 11, message: '手机号长度只能为11位' },
+						{
+							type: 'function',
+							fun: (e : any) : boolean => {
+								return isPhone(`${e}`)
+							},
+							message: '手机号正则验证失败'
+						}
+					],
+					name: [
+						{ type: 'required', message: '请输入活动名称' },
+						{ type: 'length', min: 3, max: 5, message: '字符串长度必须为3-5之间' }
+					],
+					trate: [
+						{ type: 'range', min: 3, max: 5, message: '评分必须为3-5分' },
+					],
+					tupload: [{ type: 'required', message: '图片上传不能为空' }],
+					tselectval: [{ type: 'required', message: '输入不能为空' }],
+					pickerselectval: [{ type: 'required', message: '选择内容不能为空' }],
+					pca: [{ type: 'required', message: '请选择活动地点' }],
+					textarea: [{ type: 'required', message: '活动内容不能为空' }],
+					slider: [{ type: 'required', message: 'slider验证失败' }],
+					color: [{ type: 'required', message: '请选择颜色' }],
+					tswitch: [
+						{ type: 'required', message: 'switch校验必填为空' },
+					],
+					calendar: [
+						{ type: 'required', message: '日历数据不能为空' }
+					],
+					filemanager: [
+						{ type: 'required', message: '请选择文件内容' }
+					],
+					calendar1: [
+						{ type: 'required', message: '日历数据不能为空' }
+					],
+					cascader: [
+						{ type: 'required', message: '请选择级联数据' }
+					],
+					tcodeinput: [
+						{ type: 'required', message: '验证码不能为空' }
+					],
+					desc: [
+						{ type: 'required', message: '请选择活动区域' }
+					],
+					tnumberbox: [
+						{ type: 'required', message: '步进必填验证不能为空' },
+						{ type: 'range', min: 3, max: 5, message: '表单验证为3-5之间' }
+					],
+					checkbox: [
+						{ type: 'required', message: 'checkbox不能为空' }
+					],
+					region: [
+						{ type: 'required', message: '请选择活动区域' }
+					],
+					activityTime: [
+						{ type: 'required', message: '请选择日期' }
+					]
+				} as UTSJSONObject,
+				selected: [
+					{
+						date: '2025-3-17',
+						info: '打折',
+						infoColor: '#00cc81',
+						// topInfo: '一折',
+						// topInfoColor: '#ff5500',
+						badge: true,
+						badgeInfo: '休',
+						badgeColor: '#ff0000',
+						disabled: true
+					},
+					{
+						date: '2025-3-18',
+						info: '爆满',
+						// infoColor: '#ff0000',
+						badge: true,
+						badgeInfo: '',
+						badgeColor: '#00cc81',
+						disabled: true
+					},
+					{
+						date: '2025-3-19',
+						info: '已签到',
+						infoColor: '#ff5500',
+						badge: true,
+						badgeInfo: '16',
+						badgeColor: '#ff0000',
+						disabled: false
+					}
+				],
+				cascaderlist: [
+					{
+						"value": "zhinan",
+						"label": "指南",
+						"children": [
+							{
+								"value": "shejiyuanze",
+								"label": "设计原则",
+								"children": [
+									{
+										"value": "yizhi",
+										"label": "一致",
+										"disabled": true
+									},
+									{
+										"value": "fankui",
+										"label": "反馈"
+									},
+									{
+										"value": "xiaolv",
+										"label": "效率"
+									},
+									{
+										"value": "kekong",
+										"label": "可控"
+									}
+								]
+							},
+							{
+								"value": "daohang",
+								"label": "导航",
+								"children": [
+									{
+										"value": "cexiangdaohang",
+										"label": "侧向导航"
+									},
+									{
+										"value": "dingbudaohang",
+										"label": "顶部导航"
+									}
+								]
+							}
+						]
+					},
+					{
+						"value": "zujian",
+						"label": "组件",
+						"children": [
+							{
+								"value": "basic",
+								"label": "Basic",
+								"children": [
+									{
+										"value": "layout",
+										"label": "Layout 布局"
+									},
+									{
+										"value": "color",
+										"label": "Color 色彩"
+									},
+									{
+										"value": "typography",
+										"label": "Typography 字体"
+									},
+									{
+										"value": "icon",
+										"label": "Icon 图标"
+									},
+									{
+										"value": "button",
+										"label": "Button 按钮"
+									}
+								]
+							},
+							{
+								"value": "form",
+								"label": "Form",
+								"children": [
+									{
+										"value": "radio",
+										"label": "Radio 单选框"
+									},
+									{
+										"value": "checkbox",
+										"label": "Checkbox 多选框"
+									},
+									{
+										"value": "input",
+										"label": "Input 输入框"
+									},
+									{
+										"value": "input-number",
+										"label": "InputNumber 计数器"
+									},
+									{
+										"value": "select",
+										"label": "Select 选择器"
+									},
+									{
+										"value": "cascader",
+										"label": "Cascader 级联选择器"
+									},
+									{
+										"value": "switch",
+										"label": "Switch 开关"
+									},
+									{
+										"value": "slider",
+										"label": "Slider 滑块"
+									},
+									{
+										"value": "time-picker",
+										"label": "TimePicker 时间选择器"
+									},
+									{
+										"value": "date-picker",
+										"label": "DatePicker 日期选择器"
+									},
+									{
+										"value": "datetime-picker",
+										"label": "DateTimePicker 日期时间选择器"
+									},
+									{
+										"value": "upload",
+										"label": "Upload 上传"
+									},
+									{
+										"value": "rate",
+										"label": "Rate 评分"
+									},
+									{
+										"value": "form",
+										"label": "Form 表单"
+									}
+								]
+							},
+							{
+								"value": "data",
+								"label": "Data",
+								"children": [
+									{
+										"value": "table",
+										"label": "Table 表格"
+									},
+									{
+										"value": "tag",
+										"label": "Tag 标签"
+									},
+									{
+										"value": "progress",
+										"label": "Progress 进度条"
+									},
+									{
+										"value": "tree",
+										"label": "Tree 树形控件"
+									},
+									{
+										"value": "pagination",
+										"label": "Pagination 分页"
+									},
+									{
+										"value": "badge",
+										"label": "Badge 标记"
+									}
+								]
+							},
+							{
+								"value": "notice",
+								"label": "Notice",
+								"children": [
+									{
+										"value": "alert",
+										"label": "Alert 警告"
+									},
+									{
+										"value": "loading",
+										"label": "Loading 加载"
+									},
+									{
+										"value": "message",
+										"label": "Message 消息提示"
+									},
+									{
+										"value": "message-box",
+										"label": "MessageBox 弹框"
+									},
+									{
+										"value": "notification",
+										"label": "Notification 通知"
+									}
+								]
+							},
+							{
+								"value": "navigation",
+								"label": "Navigation",
+								"children": [
+									{
+										"value": "menu",
+										"label": "NavMenu 导航菜单"
+									},
+									{
+										"value": "tabs",
+										"label": "Tabs 标签页"
+									},
+									{
+										"value": "breadcrumb",
+										"label": "Breadcrumb 面包屑"
+									},
+									{
+										"value": "dropdown",
+										"label": "Dropdown 下拉菜单"
+									},
+									{
+										"value": "steps",
+										"label": "Steps 步骤条"
+									}
+								]
+							},
+							{
+								"value": "others",
+								"label": "Others",
+								"children": [
+									{
+										"value": "dialog",
+										"label": "Dialog 对话框"
+									},
+									{
+										"value": "tooltip",
+										"label": "Tooltip 文字提示"
+									},
+									{
+										"value": "popover",
+										"label": "Popover 弹出框"
+									},
+									{
+										"value": "card",
+										"label": "Card 卡片"
+									},
+									{
+										"value": "carousel",
+										"label": "Carousel 走马灯"
+									},
+									{
+										"value": "collapse",
+										"label": "Collapse 折叠面板"
+									}
+								]
+							}
+						]
+					},
+					{
+						"value": "ziyuan",
+						"label": "资源",
+						"children": [
+							{
+								"value": "axure",
+								"label": "Axure Components"
+							},
+							{
+								"value": "sketch",
+								"label": "Sketch Templates"
+							},
+							{
+								"value": "jiaohu",
+								"label": "组件交互文档"
+							}
+						]
+					}
+				]
+			}
+		},
+		onLoad() {
+			TuiApi('citydata', {}, false).then(res => {
+				this.list = res.getArray('data') as UTSJSONObject[]
+			})
+		},
+		methods: {
+			dateConfirm(e : UTSJSONObject) {
+				this.formData.activityTime = e.getString('time')!
+			},
+			cityConfirm(e : TuiPickerCityChange) { },
+			colorConfirm(e : TuiColorChangeEvent) {
+				this.formData.color = e.hex
+			},
+			calendarConfirm(e : string[]) {
+				if (e.length > 0) this.calendarTitle = e[0]
+			},
+			submitForm() {
+				const validate : boolean = (this.$refs['ruleForm'] as ComponentPublicInstance).$callMethod('validate') as boolean
+				if (validate) {
+					console.log(this.formData)
+					uni.showModal({
+						title: '数据提交成功'
+					})
+					this.disabled = !this.disabled
+				} else {
+					uni.showModal({
+						title: '数据校验失败'
+					})
+				}
+			},
+			resetForm() {
+				(this.$refs['ruleForm'] as ComponentPublicInstance).$callMethod('reset')
+			}
+		}
+	}
+</script>

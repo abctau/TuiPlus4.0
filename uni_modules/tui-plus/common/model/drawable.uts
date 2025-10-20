@@ -1,0 +1,269 @@
+import { getPx, TuiMeasureText } from "./util.uts"
+export class TuiDrawableContext {
+	// #ifdef APP
+	private ctx : DrawableContext
+	// #endif
+	// #ifndef APP
+	private ctx : CanvasRenderingContext2D
+	// #endif
+	private el : UniElement | null = null
+	private fontSize = 10
+	private component : ComponentPublicInstance | null
+	private taskId : number = 0
+	private canvas : any
+	constructor(draw : ComponentPublicInstance, ctx : any, canvasEl : any | null = null) {
+		this.component = draw
+		// #ifdef APP
+		this.ctx = ctx as DrawableContext
+		// #endif
+		// #ifndef APP
+		this.ctx = ctx as CanvasRenderingContext2D
+		// #endif
+		this.canvas = canvasEl!
+		this.el = draw.$el as UniElement | null
+	}
+	get font() : string {
+		return this.ctx.font as string
+	}
+	set font(size : string) {
+		const _size = getPx(size)
+		this.fontSize = _size
+		this.ctx.font = `${_size}px Arial`
+	}
+	get fillStyle() : string {
+		return this.ctx.fillStyle as string
+	}
+	set fillStyle(color : string) {
+		this.ctx.fillStyle = color
+	}
+	measureText(e : string) : number {
+		return TuiMeasureText(e, this.fontSize)
+	}
+	get lineCap() : any {
+		return this.ctx.lineCap
+	}
+	set lineCap(cap : any) {
+		// #ifdef APP
+		this.ctx.lineCap = cap as string
+		// #endif
+		// #ifndef APP
+		this.ctx.lineCap = cap as CanvasLineCap
+		// #endif
+	}
+	get lineDashOffset() : number {
+		return this.ctx.lineDashOffset as number
+	}
+	set lineDashOffset(tran : number) {
+		this.ctx.lineDashOffset = tran
+	}
+	get lineJoin() : any {
+		return this.ctx.lineJoin
+	}
+	set lineJoin(join : any) {
+		// #ifdef APP
+		this.ctx.lineJoin = join as string
+		// #endif
+		// #ifndef APP
+		this.ctx.lineJoin = join as CanvasLineJoin
+		// #endif
+	}
+	get lineWidth() : number {
+		return this.ctx.lineWidth as number
+	}
+	set lineWidth(width : number) {
+		this.ctx.lineWidth = width
+	}
+	get strokeStyle() : string {
+		return this.ctx.strokeStyle as string
+	}
+	set strokeStyle(color : string) {
+		this.ctx.strokeStyle = color
+	}
+	get textAlign() : any {
+		return this.ctx.textAlign
+	}
+	set textAlign(align : any) {
+		// #ifdef APP
+		this.ctx.textAlign = align as string
+		// #endif
+		// #ifndef APP
+		this.ctx.textAlign = align as CanvasTextAlign
+		// #endif
+	}
+	beginPath() {
+		this.ctx.beginPath()
+	}
+	arc(x : number, y : number, radius : number, startAngle : number, endAngle : number, anticlockwise : boolean = false) {
+		this.ctx.arc(x, y, radius, startAngle, endAngle, anticlockwise)
+	}
+	moveTo(x : number, y : number) {
+		this.ctx.moveTo(x, y)
+	}
+	rect(x : number, y : number, width : number, height : number) {
+		this.ctx.rect(x, y, width, height)
+	}
+	//空心圆角矩形
+	roundRect(x : number, y : number, width : number, height : number, radius : number) {
+		this.ctx.moveTo((x + radius), y);
+		this.ctx.lineTo((x + width - radius), y);
+		this.ctx.arc((x + width - radius), (y + radius), radius, -Math.PI / 2, 0, false);
+		this.ctx.lineTo((x + width), (y + height - radius));
+		this.ctx.arc((x + width - radius), (y + height - radius), radius, 0, Math.PI / 2, false);
+		this.ctx.lineTo((x + radius), (y + height));
+		this.ctx.arc((x + radius), (y + height - radius), radius, Math.PI / 2, Math.PI, false);
+		this.ctx.lineTo(x, (y + radius));
+		this.ctx.arc((x + radius), (y + radius), radius, Math.PI, -Math.PI / 2, false);
+	}
+	//实心圆角矩形
+	roundFillRect(x : number, y : number, width : number, height : number, radius : number) {
+		let ctx = this.ctx
+		// #ifdef APP || MP
+		ctx.moveTo((x + radius), y);
+		ctx.arc((x + width - radius), (y + radius), radius, 0, Math.PI * 2, false);
+		ctx.arc((x + width - radius), (y + height - radius), radius, 0, Math.PI * 2, false);
+		ctx.arc((x + radius), (y + height - radius), radius, 0, Math.PI * 2, false);
+		ctx.arc((x + radius), (y + radius), radius, 0, Math.PI * 2, false);
+		ctx.rect(x + radius, y, width - radius - radius, height)
+		ctx.rect(x, y + radius, width, height - radius - radius)
+		// #endif
+		// #ifdef WEB
+		ctx.roundRect(x, y, width, height, radius)
+		// #endif
+		ctx.fill();
+	}
+	lineTo(x : number, y : number) {
+		this.ctx.lineTo(x, y)
+	}
+	closePath() {
+		this.ctx.closePath()
+	}
+	stroke() {
+		this.ctx.stroke()
+	}
+	strokeRect(x : number, y : number, width : number, height : number) {
+		this.ctx.strokeRect(x, y, width, height)
+	}
+	strokeText(text : string, x : number, y : number) {
+		this.ctx.strokeText(text, x, y)
+	}
+	fill(fillRule : string = 'nonzero') {
+		// #ifdef APP
+		this.ctx.fill(fillRule)
+		// #endif
+		// #ifndef APP
+		this.ctx.fill()
+		// #endif
+	}
+	fillRect(x : number, y : number, width : number, height : number) {
+		this.ctx.fillRect(x, y, width, height)
+	}
+	fillText(text : string, x : number, y : number) {
+		this.ctx.fillText(text, x, y)
+	}
+	reset() {
+		// #ifndef APP
+		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.width)
+		// #endif
+		// #ifdef APP
+		this.ctx.reset()
+		this.component?.$callMethod('reset')
+		// #endif
+	}
+	update() {
+		// #ifdef APP
+		this.ctx.update()
+		// #endif
+	}
+	setLineDash(segments : number[]) {
+		this.ctx.setLineDash(segments)
+	}
+	bezierCurveTo(cp1x : number, cp1y : number, cp2x : number, cp2y : number, x : number, y : number) {
+		this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+	}
+	takeSnapshot() : Promise<TakeSnapshotSuccess> {
+		return new Promise((
+			resolve : (res : TakeSnapshotSuccess) => void,
+			reject : (err : Error) => void
+		) => {
+			// #ifdef APP
+			this.el?.takeSnapshot({
+				success: (res) => {
+					resolve(res)
+				},
+				fail: function (_) {
+					reject(new Error(`截图失败`))
+				}
+			})
+			// #endif
+			// #ifndef APP
+			const dataBase64 = (this.canvas as CanvasContext).toDataURL()
+			resolve({ tempFilePath: dataBase64 } as TakeSnapshotSuccess)
+			// #endif
+		})
+	}
+	drawImage(url : string, dx : number, dy : number, dWidth : number, dHeight : number) {
+		// #ifndef APP
+		const image = this.canvas!.createImage();
+		image.src = url
+		image.onload = () => {
+			this.ctx.drawImage(image, 0, 0, 100, 100)
+		}
+		// #endif
+		// #ifdef APP
+		this.component?.$callMethod('drawImage', url, dx, dy, dWidth, dHeight)
+		// #endif
+	}
+	createLinearGradient(x0 : number, y0 : number, x1 : number, y1 : number) {
+		// #ifndef APP
+		const grd = this.ctx.createLinearGradient(0, 0, 150, 150)
+		grd.addColorStop(0, 'red')
+		grd.addColorStop(1, 'white')
+		this.ctx.fillStyle = grd
+		this.ctx.fillRect(10, 10, 150, 80)
+		// #endif
+	}
+	get width() : number {
+		// #ifdef MP
+		return this.canvas._width
+		// #endif
+		// #ifndef MP
+		return this.el?.getBoundingClientRect()?.width as number
+		// #endif
+	}
+	set width(w : number) {
+		this.el?.style?.setProperty('width', `${w}px`)
+	}
+	get height() : number {
+		// #ifdef MP
+		return this.canvas._height
+		// #endif
+		// #ifndef MP
+		return this.el?.getBoundingClientRect()?.height as number
+		// #endif
+	}
+	set height(h : number) {
+		this.el?.style?.setProperty('width', `${h}px`)
+	}
+	requestAnimationFrame(callback : () => void) {
+		if (this.taskId != 0) this.cancelAnimationFrame()
+		// #ifndef APP
+		this.taskId = this.canvas.requestAnimationFrame((timestamp : number) => {
+			callback()
+		})
+		// #endif
+		// #ifdef APP
+		this.taskId = requestAnimationFrame((timestamp : number) => {
+			callback()
+		})
+		// #endif
+	}
+	cancelAnimationFrame() {
+		// #ifndef APP
+		this.canvas.cancelAnimationFrame(this.taskId)
+		// #endif
+		// #ifdef APP
+		cancelAnimationFrame(this.taskId)
+		// #endif
+		this.taskId = 0
+	}
+}

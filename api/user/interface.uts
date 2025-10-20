@@ -1,0 +1,11 @@
+import { ApiResponse } from '../interface'
+export type loginPasswordData = {
+	token : string;
+	user : UTSJSONObject;
+}
+export type SignData = {
+	privateId : string
+	publicKey : string
+}
+export type loginPasswordResponse = ApiResponse<loginPasswordData>;
+export type signResponse = ApiResponse<SignData>;

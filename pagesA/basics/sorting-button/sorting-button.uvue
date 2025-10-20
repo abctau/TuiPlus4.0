@@ -1,0 +1,35 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="SortingButton" sub-title="升序降序按钮"></t-card>
+		<t-section main-class="tdb-tdr-mtlr-30" title="基础功能+主题展示" type='p'></t-section>
+		<t-row main-class="mb-30 tdr tdb mt-30 tdp">
+			<t-sorting-button main-class="mrb-15" :state="sort" type="p" @change="sortChange"></t-sorting-button>
+			<t-sorting-button main-class="mrb-15" type="success" :state="sort"></t-sorting-button>
+			<t-sorting-button main-class="mrb-15" type="error" :state="sort"></t-sorting-button>
+			<t-sorting-button main-class="mrb-15" type="warning" :state="sort"></t-sorting-button>
+		</t-row>
+		<t-section main-class="tdb-tdr-mtlr-30" title="自定义样式" type='p'></t-section>
+		<t-row main-class="mb-30 tdr tdb mt-30 tdp">
+			<t-sorting-button prefixIcon="arrow-up-fill" main-class="mrb-15" suffixIcon="arrow-down-fill" type="s"
+				:state="sort"></t-sorting-button>
+			<t-sorting-button prefixIcon="arrow-up-fill" main-class="mrb-15" suffixIcon="arrow-down-fill"
+				type="error" :state="sort"></t-sorting-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				sortType: ['默认状态', '升序', '降序'],
+				sort: 1,
+			};
+		},
+		methods: {
+			sortChange(e : number) {
+				console.log(e)
+			}
+		},
+	}
+</script>

@@ -1,0 +1,85 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Picker 选择容器" sub-title="Canvas绘制更快渲染速度,自研滚动算法不会在滚动结束的时候回弹"></t-card>
+		<t-card main-class="mb-30" title="提示" sub-title="embeddable控制是弹窗显示还是嵌入到页面显示"></t-card>
+		<t-section title='基础使用' main-class="mb-30"></t-section>
+		<t-picker-custom v-model="pickerIds" :list="list" @change="pickerchange" :embeddable="true">
+		</t-picker-custom>
+		<t-text main-class="tdr tdb tdp mb-30">值：{{pickerIds.join('-')}}</t-text>
+		<t-button @click="test" main-class="mb-30" type="primary">双向绑定测试</t-button>
+		<t-picker-custom main-class="tdr mb-30" v-model="pickerIds1" :list="list" @change="pickerchange" :embeddable="false"
+			title="学院" label="弹窗测试">
+		</t-picker-custom>
+		<t-text main-class="tdr tdb tdp mb-30">值：{{pickerIds1.join('-')}}</t-text>
+		<t-button @click="test1" main-class="mb-30" type="primary">双向绑定测试</t-button>
+		<t-section title='数据关联用法见日期选择和城市选择组件' main-class="mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-button type="p" main-class="mb-30 " path="/pagesA/form/datetime-picker/datetime-picker">日期选择组件</t-button>
+			<t-button type='s' path="/pagesA/form/pca-picker/pca-picker">城市选择组件</t-button>
+		</t-col>
+	</t-page>
+</template>
+<script setup>
+	const pickerIns = ref<TPickerComponentPublicInstance | null>(null)
+	const direction = ref<string>('vertical')
+	const list = ref<UTSJSONObject[][]>([]);
+	const pickerIds1 = ref<string[]>(['20', '33'])
+	const pickerIds = ref<string[]>([])
+	const pickerValue = ref<string[]>([])
+	function pickerchange(e : UTSJSONObject) {
+		console.log('pickerchange')
+	}
+	function test() {
+		pickerIds.value = ['20', '33']
+	}
+	function test1() {
+		pickerIds1.value = []
+	}
+	onLoad(() => {
+		uni.showLoading({
+			title:'接口模拟'
+		})
+		setTimeout(() => {
+			uni.hideLoading()
+			list.value = [
+				[
+					{ "id": "1", "title": "北京大学" },
+					{ "id": "2", "title": "清华大学历" },
+					{ "id": "3", "title": "复旦大学" },
+					{ "id": "4", "title": "中国人民大学" },
+					{ "id": "5", "title": "上海交通大学" },
+					{ "id": "6", "title": "浙江大学" },
+					{ "id": "7", "title": "南京大学" },
+					{ "id": "8", "title": "北京外国语大学" },
+					{ "id": "9", "title": "武汉大" },
+					{ "id": "10", "title": "华中科技大学" },
+					{ "id": "11", "title": "西安交通大学" },
+					{ "id": "12", "title": "四川科学学院" },
+					{ "id": "13", "title": "电子科技大" },
+					{ "id": "14", "title": "暨南大学" },
+					{ "id": "15", "title": "中南大学" },
+					{ "id": "16", "title": "河北工业大学" },
+					{ "id": "17", "title": "苏州大学" },
+					{ "id": "18", "title": "武汉理工大学" },
+					{ "id": "19", "title": "福州大学" },
+					{ "id": "20", "title": "暨南大学" }
+				],
+				[
+					{ "id": "21", "title": "北人事处" },
+					{ "id": "22", "title": "教务处" },
+					{ "id": "23", "title": "外事办公室" },
+					{ "id": "24", "title": "财务处" },
+					{ "id": "25", "title": "后勤管理处" },
+					{ "id": "26", "title": "浙江大学图书馆" },
+					{ "id": "27", "title": "信息中心" },
+					{ "id": "28", "title": "宣传部" },
+					{ "id": "29", "title": "学生工作部" },
+					{ "id": "30", "title": "研究生院" },
+					{ "id": "31", "title": "国际合作处" },
+					{ "id": "32", "title": "保卫处" },
+					{ "id": "33", "title": "网络与信息中心" },
+				]
+			]
+		}, 1000)
+	})
+</script>

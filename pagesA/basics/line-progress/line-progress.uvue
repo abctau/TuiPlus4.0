@@ -1,0 +1,85 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class='mb-30' title="ProgressLine 线形进度条"
+			sub-title='组件以直观的视觉方式展示进度百分比，支持自定义颜色、显示比例文本.'></t-card>
+		<t-section title="操作" main-class="mb-30"></t-section>
+		<t-row main-class="tdr tdp tdb mb-30">
+			<t-button type="primary" main-class="mr-15 f" @click="increase">增加</t-button>
+			<t-button type="warn" main-class="f" @click="reduce">减少</t-button>
+		</t-row>
+		<template v-if="area==1">
+			<t-section title="基础功能+主题展示" main-class="mb-30"></t-section>
+			<t-col main-class="tdr tdp tdb mb-30">
+				<t-progress-line main-class="mb-25" :percent="percent" type="info"></t-progress-line>
+				<t-progress-line main-class="mb-25 h-150 r-150" :percent="percent" type="success"></t-progress-line>
+				<t-progress-line main-class="mb-25" :percent="percent" type="error"></t-progress-line>
+				<t-progress-line main-class="mb-25" :percent="percent" type="primary"></t-progress-line>
+				<t-progress-line :percent="percent" type="warning"></t-progress-line>
+			</t-col>
+		</template>
+		<template v-if="area==2">
+			<t-section title="显示百分比" main-class="mb-30"></t-section>
+			<t-row main-class="faic tdp tdb">
+				<t-progress-line main-class="f mr-10" :percent="percent" type="success"></t-progress-line>
+				<t-text>{{percent}}%</t-text>
+			</t-row>
+		</template>
+		<template v-if="area==3">
+			<t-section title="显示百分比" main-class="mb-30"></t-section>
+			<t-col>
+				<t-progress-line main-class="mb-25 r-5" :showPercentage="true" :percent="percent"
+					type="info"></t-progress-line>
+				<t-progress-line main-class="mb-25 r-8" :showPercentage="true" :percent="percent"
+					type="success"></t-progress-line>
+				<t-progress-line main-class="mb-25 r-10" :showPercentage="true" :percent="percent"
+					type="error"></t-progress-line>
+				<t-progress-line main-class="mb-25 r-12" :showPercentage="true" :percent="percent"
+					type="primary"></t-progress-line>
+				<t-progress-line :showPercentage="true" :percent="percent" type="warning"></t-progress-line>
+			</t-col>
+		</template>
+		<template v-if="area==4">
+			<t-section title="设置宽度" main-class="mb-30"></t-section>
+			<t-col>
+				<t-progress-line main-class="w-100 mb-25" :percent="percent" type="success"></t-progress-line>
+				<t-progress-line main-class="w-200 mb-25" :percent="percent" type="error"></t-progress-line>
+				<t-progress-line main-class="w-300 mb-25" :percent="percent" type="primary"></t-progress-line>
+				<t-progress-line main-class="w-400" :percent="percent" type="warning"></t-progress-line>
+			</t-col>
+		</template>
+		<template v-if="area==5">
+			<t-section title="自定义颜色" main-class="mb-30"></t-section>
+			<t-col>
+				<t-progress-line activeColor="#19be6b" inactiveColor="#f56c6c" :percent="percent"
+					type="success"></t-progress-line>
+			</t-col>
+		</template>
+		<t-row main-class='fww tdb tdr tdp'>
+			<t-button type="p" main-class="mrb-30" size="small" @click="area=1">基础功能+主题</t-button>
+			<t-button type="e" main-class="mrb-30" size="small" @click="area=2">显示百分比</t-button>
+			<t-button type="s" main-class="mrb-30" size="small" @click="area=3">显示百分比</t-button>
+			<t-button type="w" main-class="mrb-30" size="small" @click="area=4">设置宽度</t-button>
+			<t-button type="p" main-class="mrbs-30" size="small" @click="area=5">自定义颜色</t-button>
+		</t-row>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				percent: 50,
+				area: 1
+			};
+		},
+		methods: {
+			increase() {
+				this.percent = this.percent + 10
+				if (this.percent > 100) this.percent = 100
+			},
+			reduce() {
+				this.percent = this.percent - 10
+				if (this.percent < 0) this.percent = 0
+			}
+		}
+	}
+</script>

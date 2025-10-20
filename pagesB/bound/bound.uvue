@@ -1,0 +1,54 @@
+<template>
+	<t-page :scroll-disabled="true" main-class="tvg">
+		<t-form main-class="tdp ov" ref="ruleForm" :rules="rules" child-class="pt-20" direction="column" headerClass="mb-20"
+			:bottom-line="false">
+			<t-form-item label="手机号" prop="phone">
+				<t-input v-model="(formData.phone as string)" main-class="f r-150" placeholder="请输入手机号"
+					:border="true"></t-input>
+			</t-form-item>
+			<t-form-item label="验证码" prop="code">
+				<t-row main-class="b b-1px,s,#e4e7ed r-150">
+					<t-input v-model="(formData.code as string)" main-class="f r-150" placeholder="请输入验证码"
+						:border="false"></t-input>
+					<t-code type="p" size="mini" main-class="r24-150 r13-0"></t-code>
+				</t-row>
+			</t-form-item>
+			<t-form-item label="密码" prop="password">
+				<t-input v-model="(formData.password as string)" main-class="f r-150" placeholder="请输入手机号"
+					:border="true"></t-input>
+			</t-form-item>
+			<t-form-item label="确认密码" prop="confirmPassword">
+				<t-input v-model="(formData.confirmPassword as string)" main-class="f r-150" placeholder="请输入手机号"
+					:border="true"></t-input>
+			</t-form-item>
+		</t-form>
+		<t-button type="p" main-class="m-30 r-150" @click="bindphone">确认</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	import { isPhone } from '@/uni_modules/tui-plus'
+	const formData = ref<UTSJSONObject>({
+		phone: '',
+		code: '',
+		password: '',
+		confirmPassword: ''
+	})
+	const rules = {
+		phone: [
+			{ type: 'required', message: '手机号不能为空' },
+			{
+				type: 'function',
+				fun: (e : any) : boolean => {
+					return isPhone(`${e}`)
+				},
+				message: '手机号正则验证失败'
+			}
+		]
+	}
+	function bindphone() {
+		uni.showModal({
+			title: '绑定成功'
+		})
+	}
+</script>

@@ -1,0 +1,219 @@
+
+/** 链接验证
+ * @param {string} url
+ * @returns {Boolean}
+ */
+export function isURL(url : string) : boolean {
+	const reg = /^((https|http|ftp|rtsp|mms):\/\/)(([0-9a-zA-Z_!~*'().&=+$%-]+: )?[0-9a-zA-Z_!~*'().&=+$%-]+@)?(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-zA-Z_!~*'()-]+.)*([0-9a-zA-Z][0-9a-zA-Z-]{0,61})?[0-9a-zA-Z].[a-zA-Z]{2,6})(:[0-9]{1,4})?((\/?)|(\/[0-9a-zA-Z_!~*'().;?:@&=+$,%#-]+)+\/?)$/
+	return reg.test(url)
+}
+
+/**
+ * 验证十进制数字
+ */
+export const isNumber = (value : string) : boolean => {
+	return /^[\+-]?(\d+\.?\d*|\.\d+|\d\.\d+e\+\d+)$/.test(value)
+}
+
+/** 字母验证
+ * @param {string} str
+ * @returns {Boolean}
+ */
+export function isAbc(str : string) : boolean {
+	const reg = /^[A-Za-z]+$/
+	return reg.test(str)
+}
+
+/** 字母或数字验证
+ * @param {string} str
+ * @returns {Boolean}
+ */
+export function isAbcNum(str : string) : boolean {
+	const reg = /^[0-9a-zA-Z]*$/g
+	return reg.test(str)
+}
+
+/** 中文验证
+ * @param {string} str
+ * @returns {Boolean}
+ */
+export function isChinese(str : string) : boolean {
+	const reg = /[\u4E00-\u9FA5]/g
+	return reg.test(str)
+}
+
+/** 邮箱验证
+ * @param {string} email
+ * @returns {Boolean}
+ */
+export function isEmail(email : string) : boolean {
+	const reg = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/
+	return reg.test(email)
+}
+
+/** 电话验证
+ * @param {string} phone
+ * @returns {Boolean}
+ */
+export function isPhone(phone : string) : boolean {
+	const reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/
+	return reg.test(phone)
+}
+
+/** 固定电话验证
+ * @param {string} phone
+ * @returns {Boolean}
+ */
+export function isLandline(phone : string) : boolean {
+	const reg = /^\d{3,4}-\d{7,8}(-\d{3,4})?$/
+	return reg.test(phone)
+}
+
+
+/**
+ * 验证身份证号码
+ */
+export function isIdcard(value : string) : boolean {
+	return /^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$/.test(value)
+}
+
+/** 图片验证
+ * @param {string} url
+ * @returns {boolean}
+ */
+export function isImage(url : string) : boolean {
+	const reg = /\.(jpeg|jpg|gif|png|svg|webp|jfif|bmp|dpg)/i
+	return reg.test(url.split('?')[0])
+}
+
+/** 视频验证
+ * @param {string} url
+ * @returns {boolean}
+ */
+export function isVideo(url : string) : boolean {
+	const reg = /\.(mp4|mpg|mpeg|dat|asf|avi|rm|rmvb|mov|wmv|flv|mkv|m3u8)/i
+	return reg.test(url.split('?')[0])
+}
+
+/** 车牌号验证
+ * @param {string} no
+ * @returns {boolean}
+ */
+export function isCarNo(no : string) : boolean {
+	// 新能源车牌
+	const xreg = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF]$)|([DF][A-HJ-NP-Z0-9][0-9]{4}$))/
+
+	// 车牌
+	const creg = /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1}$/
+
+	if (no.length == 7) {
+		return creg.test(no)
+	} if (no.length == 8) {
+		return xreg.test(no)
+	}
+
+	return false
+}
+//判断奇偶数
+export function isEven(num : number) : boolean {
+	if (num % 2 == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * 检查是否为正确的 RGB 颜色值
+ * @param r 红色
+ * @param g 绿色
+ * @param b 蓝色
+ * @returns boolean
+ */
+export function isRGB(r : number, g : number, b : number) : boolean {
+	// 检查输入的 RGB 值是否有效
+	if (
+		isNaN(r) ||
+		isNaN(g) ||
+		isNaN(b) ||
+		r < 0 ||
+		r > 255 ||
+		g < 0 ||
+		g > 255 ||
+		b < 0 ||
+		b > 255
+	) {
+		return false;
+	}
+
+	return true;
+};
+
+/**
+ * 检查是否为正确的 HSV 颜色值
+ * @param h [0, 360]
+ * @param s [0, 1]
+ * @param v [0, 1]
+ * @returns boolean
+ */
+export function isHSV(h : number, s : number, v : number) : boolean {
+	// 检查输入的 HSV 值是否有效
+	if (
+		isNaN(h) ||
+		isNaN(s) ||
+		isNaN(v) ||
+		h < 0 ||
+		h > 360 ||
+		s < 0 ||
+		s > 1 ||
+		v < 0 ||
+		v > 1
+	) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * 检查是否为正确的 HSL 颜色值
+ * @param h [0, 360]
+ * @param s [0, 1]
+ * @param l [0, 1]
+ * @returns boolean
+ */
+export function isHSL(h : number, s : number, l : number) : boolean {
+	// 检查输入的 HSV 值是否有效
+	if (
+		isNaN(h) ||
+		isNaN(s) ||
+		isNaN(l) ||
+		h < 0 ||
+		h > 360 ||
+		s < 0 ||
+		s > 1 ||
+		l < 0 ||
+		l > 1
+	) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * 检查一个字符串是否为有效的颜色值。
+ * 支持的颜色格式包括CSS预定义的颜色名称（如'blue'）、十六进制颜色码（如'#000'或'#ffffff'）、
+ * RGB颜色（如'rgb(255, 255, 255)'）和RGBA颜色（如'rgba(255, 255, 255, 0.5)'）。
+ *
+ * @param {ColorString} color - 要检查的颜色值字符串。
+ * @returns {boolean} 如果字符串是一个有效的颜色值，则返回true，否则返回false。
+ */
+export function isColor(color : string) : boolean {
+	// 正则表达式用于匹配不同的颜色格式
+	const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+	const rgbRegex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+	const rgbaRegex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d*(?:\.\d+)?)\)$/;
+	// 检查是否匹配任何颜色格式
+	return hexRegex.test(color) || rgbRegex.test(color) || rgbaRegex.test(color);
+}

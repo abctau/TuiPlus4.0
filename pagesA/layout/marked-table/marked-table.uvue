@@ -1,0 +1,69 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="MarkedTable 富文本表格" main-class="mb-30" sub-title="t-marked的子组件，也可以单独当成表格使用，使用方法类似html中的table使用方法"></t-card>
+		<t-scroll direction="horizontal" main-class="mb-30">
+			<t-marked-table align="center" main-class="tdr" :stripe="stripe" :border="true">
+				<t-marked-tr>
+					<t-marked-th>姓名</t-marked-th>
+					<t-marked-th align="center">性别</t-marked-th>
+					<t-marked-th align="right">年龄</t-marked-th>
+					<t-marked-th width="260">时间</t-marked-th>
+				</t-marked-tr>
+				<t-scroll main-class="h-400px">
+					<t-marked-tr v-for="(item, index) in huilvList" :key="index">
+						<t-marked-td>{{ item.name?? '' }}</t-marked-td>
+						<t-marked-td>{{ item.gender ?? '' }}</t-marked-td>
+						<t-marked-td>{{ item.age ?? '' }}</t-marked-td>
+						<t-marked-td>{{ item.updateTime ?? '' }}</t-marked-td>
+					</t-marked-tr>
+				</t-scroll>
+			</t-marked-table>
+		</t-scroll>
+		<t-button @click="test" type="primary">test</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	const stripe = ref<boolean>(true)
+	const huilvList = ref<UTSJSONObject[]>([
+		{
+			name: '张三',
+			gender: '男',
+			age: 25,
+			updateTime: '2023-01-01'
+		},
+		{
+			name: '李四',
+			gender: '女',
+			age: 30,
+			updateTime: '2023-01-02'
+		},
+		{
+			name: '王五',
+			gender: '男',
+			age: 28,
+			updateTime: '2023-01-03'
+		},
+		{
+			name: '赵六',
+			gender: '女',
+			age: 22,
+			updateTime: '2023-01-04'
+		},
+		{
+			name: '孙七',
+			gender: '男',
+			age: 35,
+			updateTime: '2023-01-05'
+		},
+		{
+			name: '周八',
+			gender: '女',
+			age: 29,
+			updateTime: '2023-01-06'
+		}
+	]);
+	function test() {
+		stripe.value = !stripe.value
+	}
+</script>

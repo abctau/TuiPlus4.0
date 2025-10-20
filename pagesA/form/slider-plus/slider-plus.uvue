@@ -1,0 +1,25 @@
+<template>
+	<t-page title="slider 滑块升级版" main-class="p-30">
+		<t-card title='SliderPlus 滑块升级版' sub-title="canvas绘制丝滑不卡,支持显示百分比或者显示值,支持多滑块,滑块数据取决于绑定value值数组的长度"
+			main-class="mb-30"></t-card>
+		<t-section main-class="mb-30" title="显示值"></t-section>
+		<t-slider main-class="tdr tdb h-260 mb-30" direction="horizontal" :min="0" :max="500" type="p" blockSize="60"
+			:disabled="false" :showValue="true" trackSize="20" v-model="values" showMode="after" />
+		<t-section main-class="mb-30" title="显示百分比"></t-section>
+		<t-slider main-class="tdr tdb h-260 mb-30" direction="horizontal" type="p" blockSize="50" :disabled="false"
+			trackSize="5" :modelValue="[0]" />
+		<t-section main-class="mb-30" title="防止文本超出边界"></t-section>
+		<t-slider main-class="tdr tdb h-260 mb-30" :min="999999999" :max="99999999999" direction="horizontal" type="p"
+			:showValue="true" blockSize="50" :disabled="false" trackSize="5" :modelValue="[999999999, 99999999999]" />
+		<t-row main-class="mb-30">
+			<t-slider main-class="tdr tdb h-600 w-260 mr-30" :min="0" :max="500" :modelValue="[0, 105, 250]"
+				direction="vertical" type="e" showMode="after" blockSize="50" trackSize="10" />
+			<t-slider main-class="tdr tdb h-600 w-260" :min="0" :max="500" :modelValue="[0, 105, 250]"
+				direction="vertical" type="s" blockSize="50" trackSize="10" />
+		</t-row>
+	</t-page>
+</template>
+
+<script setup>
+	const values = ref([0, 105, 500])
+</script>

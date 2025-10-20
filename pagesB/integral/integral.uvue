@@ -1,0 +1,164 @@
+<template>
+	<t-page :scroll-disabled="true">
+		<t-navbar title="我的积分" right-text="规则" main-class="bgn" title-class="c-#fff" right-text-class="c-#fff"
+			back-icon-class="c-#fff" :placeholder="false" @right-click="test"></t-navbar>
+		<t-col main-class="bir-#0356fa,#05abff tdb w-100% h-460">
+			<t-image src="/static/my/qbg.png" main-class="da dlbr-0 h-220 z-0 w-100%" :loading="false"></t-image>
+			<t-view main-class="ml-100 mt-150">
+				<t-status-bar></t-status-bar>
+				<t-text main-class="c-#fff mb-10 ml-20">可用积分</t-text>
+				<t-text main-class="c-#fff s-80 sfwb mb-30">60005</t-text>
+				<t-text main-class="c-#fff ml-20">累计积分12026</t-text>
+			</t-view>
+			<t-button type="s" main-class="da dr-50 db-130 r-150 bg-rgba(0, 170, 0, 0.3)" text-class="sfwb"
+				@click="test">兑换</t-button>
+		</t-col>
+		<t-view main-class="f mlr-30 tvg ov">
+			<t-tabs main-class="tdr tvg mt-n60" size="l" :current="current" @change="ontabschange" type="p"
+				:scrollable="true">
+				<t-tabs-item v-for="(item,i) in tabsList" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-list main-class="f">
+				<t-list-item v-for="(item,index) in integralList" :key="index">
+					<t-row main-class="faic fjcb bb-1px,s,#fff h-130 plr-40">
+						<t-view>
+							<t-text main-class="sfwb mb-15">{{item.activity}}</t-text>
+							<t-text type="info" size="small">{{item.date}}</t-text>
+						</t-view>
+						<t-row>
+							<t-text main-class="sfwb" v-if="item.pointsEarned>0" type="e">+</t-text>
+							<t-text :type="item.pointsEarned>0?'e':'s'" main-class='sfwb'>{{item.pointsEarned}}</t-text>
+						</t-row>
+					</t-row>
+				</t-list-item>
+			</t-list>
+		</t-view>
+	</t-page>
+</template>
+
+<script setup>
+	type TuiTabsOption = {
+		disabled ?: boolean
+		dot ?: boolean
+		title : string
+		value ?: number
+	}
+	type IntegralDetailsType = {
+		id : string
+		userId : string
+		schoolId : string
+		activity : string
+		pointsEarned : number
+		date : string
+	}
+	const current = ref<number>(0)
+	const tabsList = [{
+		"title": "积分明细",
+		"disabled": false,
+		"dot": false,
+		"value": 0
+	},
+	{
+		"title": "兑换记录",
+		"disabled": false,
+		"dot": false,
+		"value": 0
+	}] as TuiTabsOption[]
+	const integral_details = ref<IntegralDetailsType[]>([
+		{
+			"id": "1",
+			"userId": "user123",
+			"schoolId": "school001",
+			"activity": "参与校园活动",
+			"pointsEarned": 50,
+			"date": "2023-09-15"
+		},
+		{
+			"id": "2",
+			"userId": "user456",
+			"schoolId": "school002",
+			"activity": "兑换礼物",
+			"pointsEarned": -30,
+			"date": "2023-09-16"
+		},
+		{
+			"id": "3",
+			"userId": "user789",
+			"schoolId": "school003",
+			"activity": "志愿者服务",
+			"pointsEarned": 70,
+			"date": "2023-09-17"
+		},
+		{
+			"id": "4",
+			"userId": "user123",
+			"schoolId": "school001",
+			"activity": "参加学术讲座",
+			"pointsEarned": 40,
+			"date": "2023-09-18"
+		},
+		{
+			"id": "5",
+			"userId": "user456",
+			"schoolId": "school002",
+			"activity": "校园环保行动",
+			"pointsEarned": 60,
+			"date": "2023-09-19"
+		}
+	])
+	const integral_exchange = ref<IntegralDetailsType[]>([
+		{
+			"id": "1",
+			"userId": "user123",
+			"schoolId": "school001",
+			"activity": "校园纪念品",
+			"pointsEarned": -100,
+			"date": "2023-09-20"
+		},
+		{
+			"id": "2",
+			"userId": "user456",
+			"schoolId": "school002",
+			"activity": "图书券",
+			"pointsEarned": -50,
+			"date": "2023-09-21"
+		},
+		{
+			"id": "3",
+			"userId": "user789",
+			"schoolId": "school003",
+			"activity": "体育用品折扣券",
+			"pointsEarned": -80,
+			"date": "2023-09-22"
+		},
+		{
+			"id": "4",
+			"userId": "user123",
+			"schoolId": "school001",
+			"activity": "校园食堂优惠券",
+			"pointsEarned": -30,
+			"date": "2023-09-23"
+		},
+		{
+			"id": "5",
+			"userId": "user456",
+			"schoolId": "school002",
+			"activity": "文化活动入场券",
+			"pointsEarned": -60,
+			"date": "2023-09-24"
+		}
+	])
+	const integralList = computed(() : IntegralDetailsType[] => {
+		return current.value == 0 ? integral_details.value : integral_exchange.value
+	})
+	function test() {
+		uni.showToast({
+			title: '开发中'
+		})
+	}
+	function ontabschange(e : number) {
+		current.value = e
+	}
+</script>

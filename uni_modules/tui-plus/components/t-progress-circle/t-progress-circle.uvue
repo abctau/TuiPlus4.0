@@ -1,0 +1,226 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`twh-200 dr ${mainClass}`">
+		<t-canvas ref="circlepCanvas" main-class="twh-100%" @initFinished="canvasInit">
+		</t-canvas>
+		<t-view v-if="showLabel" main-class="fc da di-0">
+			<t-text v-bind="extendsAttrs" main-class="" :text="`${nowValue}${unit}`"></t-text>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * ProgressCircle 环形进度条
+	 * @date 2025-05-31 12:05:50
+	 * @author TanYuan
+	 * @description 环形进度条组件是一个可定制的UI组件，用于显示圆形进度指示，支持自定义线条宽度、颜色，并可显示进度百分比。
+	 * @example /pagesA/basics/circleprogress/circleprogress
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-progress-circle.html
+	 * @example /pagesA/basics/circleprogress/circleprogress
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} lineWidth 进度条线条宽度(默认：20rpx)
+	 * @property {String} inactiveColor 进度条未激活时的颜色(默认：#ececec)
+	 * @property {String} activeColor 进度条激活时的颜色
+	 * @property {Number} modelValue 双向绑定的值(默认：1)
+	 * @property {String} unit 进度条值的单位(默认：%)
+	 * @property {Boolean} showLabel 是否显示进度标签
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} duration 进度条过渡的持续时间，单位为毫秒(默认：300)
+	 */
+
+	import { getPx, addUnit } from '../../common/model/util'
+	type OPTIONS = {
+		start : number,
+		end : number,
+		duration : number,
+		run : (current : number) => void,
+		complete : () => void
+	}
+	type ANIMATECALLBACK = {
+		stop : () => void
+	}
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ProgressCircleProps extends CommonProps {
+		lineWidth : string
+		inactiveColor : string
+		activeColor : string
+		modelValue : number
+		unit : string
+		showLabel : boolean
+		duration : number
+	}
+
+	const props = withDefaults(defineProps<ProgressCircleProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		lineWidth: "20rpx",
+		inactiveColor: "#ececec",
+		activeColor: "",
+		modelValue: 0,
+		unit: "%",
+		showLabel: false,
+		duration: 300
+	});
+	const { extendsAttrs, getColorToValue } = useTuiThemes(props)
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const animationTaskId = ref<number>(0);
+	const nowValue = ref<number>(0);
+	const oldValue = ref<number>(0);
+	const nowback = ref<ANIMATECALLBACK>({
+		stop: () => { },
+	});
+	const drawSize = ref<number>(0);
+	const circlepCanvas = ref<ComponentPublicInstance | null>(null)
+	const _lineWidth = computed(() : number => {
+		let w = getPx(addUnit(props.lineWidth))
+		return w
+	})
+	function animate(options : OPTIONS) : ANIMATECALLBACK {
+		const start = options.start; // 初始值，默认为0
+		const end = options.end; // 目标值，默认为100
+		const duration = options.duration; // 动画时长，默认为1000毫秒
+		let current : number; // 当前值
+		let startTime = 0; // 动画开始时间
+		let isRunning = true; // 动画运行状态
+		function run() {
+			if (startTime <= 0) {
+				startTime = Date.now(); // 记录动画开始时间
+			}
+			const progress = Math.min((Date.now() - startTime) / duration, 1); // 计算当前进度
+			current = start + (end - start) * progress; // 根据进度计算当前值
+			if (isRunning) {
+				options.run(current); // 执行传入的运行中状态回调函数
+			}
+			if (progress < 1 && isRunning) {
+				if (animationTaskId.value != 0) {
+					cancelAnimationFrame(animationTaskId.value)
+					animationTaskId.value = 0
+				}
+				animationTaskId.value = requestAnimationFrame((_ : number) => {
+					run()
+				})
+			} else {
+				options.complete(); // 动画结束时执行回调函数
+			}
+		}
+		run(); // 开始执行动画
+		return {
+			stop: () => {
+				// 设置动画运行状态为false
+				isRunning = false;
+			}
+		} as ANIMATECALLBACK;
+	}
+
+	function dreawer(start : number, end : number) {
+		let ctx = canvasCtx.value!
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		let cx = (drawSize.value) / 2
+		let cy = cx
+		let cr = (drawSize.value - _lineWidth.value) / 2
+		ctx.beginPath()
+		ctx.strokeStyle = props.inactiveColor
+		ctx.lineWidth = _lineWidth.value
+		ctx.lineCap = "round"
+		ctx.arc(cx, cy, cr, 0, Math.PI * 2, false)
+		ctx.closePath()
+		ctx.stroke()
+		if (end > 0) {
+			// 绘制起始的角度。
+			ctx.beginPath()
+			ctx.strokeStyle = getColorToValue.value
+			ctx.lineWidth = _lineWidth.value
+			ctx.arc(cx, cy, cr, 0, start, false)
+			ctx.stroke()
+
+			ctx.beginPath()
+			ctx.strokeStyle = getColorToValue.value
+			ctx.lineWidth = _lineWidth.value
+			ctx.arc(cx, cy, cr, start, end, false)
+			ctx.stroke()
+		}
+	}
+	function play() {
+		let ctx = canvasCtx.value!
+		nowback.value.stop()
+		if (animationTaskId.value != 0) {
+			cancelAnimationFrame(animationTaskId.value)
+			animationTaskId.value = 0
+		}
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		nowback.value = animate({
+			start: 0,
+			end: 100,
+			duration: props.duration,
+			complete() {
+
+			},
+			run(cureent : number) {
+				let angle = Math.PI * 2;
+				if (nowValue.value >= oldValue.value) {
+					let startAngle = (oldValue.value / 100) * angle
+					let endAngle = ((cureent / 100) * (nowValue.value - oldValue.value) / 100) * angle
+					endAngle = Math.max(endAngle, 0)
+
+					dreawer(startAngle, endAngle + startAngle)
+				} else {
+					let startAngle = (nowValue.value / 100) * angle
+					let endAngle = ((cureent / 100) * (oldValue.value - nowValue.value) / 100) * angle
+					let diff = (oldValue.value - nowValue.value) / 100 * angle
+					dreawer(startAngle, diff + startAngle - endAngle)
+				}
+			}
+		} as OPTIONS)
+	}
+	function canvasInit(ctx : CanvasContext) {
+		circlepCanvas.value?.$callMethod('getInfo', (rect : NodeInfo) => {
+			canvasCtx.value = ctx.getContext('2d')
+			drawSize.value = rect.width!
+			nowValue.value = props.modelValue
+			play();
+		})
+	}
+
+	watch(() : number => props.modelValue, (newval : number) => {
+		if (newval != nowValue.value) {
+			oldValue.value = nowValue.value
+			nowValue.value = newval
+			play();
+		}
+	})
+
+	onBeforeUnmount(() => {
+		if (animationTaskId.value != 0) {
+			cancelAnimationFrame(animationTaskId.value)
+			animationTaskId.value = 0
+		}
+	})
+</script>

@@ -1,0 +1,42 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="VisibilitySensor" main-class="mb-30" sub-title="监听元素是否在可视区"></t-card>
+		<t-button type="p" main-class="df db-30 dlr-30 z-1">{{showText}}</t-button>
+		<t-row main-class="h-300 tdr tdb mb-30"></t-row>
+		<t-visibility-sensor @change="vischange" mark="图片1" :scrollTop="scrollTop">
+			<t-col main-class="w-100%">
+				<t-image main-class="h-300 tdr mb-30 w-100%" src='/pagesA/static/image/D2.jpg'></t-image>
+			</t-col>
+		</t-visibility-sensor>
+		<t-row main-class="h-300 tdr tdb mb-30"></t-row>
+		<t-row main-class="h-800 tdr tdb mb-30"></t-row>
+		<t-visibility-sensor @change="vischange" mark="图片2" :scrollTop="scrollTop">
+			<t-col main-class="w-100%">
+				<t-image main-class="h-300 tdr mb-30 w-100%" src='/pagesA/static/image/D2.jpg'></t-image>
+			</t-col>
+		</t-visibility-sensor>
+		<t-row main-class="h-300 tdr tdb mb-30"></t-row>
+		<t-row main-class="h-300 tdr tdb mb-30"></t-row>
+		<t-row main-class="h-300 tdr tdb mb-30"></t-row>
+	</t-page>
+</template>
+
+<script>
+	import { TuiVisibilitySensorChange } from '@/uni_modules/tui-plus';
+	export default {
+		data() {
+			return {
+				scrollTop: 0,
+				showText: ''
+			};
+		},
+		onPageScroll(e : OnPageScrollOptions) {
+			this.scrollTop = e.scrollTop
+		},
+		methods: {
+			vischange(e : TuiVisibilitySensorChange) {
+				this.showText = e.mark + (e.state ? '可见' : '不可见')
+			}
+		}
+	}
+</script>

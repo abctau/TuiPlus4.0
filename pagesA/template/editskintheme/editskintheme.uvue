@@ -1,0 +1,193 @@
+<template>
+	<t-page main-class="plr-30 pb-80" title="皮肤设置">
+		<t-col :main-class="`mt-30 ${boxStyle}`" :hover="true" @click="showId">
+			<t-text main-class="s-35 sfwb">主题ID：{{formdata.id}}</t-text>
+		</t-col>
+		<t-col :main-class="`mt-30 ${boxStyle}`" :hover="true" @click="showName">
+			<t-text main-class="s-35 sfwb">主题名称：{{formdata.name}}</t-text>
+		</t-col>
+		<t-col :main-class="boxStyle" :hover="true" @click="showUnit">
+			<t-text main-class="s-35 sfwb">单位：{{formdata.unit}}</t-text>
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">主色</t-text>
+			<colorItem :fields="['primarynormal','primarydark','primarydisabled','primarylight']" :formdata="formdata"
+				type="Primary" @edit="setting" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">错误</t-text>
+			<colorItem :fields="['errornormal','errordark','errordisabled','errorlight']" :formdata="formdata"
+				@edit="setting" type="Error" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">警告</t-text>
+			<colorItem :fields="['warningnormal','warningdark','warningdisabled','warninglight']" :formdata="formdata"
+				@edit="setting" type="Warning" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">成功</t-text>
+			<colorItem :fields="['successnormal','successdark','successdisabled','successlight']" :formdata="formdata"
+				@edit="setting" type="Success" />
+		</t-col>
+
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">信息</t-text>
+			<colorItem :fields="['infonormal','infodark','infodisabled','infolight']" :formdata="formdata"
+				@edit="setting" type="Info" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">文字</t-text>
+			<colorItem :fields="['colornormal','colordark','colordisabled','colorlight']" :formdata="formdata"
+				@edit="setting" :colors="['#ffffff', '#ffffff', '#ffffff', '#606266']" type="主要文字"
+				:tips="['常用文字','次要文字','占位文字']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">文字(作为前景文字的字体色)</t-text>
+			<colorItem :fields="['colorinverse']" :formdata="formdata" @edit="setting" :colors="['#606266']" type="主要文字"
+				:tips="['常用文字']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">边框</t-text>
+			<colorItem :fields="['borderbase','borderlight','borderlighter','borderextralight']" :formdata="formdata"
+				@edit="setting" :colors="['#606266', '#606266', '#606266', '#606266']" type="Base"
+				:tips="['Light','Lighter','Extralight']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">圆角</t-text>
+			<colorItem :fields="['radiusmedium','radiuslarge','radiussmall','radiusmini']" :formdata="formdata"
+				@edit="setting" :isColor="false"
+				:value="[formdata.radiusmedium,formdata.radiuslarge,formdata.radiussmall,formdata.radiusmini]"
+				:colors="['#606266', '#606266', '#606266', '#606266']" type="Medium" :tips="['Large','Small','Mini']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">内边距</t-text>
+			<colorItem :fields="['paddingmedium','paddinglarge','paddingsmall','paddingmini']" :formdata="formdata"
+				@edit="setting" :isColor="false"
+				:value="[formdata.paddingmedium,formdata.paddinglarge,formdata.paddingsmall,formdata.paddingmini]"
+				:colors="['#606266', '#606266', '#606266', '#606266']" type="Medium" :tips="['Large','Small','Mini']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">外边距</t-text>
+			<colorItem :fields="['marginmedium','marginlarge','marginsmall','marginmini']" :formdata="formdata"
+				@edit="setting" :isColor="false"
+				:value="[formdata.marginmedium,formdata.marginlarge,formdata.marginsmall,formdata.marginmini]"
+				:colors="['#606266', '#606266', '#606266', '#606266']" type="Medium" :tips="['Large','Small','Mini']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">文字尺寸</t-text>
+			<colorItem :fields="['sizemedium','sizelarge','sizesmall','sizemini']" :formdata="formdata" :isColor="false"
+				@edit="setting" :value="[formdata.sizemedium,formdata.sizelarge,formdata.sizesmall,formdata.sizemini]"
+				:colors="['#606266', '#606266', '#606266', '#606266']" type="Medium" :tips="['Large','Small','Mini']" />
+		</t-col>
+		<t-col :main-class="boxStyle">
+			<t-text main-class="s-35 sfwb pb-30">背景</t-text>
+			<colorItem :isBackground="true" :formdata="formdata" :fields="['1']" @edit="setting" />
+		</t-col>
+		<t-button type="p" @click="save">保存</t-button>
+		<t-button main-class="mt-30" type="e" @click="reset">重置</t-button>
+		<t-form-modal ref="formedit" @confirm="onConfirm" type="p"></t-form-modal>
+	</t-page>
+</template>
+<script>
+	import { TuiCreateTheme, TuiTheme, TuiSkinTheme } from '@/uni_modules/tui-plus'
+	import colorItem from './colorItem.uvue'
+	export default {
+		data() {
+			return {
+				timer: 0,
+				boxStyle: "tdb mb-30 p-30 tdr",
+				colorValue: '#000000',
+				theme: new TuiTheme(),
+				formdata: TuiCreateTheme() as TuiSkinTheme,
+				themId: ''
+			};
+		},
+		onLoad(e : OnLoadOptions) {
+			if (e['id'] != null) this.themId = `${e['id']}`
+			if (this.themId != '') {
+				this.formdata = this.theme.getTheme(this.themId)
+			} else {
+				this.formdata.id = '请设置主题标识'
+				this.formdata.name = '请设置主题名称'
+			}
+		},
+		methods: {
+			reset() {
+				const defThem = this.theme.create()
+				defThem.id = this.themId
+				this.formdata = defThem
+				uni.showToast({
+					icon: 'success',
+					title: '重置成功'
+				})
+			},
+			setting(e : UTSJSONObject) {
+				const ins = this.$refs['formedit'] as TFormModalComponentPublicInstance
+				ins.show(e)
+			},
+			save() {
+				const cur = this.theme.getCurSkinTheme()
+				if (cur.id == this.themId) this.theme.updateCurSkinTheme(this.formdata)
+				if (this.themId == '') {
+					this.theme.add(this.formdata)
+				} else {
+					this.theme.update(this.themId, this.formdata)
+				}
+				uni.navigateBack()
+			},
+			onConfirm(e : UTSJSONObject) {
+				this.formdata[`${e['name']}`] = e.getString('value')
+			},
+			showId() {
+				this.setting({
+					title: '主题名称',
+					type: 'input',
+					name: 'id',
+					value: this.formdata.id,
+					attrs: {
+						placeholder: "请设置你的主题名称"
+					},
+					describe: '好友们可以在我的个人资料页看到，方便认出我'
+				})
+			},
+			showName() {
+				this.setting({
+					title: '主题名称',
+					type: 'input',
+					name: 'name',
+					value: this.formdata.name,
+					attrs: {
+						placeholder: "请设置你的主题名称"
+					},
+					describe: '好友们可以在我的个人资料页看到，方便认出我'
+				})
+			},
+			showUnit() {
+				this.setting({
+					list: [
+						{
+							value: 'rpx',
+							label: 'rpx'
+						},
+						{
+							value: 'px',
+							label: 'px'
+						}
+					],
+					title: '单位 ',
+					type: 'radio',
+					value: this.formdata.unit,
+					name: 'unit',
+					describe: '好友们可以在我的个人资料页看到，方便认出我'
+				})
+			}
+		},
+		onUnload() {
+			clearTimeout(this.timer)
+		},
+		components: {
+			colorItem
+		}
+
+	}
+</script>

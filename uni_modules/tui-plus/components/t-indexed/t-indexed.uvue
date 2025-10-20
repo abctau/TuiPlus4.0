@@ -1,0 +1,335 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" @tuiTouchstart="tuiTouchstart" @tuiTouchmove="tuiTouchmove"
+		@tuiTouchend="tuiTouchend" @tuiTouchcancel="tuiTouchend" @initFinished="initmainFinished">
+		<t-canvas main-class="twh-100%" @initFinished="canvasInit" @click="selectValue"></t-canvas>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Indexed 索引导航
+	 * @author TanYuan
+	 * @description 索引导航组件，用于显示索引列表，支持配置索引数据列表。
+	 * @property {UTSJSONObject[]} list 索引数据列表
+	 */
+	/**
+	 * Indexed 索引导航
+	 * @date 2025-05-31 12:04:06
+	 * @author TanYuan
+	 * @description 索引导航组件，用于显示索引列表，支持配置索引数据列表。
+	 * @example /pagesA/layout/indexed/indexed
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-indexed.html
+	 * @example /pagesA/layout/indexed/indexed
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} list 数据源
+	 * @event {Function} select 索引选中时触发返回当前选中的信息
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { TuiRequestAnimationFrame, TuiCancelAnimationFrame, drawRoundedRect } from '../../common/model/util'
+	type IndexedListItem = {
+		id ?: string
+		name ?: string
+		letter ?: string
+	}
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface IndexedProps extends CommonProps {
+		list : UTSJSONObject[]
+	}
+	const props = withDefaults(defineProps<IndexedProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as UTSJSONObject[]
+	});
+	const { extendsAttrs, getBackgroundToValue } = useTuiThemes(props)
+	const emit = defineEmits(['select'])
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const menuX = ref<number>(0);
+	const starty = ref<number>(0);
+	const endy = ref<number>(0);
+	const startTranY = ref<number>(0);
+	const moveY = ref<number>(0);
+	const translateY = ref<number>(0);
+	const isPressed = ref<boolean>(false);
+	const scrollsDown = ref<boolean>(false);
+	const acceleration = ref<number>(-0.001);
+	const startTime = ref<number>(0);
+	const lastTime = ref<number>(0);
+	const velocity = ref<number>(0);
+	const maxScroll = ref<number>(0);
+	const animationTaskId = ref<number>(0);
+	const scrollIndex = ref<number>(0);
+	const activeid = ref<string>('');
+	const isdraw = ref<boolean>(false);
+	const isdrawlist = ref<boolean>(false);
+	const listExp = ref<IndexedListItem[]>([]);
+	const sortsIndex = ref<number[]>([]);
+	const mainX = ref<number>(0);
+	const mainY = ref<number>(0);
+	function drawList() {
+		if (isdrawlist.value) return
+		isdrawlist.value = true
+		try {
+			if (canvasCtx.value != null && props.list.length > 0) {
+				const ctx = canvasCtx.value!;
+				const f = sortsIndex.value.findIndex((item : number) : boolean => {
+					return item > Math.abs(translateY.value)
+				})
+				if (maxScroll.value == translateY.value) {
+					scrollIndex.value = f
+				} else {
+					scrollIndex.value = f - 1
+				}
+				const x = 15
+				const w = ctx.canvas.offsetWidth - (x * 2)
+				const cornerRadius = 5
+				const h = 40
+				ctx.clearRect(0, 0, ctx.canvas.offsetWidth, ctx.canvas.offsetHeight)
+				ctx.font = `${14}px sans-serif`;
+				ctx.textBaseline = 'middle'
+				const remainder = Math.abs(translateY.value) % 50
+				let sx = Math.floor(Math.abs(translateY.value) / 50)
+				if (sx < 0) sx = 0
+				let ex = Math.floor(sx + (ctx.canvas.offsetHeight / 50))
+				if (ex >= listExp.value.length) ex = listExp.value.length - 1
+				let y = -50 - remainder
+				for (let i = sx; i <= ex; i++) {
+					const item : IndexedListItem = listExp.value[i]
+					ctx.textAlign = 'center'
+					const letter = item.letter
+					y += h + 10
+					if (letter != null) {
+						drawRoundedRect(ctx, 0, y, ctx.canvas.offsetWidth, h, 0);
+						// 设置矩形背景颜色和透明度
+						ctx.fillStyle = "#ffffff";
+						ctx.fill();
+						drawRoundedRect(ctx, 10, y + (h - 15) / 2, 5, 15, cornerRadius);
+						// ctx.fillStyle = getBackgroundToValue.value;
+						ctx.fill();
+						ctx.fillStyle = "#666666";
+						ctx.fillText(item.letter!, x + 10, y + (h / 2));
+					} else {
+						ctx.textAlign = 'left'
+						drawRoundedRect(ctx, x, y, w, h, cornerRadius);
+						ctx.fillStyle = "#ffffff";
+						ctx.fill();
+						if (item.id == activeid.value) {
+							ctx.fillStyle = getBackgroundToValue.value;
+						} else {
+							ctx.fillStyle = "#666666";
+						}
+						ctx.fillText(item.name!, x + 10, y + (h / 2));
+					}
+				}
+			}
+		} catch (_) {
+		}
+		isdrawlist.value = false
+	}
+	function draw() {
+		if (isdraw.value) return
+		isdraw.value = true
+		try {
+			if (canvasCtx.value != null && props.list.length > 0) {
+				const ctx = canvasCtx.value!;
+				ctx.font = `${14}px sans-serif`;
+				ctx.textAlign = "center";
+				ctx.textBaseline = 'alphabetic'
+				const space = 25;
+				const x = ctx.canvas.offsetWidth - 30;
+				const rectWidth = 30; // 你可以根据需要调整矩形的宽度
+				const rectHeight = 25; // 文字高度，也可以根据需要调整
+				const cornerRadius = 5; // 圆角的半径
+				const rectPadding = 10; // 矩形内边距，可以调整以适应文字
+				const circleRadius = rectHeight / 2 - 1
+				menuX.value = x - (rectWidth / 2)
+				// 计算背景矩形的起始y坐标
+				const startY = (ctx.canvas.offsetHeight - (props.list.length * space)) / 2 - rectPadding;
+				starty.value = startY
+				// 计算背景矩形的结束y坐标
+				const endY = startY + (props.list.length * space) + (2 * rectPadding) - 7;
+				endy.value = endY
+				const height = endY - startY;
+				drawRoundedRect(ctx, x - rectWidth / 2, startY, rectWidth, height, cornerRadius);
+				// 设置矩形背景颜色和透明度
+				ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+				ctx.fill();
+				// 绘制文字
+				props.list.forEach((item : UTSJSONObject, index : number) => {
+					const y = startY + rectPadding + (space * index) + rectHeight / 2;
+					if (index == scrollIndex.value) {
+						ctx.beginPath();
+						ctx.arc(x, y - rectHeight / 4 + 2, circleRadius, 0, 2 * Math.PI);
+						ctx.fillStyle = getBackgroundToValue.value;
+						ctx.fill();
+					}
+					ctx.fillStyle = "#ffffff";
+					ctx.fillText(item.getString('letter')!, x, y);
+					// ctx.fillStyle = "#000000";
+					// ctx.fillRect(x, y - 12, 25, 5);
+					item.set('y', y - (space / 2))
+				});
+			}
+
+		} catch (_) {
+			console.log(123)
+		}
+		isdraw.value = false
+	}
+	function drawView() {
+		nextTick(() => {
+			if (canvasCtx.value != null) {
+				const arr : IndexedListItem[] = []
+				const ctx = canvasCtx.value!
+				let maxy = 0
+				sortsIndex.value = []
+				props.list.forEach(((item : UTSJSONObject) => {
+					sortsIndex.value.push(maxy)
+					maxy += item.getArray('data')!.length * 50 + 50
+				}))
+				props.list.forEach(((item : UTSJSONObject) => {
+					const data = item.getArray('data')
+					arr.push(JSON.parse<IndexedListItem>(JSON.stringify(item)) as IndexedListItem)
+					if (data != null) arr.push(...(JSON.parse<IndexedListItem[]>(JSON.stringify(data)) as IndexedListItem[]))
+				}))
+				maxScroll.value = -(arr.length * 50) + ctx.canvas.offsetHeight
+				listExp.value = arr
+				drawList()
+				draw()
+			}
+		})
+	}
+	function initmainFinished(rect : NodeInfo) {
+		const winTop = uni.getWindowInfo().windowTop
+		mainX.value = rect.left!
+		mainY.value = rect.top! + winTop
+	}
+	function selectValue(e : UniPointerEvent) {
+		const x = e.x + mainX.value
+		const y = e.y - mainY.value
+		if (x > menuX.value && y > starty.value && y < endy.value) {
+			let f = Math.floor((y - starty.value) / 25)
+			if (f >= props.list.length) f = props.list.length - 1
+			if (f > -1) {
+				translateY.value = -(sortsIndex.value[f])
+				if (translateY.value < maxScroll.value) translateY.value = maxScroll.value
+				moveY.value = translateY.value
+				drawList()
+				draw()
+			}
+		} else {
+			const remainder = Math.abs(translateY.value) % 50
+			let sx = Math.floor(Math.abs(translateY.value) / 50)
+			let f = Math.floor((y + remainder) / 50)
+			f = f + sx
+			if (f > -1 && f < listExp.value.length) {
+				const val : IndexedListItem = listExp.value[f]
+				if (val.id != null) activeid.value = val.id!
+				emit('select', JSON.parse<UTSJSONObject>(JSON.stringify(val)))
+				drawList()
+				draw()
+			}
+		}
+	}
+	function tuiTouchstart(e : TuiTouchEvent) {
+		isPressed.value = true
+		startTime.value = new Date().getTime()
+		startTranY.value = e.offsetY
+	}
+	function tuiTouchmove(e : TuiTouchEvent) {
+		translateY.value = e.offsetY - startTranY.value + moveY.value
+		if (translateY.value > 0) translateY.value = 0
+		drawList()
+		draw()
+	}
+	function animateScroll() {
+		const currentTime = new Date().getTime();
+		const deltaTime = currentTime - lastTime.value;
+		lastTime.value = currentTime;
+		// 更新位置
+		const difupdatepos = velocity.value * deltaTime + 0.5 * acceleration.value * deltaTime * deltaTime
+		translateY.value = translateY.value + (scrollsDown.value ? -difupdatepos : difupdatepos)
+		if (translateY.value > 0) {
+			translateY.value = 0
+			moveY.value = 0
+			drawList()
+			draw()
+			return
+		}
+		if (translateY.value < maxScroll.value) {
+			translateY.value = maxScroll.value
+			moveY.value = translateY.value
+			drawList()
+			draw()
+			return
+		}
+		drawList()
+		draw()
+		// 更新速度
+		velocity.value += acceleration.value * deltaTime;
+		// 检查是否停止滚动
+		if (Math.abs(velocity.value) > 0.01 && !isPressed.value) {
+			if (animationTaskId.value != 0) TuiCancelAnimationFrame(animationTaskId.value)
+			animationTaskId.value = TuiRequestAnimationFrame(() => {
+				animateScroll()
+			})
+		} else {
+			velocity.value = 0
+			moveY.value = translateY.value
+			if (animationTaskId.value != 0) {
+				TuiCancelAnimationFrame(animationTaskId.value)
+				animationTaskId.value = 0
+			}
+		}
+	}
+	function tuiTouchend(e : TuiTouchEvent) {
+		isPressed.value = false
+		moveY.value = translateY.value
+		lastTime.value = new Date().getTime()
+		const duration = lastTime.value - startTime.value
+		const distance = e.offsetY - startTranY.value
+		velocity.value = Math.abs(distance) / duration
+		scrollsDown.value = distance < 0
+		if (distance != 0 && velocity.value > 0.2) animateScroll()
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+		drawView()
+	}
+	watch(() : UTSJSONObject[] => props.list, (_ : UTSJSONObject[]) => {
+		drawView()
+	})
+	onBeforeUnmount(() => {
+		isdraw.value = true
+	})
+</script>

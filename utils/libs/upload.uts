@@ -1,0 +1,41 @@
+import { TuiChooseImage } from '@/uni_modules/tui-plus'
+import { getUploadFileOptions, alipayCloudUpload, updateFileStatus } from '@/api'
+export function TuiUploadFileOptions(count : number = 1) : Promise<UTSJSONObject[]> {
+	return new Promise((
+		resolve : (res : UTSJSONObject[]) => void,
+		reject : (err : any | null) => void
+	) => {
+		TuiChooseImage(count).then((rst : UTSJSONObject[]) => {
+			getUploadFileOptions({ list: rst }).then((res : UTSJSONObject) => {
+				resolve(res.getArray<UTSJSONObject>('data')!)
+			})
+		})
+	})
+}
+
+//后台异步上传
+export function TuiUploadFile(e : UTSJSONObject, callback : ((e : UTSJSONObject) => void) | null = null) : Promise<UTSJSONObject> {
+	return new Promise((
+		resolve : (resp : UTSJSONObject) => void,
+		_ : (_ : UniError) => void
+	) => {
+		if (!(e.getBoolean('isupload') as boolean)) {
+			alipayCloudUpload(e).then((rst : UTSJSONObject) => {
+				const fileMd5 = `${e['md5']}`
+				updateFileStatus({ fileID: `${e['fileID']}`, fileMd5 })
+				if (callback != null) callback(e)
+				resolve({ file: e, data: rst })
+			})
+		} else {
+			if (callback != null) callback(e)
+			resolve({ file: e, data: null })
+		}
+	})
+}
+
+export function TuiUploadFiles(files : UTSJSONObject[]) : Promise<UTSJSONObject[]> {
+	const uploadPromises : Promise<UTSJSONObject>[] = files.map((file : UTSJSONObject) : Promise<UTSJSONObject> =>
+		TuiUploadFile(file)
+	);
+	return Promise.all(uploadPromises);
+}

@@ -1,0 +1,57 @@
+const max = 10000000000000;
+export class Int10 {
+	buf : number[]
+	constructor(value : number = 0) {
+		this.buf = [value];
+	}
+
+	mulAdd(m : number, c : number) {
+		const b : number[] = this.buf;
+		const l : number = b.length;
+		let t : number;
+		for (let i = 0; i < l; i++) {
+			t = b[i] * m + c;
+			if (t < max) {
+				c = 0;
+			} else {
+				c = Math.floor(t / max);
+				t = t % max;
+			}
+			b[i] = t;
+		}
+		if (c > 0) {
+			b[l - 1] = c;
+		}
+	}
+	sub(c : number) {
+		const b : number[] = this.buf;
+		const l : number = b.length;
+		let t : number;
+		for (let i = 0; i < l; i++) {
+			t = b[i] - c;
+			if (t < 0) {
+				t = max + t;
+				c = 1;
+			} else {
+				c = 0;
+			}
+			b[i] = t;
+		}
+		while (b[b.length - 1] == 0) {
+			b.pop();
+		}
+	}
+	valueOf() {
+		const b : number[] = this.buf;
+		let v : number = 0;
+		for (let i = b.length - 1; i >= 0; --i) {
+			v = v * max + b[i];
+		}
+		return v;
+	}
+
+	simplify() : any {
+		const b : number[] = this.buf;
+		return (b.length == 1) ? b[0] : this;
+	}
+}

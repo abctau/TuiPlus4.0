@@ -1,0 +1,141 @@
+<template>
+	<t-page title='Tree-基础功能' main-class="p-30">
+		<t-card title="Tree 树" main-class="mb-30" sub-title="功能强大,多级节点展开、折叠、选择、懒加载，支持插槽灵活布局,并具有丰富的样式定制和事件响应能力"></t-card>
+		<t-card title="亮点" main-class="mb-30" type="e" effect="l" sub-title="支持折叠动画。功能齐全"></t-card>
+		<t-tree :list="list" type="p" :row-height="60" :selects="selects" :folds="['1','2']" :show-check-box="true"
+			@edit="edit" @add="add" :load="lazyload" @delete="trash" @change="change" :accordion="false"></t-tree>
+	</t-page>
+</template>
+<script setup>
+	import { TuiGuid } from '@/uni_modules/tui-plus'
+	const accordion = ref(false)
+	const showCheckbox = ref(true)
+	const selects = ref<string[]>(['11', '6'])
+	const list = ref<UTSJSONObject[]>([{
+		id: '1',
+		label: '一级 1',
+		children: [{
+			id: '4',
+			label: '二级 1-1',
+			children: [{
+				id: '9',
+				label: '三级 1-1-1',
+				disabled: true,
+				children: [{
+					id: '11',
+					label: '四级 1-1-1'
+				}]
+			}, {
+				id: '12',
+				label: '三级 1-1-1',
+				children: [{
+					id: '13',
+					label: '四级 1-1-1',
+				}, {
+					id: '14',
+					label: '四级 4-2-1',
+				}]
+			}, {
+				id: '10',
+				label: '三级 1-1-2'
+			}]
+		}, {
+			id: '16',
+			label: '二级 1-1',
+			children: [{
+				id: '17',
+				label: '三级 1-1-1',
+				disabled: true,
+				children: [{
+					id: '18',
+					label: '四级 1-1-1'
+				}]
+			}, {
+				id: '19',
+				label: '三级 1-1-1',
+				children: [{
+					id: '20',
+					label: '四级 1-1-1',
+				}]
+			}, {
+				id: '21',
+				label: '最后一级 1-1-2'
+			}]
+		}]
+	}, {
+		id: '2',
+		label: '一级 2',
+		children: [{
+			id: '5',
+			label: '二级 2-1',
+			disabled: true
+		}, {
+			id: '6',
+			label: '二级 2-2'
+		}]
+	}, {
+		id: '3',
+		label: '一级 3',
+		children: [{
+			id: '7',
+			label: '二级 3-1'
+		}, {
+			id: '8',
+			label: '二级 3-2',
+		}]
+	}, {
+		id: '89',
+		label: '懒加载',
+		lazy: true
+	}])
+	function change(e : string[]) {
+		console.log(e)
+	}
+	function add(callback : (e : UTSJSONObject[]) => void) {
+		callback([{
+			id: TuiGuid(10),
+			label: `新增${TuiGuid(10)}`
+		}])
+	}
+	function edit(e : UTSJSONObject) {
+		uni.showModal({
+			title: `label更新`,
+			editable: true,
+			success: (res) => {
+				if (res.confirm) {
+					e.set('label', res.content)
+				}
+			}
+		})
+	}
+	function trash(e : UTSJSONObject) {
+		uni.showModal({
+			title: '提示',
+			content: `确认删除${e.getString('item.label')}吗？`,
+			success: function (res) {
+				if (res.confirm) {
+					const callback = e.getAny('callback') as () => void
+					callback()
+				} else if (res.cancel) {
+					console.log('用户点击取消');
+				}
+			}
+		});
+	}
+	function lazyload(e : UTSJSONObject) : Promise<UTSJSONObject[]> {
+		return new Promise((
+			resolve : (res : UTSJSONObject[]) => void,
+		) => {
+			setTimeout(() => {
+				console.log(e) //选中的项
+				resolve([{
+					id: TuiGuid(10),
+					label: `异步数据${TuiGuid(10)}`
+				}, {
+					id: TuiGuid(10),
+					label: `异步数据${TuiGuid(10)}`
+				}])
+			}, 2000)
+		})
+	}
+</script>

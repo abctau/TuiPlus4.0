@@ -1,0 +1,34 @@
+<template>
+	<t-page main-class="p-30">
+		<t-search main-class="mb-30" type="p" @search="onSearch" @select="onSelect" content="默认搜索内容"
+			:historySearch="historySearch" :hotSearches="hotSearches"></t-search>
+	</t-page>
+</template>
+
+<script setup>
+	const historySearch = ref([
+		"智能手机",
+		"笔记本电脑",
+		"智能家居",
+		"运动鞋",
+		"连衣裙"
+	]);
+
+	const hotSearches = ref([
+		"苹果手机",
+		"小米电视",
+		"华为手表",
+		"耐克跑鞋",
+		"美的空调"
+	]);
+
+	function onSearch(e : string) {
+		console.log(e)
+	}
+	function onSelect(e : UTSJSONObject) {
+		console.log(e)
+		uni.showToast({
+			title:'请控制台查看打印内容'
+		})
+	}
+</script>

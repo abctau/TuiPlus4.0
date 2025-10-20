@@ -1,0 +1,123 @@
+<template>
+	<t-gesture ref="card" v-bind="extendsAttrs" @transitionend="transitionend"
+		:main-class="`ocr da bg-#fff  attf-ei w-100% h-100% oh r-10rpx ${mainClass} ${childStyles} ${transitionProperty}`"
+		:style="tranMovePos" class="t-drop-card-item-main" @tuiTouchstart="touchstart" @tuiTouchmove="touchmove"
+		@tuiTouchend="touchend" @tuiTouchcancel="touchend">
+		<slot></slot>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * DropCardItem 滑走式卡片子组件
+	 * @date 2025-05-31 12:03:10
+	 * @author TanYuan
+	 * @description 滑走式卡片是一种堆叠卡片布局，支持卡片之间的间隔、缩放效果以及动态初始化和样式设置，通过简单的属性配置即可实现层次分明、视觉上具有深度感的卡片滑走动画效果。
+	 * @example /pagesA/other/drop-card/drop-card
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-drop-card-item.html
+	 * @example /pagesA/other/drop-card/drop-card
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { getPx, TuiGuid } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<CommonProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const instance = getCurrentInstance()?.proxy!
+	const sortIndex = ref<number>(0);
+	const zIndex = ref<number>(99)
+	const startX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranX = ref<number>(0);
+	const tranY = ref<number>(0);
+	const tranMovePos = ref<string>('');
+	const transitionProperty = ref<string>('atp-tr,mt atd-300');
+	const total = inject<Ref<number>>('total')
+	const defauZindex = inject<Ref<number>>('defauZindex')
+	const space = inject<Ref<string>>('space')
+	const scaleNumber = inject<Ref<number>>('scaleNumber')
+	const dropRenderid = inject<Ref<string>>('dropRenderid')
+	let rendering : boolean = false
+	watch(() : string => dropRenderid?.value ?? '', (e : string) => {
+		if (!rendering) {
+			rendering = true
+			zIndex.value++
+			sortIndex.value--
+		}
+	})
+	const childStyles = computed(() : string => {
+		const sort = sortIndex.value
+		let scale = 1
+		scale -= (scaleNumber!.value * sort)
+		return `ats-${scale} mt-${Math.floor(getPx(space!.value) * sort)}px z-${zIndex.value} att-0px,0px atr-0`
+	})
+	if (defauZindex != null && total != null) {
+		sortIndex.value = total.value
+		zIndex.value = defauZindex.value
+		defauZindex.value--
+		total.value++
+	}
+	function touchstart(e : TuiTouchEvent) {
+		if (zIndex.value == 99 && !rendering) {
+			e.event.preventDefault()
+			startX.value = e.x
+			startY.value = e.y
+			transitionProperty.value = ''
+		}
+	}
+	function touchmove(e : TuiTouchEvent) {
+		if (zIndex.value == 99 && !rendering) {
+			e.event.preventDefault()
+			tranX.value = e.x - startX.value;
+			tranY.value = e.y - startY.value;
+			const deg = Math.round(tranX.value / -30 * 100) / 100;
+			const tx = Math.round(tranX.value * 100) / 100;
+			const ty = Math.round(tranY.value * 100) / 100;
+			tranMovePos.value = `transform: translate(${tx}px, ${ty}px) rotate(${deg}deg)`
+		}
+	}
+	function touchend(e : TuiTouchEvent) {
+		if (zIndex.value == 99 && !rendering) {
+			rendering = true
+			const t = total!.value
+			tranMovePos.value = ``
+			transitionProperty.value = 'atp-tr,mt atd-300'
+			sortIndex.value = t - 1
+			zIndex.value = 99 - t + 1
+			if (dropRenderid != null) dropRenderid.value = TuiGuid(20)
+		}
+	}
+	function transitionend(e : UniEvent) {
+		rendering = false
+	}
+</script>

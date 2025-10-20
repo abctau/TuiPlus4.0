@@ -1,0 +1,59 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="tui-scan扫码" sub-title="支持自定义插槽自定义扫码布局,使用插槽记得设置:mask='false'">
+		</t-card>
+		<t-scan v-if="show" ref="scancodeEle" :isPreviewing="isPreviewing" main-class="h-600 mb-30 tdr"
+			@scanned="scanned" :mode="mode" :mask="mask" type='p'>
+			<!-- <t-col main-class="da-twh-100%-ba-fc">
+				<t-text>插槽测试-使用插槽记得设置:mask='false'</t-text>
+			</t-col> -->
+		</t-scan>
+		<t-button main-class="mb-30" @click="switchs">{{mode=='qr'?'扫条形码':'扫二维码'}}</t-button>
+		<t-button main-class="mb-30" @click="closeMask">{{mask?'关闭':'打开'}}遮罩层</t-button>
+		<t-button main-class="mb-30" @click="open">开启扫描</t-button>
+		<t-button main-class="mb-30" @click="isPreviewing=!isPreviewing">{{isPreviewing?'关闭相机预览':'打开相机预览'}}</t-button>
+		<t-button main-class="mb-30" @click="photo">图片识别</t-button>
+	</t-page>
+</template>
+<script setup>
+	import { ScanResult } from '@/uni_modules/tui-scan'
+	const scancodeEle = ref<TScanComponentPublicInstance | null>(null)
+	const isPreviewing = ref(true)
+	const show = ref(true)
+	const mode = ref('bar')
+	const mask = ref(true)
+	function closeMask() {
+		mask.value = !mask.value
+		show.value = false
+		nextTick(() => {
+			show.value = true
+		})
+	}
+	function switchs() {
+		show.value = false
+		nextTick(() => {
+			if (mode.value == 'bar') {
+				mode.value = 'qr'
+			} else {
+				mode.value = 'bar'
+			}
+			show.value = true
+		})
+	}
+	function photo() {
+		let el = scancodeEle.value as TScanComponentPublicInstance
+		el.scanImage()
+	}
+	function open() {
+		let el = scancodeEle.value as TScanComponentPublicInstance
+		el.rescan()
+	}
+	function scanned(e : ScanResult) : void {
+		uni.showModal({
+			title: e.data[0].value,
+			success: (_) => {
+
+			}
+		})
+	}
+</script>

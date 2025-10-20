@@ -1,0 +1,13 @@
+<template>
+	<t-page title="条形码展示" main-class="p-30">
+		<t-card title="BarCode" sub-title="Canvas绘制 组件是一个灵活的条形码生成器，支持多种编码类型，可自定义样式，适用于快速集成条形码显示。"
+			main-class="tmb-30 mb-30"></t-card>
+		<t-card title="EAN-13 标准条形码" sub-title="EAN-13 是一种国际通用的商品条形码标准，由13位数字组成。" main-class="tmb-30 tdb">
+		</t-card>
+		<t-barcode main-class="h-240" text="9876543210987"></t-barcode>
+		<t-card title="Codebar 特殊用途条形码" sub-title="Codebar（代码39）条形码常用于物流、图书管理和其他特殊领域。" main-class="tmb-30 tdb mb-30">
+
+		</t-card>
+		<t-barcode main-class="h-240" encode="codebar" text="9876543210987"></t-barcode>
+	</t-page>
+</template>

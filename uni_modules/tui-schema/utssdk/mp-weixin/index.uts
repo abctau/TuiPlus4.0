@@ -1,0 +1,11 @@
+import { OpenSchema, CanOpenURL } from '../interface.uts'
+export const openSchema : OpenSchema = function (option : UTSJSONObject) : void {
+	console.log('跳转小程序',option)
+	uni.navigateToMiniProgram(option)
+}
+export const canOpenURL : CanOpenURL = function (url : string) : boolean {
+	if (url != "") {
+		return true;
+	}
+	return false;
+}

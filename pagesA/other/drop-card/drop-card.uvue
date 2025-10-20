@@ -1,0 +1,54 @@
+<template>
+	<t-page title="卡片" main-class="f">
+		<t-card main-class="m-30" title="DropCard 滑走式卡片"
+			sub-title="滑走式卡片是一种堆叠卡片布局，支持卡片之间的间隔、缩放效果以及动态初始化和样式设置，通过简单的属性配置即可实现层次分明、视觉上具有深度感的卡片滑走动画效果。"></t-card>
+		<t-view main-class="pt-10 ov fc">
+			<t-drop-card main-class="w-600 h-400 ov" space="38rpx">
+				<t-drop-card-item v-for="(item,index) in cardList1" :key="index" style="overflow: hidden;">
+					<image :src="item" style="width: 100%;height: 100%;"></image>
+				</t-drop-card-item>
+			</t-drop-card>
+		</t-view>
+		<t-view main-class="h-110"></t-view>
+		<t-view main-class="ov fc">
+			<t-drop-card main-class="w-500 h-700 ov" space="38rpx">
+				<t-drop-card-item v-for="(item,index) in cardList" :key="`dropcard${index}`" @left="left" @right="right"
+					@center="center">
+					<image :src="item" style="width: 100%;height: 100%;"></image>
+				</t-drop-card-item>
+			</t-drop-card>
+		</t-view>
+	</t-page>
+</template>
+<script lang="uts">
+	export default {
+		data() {
+			return {
+				cardList: [
+					'/pagesA/static/image/Z1.jpg',
+					'/pagesA/static/image/Z2.jpg',
+					'/pagesA/static/image/Z3.jpg',
+					'/pagesA/static/image/Z4.jpg',
+					'/pagesA/static/image/Z5.jpg'
+				] as string[],
+				cardList1: [
+					'/pagesA/static/image/D1.jpg',
+					'/pagesA/static/image/D2.jpg',
+					'/pagesA/static/image/D3.jpg',
+					'/pagesA/static/image/D4.jpg'
+				] as string[]
+			}
+		},
+		methods: {
+			left() {
+				console.log('left')
+			},
+			right() {
+				console.log('right')
+			},
+			center() {
+				console.log('center')
+			}
+		}
+	}
+</script>

@@ -1,0 +1,29 @@
+import BitByte from './8BitByte';
+import RSBlock from './RSBlock';
+import BitBuffer from './BitBuffer';
+import Util from './util';
+export interface QRCodeInterface {
+	typeNumber : number;
+	errorCorrectLevel : number;
+	modules : Array<Array<boolean | null>>;
+	moduleCount : number;
+	dataCache : number[];
+	dataList : BitByte[];
+	PAD0 : number;
+	PAD1 : number;
+	util : Util;
+	addData(data : string) : void;
+	isDark(row : number, col : number) : boolean;
+	getModulesCount() : number;
+	make() : void;
+	makeImpl(test : boolean, maskPattern : number) : void;
+	setupPositionProbePattern(row : number, col : number) : void;
+	getBestMaskPattern() : number;
+	setupTimingPattern() : void;
+	setupPositionAdjustPattern() : void;
+	setupTypeNumber(test : boolean) : void;
+	setupTypeInfo(test : boolean, maskPattern : number) : void;
+	mapData(data : number[], maskPattern : number) : void;
+	createData(typeNumber : number, errorCorrectLevel : number, dataList : BitByte[]) : number[];
+	createBytes(buffer : BitBuffer, rsBlocks : RSBlock[]) : number[];
+}

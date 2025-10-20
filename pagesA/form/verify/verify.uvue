@@ -1,0 +1,16 @@
+<template>
+	<t-page title='滑块验证码' main-class="p-30">
+		<t-card main-class="mb-30" title='VerifySlider 滑块验证码' sub-title="滑块验证码用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!"></t-card>
+		<t-section main-class="mb-30" title="基础使用+主题展示"></t-section>
+		<t-verify-slider main-class="mb-30"></t-verify-slider>
+		<t-verify-slider main-class="mb-30" type="s"></t-verify-slider>
+		<t-verify-slider main-class="mb-30" type="w"></t-verify-slider>
+		<t-verify-slider main-class="mb-30" type="e"></t-verify-slider>
+		<t-section main-class="mb-30" title="样式设置"></t-section>
+		<t-verify-slider main-class="mb-30 h-100" type="e" size="l"></t-verify-slider>
+		<t-verify-slider main-class="w-300 mb-30" type="s"></t-verify-slider>
+		<t-section main-class="mb-30" title="自定义颜色覆盖主题"></t-section>
+		<t-verify-slider main-class="mb-30 h-100" type="e" active-color="blue" inactive-color="#ff5500"
+			size="l"></t-verify-slider>
+	</t-page>
+</template>

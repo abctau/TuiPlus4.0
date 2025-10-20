@@ -1,0 +1,103 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`tvg ocr ${extendsPadding} ${extendsRadius} oh dr ${mainClass}`"
+		@initFinished="mainInitFinished" @tuiTouchstart="touchstart" @tuiTouchmove="touchmove" @tuiTouchend="touchend">
+		<t-view main-class="fais">
+			<t-view :main-class="`fl fc fwn ${tranPos}`" @initFinished="initFinished">
+				<slot></slot>
+			</t-view>
+		</t-view>
+		<t-view v-if="indicator" :main-class="`fc h-80`">
+			<t-view :main-class="`h-10px w-100px r-10px tdb-${type},l dr`">
+				<t-view :main-class="`da dlt-0 h-10px w-25px r-10px ${barPos} ${extendsBackgroundColor}`"></t-view>
+			</t-view>
+		</t-view>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * ScrollList 滑动列表
+	 * @date 2025-05-31 12:06:35
+	 * @author TanYuan
+	 * @description 滑动列表组件允许用户通过滑动来浏览列表项，支持自定义指示器
+	 * @example /pagesA/layout/scroll-list/scroll-list
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-scroll-list.html
+	 * @example /pagesA/layout/scroll-list/scroll-list
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} indicator 是否显示指示器(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ScrollListProps extends CommonProps {
+		indicator : boolean
+	}
+	const props = withDefaults(defineProps<ScrollListProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		indicator: true
+	});
+	const { extendsAttrs, extendsPadding, extendsRadius, extendsBackgroundColor } = useTuiThemes(props)
+	const boxW = ref<number>(0)
+	const conW = ref<number>(0)
+	const starX = ref<number>(0)
+	const tranX = ref<number>(0)
+	const moveX = ref<number>(0)
+	const tranPos = ref<string>('')
+	const barPos = ref<string>('')
+
+	const maxScroll = computed(() : number => {
+		return Math.floor(conW.value - boxW.value)
+	})
+
+	function touchstart(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		starX.value = e.x
+	}
+	function touchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		tranX.value = starX.value - e.x + moveX.value
+		if (tranX.value < 0) tranX.value = 0
+		if (tranX.value > maxScroll.value) tranX.value = maxScroll.value
+		const b = (tranX.value / maxScroll.value) * (100 - 25)
+		tranPos.value = `attx-n${tranX.value}px`
+		barPos.value = `attx-${b}px`
+	}
+	function touchend(e : TuiTouchEvent) {
+		moveX.value = tranX.value
+	}
+	function mainInitFinished(rect : NodeInfo) {
+		boxW.value = rect.width!
+	}
+	function initFinished(rect : NodeInfo) {
+		conW.value = rect.width!
+	}
+</script>

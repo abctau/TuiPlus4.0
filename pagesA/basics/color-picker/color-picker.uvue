@@ -1,0 +1,29 @@
+<template>
+	<t-page title='Color' main-class="p-30">
+		<t-card main-class="mb-30" title='Color 颜色选择器' sub-title="非webview采用Draw绘制,流畅丝滑不卡顿,支持透明通道显示"></t-card>
+		<t-section title="基础功能" main-class="mb-30"></t-section>
+		<t-color main-class="tdr mb-30" v-model="colorValue" @change="colorChange"></t-color>
+		<t-button @click="colorValue='#f56c6c'" main-class="mb-30" type="p">修改为红色</t-button>
+		<t-section title="弹窗-表单中使用方法" main-class="mb-30"></t-section>
+		<t-picker-color main-class="tdr mb-30" @confirm="colorConfirm" @cancel="colorCancel" @change="colorChange"
+			v-model="color1">
+			<t-button type="p">请选择主题色</t-button>
+		</t-picker-color>
+	</t-page>
+</template>
+
+<script setup>
+	const color1 = ref<string>('#0055ff')
+	const color = ref('rgba(53,186,255,0.5)')
+	const show = ref(false)
+	const colorValue = ref('#ff0000')
+	function colorCancel(e : string) {
+		console.log('colorCancel', e)
+	}
+	function colorChange(e : string) {
+		// console.log('colorChange', e)
+	}
+	function colorConfirm(e : string) {
+		console.log('onConfirm', e)
+	}
+</script>

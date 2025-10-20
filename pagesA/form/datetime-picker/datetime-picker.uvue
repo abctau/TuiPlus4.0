@@ -1,0 +1,48 @@
+<template>
+	<t-page title="日期选择" main-class="p-30">
+		<t-card main-class="mb-30" title="PickerDate 日期选择"
+			sub-title="Canvas绘制,虚拟滚动绘制原理数据在多也不怕了,自研滚动算法,支持年月日、年月日时分秒、年月日时分、时分秒、年月、年、周等日期选择，可限制选择范围"></t-card>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-text main-class="slh-60">当前日期:{{defaultDate}}</t-text>
+		</t-col>
+		<t-section title="默认值+日期限制(嵌入模式)" main-class="mb-30 tdb tdr"></t-section>
+		<t-picker-date main-class="tdr mb-30 h-600" v-model="defaultDate" :range="dateRange" @change="pickerChange"
+			:embeddable="true">
+		</t-picker-date>
+		<t-button main-class="mb-30" type="e" @click="defaultDate='1986-11-02 12:35:40'">双向绑定测试</t-button>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-text main-class="slh-60">表单日期:{{curDate}}</t-text>
+		</t-col>
+		<t-section title="默认值+日期限制(弹窗模式)" main-class="mb-30"></t-section>
+		<t-picker-date main-class="tdr mb-30" v-model="curDate" @confirm="pickerConfirm" :range="dateRange1">
+			<template #button>
+				<t-button type="p">请选择日期</t-button>
+			</template>
+		</t-picker-date>
+		<t-button main-class="mb-30" type="p" @click="curDate='1986-11-02 12:35:40'">双向绑定测试</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	const defaultDate = ref<string>('1612959739000') //1986-11-02 12:35:40 or 1612959739000
+	const curDate = ref<string>('')
+	const dateRange = ref<any[][]>([
+		['year', '年', [1913, 2099]],
+		['month', '月', [1, 12]],
+		['date', '日', [1, 31]],
+		// ['hour', '时', [0, 23]], // 注意：小时通常是从0到23
+		// ['minute', '分', [0, 59]], // 注意：分钟和秒通常是从0开始
+		// ['second', '秒', [0, 59]] // 注意：这里我也假设了最大值为59，根据实际需要调整
+	]);
+	const dateRange1 = ref<any[][]>([
+		['year', '年', [1913, 2099]],
+		['month', '月', [1, 12]],
+		['date', '日', [1, 31]]
+	]);
+	function pickerChange(e : UTSJSONObject) {
+		// console.log(e)
+	}
+	function pickerConfirm(e : UTSJSONObject) {
+		console.log(e)
+	}
+</script>

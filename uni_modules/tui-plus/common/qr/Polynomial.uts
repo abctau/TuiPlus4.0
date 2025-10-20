@@ -1,0 +1,67 @@
+import QRMath from './math';
+export default class QRPolynomial {
+	num : number[] = []
+	qrmath : QRMath = new QRMath()
+	constructor(num : number[], shift : number) {
+		if (num.length == 0) {
+			throw new Error(num.length + "/" + shift);
+		}
+
+		var offset = 0;
+
+		while (offset < num.length && num[offset] == 0) {
+			offset++;
+		}
+		this.num = [];
+		for (var i = 0; i < num.length - offset + shift; i++) {
+			if ((i + offset) < num.length) {
+				this.num.push(num[i + offset]);
+			} else {
+				this.num.push(0);
+			}
+		}
+	}
+
+	get(index : number) : number {
+		return this.num[index];
+	}
+
+	getLength() : number {
+		return this.num.length;
+	}
+	multiply(e : QRPolynomial) : QRPolynomial {
+		var num : number[] = []
+		const len = this.getLength() + e.getLength() - 1
+		for (var i = 0; i < len; i++) {
+			num.push(0);
+		}
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= this.qrmath.gexp(this.qrmath.glog(this.get(i)) + this.qrmath.glog(e.get(j)));
+			}
+		}
+		return new QRPolynomial(num, 0);
+	}
+
+	mod(e : QRPolynomial) : QRPolynomial {
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+
+		var ratio = this.qrmath.glog(this.get(0)) - this.qrmath.glog(e.get(0));
+
+		var num : number[] = [];
+
+		for (var i = 0; i < this.getLength(); i++) {
+			num.push(this.get(i));
+		}
+
+		for (var i = 0; i < e.getLength(); i++) {
+			num[i] ^= this.qrmath.gexp(this.qrmath.glog(e.get(i)) + ratio);
+		}
+
+		// 递归调用
+		return new QRPolynomial(num, 0).mod(e);
+	}
+
+}

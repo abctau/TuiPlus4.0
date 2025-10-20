@@ -1,0 +1,105 @@
+<template>
+	<t-view v-if="trans" :main-class="`${mainClass} fww atp-o atd-500  ${hidden?'o-1':'o-0'}`" @click="mainOnclick"
+		@transitionend="transitionend">
+		<t-button v-bind="extendsAttrs" main-class="mr-15 h-100%" :right-icon="closable?'close':''" @rightClick="close">
+			<slot></slot>
+		</t-button>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Tag 标签
+	 * @date 2025-05-31 12:08:03
+	 * @author TanYuan
+	 * @description 轻量级的方式来展示和操作标签信息，支持可关闭、主题样式、动态隐藏以及自定义尺寸和关闭图标样式
+	 * @example /pagesA/basics/tag/tag
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-tag.html
+	 * @example /pagesA/basics/tag/tag
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} name 标签名称
+	 * @property {Boolean} closable 是否可关闭
+	 * @value true 是
+	 * @value false 否
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} closeClass 关闭按钮样式
+	 * @property {String} labelClass 标签文本样式
+	 * @event {Function} click 点击时触发
+	 * @event {Function} close 关闭标签时触发
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface TagProps extends CommonProps {
+		name : string
+		closable : boolean
+		closeClass : string
+		labelClass : string
+	}
+
+	const props = withDefaults(defineProps<TagProps>(), {
+		path: '',
+		hover: true,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: 'plain',
+		size: 'mini',
+		mainClass: '',
+		nativeClass: '',
+		name: '',
+		closable: false,
+		closeClass: '',
+		labelClass: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['close', 'click'])
+	const trans = ref(true)
+	const hidden = ref(true)
+	const tagNode = ref<UniElement | null>(null)
+	let timer : number = 0
+	function transitionend() {
+		trans.value = false
+	}
+	function close() : void {
+		clearTimeout(timer)
+		timer = setTimeout(() => {
+			hidden.value = false
+			emit('close', props.name)
+		}, 500)
+	}
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+</script>

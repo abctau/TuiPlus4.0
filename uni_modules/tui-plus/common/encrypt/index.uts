@@ -1,0 +1,59 @@
+import { JSEncrypt } from './rsa/JSEncrypt.uts'
+import { encodeBase64, decodeBase64 } from './crypto/base64'
+import { encryptAES, decryptAES } from './crypto/aes'
+import { MD5, HmacMD5 } from './crypto/md5'
+import { SHA1, HmacSHA1 } from './crypto/sha1'
+import { SHA256, HmacSHA256 } from './crypto/sha256'
+import { SHA512, HmacSHA512 } from './crypto/sha512'
+export class TuiCryptoShal {
+	constructor() { }
+	md5(str : string) : string {
+		return MD5(str)
+	}
+	HmacMD5(message : string, key : string) : string {
+		return HmacMD5(message, key)
+	}
+	sha1(str : string) : string {
+		return SHA1(str)
+	}
+	HmacSHA1(message : string, key : string) : string {
+		return HmacSHA1(message, key)
+	}
+	sha256(str : string) : string {
+		return SHA256(str)
+	}
+	HmacSHA256(message : string, key : string) : string {
+		return HmacSHA256(message, key)
+	}
+	sha512(str : string) : string {
+		return SHA512(str)
+	}
+	HmacSHA512(message : string, key : string) : string {
+		return HmacSHA512(message, key)
+	}
+}
+export class TuiCryptoAes {
+	constructor() { }
+	encrypt(message : string, key : string, _cfg : UTSJSONObject = {}) : string {
+		return encryptAES(message, key, _cfg)
+	}
+	decrypt(message : string, key : string, _cfg : UTSJSONObject = {}) : string {
+		return decryptAES(message, key, _cfg)
+	}
+}
+export class TuiCryptoBase64 {
+	constructor() { }
+	encrypt(str : string) : string {
+		return encodeBase64(str)
+	}
+	decrypt(str : string) : string {
+		return decodeBase64(str)
+	}
+}
+export class TuiCrypto {
+	static rsa = new JSEncrypt()
+	static base64 = new TuiCryptoBase64()
+	static aes = new TuiCryptoAes()
+	static sha = new TuiCryptoShal()
+	constructor() { }
+}

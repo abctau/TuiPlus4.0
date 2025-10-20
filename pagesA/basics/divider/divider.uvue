@@ -1,0 +1,41 @@
+<template>
+	<t-page main-class="p-30" title="分割线">
+		<t-card main-class="mb-30" title="Divider 分割线" sub-title="内容进行分割展示"></t-card>
+		<t-section title='功能展示' type='p' main-class="tdb-tdr"></t-section>
+		<t-col main-class="mt-30 tdr tdb plr-100 pt-30">
+			<t-divider main-class="mb-30" :line="line" :dot="isdot" :lineStyle="lineStyle" :text="text"></t-divider>
+			<t-divider main-class="mb-30" :line="line" :dot="isdot" type="success" :lineStyle="lineStyle"
+				:text="text"></t-divider>
+			<t-divider main-class="mb-30" :line="line" :dot="isdot" type="error" :lineStyle="lineStyle"
+				:text="text"></t-divider>
+			<t-divider main-class="mb-30" :line="line" :dot="isdot" type="primary" :lineStyle="lineStyle"
+				:text="text"></t-divider>
+			<t-divider main-class="mb-30" :line="line" :dot="isdot" type="warning" :lineStyle="lineStyle"
+				:text="text"></t-divider>
+		</t-col>
+		<t-row main-class="fww tdr tdb mt-20 p-20">
+			<t-button main-class="mrb-30" type='p' @click="setText">设置文本</t-button>
+			<t-button type='p' main-class="mrb-30" @click="setBorder">设置线条样式</t-button>
+			<t-button type='p' main-class="mrb-30" @click="setBorder1">不显示线条</t-button>
+			<t-button type='p' main-class="mrb-30" @click="setDot">显示圆点</t-button>
+		</t-row>
+	</t-page>
+</template>
+<script setup>
+	const text = ref('页面有限，服务不止')
+	const line = ref(true)
+	const lineStyle = ref('solid')
+	const isdot = ref(false)
+	function setText() {
+		text.value = text.value == '页面有限，服务不止' ? '加载中' : '页面有限，服务不止'
+	}
+	function setBorder() {
+		lineStyle.value = lineStyle.value == 'solid' ? 'dashed' : 'solid'
+	}
+	function setBorder1() {
+		line.value = line.value ? false : true
+	}
+	function setDot() {
+		isdot.value = !isdot.value
+	}
+</script>

@@ -1,0 +1,942 @@
+import { getPx, addUnit, replaceCommasInRGBValues, removeSpacesRGB, replaceNWithNegative, getRandomInt } from './util.uts'
+import { b, c, bc, ra, ms, ps, pts, pg, vg, ttc } from './theme'
+import { RandomHexColor } from './color.uts';
+function styleFormart(e : string) : Map<string, string> {
+	let colorValue = removeSpacesRGB(e)
+	colorValue = colorValue.replace(/--/g, "-n")
+	colorValue = colorValue.replace(/\(-/g, "(n")
+	colorValue = colorValue.replace(/,-/g, ",n")
+	const arr = colorValue.trim().split(' ')
+	const style_map : Map<string, string> = new Map()
+	arr.forEach((_item : string) => {
+		let item : string = _item
+		let isimportant : boolean = item.includes('!')
+		if (isimportant) item = item.replace(/!/g, "")
+		function addImportant(value : any | null) : string {
+			return `${value}` + (isimportant ? ' !important' : '')
+		}
+		let iv = item.split('-')
+		const type : string = iv[0]
+		const typearr = type.split('')
+		const value : string | null = iv.length > 1 ? iv[1] : null
+		const rgbastr = replaceCommasInRGBValues(value ?? '')
+		const valuearr : string[] = rgbastr == '' ? [] : rgbastr.split(',')
+		valuearr.forEach((e, index) => {
+			if (e.startsWith('rgb')) valuearr[index] = e.replace(/ /g, ',')
+		})
+		const firstType = type.charAt(0)
+		const ortherType = type.slice(1)
+		function tvh(index : number) : string {
+			let val : string = ''
+			if (valuearr.length > index) val = valuearr[index]
+			return val
+		}
+		switch (firstType) {
+			case 't':
+				switch (ortherType) {
+					case 'db': //主题元素例子背景色
+						style_map.set('background-color', addImportant(b(tvh(0), tvh(1), tvh(2), false)))
+						break;
+					case 'dc': //字体色主题前景字体色
+						style_map.set('color', addImportant(c(tvh(0), tvh(1), tvh(2), false)))
+						break;
+					case 'qc': //字体色
+						style_map.set('color', addImportant(ttc(tvh(0), tvh(1), tvh(2), false)))
+						break;
+					case 'dr': //主题圆角中
+						const drstyles : string[] = ra(tvh(0), tvh(1), tvh(2)).split(';')
+						drstyles.forEach((item : string) => {
+							const itemarr : string[] = item.split(':')
+							if (itemarr.length > 1) style_map.set(itemarr[0], itemarr[1])
+						})
+						break;
+					case 'dm': //主题外边距
+						const dmstyles : string[] = ms(tvh(0), tvh(1), tvh(2)).split(';')
+						dmstyles.forEach((item : string) => {
+							const itemarr : string[] = item.split(':')
+							if (itemarr.length > 1) style_map.set(itemarr[0], itemarr[1])
+						})
+						break;
+					case 'dp': //主题内边距
+						const dpstyles : string[] = ps(tvh(0), tvh(1), tvh(2)).split(';')
+						dpstyles.forEach((item : string) => {
+							const itemarr : string[] = item.split(':')
+							if (itemarr.length > 1) style_map.set(itemarr[0], itemarr[1])
+						})
+						break;
+					case 'ts': //主题字体尺寸
+						style_map.set('font-size', addImportant(pts(tvh(0), tvh(1), false)))
+						break;
+					case 'pg': //页面背景色
+						style_map.set('background-color', addImportant(pg(tvh(0), false)))
+						break;
+					case 'vg': //盒子背景色
+						style_map.set('background-color', addImportant(vg(tvh(0), false)))
+						break;
+					case 'bc': //边框
+						const bcstyles : string[] = bc(tvh(0), tvh(1), tvh(2), tvh(3)).split(';')
+						bcstyles.forEach((item : string) => {
+							const itemarr : string[] = item.split(':')
+							if (itemarr.length > 1) style_map.set(itemarr[0], itemarr[1])
+						})
+						break;
+					case 'hw':
+					case 'wh':
+						style_map.set('width', addImportant(addUnit(value ?? '0')))
+						style_map.set('height', addImportant(addUnit(value ?? '0')))
+						break;
+					case 'hwr':
+					case 'whr':
+						style_map.set('width', addImportant(addUnit(value ?? '0')))
+						style_map.set('height', addImportant(addUnit(value ?? '0')))
+						style_map.set('border-radius', addImportant(addUnit(value ?? '0')))
+						break;
+				}
+				break;
+
+			case 'a':
+				function fvh(val : string) {
+					let oldVal = style_map.get('transform') ?? ''
+					if (oldVal == '') {
+						style_map.set('transform', val)
+					} else {
+						const oldvalToMap = new Map<string, string>()
+						const arr = oldVal.split(' ')
+						arr.forEach((item : string) => {
+							const startIndex = item.indexOf('(')
+							const endIndex = item.indexOf(')');
+							const key = item.substring(0, startIndex)
+							const val = item.substring(startIndex + 1, endIndex);
+							oldvalToMap.set(key, val)
+						})
+						const startIndex = val.indexOf('(')
+						const endIndex = val.indexOf(')');
+						const key = val.substring(0, startIndex)
+						const value = val.substring(startIndex + 1, endIndex);
+						oldvalToMap.set(key, value)
+						let newSty : string = ''
+						oldvalToMap.forEach((v, k) => {
+							newSty += ' ' + `${k}(${v})`
+						})
+						style_map.set('transform', newSty.trim())
+					}
+				}
+				const transform_origin_options = {
+					t: 'top',
+					l: 'left',
+					r: 'right',
+					b: 'bottom',
+					c: 'center'
+				}
+				const ttflist = {
+					e: 'ease',
+					ei: 'ease-in',
+					eo: 'ease-out',
+					eio: 'ease-in-out',
+					l: 'linear',
+					cb: 'cubic-bezier'
+				}
+				const tplist = {
+					a: 'all',
+					n: 'none',
+					w: 'width',
+					h: 'height',
+					m: 'margin',
+					mt: 'margin-top',
+					mb: 'margin-bottom',
+					ml: 'margin-left',
+					mr: 'margin-right',
+					l: 'left',
+					r: 'right',
+					t: 'top',
+					b: 'bottom',
+					p: 'padding',
+					tl: 'padding-left',
+					pr: 'padding-right',
+					pt: 'padding-top',
+					pb: 'padding-bottom',
+					o: 'opacity',
+					bc: 'background-color',
+					boc: 'border-color',
+					btc: 'border-top-color',
+					bbc: 'border-bottom-color',
+					blc: 'border-left-color',
+					brc: 'border-right-color',
+					tr: 'transform'
+				}
+				switch (ortherType) {
+					case 'tp':
+						let tp_optio_star = ''
+						valuearr.forEach((option) => {
+							const tp_optio_value : string | null = tplist.getString(option)
+							if (tp_optio_value != null) tp_optio_star += ',' + tp_optio_value
+						})
+						if (tp_optio_star.length > 0) style_map.set('transition-property', addImportant(tp_optio_star.substring(1)))
+						break;
+					case 'ttf':
+						style_map.set('transition-timing-function', addImportant(ttflist[value ?? 'e']))
+						break;
+					case 'td':
+						style_map.set('transition-duration', addImportant(addUnit(value ?? '500', 'ms')))
+						break;
+					case 'tr':
+						fvh(addImportant('rotate(' + addUnit(value ?? '0', 'deg') + ')'))
+						break;
+					case 'trx':
+						// style_map.set('transform', addImportant(`rotateX(${addUnit(value)})`))
+						fvh(addImportant(`rotateX(${addUnit(value)})`))
+						break;
+					case 'try':
+						// style_map.set('transform', addImportant(`rotateY(${addUnit(value)})`))
+						fvh(addImportant(`rotateY(${addUnit(value)})`))
+						break;
+					case 'trz':
+						fvh(addImportant(`rotateZ(${addUnit(value)})`))
+						break;
+					case 'ts':
+						fvh(addImportant(`scale(${replaceNWithNegative(`${value}`)})`))
+						break;
+					case 'tsx':
+						fvh(addImportant(`scaleX(${replaceNWithNegative(`${value}`)})`))
+						break;
+					case 'tsy':
+						fvh(addImportant(`scaleY(${replaceNWithNegative(`${value}`)})`))
+						break;
+					case 'tt':
+						const valstrsss = valuearr.map((item : string) : string => `${addUnit(item)}`).join(',')
+						// style_map.set('transform', addImportant('translate(' + valstrsss + ')'))
+						fvh(addImportant(addImportant('translate(' + valstrsss + ')')))
+						break;
+					case 'ttx':
+						// style_map.set('transform', addImportant(`translateX(${addUnit(value)})`))
+						fvh(addImportant(`translateX(${addUnit(value)})`))
+						break;
+					case 'tty':
+						// style_map.set('transform', addImportant(`translateY(${addUnit(value)})`))
+						fvh(addImportant(`translateY(${addUnit(value)})`))
+						break;
+					case 'to':
+						let optio_star = ''
+						valuearr.forEach((option) => {
+							const firstoption = option.charAt(0)
+							const optionval = transform_origin_options[firstoption]
+							if (optionval != null) {
+								optio_star += `${optionval}` + ' '
+							} else {
+								optio_star += addUnit(option) + ' '
+							}
+						})
+						style_map.set('transform-origin', addImportant(optio_star.trim()))
+						break;
+				}
+				break;
+			case 'm':
+				const margin_options = {
+					t: ['margin-top'],
+					b: ['margin-bottom'],
+					l: ['margin-left'],
+					r: ['margin-right'],
+					x: ['margin-left', 'margin-right'],
+					y: ['margin-top', 'margin-bottom']
+				}
+				if (typearr.length > 1) {
+					typearr.forEach((option) => {
+						let mr_props = margin_options.getArray<string>(option)
+						if (mr_props != null) {
+							mr_props.forEach((prop) => {
+								style_map.set(prop, addImportant(addUnit(value)))
+							})
+						}
+					})
+				} else {
+					if (valuearr.length > 1) {
+						let pm = ''
+						valuearr.forEach((val, index) => {
+							pm += addUnit(val) + ' '
+						})
+						style_map.set('margin', addImportant(pm.trim()))
+					} else {
+						style_map.set('margin', addImportant(addUnit(value)))
+					}
+				}
+				break;
+			case 'p':
+				const paddings = {
+					t: ['padding-top'],
+					b: ['padding-bottom'],
+					l: ['padding-left'],
+					r: ['padding-right'],
+					x: ['padding-left', 'padding-right'],
+					y: ['padding-top', 'padding-bottom']
+				}
+				if (typearr.length > 1) {
+					typearr.forEach((option) => {
+						let p_props = paddings.getArray<string>(option)
+						if (p_props != null) {
+							p_props.forEach((prop) => {
+								style_map.set(prop, addImportant(addUnit(value)))
+							})
+						}
+					})
+				} else {
+					if (valuearr.length > 1) {
+						let pm = ''
+						valuearr.forEach((val, index) => {
+							pm += addUnit(val) + ' '
+						})
+						style_map.set('padding', addImportant(pm.trim()))
+					} else {
+						style_map.set('padding', addImportant(addUnit(value)))
+					}
+				}
+				break;
+			case 'w':
+				const widthlist = {
+					l: `max-width`,
+					s: `min-width`,
+				}
+				if (typearr.length > 1) {
+					let wprops = widthlist.getString(typearr[1])
+					if (wprops != null) style_map.set(wprops, addImportant(addUnit(value)))
+				} else {
+					style_map.set('width', addImportant(addUnit(value)))
+				}
+				break;
+			case 'h':
+				const heightlist = {
+					l: `max-height`,
+					s: `min-height`,
+				}
+				if (typearr.length > 1) {
+					let hprops = heightlist.getString(typearr[1])
+					if (hprops != null) style_map.set(hprops, addImportant(addUnit(value)))
+				} else {
+					style_map.set('height', addImportant(addUnit(value)))
+				}
+				break;
+			case 'b':
+				const byl = {
+					s: 'solid',
+					d: 'dashed',
+					n: 'none',
+				}
+				function borderHandl() : string {
+					if (valuearr.length > 0) valuearr[0] = addUnit(valuearr[0])
+					if (valuearr.length > 1) valuearr[1] = addUnit(`${byl[valuearr[1]]}`)
+					return valuearr.join(' ')
+				}
+
+				if (typearr.length > 1) {
+					switch (ortherType) {
+						case 'c':
+							style_map.set('border-color', addImportant(valuearr.join(',')))
+							break;
+						case 's':
+							style_map.set('border-style', addImportant(byl[value?.charAt(0) ?? 's']))
+							break;
+						case 't':
+							style_map.set('border-top', addImportant(valuearr.length == 0 ? '1px solid red' : borderHandl()))
+							break;
+						case 'ts':
+							style_map.set('border-top-style', addImportant(byl[value?.charAt(0) ?? 's']))
+							break;
+						case 'tc':
+							style_map.set('border-top-color', addImportant(valuearr.join(',')))
+							break;
+						case 'tw':
+							style_map.set('border-top-width', addImportant(addUnit(value ?? '1px')))
+							break;
+						case 'b':
+							style_map.set('border-bottom', addImportant(valuearr.length == 0 ? '1px solid red' : borderHandl()))
+							break;
+						case 'bs':
+							style_map.set('border-bottom-style', addImportant(byl[value?.charAt(0) ?? 's']))
+							break;
+						case 'bc':
+							style_map.set('border-bottom-color', addImportant(valuearr.join(',')))
+							break;
+						case 'bw':
+							style_map.set('border-bottom-width', addImportant(addUnit(value ?? '1px')))
+							break;
+						case 'l':
+							style_map.set('border-left', addImportant(valuearr.length == 0 ? '1px solid red' : borderHandl()))
+							break;
+						case 'ls':
+							style_map.set('border-left-style', addImportant(byl[value?.charAt(0) ?? 's']))
+							break;
+						case 'lc':
+							style_map.set('border-left-color', addImportant(valuearr.join(',')))
+							break;
+						case 'lw':
+							style_map.set('border-left-width', addImportant(addUnit(value ?? '1px')))
+							break;
+						case 'r':
+							style_map.set('border-right', addImportant(valuearr.length == 0 ? '1px solid red' : borderHandl()))
+							break;
+						case 'rs':
+							style_map.set('border-right-style', addImportant(byl[value?.charAt(0) ?? 's']))
+							break;
+						case 'rc':
+							style_map.set('border-right-color', addImportant(valuearr.join(',')))
+							break;
+						case 'rw':
+							style_map.set('border-right-width', addImportant(addUnit(value ?? '1px')))
+							break;
+						case 'w':
+							style_map.set('border-width', addImportant(addUnit(value ?? '1px')))
+							break;
+						case 'g':
+							style_map.set('background-color', addImportant(valuearr.join(',')))
+							break;
+						case 'gn':
+							style_map.set('background-color', addImportant('transparent'))
+							break;
+						case 'i':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(${valuearr.join(',')})`))
+							break;
+						case 'bf':
+							style_map.set('backdrop-filter', `blur(${addImportant(addUnit(value ?? '1px'))})`)
+							break;
+						case 'ir':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to right,${valuearr.join(',')})`))
+							break;
+						case 'il':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to left,${valuearr.join(',')})`))
+							break;
+						case 'ib':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to bottom, ${valuearr.join(',')})`))
+							break;
+						case 'it':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to top,${valuearr.join(',')})`))
+							break;
+						case 'ibl':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to bottom left,${valuearr.join(',')})`))
+							break;
+						case 'ibr':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to bottom right,${valuearr.join(',')})`))
+							break;
+						case 'itl':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to top left,${valuearr.join(',')})`))
+							break;
+						case 'itr':
+							style_map.set('background-image', addImportant(
+								`linear-gradient(to top right,${valuearr.join(',')})`))
+							break;
+						case 'ran':
+							const dd : string[] = [
+								'to right',
+								'to left',
+								'to bottom',
+								'to top',
+								'to bottom right',
+								'to top left',
+								'to top right'
+							]
+							style_map.set('background-image', addImportant(
+								`linear-gradient(${dd[getRandomInt(0, 6)]},${[RandomHexColor(), RandomHexColor()].join(',')})`))
+							break;
+						case 'zb':
+							style_map.set('box-sizing', addImportant('border-box'))
+							break;
+						case 'zn':
+							style_map.set('box-sizing', addImportant('none'))
+							break;
+						case 'zx':
+							style_map.set('box-sizing', addImportant('content-box'))
+							break;
+						case 's0':
+							valuearr.forEach((e, index) => {
+								valuearr[index] = addUnit(e)
+							})
+							style_map.set('box-shadow', addImportant(valuearr.join(' ')))
+							break;
+						case 's1':
+							style_map.set('box-shadow', addImportant('0 0rpx 10rpx 0rpx rgba(2, 4, 38, 0.1)'))
+							break;
+						case 's2':
+							style_map.set('box-shadow', addImportant('0 0 10px rgba(0, 0, 0, 0.06)'))
+							break;
+						default:
+							break;
+					}
+				} else {
+					style_map.set('border', addImportant(valuearr.length == 0 ? '1px solid red' : borderHandl()))
+				}
+				break;
+			case 'l':
+				style_map.set('lines', addImportant(value))
+				// style_map.set('white-space', addImportant('nowrap'))
+				// #ifdef WEB || MP
+				style_map.set('overflow', addImportant('hidden'))
+				style_map.set('text-overflow', addImportant('ellipsis'))
+				style_map.set('display', addImportant('-webkit-box'))
+				style_map.set('-webkit-line-clamp', addImportant(value))
+				style_map.set('line-clamp', addImportant(value))
+				style_map.set('-webkit-box-orient', addImportant('vertical'))
+				style_map.set('word-break', addImportant('break-all'))
+				// #endif
+				break;
+			case 'z':
+				style_map.set('z-index', addImportant(value?.replace('n', '-')))
+				break;
+			case 'c':
+				style_map.set('color', addImportant(valuearr.join(',')))
+				break;
+			case 's':
+				const wbl = {
+					b: 'break-all'
+				}
+				const tll = {
+					c: 'center',
+					r: 'right',
+					l: 'left'
+				}
+				const tfl = {
+					e: 'ellipsis'
+				}
+				const tdl = {
+					n: 'none',
+					u: 'underline',
+					o: 'overline',
+					l: 'line-through',
+					b: 'blink',
+					s: 'spelling-error',
+					g: 'grammar-error'
+				}
+				if (typearr.length > 1) {
+					switch (ortherType) {
+						case 'fw':
+							style_map.set('font-weight', addImportant(value))
+							break;
+						case 'fwb':
+							style_map.set('font-weight', addImportant('700'))
+							break;
+						case 'fwn':
+							style_map.set('font-weight', addImportant('400'))
+							break;
+						case 'wb':
+							style_map.set('word-break', addImportant(wbl[value?.charAt(0) ?? 'b']))
+							break;
+						case 'ta':
+							style_map.set('text-align', addImportant(tll[value?.charAt(0) ?? 'c']))
+							break;
+						case 'to':
+							style_map.set('text-overflow', addImportant(tfl[value?.charAt(0) ?? 'l']))
+							break;
+						case 'lhm':
+							style_map.set('line-height', addImportant(value))
+							break;
+						case 'lh':
+							style_map.set('line-height', addImportant(addUnit(value)))
+							break;
+						case 'ls':
+							style_map.set('letter-spacing', addImportant(addUnit(value)))
+							break;
+						case 'tdl':
+							style_map.set('text-decoration-line', addImportant(tdl[value?.charAt(0) ?? 'n']))
+							break;
+						// #ifndef APP-ANDROID
+						case 'van':
+							style_map.set('vertical-align', addImportant('baseline'))
+							break;
+						case 'vat':
+							style_map.set('vertical-align', addImportant('top'))
+							break;
+						case 'vam':
+							style_map.set('vertical-align', addImportant('middle'))
+							break;
+						case 'vab':
+							style_map.set('vertical-align', addImportant('bottom'))
+							break;
+						// #endif
+						default:
+							break;
+					}
+				} else {
+					style_map.set('font-size', addImportant(addUnit(value)))
+				}
+				break;
+			case 'r':
+				if (typearr.length > 1) {
+					for (const char of ortherType) {
+						const _char = `${char}`
+						switch (_char) {
+							case 'a':
+								style_map.set('border-top-left-radius', addImportant(addUnit(value)))
+								style_map.set('border-top-right-radius', addImportant(addUnit(value)))
+								break;
+							case 'b':
+								style_map.set('border-bottom-left-radius', addImportant(addUnit(value)))
+								style_map.set('border-bottom-right-radius', addImportant(addUnit(value)))
+								break;
+							case '1':
+								style_map.set('border-top-left-radius', addImportant(addUnit(value)))
+								break;
+							case '2':
+								style_map.set('border-top-right-radius', addImportant(addUnit(value)))
+								break;
+							case '3':
+								style_map.set('border-bottom-left-radius', addImportant(addUnit(value)))
+								break;
+							case '4':
+								style_map.set('border-bottom-right-radius', addImportant(addUnit(value)))
+								break;
+							default:
+								break;
+						}
+					}
+				} else {
+					valuearr.forEach((item, index) => {
+						valuearr[index] = addUnit(item)
+					})
+					style_map.set('border-radius', addImportant(valuearr.join(' ')))
+				}
+				break;
+			case 'f':
+				style_map.set('display', addImportant('flex'))
+				if (typearr.length > 1) {
+					switch (ortherType) {
+						case 'f':
+							style_map.set('display', addImportant('flex'))
+							break;
+						case 'n':
+							style_map.set('display', addImportant('none'))
+							break;
+						case 'gc':
+							style_map.set('grid-column', addImportant(value ?? '1'))
+							break;
+						case 'v':
+							style_map.set('flex-direction', addImportant('column'))
+							break;
+						case 'l':
+							style_map.set('flex-direction', addImportant('row'))
+							break;
+						case 'rr':
+							style_map.set('flex-direction', addImportant('row-reverse'))
+							break;
+						case 'cr':
+							style_map.set('flex-direction', addImportant('column-reverse'))
+							break;
+						case 's':
+							style_map.set('flex-shrink', addImportant(value ?? '1'))
+							break;
+						case 'g':
+							style_map.set('flex-grow', addImportant(value ?? '0'))
+							break;
+						case 'b':
+							style_map.set('flex-basis', addImportant(addUnit(value ?? '0')))
+							break;
+						case 'c':
+							style_map.set('align-items', addImportant('center'))
+							style_map.set('justify-content', addImportant('center'))
+							break;
+						case 'asa':
+							style_map.set('align-self', addImportant('auto'))
+							break;
+						case 'asc':
+							style_map.set('align-self', addImportant('center'))
+							break;
+						case 'ass':
+							style_map.set('align-self', addImportant('flex-start'))
+							break;
+						case 'ase':
+							style_map.set('align-self', addImportant('flex-end'))
+							break;
+						case 'asb':
+							style_map.set('align-self', addImportant('baseline'))
+							break;
+						case 'asst':
+							style_map.set('align-self', addImportant('stretch'))
+							break;
+						case 'aic':
+							style_map.set('align-items', addImportant('center'))
+							break;
+						case 'ais':
+							style_map.set('align-items', addImportant('flex-start'))
+							break;
+						case 'aie':
+							style_map.set('align-items', addImportant('flex-end'))
+							break;
+						case 'aib':
+							style_map.set('lign-items', addImportant('baseline'))
+							break;
+						case 'aist':
+							style_map.set('align-items', addImportant('stretch'))
+							break;
+						case 'acc':
+							style_map.set('align-content', addImportant('center'))
+							break;
+						case 'acs':
+							style_map.set('align-content', addImportant('flex-start'))
+							break;
+						case 'ace':
+							style_map.set('align-content', addImportant('flex-end'))
+							break;
+						case 'acb':
+							style_map.set('align-content', addImportant('baseline'))
+							break;
+						case 'acst':
+							style_map.set('align-content', addImportant('stretch'))
+							break;
+						case 'jcs':
+							style_map.set('justify-content', addImportant('flex-start'))
+							break;
+						case 'jce':
+							style_map.set('justify-content', addImportant('flex-end'))
+							break;
+						case 'jcc':
+							style_map.set('justify-content', addImportant('center'))
+							break;
+						case 'jcb':
+							style_map.set('justify-content', addImportant('space-between'))
+							break;
+						case 'jca':
+							style_map.set('justify-content', addImportant('space-around'))
+							break;
+						case 'jcse':
+							style_map.set('justify-content', addImportant('space-evenly'))
+							break;
+						case 'ww':
+							style_map.set('flex-wrap', addImportant('wrap'))
+							break;
+						case 'wn':
+							style_map.set('flex-wrap', addImportant('nowrap'))
+							break;
+						case 'wwr':
+							style_map.set('flex-wrap', addImportant('wrap-reverse'))
+							break;
+						default:
+							break;
+					}
+				} else {
+					style_map.set('flex', addImportant(value ?? '1'))
+				}
+				break;
+			case 'o':
+				const pel = {
+					ao: 'auto',
+					n: 'none',
+					vd: 'visiblePainted',
+					vl: 'visibleFill',
+					ve: 'visibleStroke',
+					v: 'visible',
+					p: 'painted',
+					f: 'fill',
+					s: 'stroke',
+					a: 'all',
+					i: 'inherit'
+				}
+				const vbl = {
+					v: 'visible',
+					h: 'hidden',
+					c: 'collapse'
+				}
+				// #ifdef WEB
+				const cul = {
+					a: 'auto',
+					c: 'crosshair',
+					d: 'default',
+					p: 'pointer',
+					m: 'move',
+					t: 'text',
+					w: 'wait',
+					h: 'help',
+					s: 'progress',
+					n: 'no-drop',
+					g: 'grabbing'
+				}
+				// #endif
+				if (typearr.length > 1) {
+					switch (ortherType) {
+						case "h":
+							style_map.set('overflow', addImportant('hidden'))
+							break;
+						case "v":
+							style_map.set('overflow', addImportant('visible'))
+							break;
+						case "pe":
+							style_map.set('pointer-events', addImportant(pel[value ?? 'n']))
+							break;
+						case "vy":
+							style_map.set('visibility', addImportant(vbl[value?.charAt(0) ?? 'v']))
+							break;
+						case "cr":
+							// #ifdef WEB
+							style_map.set('cursor', addImportant(cul[value?.charAt(0) ?? 'p']))
+							// #endif
+							break;
+						case "crn":
+							// #ifdef WEB
+							style_map.set('cursor', addImportant('no-drop'))
+							// #endif
+							break;
+						default:
+							break;
+					}
+				} else {
+					style_map.set('opacity', addImportant(value))
+				}
+				break;
+			case 'd':
+				if (typearr.length > 1) {
+					function defaultpos() {
+						for (const char of ortherType) {
+							const _char = `${char}`
+							switch (_char) {
+								case 'l':
+									style_map.set('left', addImportant(addUnit(value ?? '0')))
+									break;
+								case 'r':
+									style_map.set('right', addImportant(addUnit(value ?? '0')))
+									break;
+								case 't':
+									style_map.set('top', addImportant(addUnit(value ?? '0')))
+									break;
+								case 'b':
+									style_map.set('bottom', addImportant(addUnit(value ?? '0')))
+									break;
+								default:
+									break;
+							}
+						}
+					}
+					switch (ortherType) {
+						case "r":
+							if (value == null || value == '') {
+								style_map.set('position', addImportant('relative'))
+							} else {
+								defaultpos()
+							}
+							break;
+						case "a":
+							style_map.set('position', addImportant('absolute'))
+							break;
+						case "f":
+							style_map.set('position', addImportant('fixed'))
+							break;
+						case "i":
+							style_map.set('left', addImportant(addUnit(value ?? '0')))
+							style_map.set('right', addImportant(addUnit(value ?? '0')))
+							style_map.set('top', addImportant(addUnit(value ?? '0')))
+							style_map.set('bottom', addImportant(addUnit(value ?? '0')))
+							break;
+						case "x":
+							style_map.set('left', addImportant(addUnit(value ?? '0')))
+							style_map.set('right', addImportant(addUnit(value ?? '0')))
+							break;
+						case "y":
+							style_map.set('top', addImportant(addUnit(value ?? '0')))
+							style_map.set('bottom', addImportant(addUnit(value ?? '0')))
+							break;
+						default:
+							defaultpos()
+							break;
+					}
+				}
+				break;
+			default:
+				break;
+		}
+	})
+	return style_map
+}
+export function useStyle(e : string, filter : string[] = [], state : boolean = false) {
+	let cssstr = ''
+	const style_map = styleFormart(e)
+	style_map.forEach((val : string, key : string) => {
+		if (filter.length == 0) {
+			cssstr += `${key}: ${val};`
+		} else {
+			if (state) {
+				if (!filter.includes(key)) cssstr += `${key}: ${val};`
+			} else {
+				if (filter.includes(key)) cssstr += `${key}: ${val};`
+			}
+		}
+	})
+	return cssstr
+}
+export function getStyleProperty(e : string, propertyName : string) : string {
+	let v : string = ''
+	const style_map = styleFormart(e)
+	style_map.forEach((val : string, prop : string) => {
+		if (prop == propertyName) v = val
+	})
+	return v
+}
+
+export function getStyleFontSize(e : string) : number {
+	let size : number = 0
+	let sty : string = getStyleProperty(e, 'font-size')
+	if (sty != '') size = parseFloat(getPx(sty).toFixed(1))
+	return size
+}
+
+export function getStyleFontColor(e : string) : string {
+	return getStyleProperty(e, 'color')
+}
+
+export function getStyleBackgroundColor(e : string) : string {
+	return getStyleProperty(e, 'background-color')
+}
+
+export function setStyleProperty(ref : UniElement | null, e : string) {
+	const style_map = styleFormart(e)
+	style_map.forEach((value : string, key : string) => {
+		ref?.style?.setProperty(key, value)
+	})
+}
+
+export const TuiTextStyle = [
+	'font-family',
+	'font-size',
+	'font-weight',
+	'font-style',
+	'font-variant',
+	'font-stretch',
+	'line-height',
+	'letter-spacing',
+	'word-spacing',
+	'text-decoration',
+	'text-transform',
+	'text-align',
+	'vertical-align',
+	'text-indent',
+	'white-space',
+	'color',
+	'text-shadow',
+	'font-kerning',
+	'font-feature-settings',
+	'font-variant-caps',
+	'font-variant-east-asian',
+	'font-variant-ligatures',
+	'font-variant-numeric',
+	'text-underline-position',
+	'text-rendering',
+	'writing-mode',
+	'text-orientation',
+	'text-combine-upright',
+	'direction',
+	'unicode-bidi'
+];
+export const TuiPmStyle = [
+	'margin',
+	'padding',
+	'margin-left',
+	'margin-right',
+	'margin-top',
+	'margin-bottom',
+	'padding-left',
+	'padding-right',
+	'padding-top',
+	'padding-bottom',
+	'border'
+];

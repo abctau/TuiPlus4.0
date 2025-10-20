@@ -1,0 +1,12 @@
+type configType = {
+	appSelect : string,
+	baseUrl : string,
+	imagePath : string
+	staticUrl : string
+}
+export default {
+	appSelect: '664d8704f6d6c7f1280f4f6c',
+	baseUrl: 'https://tool.yundie.xyz/api/',
+	imagePath: 'image',
+	staticUrl: 'https://life.yundie.xyz/tuiplus/'
+} as configType

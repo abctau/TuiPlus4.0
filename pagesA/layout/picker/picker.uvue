@@ -1,0 +1,103 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Picker 选择容器" sub-title="Canvas绘制更快渲染速度,自研滚动算法不会在滚动结束的时候回弹"></t-card>
+		<t-card main-class="mb-30" title="亮点" sub-title="Canvas绘制,使用了虚拟列表原理,只会绘制需要滚动显示的数据,不用担心数据量大影响渲染速度"></t-card>
+		<t-section title='基础使用-数据不关联(自由控制)' main-class="mb-30"></t-section>
+		<t-picker class="tdr mb-30" :value="pickerIds" @change="pickerchange">
+			<t-picker-column :list="province"></t-picker-column>
+			<t-picker-column :list="city"></t-picker-column>
+			<t-picker-column :list="area"></t-picker-column>
+		</t-picker>
+		<t-section title='header展示' main-class="mb-30"></t-section>
+		<!-- <t-picker class="tdr-mb.30" :show-unit="true">
+			<t-picker-column :list="province" unit="省"></t-picker-column>
+			<t-picker-column :list="city" unit="市"></t-picker-column>
+			<t-picker-column :list="area" unit="区"></t-picker-column>
+		</t-picker> -->
+		<t-section title='选中的值' main-class="mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-text main-class="mb-30">选中的ID：{{pickerIds1.join(',')}}(方便数据库存储)</t-text>
+			<t-text>选中Value：{{pickerValue.join('-')}}</t-text>
+		</t-col>
+		<t-col main-class="tdr tdb mb-30 tdp fww">
+			<t-button @click="updateList" main-class="mb-30" type='s'>修改第三列列表</t-button>
+			<t-button @click="updateValue" main-class="mb-30" type='p'>修改第三列的值</t-button>
+			<t-button @click="updArrteAValue" type='e'>直接修改数组</t-button>
+		</t-col>
+		<t-section title='数据关联用法见日期选择和城市选择组件' main-class="mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-button type="p" main-class="mb-30 "
+				path="/pagesA/form/datetime-picker/datetime-picker">日期选择组件</t-button>
+			<t-button type='s' path="/pagesA/form/pca-picker/pca-picker">城市选择组件</t-button>
+		</t-col>
+	</t-page>
+</template>
+<script setup>
+	const pickerIns = ref<TPickerComponentPublicInstance | null>(null)
+	const direction = ref<string>('vertical')
+	const province = ref<UTSJSONObject[]>([
+		{ partenid: "0", id: "1", title: '四川省' },
+		{ partenid: "0", id: "2", title: '重庆市' },
+		{ partenid: "0", id: "3", title: '广东省' }, // 广州是广东省的一个城市
+		{ partenid: "0", id: "4", title: '上海市' }
+	]);
+
+	const city = ref<UTSJSONObject[]>([
+		{ partenid: "1", id: "11", title: '成都市' },
+		{ partenid: "1", id: "12", title: '绵阳市' },
+		{ partenid: "2", id: "21", title: '渝中区' },
+		{ partenid: "2", id: "22", title: '江北区' },
+		{ partenid: "3", id: "31", title: '广州市' },
+		{ partenid: "3", id: "32", title: '深圳市' },
+		{ partenid: "4", id: "41", title: '黄浦区' },
+		{ partenid: "4", id: "42", title: '徐汇区' }
+	]);
+
+	const area = ref<UTSJSONObject[]>([
+		{ partenid: "11", id: "111", title: '武侯区' },
+		{ partenid: "11", id: "112", title: '青羊区' },
+		{ partenid: "12", id: "121", title: '涪城区' },
+		{ partenid: "12", id: "122", title: '游仙区' },
+		{ partenid: "21", id: "211", title: '解放碑街道' },
+		{ partenid: "21", id: "212", title: '南岸区' },
+		{ partenid: "22", id: "221", title: '观音桥街道' },
+		{ partenid: "22", id: "222", title: '江北城街道' },
+		{ partenid: "31", id: "311", title: '越秀区' },
+		{ partenid: "31", id: "312", title: '天河区' },
+		{ partenid: "32", id: "321", title: '福田区' },
+		{ partenid: "32", id: "322", title: '罗湖区' },
+	])
+	const area1 = ref<UTSJSONObject[]>([
+		{ partenid: "41", id: "411", title: '外滩街道' },
+		{ partenid: "41", id: "412", title: '南京东路街道' },
+		{ partenid: "42", id: "421", title: '徐家汇街道' },
+		{ partenid: "42", id: "422", title: '漕河泾街道' }
+	]);
+	const pickerIds = ref<string[]>(['3', '32', '322'])
+	const pickerIds1 = ref<string[]>(['3', '32', '322'])
+	const pickerValue = ref<string[]>([])
+	function ontouchstart() {
+		// #ifdef APP-IOS
+		direction.value = "none"
+		// #endif
+	}
+	function ontouchend() {
+		// #ifdef APP-IOS
+		direction.value = "vertical"
+		// #endif
+	}
+	function pickerchange(e : UTSJSONObject) {
+		pickerValue.value = e.getArray<string>('values')!
+		pickerIds1.value = e.getArray<string>('ids')!
+	}
+	function updateList() {
+		pickerIds.value[2] = "422"
+		area.value = area1.value
+	}
+	function updateValue() {
+		pickerIds.value = ['3', '32', '311']
+	}
+	function updArrteAValue() {
+		pickerIds.value = ['4', '21', '222']
+	}
+</script>

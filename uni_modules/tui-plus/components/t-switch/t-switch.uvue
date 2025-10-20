@@ -1,0 +1,242 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl faic ${mainClass} p-0`">
+		<t-text v-if="mode==3  && activeText!=''" :main-class="switchModeThreeActiveTextStyles"
+			:text="activeText"></t-text>
+		<t-view :main-class="switchStyles" @click="setSwitchState">
+			<t-view :main-class="switchBarStyles">
+				<t-loading v-if="loading" v-bind="extendsAttrs" :main-class="loadingClass"></t-loading>
+				<t-icon v-else-if="switchIconName!=''" v-bind="extendsAttrs" :main-class="switchIconStyles"
+					:name="switchIconName"></t-icon>
+				<template v-else>
+					<t-text v-if="mode==2" :main-class="switchModeTwoTextStyles"
+						:text="state?activeText:inactiveText"></t-text>
+				</template>
+			</t-view>
+			<t-row :main-class="switchTextBoxStyles" v-if="mode==1">
+				<t-text :main-class="`${switchTextStyles} ${switchInActiveTextStyles}`" :text="activeText"></t-text>
+				<t-text :main-class="`${switchTextStyles} ${switchActiveTextStyles}`" :text="inactiveText"></t-text>
+			</t-row>
+		</t-view>
+		<t-text v-if="mode==3 && inactiveText!=''" :main-class="switchModeThreeInActiveTextStyles"
+			:text="inactiveText"></t-text>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Switch 开关
+	 * @date 2025-05-31 12:07:40
+	 * @author TanYuan
+	 * @description 实现开关切换功能。支持显示文字和图标，可自定义颜色和样式，具有加载状态显示，以及可以与表单组件配合使用。使用场景主要包括：在表单、设置页面或需要用户进行二元选择的界面中，提供直观的开关操作选项。
+	 * @example /pagesA/form/switch/switch
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-switch.html
+	 * @example /pagesA/form/switch/switch
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} activeClass 当值true时组件的样式
+	 * @property {String} inactiveClass 当值false时组件的样式(默认：bg-#eaeaea)
+	 * @property {Boolean} showText 是否显示文字(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} mode=[1|2|3] 提示文字显示位置(默认：1)
+	 * @value 1 内部显示
+	 * @value 2 外部显示
+	 * @value 3 中间显示
+	 * @property {Boolean} modelValue 绑定的状态的值
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} barClass Bar按钮样式
+	 * @property {String} activeBarClass 值为true时 Bar按钮样式
+	 * @property {String} inactiveBarClass 值为fale时 Bar按钮样式
+	 * @property {String} activeIcon 值为true时显示的图标名称
+	 * @property {String} inactiveIcon 值为false是显示的图标名称
+	 * @property {String} iconClass 图标的样式
+	 * @property {String} activeIconClass 值为true是图标的样式
+	 * @property {String} inactiveIconClass 值为false时图标的样式(默认：c-#eaeaea)
+	 * @property {String} activeText 值为true时显示的文本
+	 * @property {String} inactiveText 值为false时显示的文本
+	 * @property {String} textClass 文本的样式
+	 * @property {String} activeTextClass 值为true时文本的样式
+	 * @property {String} inactiveTextClass 值为false时文本的样式(默认：c-#acacac)
+	 * @property {Boolean} loading 是否显示loading加载动画
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} loadingClass 加载动画样式
+	 * @property {Boolean} closeScale 是否关闭状态变化时的缩放动画(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} change 开关状态改变时触发
+	 */
+	import { getPx } from '../../common/model/util';
+	import { getStyleProperty } from '../../common/model/style'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface SwitchProps extends CommonProps {
+		activeClass : string;
+		inactiveClass : string;
+		type : string;
+		showText : boolean;
+		mode : number;
+		modelValue : boolean;
+		barClass : string;
+		activeBarClass : string;
+		inactiveBarClass : string;
+		activeIcon : string;
+		inactiveIcon : string;
+		iconClass : string;
+		activeIconClass : string;
+		inactiveIconClass : string;
+		activeText : string;
+		inactiveText : string;
+		textClass : string;
+		activeTextClass : string;
+		inactiveTextClass : string;
+		loading : boolean;
+		loadingClass : string;
+		closeScale : boolean;
+	}
+
+	const props = withDefaults(defineProps<SwitchProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		activeClass: '',
+		inactiveClass: 'bg-#eaeaea',
+		showText: true,
+		mode: 1,
+		modelValue: false,
+		barClass: '',
+		activeBarClass: '',
+		inactiveBarClass: '',
+		activeIcon: '',
+		inactiveIcon: '',
+		iconClass: '',
+		activeIconClass: '',
+		inactiveIconClass: 'c-#eaeaea',
+		activeText: '',
+		inactiveText: '',
+		textClass: '',
+		activeTextClass: '',
+		inactiveTextClass: 'c-#acacac',
+		loading: false,
+		loadingClass: '',
+		closeScale: true,
+	});
+
+	const { extendsAttrs, extendsColor, getFontSizeToValue, extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const instance = getCurrentInstance()?.proxy!
+	const state = ref<boolean>(false)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	function setSwitchState() {
+		state.value = !state.value
+		nextTick(() => {
+			emit('change', state.value)
+			emit('update:modelValue', state.value)
+			itemValidate()
+		})
+	}
+	const switchBarSize = computed(() : number => {
+		return Math.round(getFontSizeToValue.value * 1.3)
+	})
+	const switchBoxPadding = computed(() : number => {
+		let p = getPx(getStyleProperty(props.mainClass, 'padding'))
+		if (p == 0) p = Math.round(switchBarSize.value * 0.15)
+		return p
+	})
+	watch(() : boolean => props.modelValue, (val : boolean) => {
+		state.value = val
+	}, { immediate: true })
+	const switchTextBoxStyles = computed(() : string => {
+		return `da di-0 fjcb faic p-${switchBoxPadding.value * 2}px`
+	})
+
+	const switchActiveTextStyles = computed(() : string => {
+		return state.value ? 'ovy-h' : 'ovy'
+	})
+	const switchInActiveTextStyles = computed(() : string => {
+		return state.value ? 'ovy' : 'ovy-h'
+	})
+	const switchModeThreeActiveTextStyles = computed(() : string => {
+		let sty = `mr-10 s-${Math.round(getFontSizeToValue.value)}px `
+		sty += `${props.textClass} `
+		sty += `${state.value ? props.inactiveTextClass : `${extendsColor.value} ${props.activeTextClass}`} `
+		return sty
+	})
+	const switchModeThreeInActiveTextStyles = computed(() : string => {
+		let sty = `ml-10 s-${Math.round(getFontSizeToValue.value)}px `
+		sty += `${extendsColor.value} ${props.textClass} `
+		sty += `${state.value ? props.activeTextClass : props.inactiveTextClass} `
+		return sty
+	})
+	const switchModeTwoTextStyles = computed(() : string => {
+		let sty = `s-${Math.round(getFontSizeToValue.value * 0.7)}px `
+		sty += `${extendsColor.value} ${props.textClass} `
+		sty += `${state.value ? props.activeTextClass : props.inactiveTextClass} `
+		return sty
+	})
+	const switchTextStyles = computed(() : string => {
+		let sty = `s-${Math.round(getFontSizeToValue.value * 0.7)}px `
+		sty += `${props.textClass} `
+		sty += `${state.value ? extendsForegroundColor.value : ''} `
+		sty += `${state.value ? props.activeTextClass : props.inactiveTextClass} `
+		return sty
+	})
+	const switchIconStyles = computed(() : string => {
+		let sty = `s-${Math.round(getFontSizeToValue.value * 0.8)}px `
+		sty += `${props.iconClass} `
+		sty += `${state.value ? props.activeIconClass : props.inactiveIconClass} `
+		return sty
+	})
+	const switchIconName = computed(() : string => {
+		return state.value ? props.activeIcon : props.inactiveIcon
+	})
+	const switchBoxWidth = computed(() : number => {
+		let w = getPx(getStyleProperty(props.mainClass, 'width'))
+		if (w == 0) w = Math.round(switchBarSize.value * 2.5)
+		return w
+	})
+
+	const switchStyles = computed(() : string => {
+		let radius = Math.round(getPx(getStyleProperty(props.mainClass, 'border-radius')))
+		if (radius == 0) radius = 1000
+		let sty = `dr atp-tr,bc atd-300 fl faic p-${switchBoxPadding.value}px r-${radius}px w-${switchBoxWidth.value}px `
+		sty += `${extendsBackgroundColor.value} `
+		sty += `${state.value ? props.activeClass : props.inactiveClass} `
+		if (props.closeScale) sty += state.value ? 'ats-1' : 'ats-0.9'
+		return sty
+	})
+	const switchBarStyles = computed(() : string => {
+		const w : number = Math.round(switchBoxWidth.value - switchBarSize.value - switchBoxPadding.value * 2)
+		let sty = `atp-tr atd-300 fc twhr-${switchBarSize.value}px tvg `
+		sty += `${props.barClass} `
+		sty += `${state.value ? props.activeBarClass : props.inactiveBarClass} `
+		sty += `attx-${state.value ? `${w}px` : '0px'} `
+		return sty
+	})
+</script>

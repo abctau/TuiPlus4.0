@@ -1,0 +1,106 @@
+<template>
+	<t-page title="倒计时">
+		<t-card title="CountDown 倒计时" main-class="mlrt-30"
+			sub-title="倒计时组件可展示倒计时，能自定义格式和时长。支持启停等操作，适用于活动等场景，支持插槽自定义显示。"></t-card>
+		<introduction title="自定义样式">
+			<t-count-down :time="5000000">
+				<template v-slot:default="{ times }">
+					<t-row main-class="fl">
+						<t-view main-class="bg-#f56c6c r-5 twh-50 fc">
+							<t-text main-class="c-#fff">{{(times as UTSJSONObject)['hours']}}</t-text>
+						</t-view>
+						<t-text main-class="c-#f56c6c sfwb plr-5">:</t-text>
+						<t-view main-class="bg-#f56c6c r-5 twh-50 fc">
+							<t-text main-class="c-#fff">{{(times as UTSJSONObject)['minutes']}}</t-text>
+						</t-view>
+						<t-text main-class="c-#f56c6c sfwb plr-5">:</t-text>
+						<t-view main-class="bg-#f56c6c r-5 twh-50 fc">
+							<t-text main-class="c-#fff">{{(times as UTSJSONObject)['seconds']}}</t-text>
+						</t-view>
+					</t-row>
+				</template>
+			</t-count-down>
+		</introduction>
+		<introduction title="自定义样式">
+			<t-count-down :time="5000000">
+				<template v-slot:default="{ times }">
+					<t-row main-class="fl faic">
+						<t-number mode='gl'>{{(times as UTSJSONObject)['hours']}}</t-number>
+						<t-text main-class="sfwb mlr-10">:</t-text>
+						<t-number mode='gl'>{{(times as UTSJSONObject)['minutes']}}</t-number>
+						<t-text main-class="sfwb mlr-10">:</t-text>
+						<t-number mode='gl'>{{(times as UTSJSONObject)['seconds']}}</t-number>
+					</t-row>
+				</template>
+			</t-count-down>
+		</introduction>
+		<introduction title="自定义样式">
+			<t-count-down :time="5000000">
+				<template v-slot:default="{ times }">
+					<t-row main-class="fl faic">
+						<t-number>{{(times as UTSJSONObject)['hours']}}</t-number>
+						<t-text main-class="sfwb mlr-10">:</t-text>
+						<t-number>{{(times as UTSJSONObject)['minutes']}}</t-number>
+						<t-text main-class="sfwb mlr-10">:</t-text>
+						<t-number>{{(times as UTSJSONObject)['seconds']}}</t-number>
+					</t-row>
+				</template>
+			</t-count-down>
+		</introduction>
+		
+		<introduction title="自由控制">
+			<t-count-down ref="tCountDown" main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000"
+				type="success"></t-count-down>
+			<t-button main-class="mb-25" type="primary" @click="start">开始</t-button>
+			<t-button main-class="mb-25" type="error" @click="pause">暂停</t-button>
+			<t-button main-class="mb-25" type="warning" @click="continues">继续</t-button>
+			<t-button main-class="mb-25" type="success" @click="stop">结束</t-button>
+		</introduction>
+		<introduction title="基础功能">
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="primary"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="error"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="warning"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="success"></t-count-down>
+		</introduction>
+		<introduction title="设置格式">
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" format="d天h时M分s秒"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="primary"
+				format="d天h时M分s秒"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="error"
+				format="d天h时M分s秒"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="warning"
+				format="d天h时M分s秒"></t-count-down>
+			<t-count-down main-class="tdr tdb mb-30 tdp w-100% sta-c" :time="50000" type="success"
+				format="d天h时M分s秒"></t-count-down>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			}
+		},
+		methods: {
+			start() {
+				const ins = this.$refs['tCountDown'] as ComponentPublicInstance
+				ins.$callMethod('start')
+			},
+			pause() {
+				const ins = this.$refs['tCountDown'] as ComponentPublicInstance
+				ins.$callMethod('pause')
+			},
+			continues() {
+				const ins = this.$refs['tCountDown'] as ComponentPublicInstance
+				ins.$callMethod('continues')
+			},
+			stop() {
+				const ins = this.$refs['tCountDown'] as ComponentPublicInstance
+				ins.$callMethod('stops')
+			}
+		}
+	}
+</script>

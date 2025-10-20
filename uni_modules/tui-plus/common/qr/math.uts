@@ -1,0 +1,45 @@
+export default class QRMath {
+	EXP_TABLE : number[] = []
+	LOG_TABLE : number[] = []
+
+	constructor() {
+		// 初始化 EXP_TABLE 和 LOG_TABLE
+		for (let i = 0; i < 8; i++) {
+			this.EXP_TABLE.push(1 << i)
+		}
+		for (let i = 8; i < 256; i++) {
+			this.EXP_TABLE.push(this.EXP_TABLE[i - 4] ^
+				this.EXP_TABLE[i - 5] ^
+				this.EXP_TABLE[i - 6] ^
+				this.EXP_TABLE[i - 8])
+		}
+		for (let i = 0; i < 256; i++) {
+			this.LOG_TABLE.push(i);
+		}
+		for (let i = 0; i < 255; i++) {
+			this.LOG_TABLE[this.EXP_TABLE[i]] = i;
+		}
+	}
+
+	glog(n : number) : number {
+		let _n : number = n
+		if (_n < 1) {
+			throw new Error("glog(" + _n + ")");
+		}
+
+		return this.LOG_TABLE[_n];
+	}
+
+	gexp(n : number) : number {
+		let _n : number = n
+		while (_n < 0) {
+			_n += 255;
+		}
+
+		while (_n >= 256) {
+			_n -= 255;
+		}
+
+		return this.EXP_TABLE[_n];
+	}
+}

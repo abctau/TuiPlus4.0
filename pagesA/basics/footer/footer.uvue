@@ -1,0 +1,35 @@
+<template>
+	<t-page>
+		<t-card main-class="m-30" title="Footer 页眉 页脚"
+			sub-title="页脚组件提供了一个固定的页面底部区域，用于显示辅助信息、导航链接或版权声明。其功能亮点包括：支持自定义样式和文本，可固定在页面底部，且可以包含多个可点击的导航项。使用场景包括：在网站或应用的底部提供额外的导航选项，显示版权信息，或放置其他辅助性内容。"></t-card>
+		<t-footer></t-footer>
+		<t-footer :navigate="navigate" @click="goto"></t-footer>
+		<t-footer :navigate="navigate2" @click="goto"></t-footer>
+		<t-footer :isFixed="true" :navigate="navigate" @click="goto"></t-footer>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				navigate: [{
+					text: '底部链接',
+					id: 0
+				}] as UTSJSONObject[],
+				navigate2: [{
+					text: '底部链接',
+					id: 1
+				}, {
+					text: '底部链接2',
+					id: 2
+				}] as Array<UTSJSONObject>
+			}
+		},
+		methods: {
+			goto(item : UTSJSONObject) {
+				console.log(item)
+			}
+		}
+	}
+</script>
+

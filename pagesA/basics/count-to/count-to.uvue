@@ -1,0 +1,45 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="RollingNumber 滚动数字" sub-title="通过设置起始值、结束值、动画持续时间和小数位数的数字展示"></t-card>
+		<t-group title="基础功能" main-class="fl w-100% tdb mb-30">
+			<t-rolling-number main-class="mbr-10" :startVal="30" :endVal="50000" :duration="7000"
+				type="s"></t-rolling-number>
+		</t-group>
+		<t-group title="显示小数" main-class="fl tdb mb-30">
+			<t-rolling-number :startVal="30" mode="price" :endVal="50000.15" main-class="mbr-10" :decimals="2"
+				:duration="4000" type="error"></t-rolling-number>
+		</t-group>
+		<t-group title="自由控制">
+			<t-rolling-number ref="rol" main-class="tdp sta-c s-35 sfwb" :startVal="30" mode="price" :endVal="50000.15" :decimals="2" :duration="10000"
+				:autoplay="false" type="error"></t-rolling-number>
+			<view style="padding:10px 0;">
+				<t-button size="small" main-class="mb-15" type="primary" @click="start">开始</t-button>
+				<t-button size="small" main-class="mb-15" type="error" @click="pause">暂停</t-button>
+				<t-button size="small" main-class="mb-15" type="warning" @click="continues">继续</t-button>
+				<t-button size="small" main-class="mb-15" type="success" @click="stop">结束</t-button>
+			</view>
+		</t-group>
+		<t-group title="自定义颜色">
+			<t-rolling-number main-class="s-45 c-blue" :startVal="30" mode="price" decimal-point="￥" :endVal="50000.15"
+				:decimals="2" :duration="2000" type="error"></t-rolling-number>
+			<t-rolling-number :startVal="30" mode="price" :endVal="50000" :decimals="2" :duration="3000" type="error"
+				main-class="s-45 c-#f56c6c"></t-rolling-number>
+		</t-group>
+	</t-page>
+</template>
+
+<script setup>
+	const rol = ref<ComponentPublicInstance | null>(null)
+	function start() {
+		rol.value!.$callMethod('start')
+	}
+	function pause() {
+		rol.value!.$callMethod('pause')
+	}
+	function continues() {
+		rol.value!.$callMethod('continues')
+	}
+	function stop() {
+		rol.value!.$callMethod('stops')
+	}
+</script>

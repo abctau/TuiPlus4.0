@@ -1,0 +1,99 @@
+<template>
+	<canvas class="tui-xcharts-main" :style="xChartsStyles" :id="guid" @click="tap" @touchstart="touchStart"
+		@touchmove="touchMove" @touchend="touchEnd">
+	</canvas>
+</template>
+
+<script setup>
+	/**
+	 * Xcharts 图表
+	 * @date 2025-06-10 15:11:59
+	 * @author TanYuan
+	 * @description 为uniappx量身定制的纯UTS图表引擎，纯UTS图表，Canvas绘制，拒绝webview套壳,详细使用示例请见图表插件地址https://ext.dcloud.net.cn/plugin?id=21107
+	 * @example /pages/table/table
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-xcharts.html
+	 * @example /pages/table/table
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @event {Function} click 点击时触发
+	 * @event {Function} initFinished canvas初始化完成是触发
+	 * @event {Function} select 图表互动时触发
+	 */
+	// import { TuiGuid, TuiCharts, useStyle } from '@/uni_modules/tui-plus'
+	import { TuiGuid } from '../../common/model/util.uts'
+	import { useStyle } from '../../common/model/style.uts'
+	import { TuiCharts } from '../../common/chars/charts.uts'
+	const guid : string = `tui${TuiGuid(20)}`
+	const emits = defineEmits(['initFinished', 'select'])
+	const charts = new TuiCharts()
+	const ins = getCurrentInstance()?.proxy as ComponentPublicInstance
+	const props = defineProps({
+		mainClass: {
+			type: String,
+			default: ''
+		}
+	})
+	const xChartsStyles = computed(() : string => {
+		return useStyle(props.mainClass);
+	});
+
+	onMounted(() => {
+		nextTick(() => {
+			(uni.getElementById(guid) as UniElement).getBoundingClientRectAsync()?.then((rst : DOMRect) => {
+				uni.createCanvasContextAsync({
+					id: guid,
+					component: ins,
+					success: (context : CanvasContext) => {
+						const ctx = context.getContext('2d')!;
+						const canvas = ctx.canvas
+						const dpr = uni.getWindowInfo().pixelRatio;
+						canvas.width = canvas.offsetWidth * dpr;
+						canvas.height = canvas.offsetHeight * dpr;
+						ctx.scale(dpr, dpr);
+						charts.setInsMethod(ins, rst)
+						charts.setContext(context)
+						emits('initFinished', charts)
+					}
+				})
+			});
+		})
+	})
+	function touchStart(e : UniTouchEvent) {
+		charts.touchStart(e)
+	}
+	function touchMove(e : UniTouchEvent) {
+		charts.touchMove(e)
+	}
+	function touchEnd(e : UniTouchEvent) {
+		charts.touchEnd(e)
+	}
+	function tap(e : UniPointerEvent) {
+		charts.tap(e)
+	}
+</script>
+<style>
+	.tui-xcharts-main {
+		width: 690rpx;
+		height: 500rpx;
+	}
+</style>

@@ -1,0 +1,152 @@
+<template>
+	<t-page title="组件管理" main-class="m-30">
+		<t-card title='Tui组件管理' main-class="mb-30" sub-title="组件数据配置，未来配合hbx插件自动生成代码"></t-card>
+		<t-form ref="ruleForm" main-class="tdr tdb tdp" :rules="rules" direction="column" :model="formData">
+			<t-form-item label="组件分组" prop="type">
+				<t-radio-group v-model="(formData.type as string)" main-class="fl fww">
+					<t-radio v-for="(item,index) in typeList" :key="index" :value="`${item['value']}`"
+						type="p">{{item['label']}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="组件类型" prop="type">
+				<t-checkbox-group v-model="(formData.stack as string[])" main-class="fl fww">
+					<t-checkbox v-for="(item,index) in stackList" :key="index" :value="`${item['value']}`"
+						type="p">{{item['label']}}</t-checkbox>
+				</t-checkbox-group>
+			</t-form-item>
+			<t-form-item label="研发状态">
+				<t-checkbox-group v-model="(formData.devstatus as string[])" main-class="fl fww">
+					<t-checkbox v-for="(item,index) in devstatusList" :key="index" :value="`${item['value']}`"
+						type="p">{{item['label']}}</t-checkbox>
+				</t-checkbox-group>
+			</t-form-item>
+			<t-form-item label="组件名称" prop="name">
+				<t-input main-class="w-100% bb r-0 bb-1px,s,#e3e3e3" bb r-0 v-model="(formData.name as string)"
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="组件标签" prop="tag">
+				<t-input main-class="w-100% bb-1px,s,#e3e3e3 r-0" v-model="(formData.tag as string)"
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="展示图标" prop="icon">
+				<t-input main-class="w-100% bb r-0 bb-1px,s,#e3e3e3" v-model="(formData.icon as string)"
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="示例path" prop="path">
+				<t-input main-class="w-100% bb r-0 bb-1px,s,#e3e3e3" v-model="(formData.path as string)"
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="排序">
+				<t-slider main-class="w-100% h-120" v-model="(formData.sort as number[])" :max="100" type="success"
+					:show-value="true"></t-slider>
+			</t-form-item>
+			<t-form-item label="dot" direction="row">
+				<t-switch v-model="(formData.dot as boolean)" type="primary"></t-switch>
+			</t-form-item>
+			<t-view main-class="h-200"></t-view>
+			<t-row main-class="fc df dlbr-0 tdp tdb">
+				<t-button type="error" width="150" @click="resetForm">重置</t-button>
+				<t-button main-class="ml-30" width="150" type="primary" @click="submitForm">提交</t-button>
+			</t-row>
+		</t-form>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	const typeList = ref<UTSJSONObject[]>([
+		{ label: '基础组件', value: 'basics' },
+		{ label: '表单组件', value: 'form' },
+		{ label: '反馈组件', value: 'feedback' },
+		{ label: '布局组件', value: 'layout' },
+		{ label: '导航组件', value: 'navigation' },
+		{ label: '其它组件', value: 'other' }
+	])
+	const devstatusList = ref<UTSJSONObject[]>([
+		{ label: '规划中', value: 'planning' },
+		{ label: '文档完善', value: 'documenting' },
+		{ label: '等待开发', value: 'pending' },
+		{ label: '开发完成', value: 'completed' },
+		{ label: '待测试', value: 'testing' },
+		{ label: '计划重构', value: 'refactor' },
+		{ label: '下架', value: 'discontinued' }
+	])
+	const stackList = ref<UTSJSONObject[]>([
+		{ label: 'Canvas组件', value: 'canvas' },
+		{ label: '原生组件', value: 'native' },
+		{ label: 'uvue组件', value: 'uvue' }
+	])
+	const rules = ref<UTSJSONObject>({
+		type: [{ type: 'required', message: '组件类型不能为空' }],
+		name: [{ type: 'required', message: '组件名称不能为空' }],
+		tag: [{ type: 'required', message: '组件标签不能为空' }],
+		icon: [{ type: 'required', message: '图标不能为空' }],
+		path: [{ type: 'required', message: '示例路径不能为空' }]
+	})
+	const formid = ref('')
+	const ruleForm = ref<TFormComponentPublicInstance | null>(null)
+	const formData = reactive<UTSJSONObject>({ type: 'basics', name: '', icon: '', tag: '', sort: [0], dot: false, path: '', devstatus: ['planning'] as string[], stack: ['uvue'] as string[] })
+	function resetForm() {
+		(ruleForm.value as TFormComponentPublicInstance).reset()
+	}
+	function submitForm() {
+		const validate : boolean = (ruleForm.value as TFormComponentPublicInstance).validate() as boolean
+		if (validate) {
+			uni.showLoading({
+				title: '提交中'
+			})
+			TuiApi('addComponentTest', {
+				type: formData.type,
+				name: formData.name,
+				tag: formData.tag,
+				icon: formData.icon,
+				sort: formData.sort,
+				dot: formData.dot,
+				path: formData.path,
+				id: formid.value,
+				devstatus: formData.devstatus,
+				stack: formData.stack
+			}).then(_ => {
+				uni.hideLoading()
+				uni.showToast({
+					title: "添加成功"
+				})
+				uni.navigateBack()
+			}).catch((error) => {
+				uni.hideLoading()
+				uni.showToast({
+					title: `${(error as UniError).message}`
+				})
+			})
+		}
+	}
+	onLoad((e : OnLoadOptions) => {
+		if ('data' in e) {
+			const data = JSON.parse<UTSJSONObject>(`${decodeURIComponent(`${e['data']}`)}`) as UTSJSONObject
+			let devstatus : string[] = ['planning']
+			let stack = ['uvue'] as string[]
+			if ('devstatus' in data) devstatus = data['devstatus'] as string[]
+			if ('stack' in data) {
+				stack = data['stack'] as string[]
+			}
+			let sortInit : number[] = []
+			if (Array.isArray(data['sort'])) {
+				sortInit = data['sort'] as number[]
+			} else {
+				sortInit.push(parseFloat(`${data['sort']}`))
+			}
+			nextTick(() => {
+				formid.value = `${data['_id']}`
+				formData.type = `${data['type']}`
+				formData.name = `${data['name']}`
+				formData.icon = `${data['icon']}`
+				formData.tag = `${data['tag']}`
+				formData.sort = sortInit
+				formData.dot = data['dot'] as boolean
+				formData.path = `${data['path']}`
+				formData.devstatus = devstatus
+				formData.stack = stack
+			})
+		}
+	})
+</script>

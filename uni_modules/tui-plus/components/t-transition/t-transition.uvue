@@ -1,0 +1,173 @@
+<template>
+	<t-animation v-bind="extendsAttrs" ref="animationins" @transitionend="transitionend" @initFinished="initFinished">
+		<slot></slot>
+	</t-animation>
+</template>
+
+<script setup>
+	/**
+	 * Transition 过渡动画
+	 * @date 2025-05-31 12:08:12
+	 * @author TanYuan
+	 * @description 集合常用动画特效，使页面之间的切换更加流畅和自然。它可以实现多种动画效果，例如淡入淡出、滑动、缩放等。增强用户体验，使页面之间的切换更加有趣和吸引力。
+	 * @example /pagesA/basics/transition/transition
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-transition.html
+	 * @example /pagesA/basics/transition/transition
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[fade|fade-up|fade-down|fade-left|fade-right|zoom|heartbeat] 使用的动画模式
+	 * @value fade 渐隐渐显
+	 * @value fade-up 上方进出
+	 * @value fade-down 下方进出
+	 * @value fade-left 左方进出
+	 * @value fade-right 右方进出
+	 * @value zoom 缩放
+	 * @value heartbeat 心跳
+	 * @property {Boolean} autoPlay 是否自动播放(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} animationIterationCount 动画播放次数(默认：1)
+	 * @property {Number} duration 动画播放时间(默认：500)
+	 * @property {String} timingFunction 动画播放缓动函数(默认：ease-in-out)
+	 * @property {String} transformOrigin 动画播放变换原点(默认：50% 50%)
+	 * @event {Function} click 点击时触发
+	 * @event {Function} transitionend 动画结束时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+
+	const instance = getCurrentInstance()?.proxy;
+	const animationins = ref<TAnimationComponentPublicInstance | null>(null);
+
+	interface TranstionProps extends CommonProps {
+		mode : string;
+		autoPlay : boolean;
+		animationIterationCount : number;
+		duration : number;
+		timingFunction : string;
+		transformOrigin : string;
+	}
+
+	const props = withDefaults(defineProps<TranstionProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: '',
+		autoPlay: true,
+		animationIterationCount: 1,
+		duration: 500,
+		timingFunction: 'ease-in-out',
+		transformOrigin: '50% 50%'
+	});
+
+	const bW = ref(0);
+	const bH = ref(0);
+	const bT = ref(0);
+	const bL = ref(0);
+	const loopCount = ref(0);
+	const { extendsAttrs } = useTuiThemes(props);
+	const emit = defineEmits(['click', 'transitionend']);
+	function initFinished(rect : NodeInfo) {
+		bW.value = rect.width!
+		bH.value = rect.height!
+		bT.value = rect.top!
+		bL.value = rect.left!
+	}
+
+	function reset() {
+		console.log('reset');
+	}
+
+	function setAni() {
+		loopCount.value++;
+		const ins = animationins.value!;
+		const ani = ins.createAnimation({
+			transformOrigin: props.transformOrigin,
+			duration: props.duration,
+			timingFunction: props.timingFunction
+		});
+
+		switch (props.mode) {
+			case 'fade':
+				ani.opacity(0).step();
+				ani.opacity(1).step();
+				break;
+			case 'fade-up':
+				ani.translateY(`-${bT.value + bH.value}px`).opacity(0).step();
+				ani.translateY('0px').opacity(1).step();
+				break;
+			case 'fade-down':
+				const s = uni.getWindowInfo().windowHeight - bT.value;
+				ani.translateY(`${s}px`).opacity(0).step();
+				ani.translateY('0px').opacity(1).step();
+				break;
+			case 'fade-left':
+				ani.translateX(`-${bL.value + bW.value}px`).opacity(0).step();
+				ani.translateX('0px').opacity(1).step();
+				break;
+			case 'fade-right':
+				const rs = uni.getWindowInfo().windowWidth - bL.value;
+				ani.translateX(`${rs}px`).opacity(0).step();
+				ani.translateX('0px').opacity(1).step();
+				break;
+			case 'zoom':
+				ani.scale(0.5).opacity(0.5).rotate(800).step();
+				ani.translateX('1000px').translateY('-1000px').step();
+				ani.translateX('0px').translateY('0px').step();
+				ani.opacity(1).scale(1).rotate(0).step();
+				break;
+			case 'heartbeat':
+				ani.scale(1.2).step();
+				ani.scale(1).step();
+				break;
+		}
+
+		ins.exports();
+	}
+	function play() {
+		loopCount.value = 0;
+		setAni();
+	}
+	const transitionend=()=> {
+		if (props.animationIterationCount == 0 || loopCount.value < props.animationIterationCount) {
+			setAni()
+		}
+	}
+	onMounted(() => {
+		if (props.autoPlay) {
+			nextTick(() => {
+				setAni();
+			});
+		}
+	});
+	defineExpose({
+		play
+	})
+</script>

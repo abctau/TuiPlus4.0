@@ -1,0 +1,261 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Table 表格"
+			sub-title="亮点:采用插槽式布局数据结构完全自由 灵活度高,自由度更高容易扩展采用-listview布局自动回收资源行列宽高能自适应"></t-card>
+		<template v-if="area==1">
+			<t-table :tables="tableData2" ref="tableEl" :type="type" row-key="id" main-class="" :border="true"
+				@sort="tablesort" @scrolltolower='scrolltolower'>
+				<t-table-column mode="selection" align="center" width="100rpx"></t-table-column>
+				<t-table-column align="left" prop="name" label="姓名"></t-table-column>
+				<t-table-column align="right" prop="age" label="年龄"></t-table-column>
+			</t-table>
+			<t-button @click="add" type="p" main-class="mt-30">添加</t-button>
+		</template>
+		<template v-if="area==2">
+			<t-section title="更多主题展示" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" type="e" :border="true" main-class="mb-30"
+				@scrolltolower='scrolltolower'>
+				<t-table-column mode="selection" align="center" width="100rpx"></t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称"></t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-button type="e" size="mini">删除</t-button>
+					</template>
+				</t-table-column>
+			</t-table>
+			<t-button @click="clear" type="s">清空</t-button>
+		</template>
+
+		<template v-if="area==3">
+			<t-section title="主题" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" :checkIds="checkIds" type="w" @change="selectChange"
+				main-class="tdr tdb mb-30" @sort="tablesort" content-class="w-1000" @scrolltolower='scrolltolower'>
+				<t-table-column mode="selection" align="center" width="100rpx"></t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称">
+					<template v-slot:default="{ row }">
+						<t-text main-class="">{{(row as UTSJSONObject)['name']}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-col>
+							<t-text main-class="">列号：{{columnIndex}}</t-text>
+							<t-text main-class="">行号：{{rowIndex}}</t-text>
+							<t-button @click="test(rowIndex as number)" type='e' size="mini">删除</t-button>
+						</t-col>
+					</template>
+				</t-table-column>
+			</t-table>
+		</template>
+		<template v-if="area==4">
+			<t-section title="横向滚动+自定义插槽用法" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" :checkIds="checkIds" @change="selectChange"
+				main-class="tdr tdb mb-30" @sort="tablesort" content-class="w-1000" @scrolltolower='scrolltolower'>
+				<t-table-column mode="selection" align="center" width="100rpx"></t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID" :sortable="true"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称">
+					<template v-slot:default="{ row }">
+						<t-text main-class="">{{(row as UTSJSONObject)['name']}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-col>
+							<t-text main-class="">列号：{{columnIndex}}</t-text>
+							<t-text main-class="">行号：{{rowIndex}}</t-text>
+							<t-button @click="test(rowIndex as number)" type='e' size="mini">删除</t-button>
+						</t-col>
+					</template>
+				</t-table-column>
+			</t-table>
+		</template>
+		<template v-if="area==5">
+			<t-section title="增加一列显示序号" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" :checkIds="checkIds" type="w" @change="selectChange"
+				main-class="tdr tdb mb-30" @sort="tablesort" content-class="w-1000" @scrolltolower='scrolltolower'>
+				<t-table-column mode="selection" align="center" width="100rpx"></t-table-column>
+				<t-table-column width="100rpx" label="序号">
+					<template v-slot:default="{ rowIndex }">
+						<t-text main-class="sta-c">{{rowIndex}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称">
+					<template v-slot:default="{ row }">
+						<t-text main-class="">{{(row as UTSJSONObject)['name']}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-text main-class="">列号：{{columnIndex}}</t-text>
+						<t-text main-class="">行号：{{rowIndex}}</t-text>
+						<t-button @click="test(rowIndex as number)" type='e' size="mini">删除</t-button>
+					</template>
+				</t-table-column>
+			</t-table>
+		</template>
+		<template v-if="area==6">
+			<t-section title="不显示选择项" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" :checkIds="checkIds" type="w"
+				main-class="tdr tdb mb-30" @sort="tablesort" content-class="w-1000" @scrolltolower='scrolltolower'>
+				<t-table-column align="center" width="100rpx" label="序号">
+					<template v-slot:default="{ rowIndex }">
+						<t-text main-class="sta-c">{{rowIndex}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称">
+					<template v-slot:default="{ row }">
+						<t-text main-class="">{{(row as UTSJSONObject)['name']}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-text main-class="">列号：{{columnIndex}}</t-text>
+						<t-text main-class="">行号：{{rowIndex}}</t-text>
+						<t-button @click="test(rowIndex as number)" type='e' size="mini">删除</t-button>
+					</template>
+				</t-table-column>
+			</t-table>
+		</template>
+		<template v-if="area==7">
+			<t-section title="不显示选择项" main-class="mb-30"></t-section>
+			<t-table :tables="tableData" ref="tableEl" rowKey="id" :checkIds="checkIds" type="w"
+				main-class="tdr tdb mb-30" :border="true" @sort="tablesort" content-class="w-1000"
+				@scrolltolower='scrolltolower'>
+				<t-table-column align="center" width="100rpx" label="序号">
+					<template v-slot:default="{ rowIndex }">
+						<t-text main-class="">{{rowIndex}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="id" label="应用ID"></t-table-column>
+				<t-table-column align="center" prop="name" label="应用名称">
+					<template v-slot:default="{ row }">
+						<t-text main-class="">{{(row as UTSJSONObject)['name']}}</t-text>
+					</template>
+				</t-table-column>
+				<t-table-column align="center" prop="create_time" label="创建时间"></t-table-column>
+				<t-table-column align="center" label="操作">
+					<template v-slot:default="{ rowIndex,columnIndex }">
+						<t-text main-class="">列号：{{columnIndex}}</t-text>
+						<t-text main-class="">行号：{{rowIndex}}</t-text>
+						<t-button @click="test(rowIndex as number)" type='e' size="mini">删除</t-button>
+					</template>
+				</t-table-column>
+			</t-table>
+		</template>
+		<t-row main-class='fww tdb tdr tdp'>
+			<t-button type="p" main-class="mr-30 mb-30" size="small" @click="area=1;tableData2=[]">空状态</t-button>
+			<t-button type="e" main-class="mr-30 mb-30" size="small" @click="area=2">切换皮肤</t-button>
+			<t-button type="s" main-class="mr-30 mb-30" size="small" @click="area=3">横向滚动</t-button>
+			<t-button type="w" main-class="mr-30 mb-30" size="small" @click="area=4">列排序</t-button>
+			<t-button type="p" main-class="mr-30 mb-30" size="small" @click="area=5">序号</t-button>
+			<t-button type="e" main-class="mr-30 mb-30" size="small" @click="area=6">取消选择</t-button>
+			<t-button type="s" main-class="mr-30 mb-30" size="small" @click="area=4">自定义插槽用法</t-button>
+			<t-button type="s" main-class="mr-30 mb-30" size="small" @click="area=7">显示边框</t-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script>
+	import { TuiApi } from '@/api'
+	import { TuiTableSortEvent, TuiGuid } from '@/uni_modules/tui-plus'
+	export default {
+		data() {
+			return {
+				type: "",
+				area: 1,
+				title: "空状态",
+				tableData1: [] as UTSJSONObject[],
+				tableData: [] as UTSJSONObject[],
+				cloneTableData: [] as UTSJSONObject[],
+				checkIds: ['24', '34'] as string[],
+				tableData2: [{
+					name: "张三",
+					age: 22,
+					id: TuiGuid(10)
+				}, {
+					name: "李四",
+					age: '18',
+					id: TuiGuid(10)
+				}] as UTSJSONObject[],
+				timer: 0
+			}
+		},
+		methods: {
+			scrolltolower() {
+				clearTimeout(this.timer)
+				this.timer = setTimeout(() => {
+					const ins = (this.$refs['tableEl'] as ComponentPublicInstance)
+					ins.$callMethod('setLoadmore', 0)
+					ins.$callMethod('hideMask')
+				}, 1000)
+			},
+			refresherrefresh() {
+				clearTimeout(this.timer)
+				this.timer = setTimeout(() => {
+					const ins = (this.$refs['tableEl'] as ComponentPublicInstance)
+					ins.$callMethod('closerefresher')
+					ins.$callMethod('hideMask')
+				}, 1000)
+			},
+			add() {
+				this.tableData2.push({
+					name: "王五",
+					age: '32',
+					id: `tui${TuiGuid(10)}`
+				})
+			},
+			clear() {
+				this.tableData = []
+			},
+			tablesort(e : UTSJSONObject) {
+				if (e.state == 0) {
+					this.tableData = []
+					this.tableData = this.cloneTableData
+				} else {
+					const arr = this.tableData.sort((a : UTSJSONObject, b : UTSJSONObject) : number => {
+						const _a = parseInt(`${a[e.field!]}`)
+						const _b = parseInt(`${b[e.field!]}`)
+						const d = e.state == 1 ? _a - _b : _b - _a
+						return d
+					});
+					this.tableData = arr
+				}
+			},
+			selectChange(ids : string[]) {
+				console.log(ids)
+			},
+			test(index : number) {
+				this.tableData.splice(index, 1)
+			},
+			onDelete(rowIndex : number) {
+				this.tableData.splice(rowIndex, 1)
+				this.tableData = [...this.tableData]
+			},
+			getTableList(cur : number) {
+				TuiApi('getTableList', {
+					current: cur,
+					pageSize: 10
+				}, true).then(res => {
+					const data = res['data'] as UTSJSONObject
+					this.tableData = data['list'] as UTSJSONObject[]
+					this.cloneTableData = [...this.tableData]
+				})
+			}
+		},
+		created() {
+			this.getTableList(1)
+		},
+		onReady() {
+
+		}
+	}
+</script>

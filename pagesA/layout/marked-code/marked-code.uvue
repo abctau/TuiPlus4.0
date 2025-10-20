@@ -1,0 +1,36 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="MarkedCode 代码显示"
+			sub-title="t-marked子组件，用于展示markdown代码片段，支持亮高显示，可单独使用,非webview套壳"></t-card>
+		<t-marked-code :codeText="sourceCode" main-class="mb-30" language="javascript"></t-marked-code>
+		<t-marked-code :codeText="cssCode" main-class="mb-30" language="css"></t-marked-code>
+		<t-marked-code :codeText="htmlCode" main-class="mb-30" content-class="w-2000" language="html"></t-marked-code>
+	</t-page>
+</template>
+
+<script setup>
+	const sourceCode = `import App from './App.uvue'
+import { createSSRApp } from 'vue'
+export function createApp() {
+const app = createSSRApp(App)
+	return {
+		app
+	}
+}
+`
+	const cssCode = `.tok-keyword { color: #d73a49; font-weight: bold; }
+.tok-variable { color: #6f42c1; }
+.tok-string { color: #032f62; }
+.tok-number  { color: #005cc5; }
+.tok-comment { color: #6a737d; font-style: italic; }
+`
+
+	const htmlCode = `<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="MarkedCode 代码显示"
+			sub-title="t-marked子组件，用于展示markdown代码片段，支持亮高显示，可单独使用"></t-card>
+		<t-marked-code :codeText="cssCode" main-class="mb-30" language="css"></t-marked-code>
+	</t-page>
+</template>
+`
+</script>

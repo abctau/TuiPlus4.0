@@ -1,0 +1,106 @@
+<template>
+	<t-page>
+		<t-lucky-wheel :options="options"></t-lucky-wheel>
+	</t-page>
+</template>
+
+<script setup>
+	const options : UTSJSONObject[] = [
+		{
+			text: '一等奖',
+			color: '#FF5252',
+			fontSize: '',
+			icon: '🏆',
+			iconWidth: 0,
+			iconHeight: 0
+		},
+		{
+			text: '谢谢参与',
+			color: '#FF4081',
+			fontSize: '',
+			icon: '😢',
+			iconWidth: 0,
+			iconHeight: 0
+		},
+		{
+			text: '二等奖',
+			color: '#E040FB',
+			fontSize: '',
+			icon: '🥈',
+			iconWidth: 0,
+			iconHeight: 0
+		},
+		{
+			text: '优惠券',
+			color: '#7C4DFF',
+			fontSize: '',
+			icon: '🎫',
+			iconWidth: 0,
+			iconHeight: 0
+		},
+		{
+			text: '三等奖',
+			color: '#536DFE',
+			fontSize: '',
+			icon: '🥉',
+			iconWidth: 0,
+			iconHeight: 0
+		},
+		// {
+		// 	text: '谢谢参与',
+		// 	color: '#448AFF',
+		// 	fontSize: '',
+		// 	icon: '😢',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '四等奖',
+		// 	color: '#40C4FF',
+		// 	fontSize: '',
+		// 	icon: '🎁',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '折扣券',
+		// 	color: '#18FFFF',
+		// 	fontSize: '',
+		// 	icon: '💳',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '五等奖',
+		// 	color: '#64FFDA',
+		// 	fontSize: '',
+		// 	icon: '🎯',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '谢谢参与',
+		// 	color: '#69F0AE',
+		// 	fontSize: '',
+		// 	icon: '😢',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '六等奖',
+		// 	color: '#B2FF59',
+		// 	fontSize: '',
+		// 	icon: '🎨',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// },
+		// {
+		// 	text: '代金券',
+		// 	color: '#FFFF00',
+		// 	fontSize: '',
+		// 	icon: '💰',
+		// 	iconWidth: 0,
+		// 	iconHeight: 0
+		// }
+	]
+</script>

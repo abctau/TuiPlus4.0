@@ -1,0 +1,102 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="DropdownMenu 下拉菜单" sub-title="菜单呈现数个并列的选项类目，用于页面的内容筛选、排序等操作。" />
+		<t-section main-class="mb-30 tdr" title="基础用法"></t-section>
+		<t-dropdown-menu main-class="tdr" :model="formData" @select="onselect" ref="dropdownins">
+			<t-dropdown-item prop="goods" :options="goodsOptions"></t-dropdown-item>
+			<t-dropdown-item prop="sort" :options="sortOptions"></t-dropdown-item>
+			<!-- 使用插槽需要手从外部修改label -->
+			<t-dropdown-item prop="sort" label="插槽">
+				<t-card title="服务(多选)" main-class="pb-0">
+					<t-checkbox-group v-model="(formData.server as string[])" mode="button" type="p"
+						main-class="fl fww mt-20 fjcb" child-class="mb-30 w-170">
+						<t-checkbox value="0">预定</t-checkbox>
+						<t-checkbox value="1">点餐</t-checkbox>
+						<t-checkbox value="2">外卖</t-checkbox>
+						<t-checkbox value="3">wifi</t-checkbox>
+						<t-checkbox value="4">停车位</t-checkbox>
+						<t-checkbox value="5">包厢</t-checkbox>
+						<t-checkbox value="6">无烟区</t-checkbox>
+						<t-checkbox value="7">营业中</t-checkbox>
+					</t-checkbox-group>
+				</t-card>
+				<t-card title="价格(单选)" main-class="pb-0">
+					<t-radio-group v-model="(formData.price as string)" mode="button" type="p"
+						main-class="fl fww mt-20 fjcb" child-class="mb-30 w-180">
+						<t-radio value="0">50以下</t-radio>
+						<t-radio value="1">50-100</t-radio>
+						<t-radio value="2">100-300</t-radio>
+						<t-radio value="3">300以上</t-radio>
+					</t-radio-group>
+				</t-card>
+				<t-card title="价格(区间)" main-class="">
+					<t-row main-class="faic mt-20">
+						<t-input :border="true" main-class="f" size="small"
+							v-model="(formData.minPrice as string)"></t-input>
+						<t-text main-class="mlr-20">至</t-text>
+						<t-input :border="true" main-class="f" size="small"
+							v-model="(formData.maxPrice as string)"></t-input>
+					</t-row>
+				</t-card>
+				<t-row main-class="plrb-20 mt-20">
+					<t-button :border="true" main-class="f r-150 mr-30" @click="reset">重置</t-button>
+					<t-button type="primary" main-class="f r-150" @click="select">确认</t-button>
+				</t-row>
+			</t-dropdown-item>
+			<!-- <t-dropdown-item prop="filter" :options="filterOptions" /> -->
+		</t-dropdown-menu>
+		<t-view main-class="h-2000"></t-view>
+	</t-page>
+</template>
+
+<script setup>
+	const dropdownins = ref<ComponentPublicInstance | null>(null)
+	const formData = reactive<UTSJSONObject>({
+		goods: '0',
+		sort: 'b',
+		filter: 'inStock',
+		server: ['0'] as string[],
+		price: '0',
+		user: '2',
+		minPrice: '',
+		maxPrice: ''
+	});
+
+	const userOptions : UTSJSONObject[] = [
+		{ label: '全部', value: 'all' },
+		{ label: '普通会员', value: '1' },
+		{ label: '金牌会员', value: '2' },
+	];
+	const goodsOptions : UTSJSONObject[] = [
+		{ label: '全部商品', value: '0' },
+		{ label: '新款商品', value: '1' },
+		{ label: '活动商品', value: '2' },
+	];
+
+	const sortOptions : UTSJSONObject[] = [
+		{ label: '默认排序', value: 'a' },
+		{ label: '好评优先', value: 'b' },
+		{ label: '销量最高', value: 'c', disabled: true },
+		{ label: '价格最低', value: 'd' },
+	];
+
+	const filterOptions : UTSJSONObject[] = [
+		{ label: '全部', value: 'all' },
+		{ label: '有货优先', value: 'inStock' },
+		{ label: '仅看有优惠', value: 'onSale' },
+		{ label: '海淘商品', value: 'imported' },
+	];
+	function onselect(val : UTSJSONObject) {
+		console.log(val)
+	}
+	function select() {
+		dropdownins.value?.$callMethod('close')
+	}
+	function reset() {
+		formData.server = ['0'] as string[]
+		formData.price = '0'
+		formData.user = '2'
+		formData.minPrice = ''
+		formData.maxPrice = ''
+	}
+</script>

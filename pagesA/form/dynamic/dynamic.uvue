@@ -1,0 +1,604 @@
+<template>
+	<t-page main-class="p-30" :loading="true" :waiting="1500">
+		<t-card main-class="mb-30" title="DynamicForm 动态表单" sub-title="后端配置json,前端动态展示表单填写,适用于政务办件后台制作表格的展示"></t-card>
+		<t-form-dynamic ref="ruleForm" v-if="list.length>0" :options="childs" :forms="formdata" :rules="rules"
+			:bottom-line="true" :disabled="disabled" main-class="tdb tdr oh mb-30 plr-20"
+			child-class="ptb-20"></t-form-dynamic>
+		<t-button main-class="mb-30" type="primary" @click="submitForm">提交</t-button>
+		<t-button main-class="mb-30" type="s" @click="resetForm">重置</t-button>
+		<t-button type="error" @click="disabled=!disabled">{{disabled?'取消禁用':'禁用表单'}}</t-button>
+	</t-page>
+</template>
+<script setup>
+	import { isPhone } from '@/uni_modules/tui-plus'
+	import { TuiApi } from '@/api'
+	const disabled = ref(false)
+	const ruleForm = ref<ComponentPublicInstance | null>(null)
+	const list = ref<UTSJSONObject[]>([])
+	const childs = ref<UTSJSONObject[]>([
+		{
+			type: "picker-custom",
+			label: '学院',
+			name: 'school',
+			attrs: {
+				list: [
+					[
+						{ "id": "1", "title": "北京大学文学院" },
+						{ "id": "2", "title": "清华大学历史学院" },
+						{ "id": "3", "title": "复旦大学哲学院" },
+						{ "id": "4", "title": "中国人民大学法学院" },
+						{ "id": "5", "title": "上海交通大学经济学院" },
+						{ "id": "6", "title": "浙江大学管理学院" },
+						{ "id": "7", "title": "南京大学教育学院" },
+						{ "id": "8", "title": "北京外国语大学外国语学院" },
+						{ "id": "9", "title": "武汉大学数学科学学院" },
+						{ "id": "10", "title": "华中科技大学物理学院" },
+						{ "id": "11", "title": "西安交通大学化学学院" },
+						{ "id": "12", "title": "四川大学生命科学学院" },
+						{ "id": "13", "title": "电子科技大学计算机科学与技术学院" },
+						{ "id": "14", "title": "北京邮电大学信息科学与技术学院" },
+						{ "id": "15", "title": "南京师范大学地理科学学院" },
+						{ "id": "16", "title": "同济大学环境学院" },
+						{ "id": "17", "title": "北京师范大学心理学院" },
+						{ "id": "18", "title": "华东师范大学体育学院" },
+						{ "id": "19", "title": "中央美术学院美术学院" },
+						{ "id": "20", "title": "中央音乐学院音乐学院" }
+					]
+				]
+			}
+		},
+		{
+			type: "pickerSelect",
+			label: '下拉选择',
+			name: 'pickerselectvalue',
+			attrs: {
+				mainClass: 'f',
+				list: [{
+					value: '选项1',
+					label: '黄金糕'
+				}, {
+					value: '选项2',
+					label: '双皮奶',
+					disabled: true
+				}, {
+					value: '选项3',
+					label: '蚵仔煎'
+				}, {
+					value: '选项4',
+					label: '龙须面'
+				}, {
+					value: '选项5',
+					label: '北京烤鸭'
+				}]
+
+			}
+		},
+		{
+			label: '手机号',
+			type: 'input',
+			name: 'phone',
+			itemAttrs: {},
+			attrs: {
+				effect: 'plain',
+				border: false,
+				mainClass: 'f sta-r pr-0',
+				mode: 'number',
+				maxlength: 11,
+				placeholder: "请输入手机号"
+			}
+		}, {
+			label: '性别 ',
+			type: 'radio',
+			name: 'gender',
+			itemAttrs: {},
+			attrs: { type: 'p', mainClass: "f fl fww fjce", childClass: "p-0 ml-20" },
+			list: [
+				{
+					value: '1',
+					label: '男'
+				},
+				{
+					value: '2',
+					label: '女'
+				}, {
+					value: '3',
+					label: '保密'
+				}
+			]
+		}, {
+			label: '爱好 ',
+			type: 'checkbox',
+			name: 'hobby',
+			itemAttrs: {},
+			attrs: {
+				mainClass: "`f fl fww fjce`",
+				type: "p",
+				icon: "checkbox-blank-circle-fill",
+				childClass: "p-0 ml-15",
+				transition: false
+			},
+			list: [
+				{
+					value: '1',
+					label: '学习'
+				},
+				{
+					value: '2',
+					label: '泡妞'
+				}, {
+					value: '3',
+					label: '看书'
+				}
+			]
+		},
+		{
+			label: "验证码",
+			name: "codeinput",
+			type: "code",
+			itemAttrs: {},
+			attrs: {
+				type: "primary",
+				dotSymbol: "",
+				maxlength: 4
+			}
+		},
+		{
+			label: "评分",
+			name: "ratecount",
+			type: "rate",
+			itemAttrs: {},
+			attrs: {
+				mainClass: "s-60",
+				type: "primary"
+			}
+		},
+		{
+			label: "开关",
+			name: "switchs",
+			type: "switch",
+			itemAttrs: {},
+			attrs: {
+				type: "primary",
+				activeIcon: 'volume-up',
+				inactiveIcon: 'volume-off'
+			}
+		},
+		{
+			label: "上传",
+			name: "uploads",
+			type: "upload",
+			itemAttrs: {},
+			attrs: {
+				count: 1
+			}
+		},
+		{
+			label: "步进器",
+			name: "numberbox",
+			type: "stepper",
+			itemAttrs: {},
+			attrs: { min: 3, max: 99, type: "s" }
+		},
+		{
+			label: "滑块",
+			name: "sliderval",
+			type: "slider",
+			itemAttrs: {},
+			attrs: {
+				mainClass: 'f h-160 mb-30 ', direction: 'horizontal', min: 0, max: 500, blockSize: '60', disabled: false, showValue: true, trackSize: '20', showMode: 'after'
+			}
+		},
+		{
+			label: '文本',
+			type: 'textarea',
+			name: 'textareavalue',
+			itemAttrs: {
+				bottomLine: false, direction: "col"
+			},
+			attrs: {
+				effect: "plain",
+				border: true,
+				placeholder: "欢迎使用Tui",
+				onInput: (e : UniInputEvent) => {
+					uni.showToast({
+						title: e.detail.value
+					})
+				}
+			}
+		},
+		{
+			label: "颜色设置",
+			name: "colorvalue",
+			type: "color",
+			itemAttrs: {
+				bottomLine: false
+			}
+		},
+		{
+			label: "时间选择",
+			type: 'date',
+			name: "datevalue",
+			itemAttrs: {},
+			attrs: {
+				mainClass: "f",
+				format: "yyyy-mm-dd",
+				range: [
+					['year', '年', [1913, 2099]],
+					['month', '月', [1, 12]],
+					['date', '日', [1, 31]]
+				]
+			}
+		}, {
+			label: "弹窗日历测试",
+			type: 'pickercalendar',
+			name: "pickercalendar",
+			itemAttrs: {},
+			attrs: {
+				vertical: false,
+				mode: "single",
+				mainClass: "f",
+				selected: [{
+					date: '2025-3-17',
+					info: '打折',
+					infoColor: '#00cc81',
+					badge: true,
+					badgeInfo: '休',
+					badgeColor: '#ff0000',
+					disabled: true
+				}]
+			}
+		}, {
+			label: "级联表单",
+			type: 'cascader',
+			name: "cascader",
+			itemAttrs: {
+				direction: "col", showLabel: false
+			},
+			attrs: {
+				type: "p",
+				option: [
+					{
+						"value": "zhinan",
+						"label": "指南",
+						"children": [
+							{
+								"value": "shejiyuanze",
+								"label": "设计原则",
+								"children": [
+									{
+										"value": "yizhi",
+										"label": "一致",
+										"disabled": true
+									},
+									{
+										"value": "fankui",
+										"label": "反馈"
+									},
+									{
+										"value": "xiaolv",
+										"label": "效率"
+									},
+									{
+										"value": "kekong",
+										"label": "可控"
+									}
+								]
+							},
+							{
+								"value": "daohang",
+								"label": "导航",
+								"children": [
+									{
+										"value": "cexiangdaohang",
+										"label": "侧向导航"
+									},
+									{
+										"value": "dingbudaohang",
+										"label": "顶部导航"
+									}
+								]
+							}
+						]
+					},
+					{
+						"value": "zujian",
+						"label": "组件",
+						"children": [
+							{
+								"value": "basic",
+								"label": "Basic",
+								"children": [
+									{
+										"value": "layout",
+										"label": "Layout 布局"
+									},
+									{
+										"value": "color",
+										"label": "Color 色彩"
+									},
+									{
+										"value": "typography",
+										"label": "Typography 字体"
+									},
+									{
+										"value": "icon",
+										"label": "Icon 图标"
+									},
+									{
+										"value": "button",
+										"label": "Button 按钮"
+									}
+								]
+							},
+							{
+								"value": "form",
+								"label": "Form",
+								"children": [
+									{
+										"value": "radio",
+										"label": "Radio 单选框"
+									},
+									{
+										"value": "checkbox",
+										"label": "Checkbox 多选框"
+									},
+									{
+										"value": "input",
+										"label": "Input 输入框"
+									},
+									{
+										"value": "input-number",
+										"label": "InputNumber 计数器"
+									},
+									{
+										"value": "select",
+										"label": "Select 选择器"
+									},
+									{
+										"value": "cascader",
+										"label": "Cascader 级联选择器"
+									},
+									{
+										"value": "switch",
+										"label": "Switch 开关"
+									},
+									{
+										"value": "slider",
+										"label": "Slider 滑块"
+									},
+									{
+										"value": "time-picker",
+										"label": "TimePicker 时间选择器"
+									},
+									{
+										"value": "date-picker",
+										"label": "DatePicker 日期选择器"
+									},
+									{
+										"value": "datetime-picker",
+										"label": "DateTimePicker 日期时间选择器"
+									},
+									{
+										"value": "upload",
+										"label": "Upload 上传"
+									},
+									{
+										"value": "rate",
+										"label": "Rate 评分"
+									},
+									{
+										"value": "form",
+										"label": "Form 表单"
+									}
+								]
+							},
+							{
+								"value": "data",
+								"label": "Data",
+								"children": [
+									{
+										"value": "table",
+										"label": "Table 表格"
+									},
+									{
+										"value": "tag",
+										"label": "Tag 标签"
+									},
+									{
+										"value": "progress",
+										"label": "Progress 进度条"
+									},
+									{
+										"value": "tree",
+										"label": "Tree 树形控件"
+									},
+									{
+										"value": "pagination",
+										"label": "Pagination 分页"
+									},
+									{
+										"value": "badge",
+										"label": "Badge 标记"
+									}
+								]
+							},
+							{
+								"value": "notice",
+								"label": "Notice",
+								"children": [
+									{
+										"value": "alert",
+										"label": "Alert 警告"
+									},
+									{
+										"value": "loading",
+										"label": "Loading 加载"
+									},
+									{
+										"value": "message",
+										"label": "Message 消息提示"
+									},
+									{
+										"value": "message-box",
+										"label": "MessageBox 弹框"
+									},
+									{
+										"value": "notification",
+										"label": "Notification 通知"
+									}
+								]
+							},
+							{
+								"value": "navigation",
+								"label": "Navigation",
+								"children": [
+									{
+										"value": "menu",
+										"label": "NavMenu 导航菜单"
+									},
+									{
+										"value": "tabs",
+										"label": "Tabs 标签页"
+									},
+									{
+										"value": "breadcrumb",
+										"label": "Breadcrumb 面包屑"
+									},
+									{
+										"value": "dropdown",
+										"label": "Dropdown 下拉菜单"
+									},
+									{
+										"value": "steps",
+										"label": "Steps 步骤条"
+									}
+								]
+							},
+							{
+								"value": "others",
+								"label": "Others",
+								"children": [
+									{
+										"value": "dialog",
+										"label": "Dialog 对话框"
+									},
+									{
+										"value": "tooltip",
+										"label": "Tooltip 文字提示"
+									},
+									{
+										"value": "popover",
+										"label": "Popover 弹出框"
+									},
+									{
+										"value": "card",
+										"label": "Card 卡片"
+									},
+									{
+										"value": "carousel",
+										"label": "Carousel 走马灯"
+									},
+									{
+										"value": "collapse",
+										"label": "Collapse 折叠面板"
+									}
+								]
+							}
+						]
+					},
+					{
+						"value": "ziyuan",
+						"label": "资源",
+						"children": [
+							{
+								"value": "axure",
+								"label": "Axure Components"
+							},
+							{
+								"value": "sketch",
+								"label": "Sketch Templates"
+							},
+							{
+								"value": "jiaohu",
+								"label": "组件交互文档"
+							}
+						]
+					}
+				]
+			}
+		}, {
+			label: "文件选择",
+			type: 'filemanager',
+			name: "filemanager",
+			itemAttrs: { direction: "col", showLabel: false },
+			attrs: { type: 'p', }
+		}
+	])
+	const formdata = ref<UTSJSONObject>({
+		phone: '15329438335',
+		gender: '2',
+		hobby: ['1', '3'],
+		codeinput: '1',
+		ratecount: 3,
+		switchs: true,
+		uploads: [{ url: '/pagesA/static/image/6527ae979850d.jpg' }],
+		numberbox: 15,
+		sliderval: [0, 105, 500],
+		textareavalue: '文本域内容',
+		colorvalue: '#2979ff',
+		datevalue: '',
+		school: [] as string[],
+		cityvalue: ['120000', '120200', '120225'],
+		calendar: ['2025-3-18', '2025-3-28'],
+		pickercalendar: [] as string[],
+		cascader: [] as string[],
+		filemanager: [] as UTSJSONObject[],
+		pickerselectvalue: ''
+	})
+	const rules = ref<UTSJSONObject>({
+		phone: [
+			{ type: 'required', message: '手机号不能为空' },
+			{ type: 'length', min: 11, max: 11, message: '手机号长度只能为11位' },
+			{
+				type: 'function',
+				fun: (e : any) : boolean => {
+					return isPhone(`${e}`)
+				},
+				message: '手机号正则验证失败'
+			}
+		]
+	})
+	function submitForm() {
+		const validate : boolean = (ruleForm.value!).$callMethod('validate') as boolean
+		if (validate) {
+			uni.showModal({
+				title: '数据提交成功'
+			})
+			disabled.value = !disabled.value
+		} else {
+			uni.showModal({
+				title: '数据校验失败'
+			})
+		}
+	}
+	function resetForm() {
+		(ruleForm.value!).$callMethod('reset')
+	}
+
+	onLoad((_) => {
+		TuiApi('citydata', {}, true).then((res : UTSJSONObject) => {
+			let arr = res.getArray('data') as UTSJSONObject[]
+			childs.value.push({
+				label: "地区选择",
+				type: 'city',
+				name: 'cityvalue',
+				itemAttrs: {},
+				attrs: {
+					mainClass: "f",
+					list: arr
+				}
+			} as UTSJSONObject)
+			list.value = arr
+		})
+	})
+</script>

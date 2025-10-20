@@ -1,0 +1,81 @@
+<template>
+	<t-page main-class="">
+		<t-view>
+			<t-status-bar></t-status-bar>
+			<t-view main-class="h-400"></t-view>
+		</t-view>
+		<t-col main-class="bir-#0356fa,#05abff tdb w-100% df dlt-0 z-1">
+			<t-image src="/static/my/qbg.png" main-class="da dlbr-0 h-220 z-0 w-100%" :loading="false"></t-image>
+			<t-status-bar></t-status-bar>
+			<t-row main-class="pr-30 pl-70 z-999 fjcb faic h-200" @click="pageto">
+				<t-row main-class='faic mt-30'>
+					<t-avatar :src="userinfo.avatar ?? '/pagesA/static/image/65275c9ac3b1d.jpg'"
+						main-class="twhr-100"></t-avatar>
+					<t-col main-class="ml-30">
+						<t-text main-class="c-#fff s-36 sfwb">{{userinfo.username??'去登录'}}</t-text>
+						<t-text type="i" main-class="c-#fff slh-80">{{userinfo.nickname ?? '欢迎使用Tui'}}</t-text>
+					</t-col>
+				</t-row>
+				<t-button v-if="userinfo.nickname!=null" main-class='w-200 r-150 bc-#fff bw-2px'
+					text-class="c-#fff sfwb s-35" :border="true" :stop="true" effect="plain"
+					@click="pageto">编辑</t-button>
+			</t-row>
+			<t-grid :column="3" child-label-class="c-#fff" main-class="h-200">
+				<t-grid-item :hover="true">
+					<t-text main-class="c-#fff sfwb slh-65" size="large">{{ userinfo.followCount ?? 54 }}</t-text>
+					<t-text main-class="c-#fff">关注</t-text>
+				</t-grid-item>
+				<t-grid-item :hover="true">
+					<t-text main-class="c-#fff sfwb slh-65" size="large">{{ userinfo.fansCount ?? 42 }}</t-text>
+					<t-text main-class="c-#fff">粉丝</t-text>
+				</t-grid-item>
+				<t-grid-item :hover="true" path="/pagesB/integral/integral">
+					<t-text main-class="c-#fff sfwb slh-65" size="large">{{ userinfo.collectCount ?? 64 }}</t-text>
+					<t-text main-class="c-#fff">积分</t-text>
+				</t-grid-item>
+			</t-grid>
+		</t-col>
+		<t-grid :col="4" main-class="tdb tdr mt-30 mlr-30 z-999 ptb-15">
+			<t-grid-item icon="/static/my/share.png" label="分享有礼" @click="message"></t-grid-item>
+			<t-grid-item icon="/static/my/integral.png" label="积分查询" @click="message"></t-grid-item>
+			<t-grid-item icon="/static/my/member.png" label="会员中心" @click="message"></t-grid-item>
+			<t-grid-item icon="/static/my/collection.png" label="我的留言" path="/pagesB/message/message"></t-grid-item>
+		</t-grid>
+		<t-col main-class="m-30 tdr">
+			<t-cell path="/pagesB/upgradelog/upgradelog" icon-main-class="s-45" icon="/static/grid/grid (4).png"
+				title="升级日志"></t-cell>
+			<t-cell path="/pagesB/work/work-task" icon-main-class="s-45" icon="/static/grid/grid (8).png"
+				title="工作任务"></t-cell>
+			<t-cell path="/pagesB/about/about" icon-main-class="s-45" icon="/static/grid/grid (3).png" :border="false"
+				title="关于我们"></t-cell>
+		</t-col>
+		<t-col main-class="mlr-30 tdr">
+			<t-cell icon-main-class="s-45" path="/pagesB/gestion/gestion?type=3" icon="/static/grid/grid (1).png"
+				title="合作共赢"></t-cell>
+			<t-cell icon-main-class="s-45" path="/pagesB/gestion/gestion?type=2" icon="/static/grid/grid (2).png"
+				title="需求建议" :border="false"></t-cell>
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiStore, TuiIf } from '@/uni_modules/tui-plus'
+	const store = new TuiStore()
+	const userinfo : UTSJSONObject = store.get('userinfo')
+	function message() {
+		uni.showToast({
+			title: '模版开发中'
+		})
+	}
+	function pageto() {
+		if (!TuiIf(store.value['token'])) {
+			uni.navigateTo({
+				url: '/pagesB/login/login'
+			})
+		} else {
+			uni.navigateTo({
+				url: '/pagesB/account/account'
+			})
+		}
+	}
+</script>

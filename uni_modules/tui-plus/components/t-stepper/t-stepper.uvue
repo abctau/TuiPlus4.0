@@ -1,0 +1,221 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="radioStyles">
+		<t-button v-bind="extendsAttrs" v-if="showMinus"
+			:main-class="`mr-10 r-10 p-0 twh-${themeSize}px ${buttonClass} ${buttonLeftClass}`" right-icon="minus-fill"
+			:right-icon-class="iconMinusClass" :iconHolder="false" text-class="mlr-0" @click="minusClick" :hover="true"
+			:disabled="minusDisabled" @longpress="startRement(false)" @touchend="stopRement"
+			@touchcancel="stopRement"></t-button>
+		<t-input v-bind="extendsAttrs" :disabled="disabledInput" :modelValue="inputValueFormart" input-type="digit"
+			:input-class="`sta ${inputTextClass}`" :main-class="`f r-10 p-0 h-${themeSize}px ${inputClass}`"
+			:clearabled="false" :placeholder-style="inputPlaceholderStyle" @blur="blur"></t-input>
+		<t-button v-bind="extendsAttrs" v-if="showPlus" :cursor-spacing="cursorSpacing"
+			:main-class="`ml-10 r-10 p-0 twh-${themeSize}px ${buttonClass} ${buttonRightClass}`" right-icon="add-fill"
+			:right-icon-class="iconPlusClass" text-class="mlr-0" :iconHolder="false" @click="plusClick"
+			:disabled="plusDisabled" :hover="true" @longpress="startRement(true)" @touchend="stopRement"
+			@touchcancel="stopRement"></t-button>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Stepper 步进器
+	 * @date 2025-05-31 12:07:09
+	 * @author TanYuan
+	 * @description 在指定数值范围内进行加减操作的UI元素，支持多种配置，如最小值、最大值、步长、按钮样式等。使用场景包括在需要精确控制数值增减的场景，如设置时间、金额等。
+	 * @example /pagesA/form/number-box/number-box
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-stepper.html
+	 * @example /pagesA/form/number-box/number-box
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} modelValue 默认值(默认：1)
+	 * @property {Number} min 用户可输入的最小值(默认：1)
+	 * @property {Number} max 用户可输入的最大值(默认：100)
+	 * @property {Number} step 步长，每次加或减的值，支持小数值(默认：1)
+	 * @property {String} buttonClass 按钮的样式
+	 * @property {String} buttonLeftClass 右边按钮的样式
+	 * @property {String} buttonRightClass 左边按钮的样式
+	 * @property {String} iconMinusClass 减少图标的样式
+	 * @property {String} iconPlusClass 增加图标的样式
+	 * @property {String} inputPlaceholderStyle 编辑区占位样式
+	 * @property {String} iconMinus 减少按钮图标名称(默认：minus)
+	 * @property {String} iconPlus 增加按钮图标名称(默认：plus)
+	 * @property {Boolean} showMinus 是否显示减少按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showPlus 是否显示增加按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} disabledInput 是否禁用编辑
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} disableMinus 是否禁用减少按钮
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} disablePlus 是否禁用增加按钮
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} cursorSpacing 指定光标于键盘的距离，避免键盘遮挡输入框，单位px(默认：100)
+	 * @property {Number} plusInterval 长按加减间隔(默认：100)
+	 * @property {Boolean} longPress 是否允许长按进行加减(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} inputClass 编辑输入框样式
+	 * @property {String} inputTextClass 编辑输入文本样式
+	 * @event {Function} change 当数值改变时触发
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface StepperProps extends CommonProps {
+		modelValue : number
+		min : number
+		max : number
+		step : number
+		buttonClass : string
+		buttonLeftClass : string
+		buttonRightClass : string
+		iconMinusClass : string
+		iconPlusClass : string
+		inputClass : string
+		inputTextClass : string
+		inputPlaceholderStyle : string
+		iconMinus : string
+		iconPlus : string
+		showMinus : boolean
+		showPlus : boolean
+		disabledInput : boolean
+		disableMinus : boolean
+		disablePlus : boolean
+		cursorSpacing : number
+		plusInterval : number
+		longPress : boolean
+	}
+	const props = withDefaults(defineProps<StepperProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: 0,
+		min: 0,
+		max: 100,
+		step: 1,
+		buttonClass: '',
+		buttonLeftClass: '',
+		buttonRightClass: '',
+		iconMinusClass: '',
+		iconPlusClass: '',
+		inputClass: '',
+		inputTextClass: '',
+		inputPlaceholderStyle: '',
+		iconMinus: 'minus',
+		iconPlus: 'plus',
+		showMinus: true,
+		showPlus: true,
+		disabledInput: false,
+		disableMinus: false,
+		disablePlus: false,
+		cursorSpacing: 100,
+		plusInterval: 100,
+		longPress: true
+	});
+	const { extendsAttrs, getFontSizeToValue } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const instance = getCurrentInstance()?.proxy!
+	const inputValue = ref<number>(0)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	let timer : number = 0
+
+	const plusDisabled = computed(() : boolean => {
+		return (inputValue.value >= props.max) || props.disablePlus
+	})
+	const minusDisabled = computed(() : boolean => {
+		return (inputValue.value <= props.min) || props.disableMinus
+	})
+	const getDecimalPlaces = computed(() : number => {
+		const numStr = props.step.toString();
+		const dotIndex = numStr.indexOf('.');
+		if (dotIndex == -1) return 0;
+		return numStr.length - dotIndex - 1;
+	})
+	const inputValueFormart = computed(() : string => {
+		emit('change', inputValue.value)
+		emit('update:modelValue', inputValue.value)
+		return inputValue.value.toFixed(getDecimalPlaces.value)
+	})
+	const themeSize = computed(() : number => {
+		return Math.round(getFontSizeToValue.value * 2)
+	})
+	const radioStyles = computed(() : string => {
+		return `fl w-${Math.round(themeSize.value * 3.5)}px ${props.mainClass}`
+	})
+	function updateValue(val : number) {
+		if (isNaN(val)) {
+			inputValue.value = props.min
+		} else {
+			if (val < props.min) {
+				inputValue.value = props.min
+			} else if (val > props.max) {
+				inputValue.value = props.max
+			} else {
+				inputValue.value = val
+			}
+		}
+	}
+	function minusClick() {
+		updateValue(inputValue.value - props.step)
+	}
+	function plusClick() {
+		updateValue(inputValue.value + props.step)
+	}
+	function startRement(type : Boolean) {
+		if (!props.longPress) return
+		clearInterval(timer)
+		timer = setInterval(() => {
+			if (inputValue.value <= props.min || inputValue.value >= props.max) clearInterval(timer)
+			if (type) {
+				plusClick()
+			} else {
+				minusClick()
+			}
+		}, props.plusInterval);
+	}
+	function stopRement() {
+		clearInterval(timer)
+		timer = setTimeout(() => {
+			itemValidate()
+		}, 500)
+	}
+	function blur(event : UniInputBlurEvent) {
+		updateValue(parseInt(event.detail.value))
+	}
+	watch(() : number => props.modelValue, (newVal : number) => {
+		updateValue(newVal)
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		clearInterval(timer)
+	})
+</script>

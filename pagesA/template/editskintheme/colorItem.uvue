@@ -1,0 +1,147 @@
+<template>
+	<t-col v-if="fields.length>0" main-class="obs1 tdr oh">
+		<template v-if="!isBackground">
+			<t-col :hover="true" main-class="h-160 pl-20 fjcc"
+				:style="[`background-color:${isColor?formdata[fields[0]]:'#DCDFE6'};`]" @click="showPicker(fields[0])">
+				<t-text :main-class="`c-${colors[0]}`">{{type}}</t-text>
+				<t-text :main-class="`c-${colors[0]}`">{{formdata[fields[0]]}}</t-text>
+			</t-col>
+			<t-row main-class="h-120">
+				<t-col :hover="true" :main-class="`fjcc ${itemsty}`" v-if="fields.length>1"
+					:style="[`background-color:${isColor?formdata[fields[1]]:'#E4E7ED'};`]"
+					@click="showPicker(fields[1])">
+					<t-text :main-class="`c-${colors[1]}`">{{tips[0]}}</t-text>
+					<t-text :main-class="`c-${colors[1]}`">{{formdata[fields[1]]}}</t-text>
+				</t-col>
+				<t-col :hover="true" :main-class="`fjcc ${itemsty}`" v-if="fields.length>2"
+					:style="[`background-color:${isColor?formdata[fields[2]]:'#EBEEF5'};`]"
+					@click="showPicker(fields[2])">
+					<t-text :main-class="`c-${colors[2]}`">{{tips[1]}}</t-text>
+					<t-text :main-class="`c-${colors[2]}`">{{formdata[fields[2]]}}</t-text>
+				</t-col>
+				<t-col :hover="true" :main-class="`fjcc ${itemsty}`" v-if="fields.length>3"
+					:style="[`background-color:${isColor?formdata[fields[3]]:'#F2F6FC'};`]"
+					@click="showPicker(fields[3])">
+					<t-text :main-class="`c-${colors[3]}`">{{tips[2]}}</t-text>
+					<t-text :main-class="`c-${colors[3]}`">{{formdata[fields[3]]}}</t-text>
+				</t-col>
+			</t-row>
+		</template>
+		<template v-else>
+			<t-row main-class="h-120 tdr obs1">
+				<t-col style=" flex: 1;padding-left: 20rpx;" main-class="h-120 fjcc" :hover="true"
+					@click="showPicker('bgcolorview')" :style="`background-color:${formdata.bgcolorview}`">
+					<t-text :main-class="`c-${colors[3]}`">元素背景</t-text>
+					<t-text :main-class="`c-${colors[3]}`">{{formdata.bgcolorview}}</t-text>
+				</t-col>
+				<t-col style="flex: 1;padding-left: 20rpx;" main-class="h-120 fjcc" @click="showPicker('bgcolorpage')"
+					:style="`background-color:${formdata.bgcolorpage}`" :hover="true">
+					<t-text :main-class="`c-${colors[3]}`">页面背景</t-text>
+					<t-text :main-class="`c-${colors[3]}`">{{formdata.bgcolorpage}}</t-text>
+				</t-col>
+			</t-row>
+		</template>
+	</t-col>
+</template>
+<script>
+	import { rgbaToHex } from '@/uni_modules/tui-plus'
+	import { TuiSkinTheme } from '@/uni_modules/tui-plus'
+	export default {
+		data() {
+			return {
+				itemsty: 'h-120 pl-20 f',
+				colorValue: '#000000',
+				selectField: ''
+			}
+		},
+		props: {
+			isBackground: {
+				type: Boolean,
+				default: false
+			},
+			isColor: {
+				type: Boolean,
+				default: true
+			},
+			formdata: {
+				type: Object as PropType<TuiSkinTheme>,
+				required: true
+			},
+			fields: {
+				type: Array as PropType<string[]>,
+				default: () : string[] => [] as string[]
+			},
+			type: {
+				type: String,
+				default: 'Primary'
+			},
+			colorList: {
+				type: Array as PropType<string[]>,
+				default: () : string[] => [] as string[]
+			},
+			tips: {
+				type: Array as PropType<string[]>,
+				default: () : string[] => ['Dark', 'Disabled', 'Light'] as string[]
+			},
+			value: {
+				type: Array as PropType<number[]>,
+				default: () : number[] => [] as number[]
+			},
+			colors: {
+				type: Array as PropType<string[]>,
+				default: () : string[] => ['#ffffff', '#ffffff', '#606266', '#606266'] as string[]
+			}
+		},
+		methods: {
+			showPicker(field : string) {
+				const val = `${this.formdata[field]}`
+				if (this.isColor) {
+					this.$emit('edit', {
+						title: `${field}颜色设置`,
+						name: field,
+						type: 'color',
+						attrs: {},
+						value: val,
+						describe: "",
+						contentClass: 'w-690',
+					} as UTSJSONObject)
+				} else {
+					this.$emit('edit', {
+						title: `${field}尺寸设置`,
+						name: field,
+						theme: 'p',
+						type: 'input',
+						value: val,
+						attrs: {
+							mode: 'number',
+							placeholder: "请输入尺寸"
+						},
+						describe: '',
+					} as UTSJSONObject)
+				}
+			},
+			onupdate(e : UTSJSONObject) {
+				const fieldname = `${e['fieldName']}`
+				this.formdata[fieldname] = e.getString('data.value')
+			},
+			onConfirm(color : string) {
+				const hex = rgbaToHex(color).slice(0, 7)
+				this.formdata[this.selectField] = hex
+			}
+		}
+	}
+</script>
+
+<style lang="scss">
+	.color-header {
+		height: 150rpx;
+		justify-content: center;
+		padding-left: 20rpx;
+	}
+
+	.color-item {
+		flex: 1;
+		justify-content: center;
+		padding-left: 20rpx;
+	}
+</style>

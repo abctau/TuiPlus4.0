@@ -1,0 +1,101 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="Camrea 相机" sub-title="本相机组件设计简洁，易于集成，满足多样化的拍摄需求,uts原生轻量级，无需安装自定义基座就可运行">
+		</t-card>
+		<t-col main-class="tdr-tdb-mt-30">
+			<t-camera @take="getPhoto" orientation="back" main-class="w-100% h-550 tdr tdb mtb-30" ref="camrea"
+				@recoder="recoder"></t-camera>
+		</t-col>
+		<t-row main-class="fww mt-30">
+			<t-button main-class="mrb-15" type="p" @click="front">前置摄像头</t-button>
+			<t-button main-class="mrb-15" type="p" @click="back">后置摄像头</t-button>
+			<t-button main-class="mrb-15" type="p" @click="open">打开相机</t-button>
+			<t-button main-class="mrb-15" type="w" @click="close">关闭相机</t-button>
+			<t-button main-class="mrb-15" type="s" @click="take">拍照</t-button>
+			<!-- #ifndef WEB -->
+			<t-button main-class="mrb-15" type="e" @click="flashOn">打开闪光灯</t-button>
+			<t-button main-class="mrb-15" type="p" @click="flashOff">关灯闪光灯</t-button>
+			<!-- #endif -->
+		</t-row>
+		<t-row main-class="fww mt-30">
+			<t-button main-class="mrb-15" type="w" @click="start" :loading="loading">开始录像</t-button>
+			<t-button main-class="mrb-15" type="e" @click="stops">停止录像</t-button>
+		</t-row>
+		<t-section main-class="mtb-30" title='拍照图版预览'></t-section>
+		<t-col main-class="tdr" v-if="urlSrc!=''">
+			<t-image main-class="w-100% h-550" :src="urlSrc"></t-image>
+		</t-col>
+		<t-section main-class="mtb-30" title='录制结束 视频预览'></t-section>
+		<t-col main-class="tdr" v-if="recoderUrl!=''">
+			<video :src="recoderUrl" style="width: 100%;height: 550rpx;"></video>
+		</t-col>
+		<view style="height: 50px;"></view>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				urlSrc: '',
+				recoderUrl: '',
+				loading: false
+			}
+		},
+		methods: {
+			recoder(request : string) {
+				console.log(request)
+				this.recoderUrl = request
+			},
+			front() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('front')
+			},
+			back() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('back')
+			},
+			start() {
+				this.loading = true
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('start')
+			},
+			pause() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('pause')
+			},
+			continues() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('continues')
+			},
+			stops() {
+				this.loading = false
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('stops')
+			},
+			open() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('open')
+			},
+			close() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('close')
+			},
+			flashOn() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('flashOn')
+			},
+			flashOff() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('flashOff')
+			},
+			take() {
+				let el = this.$refs['camrea'] as ComponentPublicInstance
+				el.$callMethod('take')
+			},
+			getPhoto(result : string) {
+				this.urlSrc = result
+			}
+		}
+	}
+</script>

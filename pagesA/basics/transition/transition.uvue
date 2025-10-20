@@ -1,0 +1,40 @@
+<template>
+	<t-page title='动画'>
+		<t-card main-class="m-30" title="Transtion 过渡动画"
+			sub-title="集合常用动画特效，使页面之间的切换更加流畅和自然。它可以实现多种动画效果，例如淡入淡出、滑动、缩放等。增强用户体验，使页面之间的切换更加有趣和吸引力。"></t-card>
+		<t-transition :mode="mode" main-class="fc mt-30 z-999" :animationIterationCount="1" :auto-play="false"
+			ref="transitionins">
+			<t-row main-class="twh-150 r-10 bg-#4cd964;"></t-row>
+		</t-transition>
+		<t-col main-class='fc p-30'>
+			<t-transition mode="heartbeat" :animation-iteration-count="0">
+				<t-icon name="heart-fill" main-class="c-red s-180"></t-icon>
+			</t-transition>
+		</t-col>
+		<t-col main-class="p-30">
+			<t-button main-class="mb-20" @click="onButtonClick('fade')" type="primary">渐隐渐显</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('fade-up')" type="primary">上方进出</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('fade-down')" type="primary">下方进出</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('fade-left')" type="primary">左方进出</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('fade-right')" type="primary">右方进出</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('zoom')" type="primary">缩放</t-button>
+			<t-button main-class="mb-20" @click="onButtonClick('heartbeat')" type="primary">心跳</t-button>
+		</t-col>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				mode: 'fade'
+			};
+		},
+		methods: {
+			onButtonClick(type : string) {
+				this.mode = type;
+				(this.$refs['transitionins'] as ComponentPublicInstance).$callMethod('play')
+			}
+		}
+	}
+</script>

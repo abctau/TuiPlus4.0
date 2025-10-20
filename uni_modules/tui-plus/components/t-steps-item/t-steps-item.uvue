@@ -1,0 +1,180 @@
+<template>
+	<t-view v-bind="extendsAttrs"
+		:main-class="`${getPartenDirection=='horizontal'?'fv':'fl'} ${getPartentIsEvenlyDistributed?'f':''} ${mainClass}`">
+		<template v-if="getPartenDirection=='horizontal'">
+			<t-view :main-class="`fl faic w-100% pt-20`">
+				<t-view main-class="f" v-if="sortIndex==0"></t-view>
+				<t-line v-else :type="isactive?getPartenType:'info'"
+					:main-class="`f ${sortIndex>itemCount-1?'ovy-h':'ovy'}`"></t-line>
+				<t-view :main-class="`fl fc twhr-20px ${getExtendsBackground}`">
+					<t-icon v-if="isactive" size="mini" :name="getPartentActiveIcon"
+						:main-class="`${bariconStyle} ${getPartentActiveIconClass}`"></t-icon>
+					<t-text v-else size="mini" :main-class="barTextStyle" :text="`${sortIndex}`"></t-text>
+				</t-view>
+				<t-line :type="isactive?getPartenType:'info'"
+					:main-class="`f ${sortIndex>itemCount-2?'ovy-h':'ovy'}`"></t-line>
+			</t-view>
+			<t-view :main-class="`faic p-15`">
+				<t-text v-if="title!=''" :type="isactive?getPartenType:''" :text="title"
+					:main-class="`slhm-1.7 ${titleClass}`"></t-text>
+				<t-text v-if="time!=''" :type="isactive?getPartenType:''" :text="time"
+					:main-class="`slhm-1.7 ${timeClass}`"></t-text>
+				<t-text v-if="desc!=''" :type="isactive?getPartenType:''" :text="desc"
+					:main-class="`o-0.8 slhm-1.7 ${descClass}`"></t-text>
+				<slot></slot>
+			</t-view>
+		</template>
+		<template v-else>
+			<t-view :main-class="`fv faic mr-10`">
+				<t-view :main-class="`fl fc twhr-20px ${getExtendsBackground}`">
+					<t-icon v-if="isactive" size="mini" :name="getPartentActiveIcon"
+						:main-class="`${bariconStyle} ${getPartentActiveIconClass}`"></t-icon>
+					<t-text v-else size="mini" :main-class="barTextStyle" :text="`${sortIndex}`"></t-text>
+				</t-view>
+				<t-line :type="isactive?getPartenType:'info'" direction="col"
+					:main-class="`f ${sortIndex>itemCount-2?'ovy-h':'ovy'}`"></t-line>
+			</t-view>
+			<t-view :main-class="`fais mb-20`">
+				<t-text v-if="title!=''" :type="isactive?getPartenType:''" :text="title"
+					:main-class="titleClass"></t-text>
+				<t-text v-if="time!=''" :type="isactive?getPartenType:''" :text="time"
+					:main-class="`slhm-1.7 ${timeClass}`"></t-text>
+				<t-text v-if="desc!=''" :type="isactive?getPartenType:''" :text="desc"
+					:main-class="`o-0.8 slhm-1.7 ${descClass}`"></t-text>
+				<slot></slot>
+			</t-view>
+		</template>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * StepsItem 步骤条子组件
+	 * @date 2025-05-31 12:07:15
+	 * @author TanYuan
+	 * @description 展示操作流程的步骤进度，引导用户按步骤完成任务,3.0支持内容组件滚动,内容自适度,子组件样式主题覆盖父组件样式主题
+	 * @example /pagesA/layout/steps/steps
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-steps-item.html
+	 * @example /pagesA/layout/steps/steps
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} title 标题文本
+	 * @property {String} time 时间文本
+	 * @property {String} desc 描述文本
+	 * @property {String} titleClass 标题文本样式
+	 * @property {String} timeClass 时间文本样式
+	 * @property {String} descClass 描述文字样式
+	 * @property {String} activeColor 激活状态文字颜色
+	 * @property {String} inactiveColor 未激活状态文字颜色
+	 * @property {String} activeIcon 激活状态的图标
+	 * @property {String} activeIconClass 激活状态图标的样式
+	 * @property {String} barClass 步骤条样式
+	 * @property {Boolean} showIndex 是否显示序号(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} isEvenlyDistributed 是否一部分布局
+	 * @value true 是
+	 * @value false 否
+	 */
+	import { CommonProps, useTuiThemes, StepsGroupAttrsType } from '../../common/props/index.uts';
+	interface StepsItemProps extends CommonProps {
+		title : string;
+		time : string;
+		desc : string;
+		titleClass : string;
+		timeClass : string;
+		descClass : string;
+		activeColor : string;
+		inactiveColor : string;
+		activeIcon : string;
+		activeIconClass : string;
+		barClass : string;
+		showIndex : boolean;
+		isEvenlyDistributed : boolean;
+	}
+
+	const props = withDefaults(defineProps<StepsItemProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		title: '',
+		time: '',
+		desc: '',
+		titleClass: '',
+		timeClass: '',
+		descClass: '',
+		activeColor: '',
+		inactiveColor: '',
+		activeIcon: '',
+		activeIconClass: '',
+		barClass: '',
+		showIndex: true,
+		isEvenlyDistributed: false,
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const stepsGroupAttrs = inject<StepsGroupAttrsType>('stepsGroupAttrs')
+	const total = inject<Ref<number>>('total')
+	const sortIndex = ref<number>(total?.value ?? 0)
+	if (total != null) total.value++
+	const itemCount =computed(():number=>{
+		return total?.value??0
+	})
+	const isactive = computed(() : boolean => {
+		return sortIndex.value < (stepsGroupAttrs?.current?.value ?? 0)
+	})
+	const getPartentInactiveColor = computed(() => {
+		return props.inactiveColor == '' ? stepsGroupAttrs?.inactiveColor?.value ?? '' : props.inactiveColor
+	})
+	const getPartentIsEvenlyDistributed = computed(() : boolean => {
+		return props.isEvenlyDistributed ? props.isEvenlyDistributed : stepsGroupAttrs?.isEvenlyDistributed?.value ?? false
+	})
+	const getPartentActiveIcon = computed(() : string => {
+		return props.activeIcon == '' ? stepsGroupAttrs?.activeIcon?.value ?? '' : props.activeIcon
+	})
+	const getPartentActiveIconClass = computed(() : string => {
+		return props.activeIconClass == '' ? stepsGroupAttrs?.activeIconClass?.value ?? '' : props.activeIconClass
+	})
+	const getPartenType = computed(() : string => {
+		return props.type == '' ? stepsGroupAttrs?.type?.value ?? '' : props.type
+	})
+	const getPartenEffect = computed(() : string => {
+		return props.effect == '' ? stepsGroupAttrs?.effect?.value ?? '' : props.effect
+	})
+	const barTextStyle = computed(() : string => {
+		return `c-#333`
+	})
+	const bariconStyle = computed(() : string => {
+		return `tdc-${getPartenType.value},${getPartenEffect.value}`
+	})
+	const getExtendsBackground = computed(() : string => {
+		return `tdb-${getPartenType.value},${getPartenEffect.value},${isactive.value ? '' : getPartentInactiveColor.value}`
+	})
+	const getPartenDirection = computed(() : string => {
+		return stepsGroupAttrs?.direction?.value ?? ''
+	})
+</script>

@@ -1,0 +1,118 @@
+type TypeExpires = {
+	exp : number
+	time : number
+}
+let TuiResolve : UTSJSONObject = reactive({} as UTSJSONObject)
+const expires = new Map<string, TypeExpires>()
+let storeSync = false
+export class TuiStore {
+	value : UTSJSONObject
+	constructor() {
+		if (!storeSync) {
+			TuiResolve = reactive({} as UTSJSONObject)
+			expires.clear()
+			const keys = uni.getStorageSync('expires')
+			if (Array.isArray(keys)) {
+				(keys as any[][]).forEach((val : any[]) => {
+					const key : string = val[0] as string
+					const v = JSON.parse<TypeExpires>(JSON.stringify(val[1])) as TypeExpires
+					const values = uni.getStorageSync(key)!
+					TuiResolve.set(key, values)
+					expires.set(key, v)
+				})
+			}
+			this.clearExpiresData()
+			storeSync = true
+		}
+		this.value = TuiResolve
+	}
+	clearExpiresData() {
+		expires.forEach((val : TypeExpires, key : string) => {
+			const t : number = val.exp
+			if (t > 0) {
+				const curT = new Date().getTime()
+				if ((curT - val.time) < 0) this.delete(key)
+			}
+		})
+	}
+	delete(...params : string[]) {
+		params.forEach((key : string) => {
+			const val = TuiResolve.get(key)
+			if (val != null) {
+				if (typeof (val) == 'object') {
+					if (Array.isArray(val)) {
+						TuiResolve.set(key, null)
+					} else {
+						const _val = val as UTSJSONObject
+						for (let v in _val) {
+							_val.set(v, null)
+						}
+					}
+				} else {
+					TuiResolve.set(key, null)
+				}
+			}
+			uni.removeStorageSync(key)
+			expires.delete(key)
+		})
+		uni.setStorageSync('expires', Array.from<any>(expires))
+	}
+	clear() {
+		expires.forEach((_, key : string) => {
+			uni.removeStorageSync(key)
+		})
+		for (let key in TuiResolve) {
+			const val = TuiResolve.get(key)
+			if (val != null) {
+				if (typeof (val) == 'object') {
+					if (Array.isArray(val)) {
+						TuiResolve.set(key, null)
+					} else {
+						const _val = val as UTSJSONObject
+						for (let v in _val) {
+							_val.set(v, null)
+						}
+					}
+				} else {
+					TuiResolve.set(key, null)
+				}
+			}
+		}
+		expires.clear()
+		uni.setStorageSync('expires', Array.from<any>(expires))
+		storeSync = true
+	}
+
+	get(key : string) : UTSJSONObject {
+		this.clearExpiresData()
+		const val = TuiResolve.get(key) as UTSJSONObject | null
+		if (val == null) TuiResolve.set(key, {})
+		return TuiResolve.get(key) as UTSJSONObject
+	}
+	set(key : string, data : any | null, expire : number = 86400000) {
+		if (data != null) {
+			if (typeof (data) == 'string') {
+				TuiResolve.set(key, data)
+			} else {
+				if (key in TuiResolve) {
+					if (typeof (data) == 'object') {
+						if (Array.isArray(data)) {
+							TuiResolve.set(key, data)
+						} else {
+							const val : UTSJSONObject = JSON.parse<UTSJSONObject>(JSON.stringify(data))!
+							const oldVal = TuiResolve.get(key) as UTSJSONObject
+							for (let v in val) {
+								oldVal.set(v, val.get(v))
+							}
+						}
+					}
+				} else {
+					TuiResolve.set(key, data)
+				}
+			}
+			uni.setStorageSync(key, data!)
+			expires.set(key, { exp: new Date().getTime(), time: expire } as TypeExpires)
+			uni.setStorageSync('expires', Array.from<any>(expires))
+		}
+	}
+}

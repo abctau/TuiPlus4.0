@@ -1,0 +1,47 @@
+<template>
+	<t-page title="键盘" main-class="p-30">
+		<t-section title="弹窗模式" main-class="mb-30"></t-section>
+		<t-card title="Keyboard 键盘" main-class="mb-30" sub-title="支持车牌键盘-数字键盘-身份证键盘"></t-card>
+		<t-cell main-class="mb-30 tdr" @click="show('car')" title="车牌输入(点我弹出键盘)"></t-cell>
+		<t-cell main-class="mb-30 tdr" @click="show('number')" title="数字键盘(点我弹出键盘)"></t-cell>
+		<t-cell main-class="mb-30 tdr" @click="show('idcard')" title="身份证键盘(点我弹出键盘)"></t-cell>
+		<t-section title="嵌入模式" main-class="mb-30"></t-section>
+		<t-keyboard ref="keyboardcar" mode="car" @input="input"></t-keyboard>
+		<t-keyboard ref="keyboardnumber" mode="number" @input="input"></t-keyboard>
+		<t-keyboard ref="keyboardidcard" mode="idcard" @input="input"></t-keyboard>
+		<t-keyboard-car main-class="mb-30 tdr" type="p" @back="back" @input="input"></t-keyboard-car>
+		<t-keybord-number main-class="mb-30 tdr" type="s" @back="back" @input="input"
+			@confirm="confirm"></t-keybord-number>
+		<t-keybord-idcard main-class="mb-30 tdr" type="e" @back="back" @input="input"
+			@confirm="confirm"></t-keybord-idcard>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		},
+		methods: {
+			confirm() {
+				uni.showToast({
+					title: 'confirm'
+				})
+			},
+			show(type : string) {
+				(this.$refs[`keyboard${type}`] as ComponentPublicInstance).$callMethod('show')
+			},
+			back() {
+				uni.showToast({
+					title: 'back'
+				})
+			},
+			input(val : string) {
+				uni.showToast({
+					title: val
+				})
+			}
+		}
+	}
+</script>

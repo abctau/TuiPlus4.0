@@ -1,0 +1,262 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fl ${mainClass}`">
+		<template v-if="mode=='1'">
+			<t-button v-if="showFirstButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10"
+				@click="onFirstText">{{firstText}}</t-button>
+			<t-button v-if="showPreButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10"
+				@click="onPreText">{{preText}}</t-button>
+		</template>
+		<template v-else>
+			<t-button v-if="showFirstButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10 w-50"
+				text-class="mlr-0 w-0" :right-icon="'arrow-left-double'" @click="onFirstText"></t-button>
+			<t-button v-if="showPreButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10 w-50"
+				text-class="mlr-0 w-0" :right-icon="'arrow-left'" @click="onPreText"></t-button>
+		</template>
+		<view class="center-content">
+			<template v-if="pageType=='2'">
+				<t-button v-bind="extendsAttrs" :effect="`${cur}`==item?'':'light'" :hover="true"
+					:main-class="`p-0 f ${index<buttons.length?'mr-10':''}`" v-for="(item,index) in buttons"
+					:key="index" @click="numberClick(item)">{{item=='pre'||item=='next'?'...':item}}</t-button>
+			</template>
+			<template v-else>
+				<t-row main-class="fc twh-100%">
+					<t-text v-bind="extendsAttrs" main-class="">{{cur}}</t-text>/
+					<t-text :size="size">{{pageNumber}}</t-text>
+				</t-row>
+			</template>
+		</view>
+		<template v-if="mode=='1'">
+			<t-button v-if="showNextButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10"
+				@click="onNextText">{{nextText}}</t-button>
+			<t-button v-if="showLastButton" v-bind="extendsAttrs" :hover="true" main-class=""
+				@click="onLastText">{{lastText}}</t-button>
+		</template>
+		<template v-else>
+			<t-button v-if="showNextButton" v-bind="extendsAttrs" :hover="true" main-class="mr-10 w-50"
+				text-class="mlr-0 w-0" @click="onNextText" right-icon="arrow-right"></t-button>
+			<t-button v-if="showLastButton" v-bind="extendsAttrs" :hover="true" main-class="w-50" text-class="mlr-0 w-0"
+				right-icon="arrow-right-double" @click="onLastText"></t-button>
+		</template>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Pagination 分页
+	 * @date 2025-05-31 12:05:12
+	 * @author TanYuan
+	 * @description 分页组件，用于显示和操作分页数据，支持多种配置，包括尺寸、展示模式、页码类型等。
+	 * @example /pagesA/basics/pagination/pagination
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-pagination.html
+	 * @example /pagesA/basics/pagination/pagination
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[1] 按钮展示模式(默认：1)
+	 * @value 1 文字按钮
+	 * @property {String} pageType=[1|2] 页码展示类型(默认：2)
+	 * @value 1 简约型
+	 * @value 2 展开型
+	 * @property {String} preText 上一页的文本(默认：上一页)
+	 * @property {String} nextText 下一页的文本(默认：下一页)
+	 * @property {Boolean} showPreButton 是否显示上一页按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showNextButton 是否显示下一页按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} current 当前页码(默认：1)
+	 * @property {Number} total 数据总数(默认：1)
+	 * @property {Number} pageSize 每页数据量(默认：10)
+	 * @property {String} firstText 首页的文本(默认：首页)
+	 * @property {String} lastText 末页的文本(默认：未页)
+	 * @property {Boolean} showFirstButton 是否显示首页按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showLastButton 是否显示末页按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} change 当前页码发生变化时触发
+	 */
+	import { getDomRect } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PaginationProps extends CommonProps {
+		mode : string
+		type : string
+		pageType : string
+		preText : string
+		nextText : string
+		showPreButton : boolean
+		showNextButton : boolean
+		current : number
+		total : number
+		pageSize : number
+		firstText : string
+		lastText : string
+		showFirstButton : boolean
+		showLastButton : boolean
+	}
+	const instance = getCurrentInstance()?.proxy!
+	const props = withDefaults(defineProps<PaginationProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: '1',
+		pageType: '2',
+		preText: '上一页',
+		nextText: '下一页',
+		showPreButton: true,
+		showNextButton: true,
+		current: 1,
+		total: 0,
+		pageSize: 10,
+		firstText: '首页',
+		lastText: '未页',
+		showFirstButton: true,
+		showLastButton: true
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const cur = ref<number>(props.current)
+	const conCount = ref<number>(0)
+	const conH = ref<number>(0)
+	const isNext = ref<boolean>(true)
+	const pageNumber = computed(() : number => {
+		return Math.ceil(props.total / props.pageSize)
+	})
+	function onFirstText() {
+		cur.value = 1
+	}
+	function prevnext(state : boolean) {
+		state ? cur.value++ : cur.value--
+		if (cur.value < 1) cur.value = 1
+		if (cur.value > pageNumber.value) cur.value = pageNumber.value
+		if (props.pageType == '2') {
+			isNext.value = state
+		}
+	}
+	function onPreText() {
+		prevnext(false)
+	}
+	function onNextText() {
+		prevnext(true)
+	}
+	function onLastText() {
+		cur.value = pageNumber.value
+	}
+	function getRangeNumber(len : number) : string[] {
+		const arr : string[] = []
+		let k = 0
+		if (isNext.value) {
+			for (let i = cur.value; i <= pageNumber.value && k < len; i++) {
+				k++
+				arr.push(`${i}`)
+			}
+			if (arr.length < len) {
+				k = arr.length
+				for (let i = cur.value - 1; i >= 0 && k < len; i--) {
+					k++
+					arr.unshift(`${i}`)
+				}
+			}
+		} else {
+			for (let i = cur.value; i > 0 && k < len; i--) {
+				k++
+				arr.unshift(`${i}`)
+			}
+			if (arr.length < len) {
+				k = arr.length
+				for (let i = cur.value + 1; i <= pageNumber.value && k < len; i++) {
+					k++
+					arr.push(`${i}`)
+				}
+			}
+		}
+		return arr
+	}
+	const buttons = computed(() : string[] => {
+		let arr : string[] = []
+		if (pageNumber.value <= conCount.value) {
+			for (let i = 1; i <= pageNumber.value; i++) {
+				arr.push(`${i}`)
+			}
+		} else {
+			if (conCount.value < 5) {
+				arr = getRangeNumber(conCount.value)
+			} else {
+				const maxdif = pageNumber.value - conCount.value + 2
+				const mindif = conCount.value - 1
+
+				if (cur.value < mindif) {
+					for (let i = 1; i < mindif; i++) {
+						arr.push(`${i}`)
+					}
+					arr = [...arr, 'next', `${pageNumber.value}`]
+				} else if (cur.value > maxdif) {
+					for (let i = pageNumber.value; i > maxdif; i--) {
+						arr.unshift(`${i}`)
+					}
+					arr = ['1', 'pre', ...arr]
+				} else {
+					const a = getRangeNumber(conCount.value - 4)
+					arr = ['1', 'pre', ...a, 'next', `${pageNumber.value}`]
+				}
+			}
+		}
+		return arr
+	})
+	function numberClick(num : string) {
+		if (num == 'pre') {
+			isNext.value = false
+			cur.value = parseInt(buttons.value[2]) - 1
+		} else if (num == 'next') {
+			isNext.value = true
+			cur.value = parseInt(buttons.value[buttons.value.length - 3]) + 1
+		} else {
+			cur.value = parseInt(num)
+		}
+	}
+	watch(cur, (e : number) => {
+		emit('change', e)
+	})
+	onMounted(() => {
+		getDomRect('.center-content', instance).then((rect : NodeInfo) => {
+			conH.value = rect.height!
+			conCount.value = Math.floor((rect.width!) / (conH.value + 5))
+		})
+	})
+</script>
+<style>
+	.center-content {
+		flex: 1;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		margin-right: 10rpx;
+		min-height: 30px;
+	}
+</style>

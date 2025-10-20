@@ -1,0 +1,100 @@
+<template>
+	<t-page title='日期'>
+		<t-card main-class="mlrt-30" title="TuiDate" sub-title="它提供了一系列的方法，方便用户进行日期的转换、格式化、计算以及比较等操作"></t-card>
+		<introduction title="toDate(字符串日期转换为对象日期)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				TuiDate.toDate('2025年8月15日')
+			</t-text>
+		</introduction>
+		<introduction title="now-获取当前日期(yyyy-MM-dd HH:mm:ss)">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.now()=>{{tuidate.now()}}</t-text>
+		</introduction>
+		<introduction title="timestamp-获取当前时间时间戳">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.timestamp()=>{{tuidate.timestamp()}}</t-text>
+		</introduction>
+		<introduction title="nowYear-获取今年的年份">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.nowYear()=>{{tuidate.nowYear()}}</t-text>
+		</introduction>
+		<introduction title="lastYear-获取去年的年份">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.lastYear()=>{{tuidate.lastYear()}}</t-text>
+		</introduction>
+		<introduction title="nextYear-获取明年的年份">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.nextYear()=>{{tuidate.nextYear()}}</t-text>
+		</introduction>
+		<introduction title="month-获取今年的月份">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.month-()=>{{tuidate.month()}}</t-text>
+		</introduction>
+		<introduction title="lastMonth-获取去年的月份">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.lastMonth-()=>{{tuidate.lastMonth()}}</t-text>
+		</introduction>
+		<introduction title="nextMonth-获取明年的月份">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				TuiDate.nextMonth-()=>{{tuidate.nextMonth()}}
+			</t-text>
+		</introduction>
+		<introduction title="monthDays-获取指定年月的天数">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.monthDays(2025,
+				8)=>{{tuidate.monthDays(2025, 8)}}</t-text>
+		</introduction>
+		<introduction title="monthDates-获取指定日期所在月份的所有日期">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.monthDates('2025-08-15')=>{{tuidate.monthDates('2025-08-15')}}</t-text>
+		</introduction>
+		<introduction title="months-获取两个月份之间的所有月份">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.months('2025-01',
+				'2025-06')=>{{tuidate.months('2025-01', '2025-06')}}</t-text>
+		</introduction>
+		<introduction title="week-获取本周是星期几">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.week()=>{{tuidate.week()}}</t-text>
+		</introduction>
+		<introduction title="weeks-获取本周的所有日期">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.weeks()=>{{tuidate.weeks()}}</t-text>
+		</introduction>
+		<introduction title="today-获取今天的日期">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.today()=>{{tuidate.today()}}</t-text>
+		</introduction>
+		<introduction title="yesterday-获取昨天的日期">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.yesterday()=>{{tuidate.yesterday()}}</t-text>
+		</introduction>
+		<introduction title="tomorrow-获取明天的日期">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.tomorrow()=>{{tuidate.tomorrow()}}</t-text>
+		</introduction>
+		<introduction title="dates-获取两个日期之间的所有日期">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.dates('2025-08-01',
+				'2025-08-31')=>{{tuidate.dates('2025-08-01', '2025-08-31')}}</t-text>
+		</introduction>
+		<introduction title="time-获取当前时间">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.time()=>{{tuidate.time()}}</t-text>
+		</introduction>
+		<introduction title="compare-比较两个日期">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.compare('2025-08-15',
+				'2025-08-16')=>{{tuidate.compare('2025-08-15', '2025-08-16')}}</t-text>
+		</introduction>
+		<introduction title="toTimestamp-将日期字符串转换为毫秒时间戳">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.toTimestamp('2025-08-15
+				12:00:00')=>{{tuidate.toTimestamp('2025-08-15 12:00:00')}}</t-text>
+		</introduction>
+		<introduction title="toMillisecond-将时间字符串转换为毫秒数">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">TuiDate.toMillisecond('12:00:00')=>{{tuidate.toMillisecond('12:00:00')}}</t-text>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiDate } from '@/uni_modules/tui-plus'
+	const tuidate = new TuiDate()
+</script>

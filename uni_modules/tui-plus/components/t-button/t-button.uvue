@@ -1,0 +1,183 @@
+<template>
+	<t-view v-bind="extendsAttrs" :hover="true"
+		:main-class="`fl ${extendsPrb} ${border?extendsBorder:''} fc ${mainClass}`" @click="mainOnclick">
+		<t-row :main-class="holderStyle">
+			<t-icon v-if="leftIcon!=''" :name="leftIcon" :main-class="`${extendsSfc} ${leftIconClass}`" :stop="false"
+				@click="onLeftClick"></t-icon>
+		</t-row>
+		<t-text v-bind="textAttrs" :main-class="`mlr-15 ${extendsSfc} ${textClass}`">
+			<slot></slot>
+		</t-text>
+		<t-row :main-class="holderStyle">
+			<t-loading v-if="loading" :name="loadingIcon" :main-class="`ov ${extendsSfc} ${loadingClass}`"></t-loading>
+			<t-icon v-if="!loading && rightIcon!=''" :name="rightIcon" :stop="false"
+				:main-class="`ov ${extendsSfc} ${rightIconClass}`" @click="onRightClick"></t-icon>
+		</t-row>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Button 按钮
+	 * @date 2025-05-31 12:01:54
+	 * @author TanYuan
+	 * @description 按钮组件，封装了常用的按钮样式和行为。它支持多种类型（如主要、次要、危险等）、尺寸，并能响应点击事件。开发者可以通过简单的属性配置来定制按钮的外观和功能，轻松集成到 Vue 项目中，保持界面风格统一。
+	 * @example /pagesA/form/button/button
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-button.html
+	 * @example /pagesA/form/button/button
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject} textAttrs 按钮文字的属性 支持t-text的所有属性(默认：{})
+	 * @property {String} textClass 按钮文字的样式
+	 * @property {String} leftIcon 左侧图标
+	 * @property {String} leftIconClass 左侧图标样式
+	 * @property {String} rightIcon 右侧图标
+	 * @property {String} rightIconClass 右侧图标样式
+	 * @property {Boolean} loading 是否显示loading加载动画
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} loadingIcon 加载动画的图标(默认：spinner)
+	 * @property {String} loadingClass 加载动画的样式
+	 * @property {Boolean} debounce 是否防抖
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} throttle 是否节流
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} tdTime 防抖节流的时间设置(默认：500)
+	 * @property {Boolean} border 是否显示边框
+	 * @value true 是
+	 * @value false 否
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} iconHolder 是图在不设置图标的时候占住位置
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} click 点击时触发
+	 * @event {Function} leftClick 左侧图标单击时触发
+	 * @event {Function} rightClick 右侧图标单击时触发
+	 */
+
+	import { TuiDebounce } from '../../common/model/debounce'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ButtonProps extends CommonProps {
+		textAttrs : UTSJSONObject
+		textClass : string
+		leftIcon : string
+		leftIconClass : string
+		rightIcon : string
+		rightIconClass : string
+		loading : boolean
+		loadingIcon : string
+		loadingClass : string
+		debounce : boolean
+		throttle : boolean
+		tdTime : number
+		border : boolean
+		hover : boolean
+		iconHolder : boolean
+	}
+	const props = withDefaults(defineProps<ButtonProps>(), {
+		path: '',
+		hover: true,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		textAttrs: {},
+		textClass: '',
+		leftIcon: '',
+		leftIconClass: '',
+		rightIcon: '',
+		rightIconClass: '',
+		loading: false,
+		loadingIcon: 'spinner',
+		loadingClass: '',
+		debounce: false,
+		throttle: false,
+		tdTime: 500,
+		border: false,
+		iconHolder: false,
+	});
+	const { extendsAttrs, extendsPrb, extendsBorder, extendsSfc, getFontSizeToValue } = useTuiThemes(props)
+	const deb = new TuiDebounce()
+	const emit = defineEmits(['click', 'leftClick', 'rightClick'])
+	function onLeftClick(e : UniPointerEvent) {
+		emit('leftClick', e)
+	}
+	function onRightClick(e : UniPointerEvent) {
+		emit('rightClick', e)
+	}
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.debounce) deb.debounce(() => {
+			emit('click', e)
+			if (props.path != '') {
+				uni.navigateTo({
+					url: props.path,
+					fail: (_) => {
+						uni.switchTab({
+							url: props.path
+						})
+					}
+				})
+			}
+			return
+		}, props.tdTime)
+		if (props.throttle) deb.throttle(() => {
+			emit('click', e)
+			if (props.path != '') {
+				uni.navigateTo({
+					url: props.path,
+					fail: (_) => {
+						uni.switchTab({
+							url: props.path
+						})
+					}
+				})
+			}
+			return
+		}, props.tdTime)
+		if (!props.throttle && !props.debounce) {
+			emit('click', e)
+			if (props.path != '') {
+				uni.navigateTo({
+					url: props.path,
+					fail: (_) => {
+						uni.switchTab({
+							url: props.path
+						})
+					}
+				})
+			}
+		}
+	}
+	const holderStyle = computed(() : string => {
+		return props.iconHolder ? `ov twh-${getFontSizeToValue.value}px` : 'ov'
+	})
+	onUnmounted(() => {
+		deb.clear()
+	})
+</script>

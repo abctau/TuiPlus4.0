@@ -1,0 +1,168 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`h-320 oh dr ${mainClass}`" @click="onclick">
+		<image v-if="!iserror" class="image-class" :class="{'image-tran':fadeShow}" :style="{opacity:opacity}"
+			:src="splicingUrl" :mode="mode" @error="error" @load="load"></image>
+		<image v-if="opacity==0&&placeholder" class="image-class" :src="defaultImage" mode="scaleToFill"></image>
+		<t-row v-if="opacity==0 && loading && !iserror" main-class='da di fc'>
+			<t-loading v-bind="loadingAttrs"></t-loading>
+		</t-row>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Image 图片
+	 * @date 2025-05-31 12:04:03
+	 * @author TanYuan
+	 * @description image组件的加强版，在原有功能增加、加载中、加载失败提示、圆角值和形状等。
+	 * @example /pagesA/basics/image/image
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-image.html
+	 * @example /pagesA/basics/image/image
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} src 图片资源地址
+	 * @property {String} mode=[scaleToFill|aspectFit|aspectFill|widthFix|heightFix|top|bottom|center|left|right|top left|top right|bottom left|bottom right] 图片裁剪、缩放的模式(默认：scaleToFill)
+	 * @value scaleToFill 不保持纵横比缩放图片，使图片的宽高完全拉伸至填满 image 元素
+	 * @value aspectFit 保持纵横比缩放图片，使图片的长边能完全显示出来。也就是说，可以完整地将图片显示出来。
+	 * @value aspectFill 保持纵横比缩放图片，只保证图片的短边能完全显示出来。也就是说，图片通常只在水平或垂直方向是完整的，另一个方向将会发生截取
+	 * @value widthFix 宽度不变，高度自动变化，保持原图宽高比不变
+	 * @value heightFix 高度不变，宽度自动变化，保持原图宽高比不变
+	 * @value top 不缩放图片，只显示图片的顶部区域
+	 * @value bottom 不缩放图片，只显示图片的底部区域
+	 * @value center 不缩放图片，只显示图片的中间区域
+	 * @value left 不缩放图片，只显示图片的左边区域
+	 * @value right 不缩放图片，只显示图片的右边区域
+	 * @value top left 不缩放图片，只显示图片的左上边区域
+	 * @value top right 不缩放图片，只显示图片的右上边区域
+	 * @value bottom left 不缩放图片，只显示图片的左下边区域
+	 * @value bottom right 不缩放图片，只显示图片的右下边区域
+	 * @property {Boolean} placeholder 是否默认占位图
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} preview 是否预览
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} placeholderImage 默认占位图
+	 * @property {Boolean} fadeShow 图片加载是否显示淡入动画效果(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} loading 是否显示加载动画
+	 * @value true 是
+	 * @value false 否
+	 * @property {UTSJSONObject} loadingAttrs 加载组件的属性配置 支持t-loading的所有属性(默认：{})
+	 * @event {Function} error 加载错误时触发
+	 * @event {Function} load 图片加载完成时触发
+	 * @event {Function} click 点击时触发
+	 */
+	import { baseimage, prefix } from './index'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ViewProps extends CommonProps {
+		src : string
+		mode : string
+		placeholder : boolean
+		placeholderImage : string
+		preview : boolean
+		fadeShow : boolean
+		loading : boolean
+		loadingAttrs : UTSJSONObject
+	}
+
+	const opacity = ref(0)
+	const timer = ref(0)
+	const iserror = ref(false)
+
+	const props = withDefaults(defineProps<ViewProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		src: '',
+		mode: 'scaleToFill',
+		placeholder: false,
+		placeholderImage: '',
+		preview: false,
+		fadeShow: true,
+		loading: false,
+		loadingAttrs: { name: 'spinner', type: 'p', size: 'l' }
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['error', 'load', 'click'])
+	watch(
+		() : string => props.src,
+		(e : string) => {
+			iserror.value = false
+			opacity.value = 1
+		}
+	)
+
+	const splicingUrl = computed(() : string => {
+		let url : string = props.src
+		if (!((url.includes('://') || (url.startsWith('data:'))) || url.startsWith('/'))) {
+			url = prefix + '/' + url
+		}
+		return url
+	})
+
+	const defaultImage = computed(() : string => {
+		return props.placeholderImage == '' ? baseimage : props.placeholderImage
+	})
+
+	function onclick(e : UniPointerEvent) {
+		emit('click', e)
+		if (props.preview == true) uni.previewImage({ urls: [props.src] })
+	}
+	function error(event : UniImageErrorEvent) {
+		iserror.value = true
+		opacity.value = 0
+		emit('error', event)
+	}
+	function load(event : UniImageLoadEvent) {
+		if (props.loading) {
+			clearTimeout(timer.value)
+			timer.value = setTimeout(() => {
+				opacity.value = 1
+			}, 500)
+		} else {
+			opacity.value = 1
+		}
+		emit('load', event)
+	}
+</script>
+<style>
+	.image-class {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+
+	.image-tran {
+		transition-timing-function: linear;
+		transition-property: opacity;
+		transition-duration: 500ms;
+	}
+</style>

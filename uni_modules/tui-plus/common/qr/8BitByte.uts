@@ -1,0 +1,23 @@
+import { QRMODE } from './qrtype.uts'
+import { MODE } from './mode';
+import QRBitBuffer from './BitBuffer'
+export default class QR8bitByte {
+	mode : number;
+	data : string;
+
+	constructor(data : string) {
+		this.mode = MODE.MODE_8BIT_BYTE;
+		this.data = data;
+	}
+
+	getLength() : number {
+		return this.data.length;
+	}
+
+	write(buffer : QRBitBuffer) : void {
+		for (let i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i) as number, 8);
+		}
+	}
+}

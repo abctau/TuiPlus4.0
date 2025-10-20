@@ -1,0 +1,48 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class='mb-30' title="侧边分类"
+			sub-title="布局灵活，适配任何数据格式，组件内部使用list-view内存回收无需担心数据太多的性能问题,采用了逐帧渲染技术,解决listview首次加载慢的问题,左侧列表使用的虚拟滚动技术"></t-card>
+		<t-section title="插槽用法" main-class="mb-30"></t-section>
+		<t-slider-menu main-class="mb-30 tdr" :list="list">
+			<template v-slot:default="{item}">
+				<t-col main-class="p-20">
+					<t-text main-class="mb-20 sfwb">{{(item as UTSJSONObject).title}}</t-text>
+					<t-row v-for="(itemL,_) in (item as UTSJSONObject).getArray<UTSJSONObject>('data')" main-class="mb-30 tdr tdb ptb-20"
+						:key="itemL.goods_id">
+						<t-image :src="itemL.goods_img" main-class='twh-120 mr-10'></t-image>
+						<t-col main-class="f">
+							<t-text>{{itemL.goods_name}}</t-text>
+							<t-text type="error" main-class="slh-40">{{itemL.shop_price}}</t-text>
+						</t-col>
+					</t-row>
+				</t-col>
+				<t-row main-class="h-20"></t-row>
+			</template>
+		</t-slider-menu>
+	</t-page>
+</template>
+<script>
+	import { getSidebarMenulist } from '@/api'
+	export default {
+		data() {
+			return {
+				activeIndex: 0,
+				list: [] as UTSJSONObject[],
+				goods: [] as UTSJSONObject[]
+			};
+		},
+		methods: {
+			currentChange(cur : number) {
+				this.activeIndex = cur
+			},
+			isactive(index : any) {
+				return `${index}` == `${this.activeIndex}`
+			}
+		},
+		onLoad() {
+			getSidebarMenulist().then((res : UTSJSONObject) => {
+				this.list = res.getArray<UTSJSONObject>('data')!
+			})
+		}
+	}
+</script>

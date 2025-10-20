@@ -1,0 +1,179 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`ov ${mainClassMerge}`">
+		<t-view :main-class="`ov ${directionMerge=='row'?'fl faic':'fv'}`">
+			<t-view :main-class="`fl faic ptb-10 ${headerClassMerge}`" v-if="showLabelMerge">
+				<t-text type="e" :text="requiredAsteriskMerge" size="l"
+					:main-class="`plr-10 ${requiredAsteriskClassMerge} ${(!hideRequiredAsteriskMerge && showRequiredAsterisk)?'ovy':'ovy-h'}`"></t-text>
+				<t-text :main-class="labelClassMerge" :text="label"></t-text>
+			</t-view>
+			<t-view :main-class="`f ov ${directionMerge=='row'?'fl fjce faic':'fv'}`">
+				<slot></slot>
+			</t-view>
+		</t-view>
+		<t-text v-if="rulesMessage!=''" :text="rulesMessage" :main-class="`tdb-e,l tdr mt-20 p-20 ${rulesClassMerge}`"
+			type="e"></t-text>
+		<t-line main-class="da dlbr-0" v-if="bottomLineMerge"></t-line>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * FormItem 表单子组件
+	 * @date 2025-05-31 12:03:38
+	 * @author TanYuan
+	 * @description 由输入框、选择器、单选框、多选框等控件组成，用以收集、校验、提交数据 支持表单组件列表
+	 * @example /pagesA/form/form/form
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-form-item.html
+	 * @example /pagesA/form/form/form
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} headerClass 标题盒子的样式，优先级低于子组件。
+	 * @property {Boolean} showLabel 否显示标题(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} direction=[column|row] 布局方向(默认：row)
+	 * @value column 纵向布局
+	 * @value row 横向布局
+	 * @property {String} prop 表单校验绑定的属性名
+	 * @property {String} label 字段显示文本
+	 * @property {Boolean} required 是否必填
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showMessage 是否显示表单验证规则消息提示
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} labelClass 字段文本的样式
+	 * @property {String} rulesClass 验证规则的样式
+	 * @property {String} requiredAsterisk 必填提示文本
+	 * @property {String} requiredAsteriskClass 必填提示文本的样式
+	 * @property {Boolean} hideRequiredAsterisk 是否隐藏必填提示文本
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} bottomLine 是否显示底部线条
+	 * @value true 是
+	 * @value false 否
+	 */
+	import { TuiIf } from '../../common/model/util'
+	import { formValidation, formValidationType } from '../../common/utils/index'
+	import { CommonProps, TromGroupAttrsType, useTuiThemes } from '../../common/props/index.uts';
+	interface FormItemProps extends CommonProps {
+		headerClass : string;
+		showLabel : boolean;
+		direction : string;
+		prop : string;
+		label : string;
+		required : boolean;
+		showMessage : boolean;
+		labelClass : string;
+		rulesClass : string;
+		requiredAsterisk : string;
+		requiredAsteriskClass : string;
+		hideRequiredAsterisk : boolean;
+		bottomLine : boolean;
+	}
+
+	const props = withDefaults(defineProps<FormItemProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		headerClass: '',
+		showLabel: true,
+		direction: '',
+		prop: '',
+		label: '',
+		required: false,
+		showMessage: false,
+		labelClass: '',
+		rulesClass: '',
+		requiredAsterisk: '',
+		requiredAsteriskClass: '',
+		hideRequiredAsterisk: false,
+		bottomLine: false,
+	});
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const rulesMessage = ref<string>('')
+	const fromGroupAttrs = inject<TromGroupAttrsType>('fromGroupAttrs')
+	const chaildValidate = inject<Ref<formValidationType[]>>('chaildValidate', ref<formValidationType[]>([]))
+	watch(() : formValidationType[] => (chaildValidate.value), (e : formValidationType[]) => {
+		rulesMessage.value = ''
+		const v = e.find((item : formValidationType) => item.key == props.prop)
+		rulesMessage.value = v == null ? '' : v.message
+	})
+	provide('itemValidate', () => {
+		const key = props.prop
+		const val = fromGroupAttrs?.model?.value?.getAny(key)
+		const rules = fromGroupAttrs?.rules?.value!
+		const v : formValidationType = formValidation(key, val, rules.getArray<UTSJSONObject>(key) ?? ([] as UTSJSONObject[]))
+		rulesMessage.value = v.message
+	})
+	const mainClassMerge = computed(() : string => {
+		return `${fromGroupAttrs?.childClass?.value ?? ''} ${props.mainClass}`
+	})
+	const directionMerge = computed(() : string => {
+		return props.direction == '' ? fromGroupAttrs?.direction?.value ?? '' : props.direction
+	})
+	const requiredAsteriskMerge = computed(() : string => {
+		return props.requiredAsterisk == '' ? fromGroupAttrs?.requiredAsterisk?.value ?? '' : props.requiredAsterisk
+	})
+	const requiredAsteriskClassMerge = computed(() : string => {
+		return `${fromGroupAttrs?.requiredAsteriskClass?.value ?? ''} ${props.requiredAsteriskClass}`
+	})
+	const bottomLineMerge = computed(() : boolean => {
+		return props.bottomLine ? props.bottomLine : fromGroupAttrs?.bottomLine?.value ?? false
+	})
+	const hideRequiredAsteriskMerge = computed(() : boolean => {
+		return props.hideRequiredAsterisk ? props.hideRequiredAsterisk : fromGroupAttrs?.hideRequiredAsterisk?.value ?? false
+	})
+	const labelClassMerge = computed(() : string => {
+		return `${fromGroupAttrs?.labelClass?.value ?? ''} ${props.labelClass}`
+	})
+	const rulesClassMerge = computed(() : string => {
+		return `${fromGroupAttrs?.rulesClass?.value ?? ''} ${props.rulesClass}`
+	})
+
+	const headerClassMerge = computed(() : string => {
+		return `${fromGroupAttrs?.headerClass?.value ?? ''} ${props.headerClass}`
+	})
+	const showLabelMerge = computed(() : boolean => {
+		return props.showLabel ? fromGroupAttrs?.showLabel?.value ?? true : props.showLabel
+	})
+	const showRequiredAsterisk = computed(() : boolean => {
+		let s : boolean = false
+		const rules : UTSJSONObject[] = fromGroupAttrs?.rules?.value?.getArray<UTSJSONObject>(props.prop) ?? []
+		for (let i = 0; i < rules.length; i++) {
+			const item : UTSJSONObject = rules[i]
+			const type : string | null = item.getString('type')
+			if (type == 'required') {
+				s = true
+				break;
+			}
+		}
+		return s
+	})
+</script>

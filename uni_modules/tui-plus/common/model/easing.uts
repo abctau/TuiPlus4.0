@@ -1,0 +1,84 @@
+import { TuiRequestAnimationFrame, TuiCancelAnimationFrame } from './util'
+export type EasingOption = {
+	timing : string
+	duration : number
+	onProcess : (process : number) => void
+	onAnimationFinish : () => void
+}
+class ChartsTiming {
+	easeIn(pos : number) : number {
+		return Math.pow(pos, 3);
+	}
+	easeOut(pos : number) : number {
+		return Math.pow(pos - 1, 3) + 1;
+	}
+	easeInOut(pos : number) : number {
+		if ((pos / 0.5) < 1) {
+			return 0.5 * Math.pow(pos, 3);
+		} else {
+			return 0.5 * (Math.pow(pos - 2, 3) + 2);
+		}
+	}
+	linear(pos : number) : number {
+		return pos;
+	}
+}
+const Timing = new ChartsTiming()
+
+export class TuiEasing {
+	animationFrameId : number = 0
+	isStop : boolean = false
+	duration : number
+	timing : string
+	delay : number = 17
+	startTimeStamp : number = 0
+	opts : EasingOption
+	constructor(opts : EasingOption) {
+		this.duration = opts.duration
+		this.timing = opts.timing
+		this.delay = 17
+		this.opts = opts
+		this.startTimeStamp = new Date().getTime()
+		this.step()
+	}
+	step() {
+		if (this.isStop == true) {
+			if (this.animationFrameId != 0) TuiCancelAnimationFrame(this.animationFrameId);
+			this.opts.onAnimationFinish();
+			return;
+		}
+		const curdata = new Date().getTime()
+		if (curdata - this.startTimeStamp < this.duration) {
+			let process = (curdata - this.startTimeStamp) / this.duration;
+			switch (this.timing) {
+				case 'easeIn':
+					process = Timing.easeIn(process)
+					break;
+				case 'easeOut':
+					process = Timing.easeOut(process)
+					break;
+				case 'easeInOut':
+					process = Timing.easeInOut(process)
+					break;
+				case 'linear':
+					process = Timing.linear(process)
+					break;
+				default:
+					break;
+			}
+			this.opts.onProcess(process);
+			if (this.animationFrameId != 0) TuiCancelAnimationFrame(this.animationFrameId);
+			this.animationFrameId = TuiRequestAnimationFrame(() => {
+				this.step()
+			})
+		} else {
+			if (this.animationFrameId != 0) TuiCancelAnimationFrame(this.animationFrameId);
+			this.opts.onProcess(1);
+			this.opts.onAnimationFinish();
+		}
+	}
+
+	stop() {
+		this.isStop = true;
+	}
+}

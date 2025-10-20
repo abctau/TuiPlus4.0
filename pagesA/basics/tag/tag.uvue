@@ -1,0 +1,62 @@
+<template>
+	<t-page>
+		<t-card main-class='mlrt-30' title="Tag 标签" sub-title="轻量级的方式来展示和操作标签信息，支持可关闭、主题样式、动态隐藏以及自定义尺寸和关闭图标样式"></t-card>
+		<introduction title="基础功能+状态展示">
+			<t-row main-class="fww">
+				<t-tag main-class="mrb-15" effect='normal'>默认</t-tag>
+				<t-tag main-class="mrb-15" type="success" effect='normal'>成功</t-tag>
+				<t-tag main-class="mrb-15" type="error" effect='normal'>错误</t-tag>
+				<t-tag main-class="mrb-15" type="primary" effect='normal'>主色</t-tag>
+				<t-tag main-class="mrb-15" type="warning" effect='normal'>警告</t-tag>
+			</t-row>
+		</introduction>
+		<introduction title="可移除标签">
+			<t-row main-class="fww tdb">
+				<t-tag size="mini" main-class="mrb-30" :closable="true" effect='l'>默认</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="success" :closable="true" effect='l'>成功</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="error" :closable="true" effect='l'>错误</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="primary" :closable="true" effect='l'>主色</t-tag>
+				<t-tag size="mini" main-class="mrb-30" :closable="true" effect='normal'>默认</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="success" :closable="true" effect='normal'>成功</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="error" :closable="true" effect='normal'>错误</t-tag>
+				<t-tag size="mini" main-class="mrb-30" type="primary" :closable="true" effect='normal'>主色</t-tag>
+			</t-row>
+		</introduction>
+		<introduction title="动态编辑">
+			<t-row main-class="fww">
+				<t-tag v-for="(item,index) in tags" :key="index" :name='`${index}`' main-class="mrb-15 h-100 w-180" :closable="true"
+					@close="onclose" effect='l'>{{item['name']}}</t-tag>
+				<t-tag v-if="inputVisible" type="p" effect='n' size='mini' main-class="h-100 w-180" @click="inputVisible=false">+ New Tag</t-tag>
+				<t-input :focus="true" v-else v-model="inputvalue" size='mini' @blur="blur"
+					main-class="w-180 h-100"></t-input>
+			</t-row>
+		</introduction>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				inputVisible: true,
+				inputvalue: '',
+				tags: [
+					{ name: '标签一' },
+					{ name: '标签二' },
+					{ name: '标签三' },
+					{ name: '标签四' },
+					{ name: '标签五' }
+				]
+			}
+		},
+		methods: {
+			blur() {
+				this.tags.push({ name: this.inputvalue })
+				this.inputvalue = ''
+				this.inputVisible = true
+			},
+			onclose(e : string) {
+				console.log(e)
+			}
+		}
+	}
+</script>

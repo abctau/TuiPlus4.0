@@ -1,0 +1,62 @@
+<template>
+	<t-page>
+		<t-card title="Input 输入框" main-class="m-30" size="l"
+			sub-title="支持多种配置，包括前置图标、后置图标、清空输入、密码显示等功能。组件提供了丰富的属性，如绑定值、图标类名、是否显示边框等，可以根据不同需求进行定制。适用于各种表单场景，方便用户进行文本输入。"></t-card>
+		<t-card title="提示" main-class="mlrb-30" size="l" type="e"
+			sub-title="官方input封装,type属性和框架冲突,input-type属性对应input的type"></t-card>
+		<introduction title="主题-type">
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" :disabled="disabled"
+				@clear="clear">默认按钮</t-input>
+			<t-button main-class="mb-30" type="success" @click="disabled=!disabled">{{disabled?'正常':'禁用'}}</t-button>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" prefix-icon="map" suffix-icon="mic"
+				type="primary"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" type="success" :password="true"
+				size="l"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" type="info"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" type="warning"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" type="error"></t-input>
+		</introduction>
+		<introduction title="主题-effect">
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" prefix-icon="map" suffix-icon="mic"
+				effect="normal" type="primary"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="dark" type="success"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="disabled" type="info"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="light" type="warning"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="plain" :border="true"
+				type="warning"></t-input>
+		</introduction>
+		<introduction title="主题-size">
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="large" prefix-icon="map"
+				suffix-icon="mic" type="success"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="medium" type="info"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="small" type="warning"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="mini" type="error"></t-input>
+		</introduction>
+		<introduction title="对齐方式">
+			<t-input main-class="mb-30 sta-r" placeholder="请输入内容" v-model="inputVal" size="large" prefix-icon="map"
+				suffix-icon="mic" type="p"></t-input>
+			
+		</introduction>
+		<introduction title="自定义样式">
+			<t-input main-class="mb-30 r-180" placeholder="请输入内容" v-model="inputVal" type="p" size="l"></t-input>
+			<t-input main-class="mb-30" placeholder="请输入内容" input-type="number" v-model="inputVal" type="p"
+				size="l"></t-input>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				inputVal: '8151',
+				disabled: false
+			};
+		},
+		methods: {
+			clear() {
+				console.log('清除')
+			}
+		}
+	}
+</script>

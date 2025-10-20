@@ -1,0 +1,61 @@
+<template>
+	<t-page title='加载中'>
+		<t-card main-class="mlrt-30" title="Loading"
+			sub-title="显示加载状态,同时支持darw和CSS动画 name=circular和name=spinner为draw动画 其它为图标动画"></t-card>
+		<introduction title="drawapi-circular">
+			<t-row>
+				<t-loading main-class="mr-15 s-50 c-red" name="circular"></t-loading>
+				<t-loading main-class="mr-15" name="circular" type="success"></t-loading>
+				<t-loading main-class="mr-15" name="circular" type="error"></t-loading>
+				<t-loading main-class="mr-15" name="circular" type="primary"></t-loading>
+				<t-loading main-class="mr-15" name="circular" type="warning"></t-loading>
+				<t-loading main-class="mr-15" name="circular" color="blue"></t-loading>
+			</t-row>
+		</introduction>
+		<introduction title="drawapi花瓣">
+			<t-row>
+				<t-loading main-class="mr-15 s-80" name="spinner"></t-loading>
+				<t-loading main-class="mr-15 s-160" name="spinner" type="success"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="spinner" type="error"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="spinner" type="primary"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="spinner" type="warning"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="spinner"></t-loading>
+			</t-row>
+		</introduction>
+
+		<introduction title="icon实现">
+			<t-row>
+				<t-loading main-class="mr-15 s-80" name="moments"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="cube" type="success"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="closes-circle-line" type="error"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="moments" type="primary"></t-loading>
+				<t-loading main-class="mr-15 s-80" name="moments" type="warning"></t-loading>
+			</t-row>
+		</introduction>
+		<introduction title="设置图标大小(有些字体无法居中需要通过设置行高,例:s-80 slh-75)">
+			<t-row>
+				<t-loading name="setting" main-class="mr-25 s-80" :auto-play="true"></t-loading>
+				<t-loading name="setting" main-class="mr-25 s-80" type="success" :auto-play="true"></t-loading>
+				<t-loading name="setting" main-class="mr-25 s-80" type="error" :auto-play="true"></t-loading>
+				<t-loading name="setting" main-class="mr-25 s-80" type="primary" :auto-play="true"></t-loading>
+				<t-loading name="setting" main-class="mr-25 s-80" type="warning" :auto-play="true"></t-loading>
+			</t-row>
+		</introduction>
+		<introduction title="自定义颜色">
+			<t-row main-class='faic'>
+				<t-loading main-class="mr-15 s-80 c-blue" name="circular" type="success"></t-loading>
+				<t-loading main-class="mr-15 s-80 c-blue" name="spinner" type="error"></t-loading>
+				<t-loading name="setting" main-class="s-50 c-#ff557f" type="warning"></t-loading>
+			</t-row>
+		</introduction>
+		<introduction title="设置图标" main-class="mb-50 mlr-30">
+			<t-row>
+				<t-loading main-class="mr-15" name="moments"></t-loading>
+				<t-loading main-class="mr-15" name="moments" type="success"></t-loading>
+				<t-loading main-class="mr-15" name="moments" type="error"></t-loading>
+				<t-loading main-class="mr-15" name="moments" type="primary"></t-loading>
+				<t-loading main-class="mr-15" name="moments" type="warning"></t-loading>
+			</t-row>
+		</introduction>
+	</t-page>
+</template>

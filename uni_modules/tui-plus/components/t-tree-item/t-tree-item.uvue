@@ -1,0 +1,325 @@
+<template>
+	<t-view :main-class="mainStyles" :hover="false" @click="onTreeItemClick">
+		<t-row main-class="faic pl-10">
+			<t-animation ref="fodiconins" :main-class="treeCheckBoxStyles">
+				<t-icon v-if="isChild" v-bind="extendsAttrs" main-class="" type="info" name="arrow-right"></t-icon>
+			</t-animation>
+			<t-checkbox-state v-if="showCheckbox" v-bind="extendsAttrs" :state="checkState" main-class="mr-20"
+				:stop="true" @select="checkChange"></t-checkbox-state>
+			<t-loading v-if="lazyLoading" v-bind="extendsAttrs" main-class="mr-10"></t-loading>
+			<t-text>{{itemData[labelKey]}}</t-text>
+		</t-row>
+		<t-row main-class="ov mr-10 faic pr-20">
+			<t-icon v-if="showAddButton" v-bind="extendsAttrs" :stop="true" :main-class="`ats-1.3 ${addIconClass}`"
+				@click="add" :name="addIcon" :hover="true"></t-icon>
+			<t-icon v-if="showEditButton" v-bind="extendsAttrs" :stop="true"
+				:main-class="`ats-1.3 ml-30 ${editIconClass}`" :name="editIcon" :hover="true" @click="edit"></t-icon>
+			<t-icon v-if="showDeleteButton" v-bind="extendsAttrs" :stop="true"
+				:main-class="`ats-1.3 ml-30 ${deleteIconClass}`" :name="deleteIcon" :hover="true" @click="del"></t-icon>
+		</t-row>
+	</t-view>
+	<t-animation ref="treeChildsIns" :main-class="treeChildsBoxStyles">
+		<view class="tui-item-content">
+			<t-tree v-if="isChild" v-bind="extendsTreeChildAttrs" ref="childtreeins" main-class="ml-30"
+				@edit="childEdit" @delete="childDel" :list="(itemData[childrenKey] as UTSJSONObject[])"
+				@add="childAdd"></t-tree>
+		</view>
+	</t-animation>
+</template>
+
+<script setup>
+	import { TreeProps, useTuiThemes } from '../../common/props/index.uts';
+	import { TuiIf } from '../../common/model/util.uts'
+	interface TreeItemType extends TreeProps {
+		itemData : UTSJSONObject
+		sortIndex : number
+	}
+	const props = withDefaults(defineProps<TreeItemType>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		selects: [] as string[],
+		folds: [] as string[],
+		list: [] as UTSJSONObject[],
+		accordion: false,
+		load: (_ : UTSJSONObject) => Promise.resolve([] as UTSJSONObject[]),
+		showCheckbox: true,
+		lazy: false,
+		showAddButton: true,
+		addIcon: 'plus-circle',
+		addIconClass: '',
+		showEditButton: true,
+		editIcon: 'edit-pen',
+		editIconClass: '',
+		showDeleteButton: true,
+		deleteIcon: 'trash',
+		deleteIconClass: '',
+		rowHeight: 50,
+		idKey: 'id',
+		labelKey: 'label',
+		disabledKey: 'disabled',
+		childrenKey: 'children',
+		itemData: {} as UTSJSONObject,
+		sortIndex: 0
+	});
+	const extendsTreeChildAttrs = computed(() : UTSJSONObject => {
+		return {
+			path: props.path,
+			hover: props.hover,
+			type: props.type,
+			disabled: props.disabled,
+			stop: props.stop,
+			effect: props.effect,
+			size: props.size,
+			mainClass: props.mainClass,
+			nativeClass: props.nativeClass,
+			selects: props.selects,
+			folds: props.folds,
+			list: props.list,
+			accordion: props.accordion,
+			load: props.load,
+			showCheckbox: props.showCheckbox,
+			lazy: props.lazy,
+			showAddButton: props.showAddButton,
+			addIcon: props.addIcon,
+			addIconClass: props.addIconClass,
+			showEditButton: props.showEditButton,
+			editIcon: props.editIcon,
+			editIconClass: props.editIconClass,
+			showDeleteButton: props.showDeleteButton,
+			deleteIcon: props.deleteIcon,
+			deleteIconClass: props.deleteIconClass,
+			rowHeight: props.rowHeight,
+			idKey: props.idKey,
+			labelKey: props.labelKey,
+			disabledKey: props.disabledKey,
+			childrenKey: props.childrenKey
+		}
+	})
+	const emit = defineEmits(['edit', 'delete', 'add'])
+	const childtreeins = ref<ComponentPublicInstance | null>(null)
+	const itemdataId = `${props.itemData[props.idKey]}`
+	const lazyLoading = ref<boolean>(false)
+	const isChild = computed(() : boolean => {
+		return TuiIf(props.itemData.getArray('children'))
+	})
+	function traverseTree(nodes : UTSJSONObject[], callback : () => void) {
+		nodes.forEach((node : UTSJSONObject) => {
+			callback();
+			const isFold : boolean = props.folds.includes(`${node[props.idKey]}`)
+			if (node.children != null && node.getArray<UTSJSONObject>('children')!.length > 0 && !isFold) {
+				traverseTree(node.getArray<UTSJSONObject>('children')!, callback);
+			}
+		});
+	}
+	function traverseChildIdsTree(nodes : UTSJSONObject[], callback : (e : UTSJSONObject) => void) {
+		nodes.forEach((node : UTSJSONObject) => {
+			const c : boolean = node.children != null && node.getArray<UTSJSONObject>('children')!.length > 0
+			if (!c) callback(node);
+			if (c) {
+				traverseChildIdsTree(node.getArray<UTSJSONObject>('children')!, callback);
+			}
+		});
+	}
+	function getAllChildIds() : string[] {
+		let ids : string[] = []
+		traverseChildIdsTree((props.itemData as UTSJSONObject).getArray<UTSJSONObject>(props.childrenKey) ?? [] as UTSJSONObject[], (item : UTSJSONObject) => {
+			ids.push(`${item.getString(props.idKey)}`)
+		})
+		return ids
+	}
+	function getIntersection(arr1 : string[], arr2 : string[]) {
+		const set2 = new Set(arr2);
+		const intersection = arr1.filter(item => set2.has(item));
+		return intersection;
+	}
+	function getCheckBoxState() : number {
+		let state = 0
+		if (isChild.value) {
+			const childAllIds : string[] = getAllChildIds()
+			const selectState : string[] = getIntersection(props.selects, childAllIds)
+			if (selectState.length > 0 && childAllIds.length == selectState.length) state = 1
+			if (selectState.length > 0 && childAllIds.length > selectState.length) state = 2
+
+		} else {
+			if (props.selects.includes(itemdataId)) state = 1
+		}
+		return state
+	}
+	const updatePartenCheckState = inject<() => void>('updatePartenCheckState', () => { })
+	const checkState = ref<number>(getCheckBoxState())
+	const updateheight = inject<() => void>('updateheight', () => { })
+	const partentAccordion = inject<(e : string) => void>('partentAccordion', (e : string) => { })
+	const treeChildsIns = ref<TAnimationComponentPublicInstance | null>(null)
+	const fodiconins = ref<TAnimationComponentPublicInstance | null>(null)
+	const { extendsAttrs } = useTuiThemes(props)
+	let isCollapsed : boolean = props.folds.includes(`${itemdataId}`)
+	const treeChildsBoxStyles : string = isCollapsed ? 'h-0' : ''
+	const treeCheckBoxStyles : string = `twh-45 fc ${isCollapsed ? 'atr-0' : 'atr-90'}`
+	let selectState = ref<boolean>(checkState.value > 0 ? true : false)
+	provide('updateheight', () => {
+		const ins = treeChildsIns.value!
+		const ani = ins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+		let h = 0
+		traverseTree((props.itemData as UTSJSONObject).getArray<UTSJSONObject>('children') ?? ([] as UTSJSONObject[]), () => {
+			h += props.rowHeight
+		})
+		ani.height(`${h}px`).step()
+		ins.exports()
+		updateheight()
+	})
+	provide('updatePartenCheckState', () => {
+		checkState.value = getCheckBoxState()
+		updatePartenCheckState()
+	})
+
+	const mainStyles = computed(() : string => {
+		return `fl faic fjcb h-${props.rowHeight}px`
+	})
+	function partenUpdateChaildCheck(e : boolean) {
+		checkState.value = e ? 1 : 0
+		childtreeins.value?.$callMethod('treeInstance', e)
+	}
+	function addSelects(dId : string) {
+		let f = props.selects.findIndex((id : string) => id == dId)
+		if (f == -1) props.selects.push(dId)
+	}
+	function spliceSelects(dId : string) {
+		let f = props.selects.findIndex((id : string) => id == dId)
+		if (f > -1) props.selects.splice(f, 1)
+	}
+	function checkChange(e : boolean) {
+		if (isChild.value) {
+			const allIds : string[] = getAllChildIds()
+			allIds.forEach((item : string) => {
+				if (e) {
+					addSelects(item)
+				} else {
+					spliceSelects(item)
+				}
+			})
+			childtreeins.value?.$callMethod('treeInstance', e)
+		} else {
+			if (e) {
+				addSelects(itemdataId)
+			} else {
+				spliceSelects(itemdataId)
+			}
+		}
+		checkState.value = getCheckBoxState()
+		updatePartenCheckState()
+	}
+	function addfolds() {
+		let f = props.folds.findIndex((id : string) => id == itemdataId)
+		if (f == -1) props.folds.push(itemdataId)
+	}
+	function splicefolds() {
+		let f = props.folds.findIndex((id : string) => id == itemdataId)
+		if (f > -1) props.folds.splice(f, 1)
+	}
+	function callbackAdd(e : UTSJSONObject[]) {
+		if (isChild.value) {
+			const children = (props.itemData as UTSJSONObject).getArray<UTSJSONObject>(props.childrenKey)!
+			children.unshift(...e)
+		} else {
+			props.itemData.set(props.childrenKey, e)
+		}
+		isCollapsed = false
+		splicefolds()
+		const ins = fodiconins.value!
+		const ani = ins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+		const childins = treeChildsIns.value!
+		const childani = childins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+		let h = 0
+		let deg = 90
+		traverseTree((props.itemData as UTSJSONObject).getArray<UTSJSONObject>('children') ?? ([] as UTSJSONObject[]), () => {
+			h += props.rowHeight
+		})
+		if (props.accordion) partentAccordion(itemdataId)
+		ani.rotate(deg).step()
+		childani.height(`${h}px`).step()
+		ins.exports()
+		childins.exports()
+		updateheight()
+	}
+	function onTreeItemClick() {
+		if (isChild.value) {
+			isCollapsed = !isCollapsed
+			const ins = fodiconins.value!
+			const ani = ins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+			const childins = treeChildsIns.value!
+			const childani = childins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+			let h = 0
+			let deg = 0
+
+			if (isCollapsed) {
+				addfolds()
+			} else {
+				splicefolds()
+				deg = 90
+				traverseTree((props.itemData as UTSJSONObject).getArray<UTSJSONObject>('children') ?? ([] as UTSJSONObject[]), () => {
+					h += props.rowHeight
+				})
+				if (props.accordion) partentAccordion(itemdataId)
+			}
+			ani.rotate(deg).step()
+			childani.height(`${h}px`).step()
+			ins.exports()
+			childins.exports()
+			updateheight()
+		} else {
+			const lazy = props.itemData.getBoolean('lazy') ?? false
+			if (lazy) {
+				lazyLoading.value = true
+				props.load(props.itemData).then((res : UTSJSONObject[]) => {
+					lazyLoading.value = false
+					callbackAdd(res)
+				})
+			}
+		}
+	}
+	function accordionFolds(id : string) {
+		if (id != itemdataId && isChild.value) {
+			isCollapsed = true
+			addfolds()
+			const ins = fodiconins.value!
+			const ani = ins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+			const childins = treeChildsIns.value!
+			const childani = childins.createAnimation({ duration: 100, timingFunction: 'ease-out' })
+			ani.rotate(0).step()
+			childani.height('0px').step()
+			ins.exports()
+			childins.exports()
+		}
+	}
+	function edit() {
+		emit('edit', props.itemData)
+	}
+	function childEdit(e : UTSJSONObject) {
+		emit('edit', e)
+	}
+	function childDel(e : UTSJSONObject) {
+		emit('delete', e)
+	}
+	function del() {
+		emit('delete', {
+			item: props.itemData, index: props.sortIndex, callback: () => {
+				props.list.splice(props.sortIndex, 1)
+				updateheight()
+			}
+		})
+	}
+	function childAdd(e : (e : UTSJSONObject[]) => void) {
+		emit('add', e)
+	}
+	function add() {
+		emit('add', callbackAdd)
+	}
+	defineExpose({ partenUpdateChaildCheck, accordionFolds })
+</script>

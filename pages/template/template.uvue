@@ -1,0 +1,17 @@
+<template>
+	<t-page :showBack="false" title="模版">
+		<toos-list :toos="toos"></toos-list>
+	</t-page>
+</template>
+<script setup>
+	import { TuiApi } from '@/api'
+	const toos = ref<UTSJSONObject[]>([])
+	onLoad((_) => {
+		TuiApi('getTempeToosplus', {}, true).then(res => {
+			toos.value = res.getArray('data.toos') as UTSJSONObject[]
+		})
+	})
+</script>
+<style lang="scss" scoped>
+
+</style>

@@ -1,0 +1,92 @@
+// #ifndef APP-ANDROID
+export function TuiRenderSlot(that : ComponentPublicInstance, slotName : string = 'default', slotData : UTSJSONObject | null = null) : VNode | null {
+	if (slotData != null) {
+		return renderSlot(that.$slots, slotName, slotData)
+	} else {
+		return renderSlot(that.$slots, slotName)
+	}
+}
+// #endif
+
+export function n(that : ComponentPublicInstance, slotName : string = 'default') : any[] {
+	const VNodeList : any[] = []
+	const instance = that
+	const slots = instance.$slots[slotName]
+	// #ifdef APP-ANDROID
+	try {
+		if (slots != null) {
+			const defaultSlot = slots as ContextualRenderFn
+			const nodes = (defaultSlot.invoke!)(null)
+			nodes.forEach((item) => {
+				if (typeof (item) == 'string') {
+					VNodeList.push(item)
+				} else {
+					const va = item as VNode
+					const type = `${va.type}`
+					if (type.includes('Symbol')) {
+						if (typeof (va.children) == 'string') {
+							VNodeList.push(`${va.children}`)
+						} else {
+							const child = va.children as VNode[]
+							child.forEach((vn : VNode) => {
+								const type = `${va.type}`
+								if (type.includes('Symbol')) {
+									const childs = (va.children as VNode[])[0].children as any[]
+									VNodeList.push(...childs)
+								} else {
+									VNodeList.push(vn)
+								}
+							})
+						}
+					} else {
+						VNodeList.push(item)
+					}
+				}
+			})
+		} else {
+
+		}
+	} catch (e) {
+		// console.log(e)
+	}
+	return VNodeList
+	// #endif
+	// #ifndef APP-ANDROID
+	try {
+		if (slots != null) {
+			const nodes = slots()
+			nodes.forEach((item) => {
+				if (typeof item == 'string') {
+					VNodeList.push(item)
+				} else {
+					const va = item as VNode
+					if (va && va.type) {
+						const type = va.type.toString()
+						if (type.includes('Symbol')) {
+							if (typeof (va.children) == 'string') {
+								VNodeList.push(va.children)
+							} else {
+								const child = va.children as VNode[]
+								child.forEach((vn : VNode) => {
+									const type = vn.type.toString()
+									if (type.includes('Symbol')) {
+										VNodeList.push(...vn.children as any[])
+									} else {
+										VNodeList.push(vn)
+									}
+								})
+							}
+						} else {
+							VNodeList.push(item)
+						}
+					}
+				})
+		} else {
+
+		}
+	} catch (e) {
+		// console.log(e)
+	}
+	return VNodeList
+	// #endif
+}

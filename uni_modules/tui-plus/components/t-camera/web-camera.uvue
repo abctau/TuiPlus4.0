@@ -1,0 +1,292 @@
+<template>
+	<t-view v-bind="extendsAttrs" main-class="dr twh-100%">
+		<view :id="id" style="height: 100%;width: 100%;position: relative;">
+			<text>{{showWelcome}}</text>
+		</view>
+		<t-view main-class="da di-0 fc bg-#000" v-if="showWelcome && !isRcodering">
+			<t-text v-bind="extendsAttrs" main-class="s-50 sfwb c-#fff">{{welcome}}</t-text>
+		</t-view>
+		<t-view main-class="da di-0" v-if="isRcodering">
+			<t-text type="success" main-class="c-red da drb-30 " mode="time" format="d天h时M分s秒"
+				:text="`${remain}`"></t-text>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface WebCamearProps extends CommonProps {
+		devicePosition : string
+		mode : string
+		resolution : string
+		frameSize : string
+		orientation : string
+		flash : string
+		welcome : string
+	}
+	const id = ref<string>(Date.now().toString())
+	let video : HTMLVideoElement | null = null
+	const stream = ref<any>(null)
+	const takeModelType = ref<string>('photo')
+	const mediaRecorder = ref<MediaRecorder | null>(null)
+	const defaultOrientation = ref<string>('front')
+	const isRcodering = ref<boolean>(false)
+	const showWelcome = ref<boolean>(true)
+	const chunks = ref<any[]>([])
+	const remain = ref(0)
+	let timer = 0
+	const props = withDefaults(defineProps<WebCamearProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		devicePosition: 'back',
+		mode: 'normal',
+		resolution: 'medium',
+		frameSize: 'medium',
+		orientation: 'front',
+		flash: 'auto',
+		welcome: '欢迎使用Tui'
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(["take", 'recoder', 'error'])
+	async function _crateCamera() {
+		closes()
+		let parentView = document.getElementById(id.value)
+		video = document.createElement("video")
+		if (video != null) {
+			video.style.width = "100%"
+			video.style.height = "100%"
+			video.style.objectFit = "cover"
+		}
+		parentView!.appendChild(video)
+
+		// 使用函数并处理结果
+		getCameraDeviceIds().then(function (cameraDeviceIds) {
+			let selectedDeviceId = cameraDeviceIds[0]
+			if (props.orientation == 'back' && cameraDeviceIds.length > 1) selectedDeviceId = cameraDeviceIds[1]
+			if (defaultOrientation.value == 'front') {
+				selectedDeviceId = cameraDeviceIds[0]
+			} else if (defaultOrientation.value == 'back' && cameraDeviceIds.length > 1) {
+				selectedDeviceId = cameraDeviceIds[1]
+			}
+			var constraints = {
+				audio: false,
+				video: {
+					width: 1920,
+					height: 1080,
+					deviceId: { exact: selectedDeviceId }
+				}
+
+			};
+			if (cameraDeviceIds.length == 0) {
+				uni.showModal({
+					title: "警告",
+					content: "没有找到可用的摄像设备",
+					showCancel: false,
+					confirmText: "关闭"
+				})
+				return;
+			}
+			window.navigator.mediaDevices
+				.getUserMedia(constraints)
+				.then(function (mediaStream) {
+					stream.value = mediaStream
+					if (video != null) {
+						video!.srcObject = stream.value;
+						video!.onloadedmetadata = function (e) {
+							video!.play();
+							if (takeModelType.value == 'video') {
+								createMediaRecorder(mediaStream)
+							}
+						};
+					}
+				})
+				.catch(function (err) {
+					console.log(err.name + ": " + err.message);
+					closes()
+				});
+		});
+	}
+	function flashOn() {
+
+	}
+	function flashOff() {
+
+	}
+	function recoder(result : string) {
+		emit('recoder', result)
+	}
+	function getPhoto(result : string) {
+		emit('take', result)
+	}
+	function front() {
+		takeModelType.value = 'photo'
+		defaultOrientation.value = 'front'
+		_crateCamera()
+		showWelcome.value = false
+	}
+	function back() {
+		takeModelType.value = 'photo'
+		defaultOrientation.value = 'back'
+		_crateCamera()
+		showWelcome.value = false
+	}
+	function open() {
+		takeModelType.value = 'photo'
+		_crateCamera();
+		showWelcome.value = false
+	}
+	function getCameraDeviceIds() {
+		return navigator.mediaDevices.enumerateDevices()
+			.then(function (devices) {
+				// 筛选出视频输入设备
+				const videoDevices = devices.filter(device => device.kind == 'videoinput');
+				// 提取deviceId
+				const deviceIds = videoDevices.map(device => device.deviceId);
+				return deviceIds;
+			})
+			.catch(function (err) {
+				console.log(err.name + ": " + err.message);
+				return []; // 发生错误时返回空数组
+			});
+	}
+
+	function start() {
+		if (mediaRecorder.value?.state == 'recording') {
+			return;
+		}
+		if (mediaRecorder.value?.state == 'paused') {
+			mediaRecorder.value?.resume()
+			return;
+		}
+
+		takeModelType.value = 'video'
+		_crateCamera()
+		isRcodering.value = true
+		clearInterval(timer)
+		timer = setInterval(() => {
+			remain.value += 1000
+		}, 1000)
+	}
+	function createMediaRecorder(stream) {
+		if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+			console.error('录制格式不正确')
+			return;
+		}
+		const options = { mimeType: 'video/webm;codecs=vp8' }; // 默认格式为 WebM
+		mediaRecorder.value = new MediaRecorder(stream, options);
+		mediaRecorder.value!.ondataavailable = (event) => {
+			if (event.data.size > 0) {
+				chunks.value.push(event.data);
+			}
+		};
+		mediaRecorder.value!.onerror = () => {
+			emit('error', '录制错误')
+		}
+		mediaRecorder.value!.start()
+	}
+	function stopRecorder() {
+		return new Promise(() => {
+			if (mediaRecorder.value != null) {
+				mediaRecorder.value.onstop = () => {
+					isRcodering.value = false;
+				};
+				mediaRecorder.value.stop();
+			} else {
+				
+			}
+		});
+	}
+	function blobToArrayBuffer(blob) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				if (reader.result) {
+					resolve(reader.result);
+				} else {
+					reject(new Error('Failed to read the Blob.'));
+				}
+			};
+
+			reader.readAsArrayBuffer(blob);
+		});
+	}
+	function stops() {
+		if (isRcodering.value) {
+			stopRecorder().then(() => {
+				const blob = new Blob(chunks.value, { type: 'video/webm' });
+				const url = URL.createObjectURL(blob);
+				emit('recoder', url)
+				chunks.value = []
+				closes();
+				clearInterval(timer)
+				remain.value = 0
+				showWelcome.value = true
+			})
+		}
+	}
+	function take() {
+		if (!video || !stream.value) {
+			uni.showToast({
+				title: '未开启摄像头'
+			})
+			return "";
+		}
+		var canvas = document.createElement('canvas');
+		canvas.width = video.videoWidth; // 设置canvas的宽度为视频的宽度
+		canvas.height = video.videoHeight; // 设置canvas的高度为视频的高度
+		var ctx = canvas.getContext('2d');
+		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+		var dataURL = canvas.toDataURL('image/png');
+		video.pause();
+		emit('take', dataURL)
+	}
+
+	function closes() {
+		try {
+			if (video) {
+				if (video != null) video.pause()
+				// video = null;
+			}
+			if (stream.value) {
+				stream.value.getTracks().forEach(function (track) {
+					track.stop();
+				});
+				stream.value = null;
+			}
+			let parentView = document.getElementById(id.value)
+			parentView!.innerHTML = ""
+			mediaRecorder.value = null;
+		} catch (error) {
+			//TODO handle the exception
+		}
+	}
+	function close() {
+		showWelcome.value = true
+		closes()
+	}
+
+	onMounted(() : HTMLElement => {
+		return document.createElement("div") as HTMLElement
+	})
+
+	onBeforeUnmount(() => {
+		closes()
+	})
+	defineExpose({
+		flashOn,
+		flashOff,
+		front,
+		back,
+		open,
+		close,
+		start,
+		stops,
+		take
+	})
+</script>

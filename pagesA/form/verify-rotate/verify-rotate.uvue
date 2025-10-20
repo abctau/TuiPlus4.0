@@ -1,0 +1,28 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title='VerifyRotate 滑块验证码' sub-title="滑块验证码用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!"></t-card>
+		<t-section main-class="mb-30" title="基础使用+主题展示"></t-section>
+		<t-col main-class='fc'>
+			<t-verify-rotate size='l' main-class="mb-30 w-550" src='/pagesA/static/image/avatar.jpeg'></t-verify-rotate>
+			<t-verify-rotate main-class="mb-30 w-480" src='/pagesA/static/image/avatar.jpeg'></t-verify-rotate>
+			<t-verify-rotate size='s' main-class="mb-30 w-400" type='e'
+				src='/pagesA/static/image/avatar.jpeg'></t-verify-rotate>
+			<t-verify-rotate size='mini' main-class="mb-30 w-400" type='s'
+				src='/pagesA/static/image/avatar.jpeg'></t-verify-rotate>
+		</t-col>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		}
+	}
+</script>
+
+<style lang="scss">
+
+</style>

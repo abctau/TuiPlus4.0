@@ -1,0 +1,61 @@
+<template>
+	<t-page title='宫格' main-class="p-30">
+		<t-card main-class="mb-30" title="Grid 宫格组件"
+			sub-title="宫格组件以灵活的栅格系统为核心，通过配置列数和可选边框，以及自定义子项样式，实现整齐划一的布局，为内容展示提供清晰有序的视觉体验。"></t-card>
+		<t-section title="基础功能" main-class="mb-30"></t-section>
+		<t-grid :column="5" main-class="tdb tdr mb-30">
+			<t-grid-item v-for="i in 5" :key="i" :icon="`/static/grid/grid (${i}).png`" :label="`功能${i}`"></t-grid-item>
+		</t-grid>
+		<t-section title="主题+徽标+图标" main-class="mb-30"></t-section>
+		<t-grid :column=" 5" main-class="tdb tdr mb-30 s-150" type="s" size="m" child-label-class="mt-0">
+			<!-- 通过插槽方式显示徽标 -->
+			<t-grid-item icon="red-packet" label="待付款">
+				<template #badge>
+					<t-badge type="error" main-class="da dr-10 dt-15" text="56556"></t-badge>
+				</template>
+			</t-grid-item>
+			<!-- 通过属性配置显示徽标 -->
+			<t-grid-item icon="car" label="待发货" :badge="true"
+				:badge-attrs="{text:'99',mainClass:'da dr-10 dt-15', type:'e'}"></t-grid-item>
+			<t-grid-item icon="bag" label="待收货" :badge="true"
+				:badge-attrs="{text:'HOT',mainClass:'da dr-10 dt-15', type:'e'}"></t-grid-item>
+			<t-grid-item icon="chat" label="待评价"></t-grid-item>
+			<t-grid-item icon="integral" label="退货"></t-grid-item>
+		</t-grid>
+		<t-section title="列数设置+徽标" main-class="mb-30"></t-section>
+		<t-grid :column="2" type='p' main-class="tdb tdr mb-30" child-label-class="mt-0">
+			<t-grid-item icon="calendar" label="签到"></t-grid-item>
+			<t-grid-item icon="gift" label="积分">
+				<template #badge>
+					<t-badge type="p" main-class="da dr-110 dt-30" text="15"></t-badge>
+				</template>
+			</t-grid-item>
+		</t-grid>
+		<t-section title="列数设置" main-class="mb-30"></t-section>
+		<t-grid :column="4" main-class="tdb tdr mb-30">
+			<t-grid-item v-for="i in 5" :key="i" :icon="`/static/grid/grid (${i}).png`" :label="`功能${i}`"
+				type="error"></t-grid-item>
+		</t-grid>
+		<t-section title="可滚动" main-class="mb-30"></t-section>
+
+		<swiper :indicator-dots="true" :autoplay="true" :interval="3000" :duration="1000" style="height: 400rpx;">
+			<swiper-item>
+				<t-grid :column="4">
+					<t-grid-item v-for="i in 8" :key="i" :icon="`/static/grid/grid (${i}).png`"
+						:label="`功能${i}`"></t-grid-item>
+				</t-grid>
+				<t-gap height="65rpx"></t-gap>
+			</swiper-item>
+			<swiper-item>
+				<t-grid :column="4">
+					<t-grid-item v-for="i in 8" :key="i" :icon="`/static/grid/grid (${i}).png`"
+						:label="`功能${i}`"></t-grid-item>
+				</t-grid>
+				<t-gap height="65rpx"></t-gap>
+			</swiper-item>
+		</swiper>
+	</t-page>
+</template>
+<script setup>
+	const column = ref(5)
+</script>

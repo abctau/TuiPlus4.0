@@ -1,0 +1,17 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title='VerifyPuzzle 拼图验证' sub-title="用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!"></t-card>
+		<t-verify-puzzle main-class="tdr tdb" :imgs="imgs"></t-verify-puzzle>
+	</t-page>
+</template>
+
+<script setup>
+	const imgs = ref<string[]>([
+		'/pagesA/static/puzzle/img.jpg',
+		'/pagesA/static/puzzle/img1.jpg',
+		'/pagesA/static/puzzle/img2.jpg',
+		'/pagesA/static/puzzle/img3.jpg',
+		'/pagesA/static/puzzle/img4.jpg',
+		'/pagesA/static/puzzle/img5.jpg'
+	])
+</script>

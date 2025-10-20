@@ -1,0 +1,182 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`${borderStyles} fv ${width!=''?'w-'+width:'f'} ${mainClass}`"
+		@initFinished="initFinished">
+		<template v-for="(item,index) in getPartenTables" :key="item[getPartenRowKey]">
+			<t-async-height :main-class="`${stripeStyles(index)} bb-1px,s,${themeColor}`"
+				:group="`tableRow${item[getPartenRowKey]}`">
+				<slot :row="item" :columnIndex="columnIndex" :rowIndex="index">
+					<t-view :main-class="`w-100% ${extendsPadding} ${alignmentBoxStyles}`">
+						<t-checkbox v-bind="extendsAttrs" :type="getPartenType" icon-box-class="mr-0"
+							:checked="checkedState(`${item[getPartenRowKey]}`)"
+							@change="(e:boolean)=>onChange(e,`${item[getPartenRowKey]}`)"
+							v-if="mode=='selection'"></t-checkbox>
+						<t-text v-else :type="getPartenType" :size="getPartenSize" :main-class="alignmentTextStyles"
+							:text="`${item[prop]}`"></t-text>
+					</t-view>
+				</slot>
+			</t-async-height>
+		</template>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * TableColumn 表格
+	 * @date 2025-06-28 19:16:35
+	 * @author TanYuan
+	 * @description Table的组件
+	 * @example /pagesA/layout/table/table
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-table-column.html
+	 * @example /pagesA/layout/table/table
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[selection|其它] 当mode=='selection'时为显示选择框
+	 * @value selection 显示选择框
+	 * @value 其它 显示表格数据
+	 * @property {String} label 列字段文本
+	 * @property {String} labelClass 列字段文本样式
+	 * @property {String} labelCellClass undefined
+	 * @property {String} width 列的宽度
+	 * @property {String} prop 绑定到列对应对应数据的字段名
+	 * @property {String} align 列的对齐方式(默认：left)
+	 * @property {Boolean} sortable 是否支持排序
+	 * @value true 是
+	 * @value false 否
+	 */
+
+	import { b, bc, ttc } from '../../common/model/theme'
+	import { isEven } from '../../common/model/test'
+	import { hexToRgba } from '../../common/model/color'
+	import { CommonProps, TableProps, useTuiThemes, TableGroupAttrsType } from '../../common/props/index.uts';
+	interface TableColumnProps extends CommonProps {
+		mode : string;
+		label : string;
+		labelClass : string;
+		width : string;
+		prop : string;
+		align : string;
+		sortable : boolean;
+	}
+	const props = withDefaults(defineProps<TableColumnProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: '',
+		label: '',
+		labelClass: '',
+		width: '',
+		prop: '',
+		align: 'left',
+		sortable: false
+	});
+	const { extendsAttrs, extendsPadding } = useTuiThemes(props)
+	const columnIndex = ref<number>(0)
+
+	const tableGroupAttrs = inject<TableGroupAttrsType>('tableGroupAttrs')
+	const headerData = inject<Ref<UTSJSONObject[]>>('headerData')
+	const selectIds = inject<Ref<string[]>>('selectIds')
+	const drawHeader = inject<(e : UTSJSONObject, callback : (index : number) => void, ids : string[]) => void>('drawHeader')
+	function checkedState(id : string) : boolean {
+		return selectIds?.value?.includes(id) ?? false
+	}
+	function initFinished(e : NodeInfo) {
+		if (drawHeader != null) {
+			drawHeader({
+				mode: props.mode,
+				label: props.label,
+				labelClass: props.labelClass,
+				width: props.width,
+				prop: props.prop,
+				align: props.align,
+				sortable: props.sortable,
+			}, (index : number) => {
+				columnIndex.value = index
+			}, selectIds!.value)
+		}
+	}
+	const getPartenType = computed(() : string => {
+		return tableGroupAttrs?.type?.value ?? ''
+	})
+	const themeColor = computed(() : string => {
+		return hexToRgba(ttc(getPartenType.value, '', '', false), 0.1)
+	})
+	const getPartenBorder = computed(() : boolean => {
+		return tableGroupAttrs?.border?.value ?? false
+	})
+	const borderStyles = computed(() : string => {
+		let sty = ''
+		if (getPartenBorder.value) sty = `${columnIndex.value < headerData!.value.length - 1 ? 'br-1px,s,' + themeColor.value : ''}`
+		return sty
+	})
+	const alignmentBoxStyles = computed(() : string => {
+		const align : string = props.align
+		let sty = `fl faic`
+		if (align == 'left') sty += ` fjcs`
+		if (align == 'center') sty += ` fjcc`
+		if (align == 'right') sty += ` fjce`
+		return sty
+	})
+	const alignmentTextStyles = computed(() => {
+		const align : string = props.align
+		let textSty = `w-100%`
+		if (align == 'left') textSty += ` sta-l`
+		if (align == 'center') textSty += ` sta-c`
+		if (align == 'right') textSty += ` sta-r`
+		return textSty
+	})
+	const getPartenlabelClass = computed(() : string => {
+		return tableGroupAttrs?.labelClass?.value ?? ''
+	})
+	const getStripe = computed(() : boolean => {
+		return tableGroupAttrs?.stripe?.value ?? false
+	})
+	const getStripeColor = computed(() : string => {
+		return tableGroupAttrs?.stripeColor?.value ?? ''
+	})
+	const getPartenEffect = computed(() : string => {
+		return tableGroupAttrs?.effect?.value ?? ''
+	})
+	const getPartenSize = computed(() : string => {
+		return tableGroupAttrs?.size?.value ?? ''
+	})
+	const getPartenRowKey = computed(() : string => {
+		return tableGroupAttrs?.rowKey?.value ?? ''
+	})
+	const getPartenTables = computed(() : UTSJSONObject[] => {
+		return tableGroupAttrs?.tables?.value ?? [] as UTSJSONObject[]
+	})
+	function onChange(e : boolean, key : string) {
+		let f = selectIds!.value.findIndex((k : string) => k == key)
+		if (e && f == -1) selectIds!.value.push(key)
+		if (!e && f > -1) selectIds!.value.splice(f, 1)
+	}
+	function stripeStyles(index : number) : string {
+		let bgc = ttc(getPartenType.value, '', getStripeColor.value, false)
+		return !isEven(index) ? getStripe.value ? `bg-${hexToRgba(bgc, 0.03)}` : '' : ''
+	}
+</script>

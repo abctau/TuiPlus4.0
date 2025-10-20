@@ -1,0 +1,269 @@
+import { Int10 } from "./int10";
+const ellipsis = "\u2026";
+function stringCut(str : string, len : number) : string {
+	if (str.length > len) {
+		str = str.substring(0, len) + ellipsis;
+	}
+	return str;
+}
+
+export class ASN1Tag {
+	tagClass : number
+	tagConstructed : boolean
+	tagNumber : number
+	constructor(stream : Stream) {
+		let buf = stream.get();
+		this.tagClass = buf >> 6;
+		this.tagConstructed = ((buf & 0x20) != 0);
+		this.tagNumber = buf & 0x1F;
+		if (this.tagNumber == 0x1F) {
+			let n = new Int10();
+			do {
+				buf = stream.get();
+				n.mulAdd(128, buf & 0x7F);
+			} while ((buf & 0x80) > 0);
+			this.tagNumber = n.simplify() as number;
+		}
+	}
+
+	isUniversal() {
+		return this.tagClass == 0x00;
+	}
+
+	isEOC() {
+		return this.tagClass == 0x00 && this.tagNumber == 0x00;
+	}
+}
+
+export class Stream {
+	hexDigits : string = "0123456789ABCDEF"
+	enc : any
+	pos : number
+	constructor(enc : any, pos : number = 0) {
+		if (enc instanceof Stream) {
+			this.enc = enc.enc;
+			this.pos = enc.pos;
+		} else {
+			this.enc = enc;
+			this.pos = pos;
+		}
+	}
+
+	get(pos : number | null = null) : number {
+		if (pos == null) {
+			pos = this.pos++;
+		}
+		if ("string" == typeof this.enc) {
+			return this.enc.charCodeAt(pos)!
+		} else {
+			const encarr = this.enc as number[]
+			if (pos >= encarr.length) {
+				throw new Error(`Requesting byte offset ${pos} on a stream of length ${encarr.length}`);
+			}
+			return encarr[pos];
+		}
+	}
+
+	hexByte(b : number) : string {
+		return this.hexDigits.charAt((b >> 4) & 0xF) + this.hexDigits.charAt(b & 0xF);
+	}
+
+	hexDump(start : number, end : number, raw : boolean) : string {
+		let s = "";
+		for (let i = start; i < end; ++i) {
+			s += this.hexByte(this.get(i));
+			if (raw != true) {
+				switch (i & 0xF) {
+					case 0x7:
+						s += "  ";
+						break;
+					case 0xF:
+						s += "\n";
+						break;
+					default:
+						s += " ";
+				}
+			}
+		}
+		return s;
+	}
+
+	isASCII(start : number, end : number) : boolean {
+		for (let i = start; i < end; ++i) {
+			let c = this.get(i);
+			if (c < 32 || c > 176) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	parseStringISO(start : number, end : number) : string {
+		let s = "";
+		for (let i = start; i < end; ++i) {
+			s += String.fromCharCode(this.get(i));
+		}
+		return s;
+	}
+
+	parseStringUTF(start : number, end : number) : string {
+		let s = "";
+		for (let i = start; i < end;) {
+			let c = this.get(i++);
+			if (c < 128) {
+				s += String.fromCharCode(c);
+			} else if ((c > 191) && (c < 224)) {
+				s += String.fromCharCode(((c & 0x1F) << 6) | (this.get(i++) & 0x3F));
+			} else {
+				s += String.fromCharCode(((c & 0x0F) << 12) | ((this.get(i++) & 0x3F) << 6) | (this.get(i++) &
+					0x3F));
+			}
+		}
+		return s;
+	}
+
+	parseStringBMP(start : number, end : number) : string {
+		let str = "";
+		let hi : number;
+		let lo : number;
+		for (let i = start; i < end;) {
+			hi = this.get(i++);
+			lo = this.get(i++);
+			str += String.fromCharCode((hi << 8) | lo);
+		}
+		return str;
+	}
+
+	parseOctetString(start : number, end : number, _maxLength : number) : string {
+		let maxLength : number = _maxLength
+		if (this.isASCII(start, end)) {
+			return stringCut(this.parseStringISO(start, end), maxLength);
+		}
+		let len = end - start;
+		let s = "(" + len + " byte)\n";
+		maxLength /= 2; // we work in bytes
+		if (len > maxLength) {
+			end = start + maxLength;
+		}
+		for (let i = start; i < end; ++i) {
+			s += this.hexByte(this.get(i));
+		}
+		if (len > maxLength) {
+			s += ellipsis;
+		}
+		return s;
+	}
+
+
+}
+
+export class ASN1 {
+	stream : Stream
+	header : number
+	length : number
+	tag : ASN1Tag
+	sub : ASN1[] | null
+	constructor(stream : Stream, header : number, length : number, tag : ASN1Tag, sub : ASN1[] | null) {
+		this.stream = stream;
+		this.header = header;
+		this.length = length;
+		this.tag = tag;
+		this.sub = sub;
+	}
+	
+	posStart() {
+		return this.stream.pos;
+	}
+
+	posContent() {
+		return this.stream.pos + this.header;
+	}
+
+	posEnd() {
+		return this.stream.pos + this.header + Math.abs(this.length);
+	}
+
+	toHexString() {
+		return this.stream.hexDump(this.posStart(), this.posEnd(), true);
+	}
+
+	getHexStringValue() {
+		const s = this.header * 2
+		const e = this.length * 2
+		return this.toHexString().substring(s, e + s);
+	}
+
+	static decodeLength(stream : Stream) : number | null {
+		let buf = stream.get();
+		let len = buf & 0x7F;
+		if (len == buf) return len;
+		if (len > 6) throw new Error(`Length over 48 bits not supported at ${stream.pos - 1}`);
+		if (len == 0) return null;
+
+		let val = 0;
+		for (let i = 0; i < len; ++i) {
+			val = val * 256 + stream.get();
+		}
+		return val;
+	}
+
+	static decode(str : any) : ASN1 {
+		const stream : Stream = str instanceof Stream ? str : new Stream(str as any, 0);
+		const streamStart = new Stream(stream);
+		const tag = new ASN1Tag(stream);
+		const len = ASN1.decodeLength(stream);
+		const start = stream.pos;
+		const header = start - streamStart.pos;
+
+		const getSub = () => {
+			const ret : ASN1[] = [];
+			if (len != null) {
+				const end = start + len;
+				while (stream.pos < end) {
+					ret.push(ASN1.decode(stream));
+				}
+				if (stream.pos != end) {
+					throw new Error(`Content size mismatch at offset ${start}`);
+				}
+			} else {
+				try {
+					while (true) {
+						const s = ASN1.decode(stream);
+						if (s.tag.isEOC()) break;
+						ret.push(s);
+					}
+				} catch (e) {
+					throw new Error(`Undefined length content error: ${e}`);
+				}
+			}
+			return ret;
+		};
+
+		let sub : ASN1[] | null = null;
+		if (tag.tagConstructed) {
+			sub = getSub();
+		} else if (tag.isUniversal() && ([0x03, 0x04] as number[]).includes(tag.tagNumber)) {
+			try {
+				if (tag.tagNumber == 0x03 && stream.get() != 0) {
+					throw new Error("Invalid BIT STRING padding");
+				}
+				sub = getSub();
+				if (sub.some(s => s.tag.isEOC())) {
+					throw new Error("EOC in content");
+				}
+			} catch {
+				console.log('Invalid BIT STRING padding')
+				sub = null;
+			}
+		}
+
+		if (sub == null && len == null) {
+			throw new Error(`Invalid tag with undefined length at ${start}`);
+		}
+		if (sub == null && len != null) {
+			stream.pos = start + Math.abs(len);
+		}
+
+		return new ASN1(streamStart, header, len ?? -(start - stream.pos), tag, sub);
+	}
+}

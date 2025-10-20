@@ -1,0 +1,54 @@
+import { b64tohex, hex2b64 } from "./jsbn/base64";
+import { JSEncryptRSAKey } from "./JSEncryptRSAKey";
+export class JSEncrypt {
+	rsaKey : JSEncryptRSAKey | null = null
+	default_key_size : number
+	default_public_exponent : string
+	constructor(options : UTSJSONObject = {}) {
+		this.default_key_size = options.getNumber('default_key_size') ?? 1024;
+		this.default_public_exponent = options.getString('default_public_exponent') ?? "010001";
+	}
+	getKey() : JSEncryptRSAKey {
+		return this.rsaKey!;
+	}
+	setKey(key : string) {
+		this.rsaKey = new JSEncryptRSAKey(key);
+	}
+	setPrivateKey(privkey : string) {
+		this.setKey(privkey);
+	}
+
+	setPublicKey(pubkey : string) {
+		this.setKey(pubkey);
+	}
+	decryptAsync(str : string) : string {
+		return this.getKey().decrypt(b64tohex(str));
+	}
+	encryptAsync(str : string) : string {
+		return hex2b64(this.getKey().encrypt(str));
+	}
+	decrypt(str : string) : Promise<string> {
+		return new Promise((
+			resolve : (res : string) => void,
+			reject : (err : any | null) => void
+		) => {
+			try {
+				resolve(this.getKey().decrypt(b64tohex(str)))
+			} catch (error) {
+				reject(error)
+			}
+		})
+	}
+	encrypt(str : string) : Promise<string> {
+		return new Promise((
+			resolve : (res : string) => void,
+			reject : (err : any | null) => void
+		) => {
+			try {
+				resolve(hex2b64(this.getKey().encrypt(str)))
+			} catch (error) {
+				reject(error)
+			}
+		})
+	}
+}

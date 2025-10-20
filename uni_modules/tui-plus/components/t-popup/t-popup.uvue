@@ -1,0 +1,219 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="popupMainStyles" @click="mask_click" :touch-stop="true">
+		<t-view :main-class="popupContentStyles" ref="popupcontent" :stop="true" @transitionend="transitionend">
+			<t-view v-if="title!=''" :main-class="`h-90 fc dr ${headerClass}`">
+				<slot name="header">
+					<t-text :mainClass="`sfwb ${titleClass}`">{{title}}</t-text>
+				</slot>
+				<t-line main-class="da dl-0 db-1 w-100%"></t-line>
+			</t-view>
+			<t-view main-class="f ov">
+				<slot></slot>
+			</t-view>
+			<t-row v-if="showFooter" :main-class="`p-30 ${footerClass}`">
+				<slot name="footer">
+					<t-button v-bind="extendsAttrs" :hover="true" @click="cancel" :main-class="`mr-20 f`"
+						effect="l">{{cancelText}}</t-button>
+					<t-button v-bind="extendsAttrs" main-class="f" :hover="true"
+						@click="confirm">{{confirmText}}</t-button>
+				</slot>
+			</t-row>
+			<t-icon v-if="closeable" name="closes-circle-fill" v-bind="extendsAttrs" :hover="true" @click="close"
+				:main-class="`da ats-1.5 dr-30 dt-20 ${closeableClass}`"></t-icon>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Popup 弹出层
+	 * @date 2025-05-31 12:05:47
+	 * @author TanYuan
+	 * @description 功能丰富的弹出层解决方案，支持自定义显示状态、过渡效果、持续时间、弹出方向以及灵活的样式控制
+	 * @example /pagesA/layout/popup/popup
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-popup.html
+	 * @example /pagesA/layout/popup/popup
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} cancelText 取消按钮的文本(默认：取消)
+	 * @property {String} confirmText 确认按钮的文本(默认：确认)
+	 * @property {Boolean} transition 是否关闭过渡动画效果(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} maskClose 点击遮罩层是否关闭窗口(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} duration 过渡动画的时间(默认：200)
+	 * @property {String} direction=[left|right|top|bottom|center] 弹出层的进入页面的方向(默认：left)
+	 * @value left 从左侧弹出
+	 * @value right 从右侧弹出
+	 * @value top 从顶部弹出
+	 * @value bottom 从底部弹出
+	 * @value center 从中心弹出
+	 * @property {String} contentClass 内容区容器样式
+	 * @property {Boolean} closeable 是否显示关闭按钮
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} closeableClass 关闭按钮样式
+	 * @property {Boolean} showFooter 是否显示底部按钮
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} footerClass 底部按钮样式
+	 * @property {String} headerClass 标题栏例子样式
+	 * @property {String} titleClass 标题样式
+	 * @property {String} title 标题
+	 * @property {Number} maskOpacity 遮罩层透明度(默认：1)
+	 * @event {Function} cancel 点取消按钮时触发
+	 * @event {Function} confirm 点确认按钮时触发
+	 * @event {Function} close 关闭时触发
+	 * @event {Function} open 打开时触发
+	 * @event {Function} transitionend 动画结束时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PopupProps extends CommonProps {
+		cancelText : string
+		confirmText : string
+		transition : boolean
+		maskClose : boolean
+		duration : number
+		direction : string
+		contentClass : string
+		closeable : boolean
+		closeableClass : string
+		showFooter : boolean
+		footerClass : string
+		maskOpacity : number
+		headerClass : string
+		titleClass : string
+		title : string
+	}
+	const conShow = ref(false)
+	const maskShow = ref(false)
+	const props = withDefaults(defineProps<PopupProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		cancelText: '取消',
+		confirmText: '确认',
+		transition: true,
+		maskClose: true,
+		duration: 200,
+		direction: 'left',
+		contentClass: '',
+		closeable: false,
+		closeableClass: '',
+		showFooter: false,
+		footerClass: '',
+		maskOpacity: 0.4,
+		headerClass: '',
+		titleClass: '',
+		title: ''
+	});
+	const { extendsAttrs, getRadiusToValue } = useTuiThemes(props)
+	const emit = defineEmits(['cancel', 'confirm', 'close', 'open', 'transitionend'])
+
+	const popupContentStyles = computed(() : string => {
+		const ra = getRadiusToValue.value
+		let csty : string = `fv tvg ov dr `
+		if (props.transition) {
+			if (props.direction == 'center') {
+				csty += `atp-o `
+			} else {
+				csty += `atp-tr `
+			}
+			csty += `atd-${props.duration} attf-eo `
+		}
+		if (props.direction == 'center') {
+			csty += conShow.value ? `o-1 ope-ao` : `o-0 open`
+			csty += ` tdr-${props.size},${ra}px`
+		}
+		if (props.direction == 'left') csty += conShow.value ? 'attx-0px' : 'attx-n100%'
+		if (props.direction == 'right') csty += conShow.value ? 'attx-0px' : 'attx-100%'
+		if (props.direction == 'top') {
+			csty += conShow.value ? 'atty-0px' : 'atty-n100%'
+			csty += ` tdr-${props.size},${ra * 2}px,34`
+		}
+		if (props.direction == 'bottom') {
+			csty += conShow.value ? 'atty-0px' : 'atty-100%'
+			csty += ` tdr-${props.size},${ra * 2}px,12`
+		}
+		return csty + ' ' + props.contentClass
+	})
+
+	const popupMainStyles = computed(() => {
+		let msty : string = `ov bzb df di-0 z-999 `
+		if (props.transition) msty += `attf-eo atp-bc atd-${props.duration} `
+		if (props.direction == 'left') msty += 'fl fjcs'
+		if (props.direction == 'right') msty += 'fl fjce'
+		if (props.direction == 'top') msty += 'fv fjcs'
+		if (props.direction == 'bottom') msty += 'fv fjce'
+		if (props.direction == 'center') msty += 'fl fc'
+		msty += conShow.value ? ` bg-rgba(0,0,0,${props.maskOpacity})` : ` bg-rgba(0,0,0,0)`
+		msty += maskShow.value ? ` attx-0px` : props.direction == 'right' ? ` attx-100%` : ` attx-n100%`
+		return msty
+	})
+
+	function show() {
+		if (!conShow.value) maskShow.value = true
+		if (!props.transition) maskShow.value = !conShow.value
+		nextTick(() => {
+			conShow.value = !conShow.value
+			if (maskShow.value) {
+				emit('open')
+			} else {
+				emit('close')
+			}
+		})
+	}
+	function mask_click() {
+		if (props.maskClose) show()
+		emit('close')
+	}
+	function close() {
+		emit('close')
+		show()
+	}
+	function cancel(e : UniPointerEvent) {
+		emit('cancel')
+		show()
+	}
+	function confirm(e : UniPointerEvent) {
+		emit('confirm')
+		show()
+	}
+	function transitionend() {
+		if (!conShow.value) maskShow.value = false
+		emit('transitionend', conShow.value)
+	}
+
+	defineExpose({
+		show
+	})
+</script>

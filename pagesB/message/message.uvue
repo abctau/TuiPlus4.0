@@ -1,0 +1,120 @@
+<template>
+	<t-page title='我的留言' :scrollDisabled="true">
+		<t-empty v-if='logs.length==0' mode="news" title="暂无新消息" main-class="mt-160"></t-empty>
+		<list-view v-else style="flex:1;" @scrolltolower="scrolltolower">
+			<list-item v-for="(item,index) in logs" :key="index">
+				<t-card main-class="tdr tdb mlrt-30" :title='item.name'
+					:sub-title="`${formatTime(item.creation_time.toString())}`" :hover="true">
+					<t-text main-class="mlrb-20 c-#666 slh-40">{{item.description}}</t-text>
+					<t-row main-class='fjce-plr.30-faic'>
+						<t-icon name="trash" :stop="true" size="large" type="error" :hover="true"
+							main-class="twh-80 sta-c slh-80" @click="deleteTask(item)"></t-icon>
+					</t-row>
+				</t-card>
+			</list-item>
+		</list-view>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	import { timeFormat } from '@/uni_modules/tui-plus'
+
+	const formatTime = computed<(e : string) => string>(() : (e : string) => string => {
+		return (e : string) : string => {
+			return timeFormat(e, 'yyyy-mm-dd hh:MM:ss')
+		}
+	})
+	let activeid = '0'
+	type taskType = {
+		_id : string;
+		creation_time : number;
+		description : string;
+		name : string;
+		type : string;
+		step ?: string;
+		update_time : number;
+	}
+
+	let lastPage = false
+	const current = ref(1)
+	const pageSize = ref(20)
+	const logs = ref<taskType[]>([])
+	let loading : boolean = false
+	function getlogs() {
+		uni.showLoading({
+			title: '加载中'
+		})
+		loading = true
+		TuiApi('getMessge', {
+			current: current.value,
+			pageSize: pageSize.value
+		}).then((res : UTSJSONObject) => {
+			lastPage = res.getBoolean('data.lastPage')!
+			uni.hideLoading()
+			loading = false
+			logs.value.push(...(JSON.parse<taskType[]>(JSON.stringify(res.getArray<UTSJSONObject>('data.list')!))!))
+		}).catch(err => {
+			uni.hideLoading()
+			loading = false
+		})
+	}
+	function updatelogs() {
+		uni.showLoading({
+			title: '加载中'
+		})
+		loading = true
+		TuiApi('getMessge', {
+			current: current.value,
+			pageSize: pageSize.value,
+		}).then((res : UTSJSONObject) => {
+			lastPage = res.getBoolean('data.lastPage')!
+			uni.hideLoading()
+			loading = false
+			logs.value = JSON.parse<taskType[]>(JSON.stringify(res.getArray<UTSJSONObject>('data.list')!))!
+		}).catch(err => {
+			uni.hideLoading()
+			loading = false
+		})
+	}
+	function scrolltolower() {
+		if (loading || lastPage) return
+		current.value++
+		updatelogs()
+	}
+	getlogs()
+	function onConfirm(e : UTSJSONObject) {
+		const step = e.getString('updateValue')!
+		loading = true
+		TuiApi('updateWorkTask', { step: step, _id: activeid }).then(res => {
+			TuiApi('getWorTask', {
+				current: current.value,
+				pageSize: pageSize.value,
+				name: ''
+			}).then((res : UTSJSONObject) => {
+				lastPage = res.getBoolean('data.lastPage')!
+				loading = false
+				logs.value = JSON.parse<taskType[]>(JSON.stringify(res.getArray<UTSJSONObject>('data.list')!))!
+			}).catch(err => {
+				loading = false
+			})
+		})
+	}
+	function deleteTask(item : taskType) {
+		uni.showModal({
+			title: `您确定删除【${item['name']}】吗？`,
+			success: (res) => {
+				if (res.confirm) {
+					TuiApi('delMessage', { _id: item._id }).then(res => {
+						updatelogs()
+					}).catch((err) => {
+						uni.showToast({
+							icon: 'error',
+							title: `${(err as UniError).message}`
+						})
+					})
+				}
+			}
+		})
+	}
+</script>

@@ -1,0 +1,91 @@
+export function encodeBase64(str : string) : string {
+	const base64Chars : string[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"];
+	// 将字符串转换成UTF-8的字节数组
+	let bytes : number[] = [];
+	for (let i = 0; i < str.length; i++) {
+		let charCode = str.charCodeAt(i)!;
+		if (charCode <= 0x7F) {
+			// 单字节字符
+			bytes.push(charCode);
+		} else if (charCode <= 0x7FF) {
+			// 双字节字符
+			bytes.push(0xC0 | (charCode >> 6), 0x80 | (charCode & 0x3F));
+		} else if (charCode <= 0xFFFF) {
+			// 三字节字符
+			bytes.push(0xE0 | (charCode >> 12), 0x80 | ((charCode >> 6) & 0x3F), 0x80 | (charCode & 0x3F));
+		} else if (charCode <= 0x10FFFF) {
+			// 四字节字符
+			bytes.push(0xF0 | (charCode >> 18), 0x80 | ((charCode >> 12) & 0x3F), 0x80 | ((charCode >> 6) & 0x3F), 0x80 | (charCode & 0x3F));
+		}
+	}
+
+	// 每三个字节为一组，转换成四个Base64字符
+	let result : string = '';
+	for (let i = 0; i < bytes.length; i += 3) {
+		let byte1 = bytes[i];
+		let byte2 = 0
+		let next = i + 1
+		if (next < bytes.length) byte2 = bytes[next];
+		let nexti = i + 2
+		let byte3 = 0
+		if (nexti < bytes.length - 1) byte3 = bytes[nexti];
+		let char1 = byte1 >> 2;
+		let char2 = ((byte1 & 0x3) << 4) | (byte2 >> 4);
+		let char3 = ((byte2 & 0xF) << 2) | (byte3 >> 6);
+		let char4 = byte3 & 0x3F;
+		result += base64Chars[char1] + base64Chars[char2] + base64Chars[char3] + base64Chars[char4];
+	}
+
+	// 处理剩余的字节
+	if (bytes.length % 3 == 1) {
+		result = result.slice(0, -2) + '==';
+	} else if (bytes.length % 3 == 2) {
+		result = result.slice(0, -1) + '=';
+	}
+	return result;
+}
+export function decodeBase64(str : string) : string {
+	let base64Str = str;
+	const base64Chars : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	const reverseBase64Chars : number[] = [];
+	for (let i = 0; i < 123; i++) {
+		reverseBase64Chars.push(0)
+	}
+	for (let i = 0; i < base64Chars.length; i++) {
+		const chr : number = base64Chars.charCodeAt(i)!
+		reverseBase64Chars[chr] = i;
+	}
+	base64Str = base64Str.replace(/=/g, '');
+	let result : string = '';
+	let currentCharIndex : number = 0;
+	let bits : number = 0;
+	let buffer : number = 0;
+
+	for (let i = 0; i < base64Str.length; i++) {
+		let char : number = base64Str.charCodeAt(i)!;
+		if (char >= reverseBase64Chars.length) {
+			throw new Error('Invalid character in base64 string.');
+		}
+		let value : number = reverseBase64Chars[char];
+
+		bits += 6;
+		buffer = (buffer << 6) | value;
+
+		if (bits >= 8) {
+			bits -= 8;
+			if (currentCharIndex < 1) {
+				result += String.fromCharCode((buffer >> bits) & 0xFF);
+			} else {
+				let byte1 = (buffer >> bits) & 0xFF;
+				let byte2 = (buffer >> (bits + 2)) & 0x03;
+				let codePoint = ((byte1 & 0x1F) << 6) | byte2;
+				if ((byte1 & 0x20) > 0) {
+					codePoint = (codePoint << 6) | (buffer >> (bits + 4)) & 0x3F;
+				}
+				result += String.fromCharCode(codePoint);
+				currentCharIndex = 0;
+			}
+		}
+	}
+	return result;
+}

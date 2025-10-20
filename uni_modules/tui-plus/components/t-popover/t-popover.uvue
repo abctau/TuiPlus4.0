@@ -1,0 +1,205 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`ov ${state?'z-999':'z-0'} ${mainClass}`">
+		<t-view @click="show" :main-class="`${menuClass}`" @initFinished="initFinished">
+			<slot name="button"></slot>
+		</t-view>
+		<t-view :main-class="`df bg-rgba(0,0,0,0) twh-2000 dlt-0 twh-100% ${maskClass}`" v-if="state" @click="show">
+
+		</t-view>
+		<t-view :main-class="contentBoxStyle" @transitionend="transitionend">
+			<t-view :main-class="tipsBoxStyle">
+				<t-view :main-class="tipsConStyle"></t-view>
+			</t-view>
+			<t-scroll :main-class="contentStyle">
+				<slot></slot>
+			</t-scroll>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Popover  气泡框
+	 * @date 2025-05-31 12:05:44
+	 * @author TanYuan
+	 * @description 显示弹出内容的气泡框组件，它支持配置弹出位置、弹出项数据、层叠顺序等。
+	 * @example /pagesA/basics/popover/popover
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-popover.html
+	 * @example /pagesA/basics/popover/popover
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} placement=[bottom|bottom-start|bottom-end|right|right-start|right-end|left|left-start|left-end|top|top-start|top-end] 弹出框位置(默认：bottom)
+	 * @value bottom 显示在下方中间对齐
+	 * @value bottom-start 显示在下方左边对齐
+	 * @value bottom-end 显示在下方右边对齐
+	 * @value right 显示在右边中间对齐
+	 * @value right-start 显示在右边左边对齐
+	 * @value right-end 显示在右边右边对齐
+	 * @value left 显示在左边中间对齐
+	 * @value left-start 显示在左边左边对齐
+	 * @value left-end 显示在左边右边对齐
+	 * @value top 显示在上方中间对齐
+	 * @value top-start 显示在上方左边对齐
+	 * @value top-end 显示在上方右边对齐
+	 * @property {String} maskClass 遮罩层样式
+	 * @property {String} menuClass 菜单样式
+	 * @property {String} contentClass 内容区样式
+	 * @property {Number} animationType=[0|1] 展开时动画区别(默认：1)
+	 * @value 0 不带缩放效果
+	 * @value 1 带缩放效果
+	 * @property {String} tipsSize 指示三角的大小(默认：18px)
+	 * @property {String} tipsClass 指示三角的样式
+	 * @event {Function} change 展开 折叠状态变化时触发
+	 */
+
+	import { getStyleProperty } from '../../common/model/style'
+	import { getPx } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PopoverProps extends CommonProps {
+		placement : string
+		maskClass : string
+		menuClass : string
+		contentClass : string
+		animationType : number
+		tipsClass : string
+	}
+
+	const props = withDefaults(defineProps<PopoverProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		placement: 'bottom',
+		maskClass: '',
+		menuClass: '',
+		contentClass: '',
+		animationType: 0,
+		tipsClass: ''
+	});
+	const { extendsAttrs, extendsBackgroundColor, extendsRb } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const state = ref<boolean>(false);
+	const bW = ref<number>(0);
+	const bH = ref<number>(0);
+	const conW = ref<number>(0);
+	const conH = ref<number>(0);
+	const cenX = ref<number>(0);
+	const cenY = ref<number>(0);
+	function transitionend() {
+		emit('change', state.value)
+	}
+	function initFinished(rect : NodeInfo) {
+		bW.value = rect.width!
+		bH.value = rect.height!
+		conW.value = getPx(getStyleProperty(props.contentClass, 'width'))
+		conH.value = getPx(getStyleProperty(props.contentClass, 'height'))
+		if (conW.value == 0) conW.value = bW.value
+		if (conH.value == 0) conH.value = 200
+		cenX.value = Math.floor((bW.value - conW.value) / 2)
+		cenY.value = Math.floor((bH.value - conH.value) / 2)
+	}
+	function show() {
+		state.value = !state.value
+	}
+	const transformOriginFormat = computed(() : string => {
+		let p = '0% 0%'
+		if (props.placement == 'bottom') p = '50%,0%'
+		if (props.placement == 'bottom-start') p = '0%,0%'
+		if (props.placement == 'bottom-end') p = '100%,0%'
+		if (props.placement == 'right') p = '0%,50%'
+		if (props.placement == 'right-start') p = '0%,0%'
+		if (props.placement == 'right-end') p = '0%,100%'
+		if (props.placement == 'left') p = '100%,50%'
+		if (props.placement == 'left-start') p = '100%,0%'
+		if (props.placement == 'left-end') p = '100%,100%'
+		if (props.placement == 'top') p = '50%,100%'
+		if (props.placement == 'top-start') p = '0%,100%'
+		if (props.placement == 'top-end') p = '100%,100%'
+		return `ato-${p}`
+	})
+	const contentBgColor = computed(() : string => {
+		const b = getStyleProperty(props.contentClass, 'background-color')
+		return b == '' ? '' : 'bg-' + b
+	})
+	const tipsSize = computed(() : string => {
+		let size = getStyleProperty(props.tipsClass, 'font-size')
+		return size == '' ? '18rpx' : size
+	})
+	const tipsConStyle = computed(() : string => {
+		let opacity = getStyleProperty(props.tipsClass, 'opacity')
+		let sty : string = `da atr-45 twh-${tipsSize.value} ${extendsBackgroundColor.value} ${contentBgColor.value} ${opacity != '' ? 'o-' + opacity : ''} `
+		const sz : number = getPx(tipsSize.value)
+		const dsz : number = Math.floor(sz / 2)
+		if (props.placement.includes('bottom')) sty += `db-n${dsz}px r1-6 `
+		if (props.placement.includes('top')) sty += `dt-n${dsz}px r4-6 `
+		if (props.placement.includes('left')) sty += `dl-n${dsz}px r2-6 `
+		if (props.placement.includes('right')) sty += `dr-n${dsz}px r3-6 `
+
+		if (props.placement == 'bottom-start' || props.placement == 'top-start') sty += `dl-${bW.value / 2 - dsz}px`
+		if (props.placement == 'bottom' || props.placement == 'top') sty += `dl-${conW.value / 2 - dsz}px`
+		if (props.placement == 'bottom-end' || props.placement == 'top-end') sty += `dl-${conW.value - (bW.value / 2) - dsz}px`
+
+		if (props.placement == 'left-start' || props.placement == 'right-start') sty += `dt-${bH.value / 2 - dsz}px`
+		if (props.placement == 'left' || props.placement == 'right') sty += `dt-${conH.value / 2 - dsz}px`
+		if (props.placement == 'left-end' || props.placement == 'right-end') sty += `dt-${conH.value - (bH.value / 2) - dsz}px`
+		return sty
+	})
+	const tipsBoxStyle = computed(() : string => {
+		let sty : string = `dr `
+		if (props.placement.includes('bottom') || props.placement.includes('top')) sty += `h-${tipsSize.value} `
+		if (props.placement.includes('left') || props.placement.includes('right')) sty += `w-${tipsSize.value} `
+		return sty
+	})
+	const contentPosStyle = computed(() : string => {
+		let sty : string = ``
+		if (props.placement.includes('bottom')) sty += `dt-100% `
+		if (props.placement.includes('top')) sty += `db-100% fcr `
+		if (props.placement.includes('left')) sty += `dr-100% frr `
+		if (props.placement.includes('right')) sty += `dl-100% `
+		if (props.placement == 'bottom' || props.placement == 'top') sty += `dl-${cenX.value}px `
+		if (props.placement == 'left' || props.placement == 'right') sty += `dt-${cenY.value}px `
+		if (props.placement == 'bottom-end' || props.placement == 'top-end') sty += `dr-0 `
+		if (props.placement == 'right-end' || props.placement == 'left-end') sty += `db-0 `
+		return sty
+	})
+	const contentBoxStyle = computed(() : string => {
+		let sty : string = `atp-tr atd-200 da w-100% h-200px ${transformOriginFormat.value} `
+		if (props.placement.includes('bottom') || props.placement.includes('top')) sty += `fv `
+		if (props.placement.includes('left') || props.placement.includes('right')) sty += `fl `
+		let t : string = 'ats'
+		if (props.animationType == 1 && (props.placement.includes('top') || props.placement.includes('bottom'))) t = 'atsy'
+		if (props.animationType == 1 && (props.placement.includes('left') || props.placement.includes('right'))) t = 'atsx'
+		sty += state.value ? `${t}-1` : `${t}-0`
+		return `${sty} ${props.contentClass} ${contentPosStyle.value} bgn`
+	})
+	const contentStyle = computed(() : string => {
+		let sty : string = `f ${extendsRb.value} ${contentBgColor.value}`
+		return sty
+	})
+	defineExpose({ show })
+</script>

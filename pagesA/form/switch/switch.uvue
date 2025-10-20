@@ -1,0 +1,96 @@
+<template>
+	<t-page main-class="p-20" title='开关'>
+		<t-card main-class="mb-30" title="Switch 开关"
+			sub-title="实现开关切换功能。支持显示文字和图标，可自定义颜色和样式，具有加载状态显示，以及可以与表单组件配合使用。使用场景主要包括：在表单、设置页面或需要用户进行二元选择的界面中，提供直观的开关操作选项。"></t-card>
+		<t-section main-class="tdr tdb mb-20" title='基础功能-type'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-20 fww fjcs">
+			<t-switch main-class="mrb-20" :modelValue="switch1" @change="onSwitchChange"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch1" type="primary"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch1" type="success"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch1" type="info"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch1" type="warning"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch1" type="error"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='基础功能-effect'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-20 fww fais">
+			<t-switch effect="normal" main-class="mrb-20 s-60" v-model="switch2" type="primary"
+				size="medium"></t-switch>
+			<t-switch effect="dark" main-class="mrb-20" v-model="switch2" type="primary" size="medium"></t-switch>
+			<t-switch effect="disabled" main-class="mrb-20" v-model="switch2" type="success" size="medium"></t-switch>
+			<t-switch effect="light" main-class="mrb-20" v-model="switch2" type="error" size="medium"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='基础功能-size'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-20 fww fais">
+			<t-switch main-class="mrb-20 s-60" v-model="switch3" type="primary" size="large"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch3" type="primary" size="large"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch3" type="success" size="medium"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch3" type="error" size="small"></t-switch>
+			<t-switch main-class="mrb-20" v-model="switch3" type="warning" size="mini"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='loading'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-40 fww">
+			<t-switch v-model="switch4" :loading="loading" type="success"></t-switch>
+			<t-row main-class='fc w-100% pt-30'>
+				<t-button @click="onLoadingClick" type="p">{{loading?'关闭':'打开'}}loading</t-button>
+			</t-row>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='显示文字(1内部显示,2外部显示,3中间按钮显示)'></t-section>
+		{{switch2}}
+		<t-col main-class="tdr tdb mb-30 p-40 fww">
+			<t-switch main-class="mb-20 s-50" :mode="1" v-model="switch2" type="p" activeText="开"
+				inactiveText="关"></t-switch>
+			<t-switch main-class="mb-20 s-50" :mode="2" v-model="switch3" type="success" activeText="开"
+				inactiveText="关"></t-switch>
+			<t-switch main-class="mb-20 s-50" :mode="3" v-model="switch4" type="success" activeText="按年付费"
+				inactiveText="按月付费"></t-switch>
+		</t-col>
+		<t-section main-class="tdr tdb mb-20" title='状态图标'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-40 fww">
+			<t-switch v-model="switch5" main-class="s-50" type="p" activeIcon="volume-up"
+				inactiveIcon="volume-off"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='禁用'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-40 fww">
+			<t-switch v-model="switch6" :disabled="true" type="success"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='自定义颜色覆盖主题'></t-section>
+		<t-row main-class="tdr tdb mb-30 p-40 fww">
+			<t-switch v-model="switch7" activeClass="bg-#dd5fdd" inactiveClass="bg-#f56c6c" type="success"></t-switch>
+		</t-row>
+		<t-section main-class="tdr tdb mb-20" title='其它样式定制'></t-section>
+		<t-row main-class="tdr tdb tdp">
+			<t-switch v-model="switch8" type="p" main-class="s-50 w-260 p-30 r-10" :close-scale="false"
+				bar-class="r-10"></t-switch>
+		</t-row>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				switch: true,
+				switch1: true,
+				switch2: true,
+				switch3: true,
+				switch4: true,
+				switch5: true,
+				switch6: true,
+				switch7: true,
+				switch8: true,
+				loading: true,
+			};
+		},
+		methods: {
+			onSwitchChange(e : boolean) {
+				console.log(e)
+			},
+			onLoadingClick() {
+				this.loading = !this.loading
+			}
+		},
+		onLoad() {
+
+		}
+	}
+</script>

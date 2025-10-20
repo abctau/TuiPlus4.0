@@ -1,0 +1,76 @@
+<template>
+	<t-page title='步进器'>
+		<t-card main-class="mlrt-30" title="Stepper 步进器"
+			sub-title="步进器组件是一个用于在指定数值范围内进行加减操作的UI元素，支持多种配置，如最小值、最大值、步长、按钮样式等。使用场景包括在需要精确控制数值增减的场景，如设置时间、金额等。"></t-card>
+		<introduction title="基础功能-类型-尺寸">
+			<t-stepper main-class="mb-30" effect="p" v-model="vala" :min="3" :max="99" size="large"></t-stepper>
+			<t-stepper main-class="mb-30" v-model="vala" :min="3" :max="99" type="primary" size="large"></t-stepper>
+			<!-- 图标不能居中可用icon-minus-class="mlt-2" icon-plus-class="mlt-3"调整样式 -->
+			<t-stepper main-class="mb-30" buttonClass='r-200' input-class="bgn w-100" input-text-class="c-#333"
+				input-placeholder-style="c-#666" v-model="vala" :min="3" :max="99" type="warning"
+				size="medium"></t-stepper>
+			<t-stepper main-class="mb-30" v-model="vala" buttonmain-class='r-200' :min="3" :max="99" type="success"
+				size="small" effect="light"></t-stepper>
+			<t-stepper main-class="mb-30" v-model="vala" buttonmain-class='r-200' :min="3" :max="99" type="error"
+				size="mini"></t-stepper>
+		</introduction>
+		<introduction title="设置步长">
+			<t-stepper :min="3" :max="99" main-class='w-250' v-model="valaa1" :step="0.01" type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="宽度设置">
+			<t-stepper main-class='w-250' :min="1" :max="10" v-model="valaa2" type="s"></t-stepper>
+		</introduction>
+
+		<introduction title="禁用编辑">
+			<t-stepper main-class='w-250' :disabledInput="true" :min="3" :max="99" v-model="valaa4" :step="0.01"
+				type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="只能减少不能增加">
+			<t-stepper :disablePlus="true" :min="3" :max="99" v-model="valaa5" :step="0.01" type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="只能增加不能减少">
+			<t-stepper :disableMinus="true" :min="3" :max="99" v-model="valaa6" :step="0.01" type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="全部禁用">
+			<t-stepper main-class='w-250' :disabled="true" :min="3" :max="99" v-model="valaa7" :step="0.01"
+				type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="长按加减时间间隔">
+			<t-stepper main-class='w-250' :plusInterval="10" :min="3" :max="99" v-model="valaa8" :step="0.01"
+				type="primary"></t-stepper>
+		</introduction>
+
+		<introduction title="禁用长按加减">
+			<t-stepper main-class='w-250' :longPress="false" :min="3" :max="99" v-model="valaa9" :step="0.01"
+				type="primary"></t-stepper>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				val: 30,
+				vala: 1,
+				valaa1: 1,
+				valaa2: 1,
+				valaa3: 1,
+				valaa4: 6,
+				valaa5: 6,
+				valaa6: 6,
+				valaa7: 6,
+				valaa8: 6,
+				valaa9: 6,
+			};
+		},
+		methods: {
+
+		}
+	}
+</script>

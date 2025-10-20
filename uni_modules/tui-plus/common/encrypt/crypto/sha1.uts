@@ -1,0 +1,180 @@
+import { TuiArray } from '../core/array'
+import { WordArray, Utf8, Hex } from './core';
+// Reusable object
+const W = new TuiArray();
+const HD = new TuiArray()
+HD.push(...[
+	0x67452301,
+	0xefcdab89,
+	0x98badcfe,
+	0x10325476,
+	0xc3d2e1f0,
+])
+/**
+ * SHA-1 hash algorithm.
+ */
+export class SHA1Algo {
+	blockSize : number = 512 / 32;
+	_hash : WordArray
+	_data : WordArray = new WordArray()
+	_nDataBytes : number = 0
+	constructor() {
+		this._hash = new WordArray(HD.copy());
+	}
+	_doReset() {
+		this._hash = new WordArray(HD.copy());
+	}
+
+	_doProcessBlock(M : TuiArray, offset : number) {
+		// Shortcut
+		const H = this._hash.words;
+
+		// Working variables
+		let a = H.getValue(0);
+		let b = H.getValue(1);
+		let c = H.getValue(2);
+		let d = H.getValue(3);
+		let e = H.getValue(4);
+
+		// Computation
+		for (let i = 0; i < 80; i += 1) {
+			if (i < 16) {
+				W.setValue(i, M.getValue(offset + i) | 0)
+			} else {
+				const n = W.getValue(i - 3) ^ W.getValue(i - 8) ^ W.getValue(i - 14) ^ W.getValue(i - 16);
+				W.setValue(i, (n << 1) | (n >>> 31))
+			}
+
+			let t = ((a << 5) | (a >>> 27)) + e + W.getValue(i);
+			if (i < 20) {
+				t += ((b & c) | (~b & d)) + 0x5a827999;
+			} else if (i < 40) {
+				t += (b ^ c ^ d) + 0x6ed9eba1;
+			} else if (i < 60) {
+				t += ((b & c) | (b & d) | (c & d)) - 0x70e44324;
+			} else {
+				t += (b ^ c ^ d) - 0x359d3e2a;
+			}
+
+			e = d;
+			d = c;
+			c = (b << 30) | (b >>> 2);
+			b = a;
+			a = t;
+		}
+
+		H.setValue(0, (H.getValue(0) + a) | 0);
+		H.setValue(1, (H.getValue(1) + b) | 0);
+		H.setValue(2, (H.getValue(2) + c) | 0);
+		H.setValue(3, (H.getValue(3) + d) | 0);
+		H.setValue(4, (H.getValue(4) + e) | 0);
+	}
+
+	_doFinalize() {
+		// Shortcuts
+		const data = this._data;
+		const dataWords = data.words;
+
+		const nBitsTotal = this._nDataBytes * 8;
+		const nBitsLeft = data.sigBytes * 8;
+
+		// Add padding
+		const index = nBitsLeft >>> 5
+		dataWords.setValue(index, dataWords.getValue(index) | (0x80 << (24 - (nBitsLeft % 32))))
+		const index1 = (((nBitsLeft + 64) >>> 9) << 4) + 14
+		dataWords.setValue(index1, dataWords.getValue(index1) | (Math.floor(nBitsTotal / 0x100000000)))
+		const index2 = (((nBitsLeft + 64) >>> 9) << 4) + 15
+		dataWords.setValue(index2, dataWords.getValue(index2) | (nBitsTotal))
+
+		data.sigBytes = dataWords.length * 4;
+
+		// Hash final blocks
+		this._process();
+
+		// Return final computed hash
+		return this._hash;
+	}
+	_append(data : any) {
+		let m_data : any = data;
+		if (typeof m_data == 'string') {
+			m_data = Utf8.parse(m_data);
+		}
+		this._data.concat(m_data as WordArray);
+		this._nDataBytes += m_data.sigBytes;
+	}
+	_process() {
+		const hasherBlockSize = this.blockSize;
+		const dataWords = this._data.words;
+		const dataSigBytes = this._data.sigBytes;
+		const blockSizeBytes = hasherBlockSize * 4;
+
+		let nBlocksReady = dataSigBytes / blockSizeBytes;
+		nBlocksReady = Math.max((nBlocksReady | 0) - 0, 0);
+
+		const nWordsReady = nBlocksReady * hasherBlockSize;
+
+		const nBytesReady = Math.min(nWordsReady * 4, dataSigBytes);
+
+		if (nWordsReady > 0) {
+			for (let offset = 0; offset < nWordsReady; offset += hasherBlockSize) {
+				this._doProcessBlock(dataWords, offset);
+			}
+			this._data.sigBytes -= nBytesReady;
+		}
+	}
+	reset() {
+		this._data = new WordArray();
+		this._nDataBytes = 0;
+		this._doReset();
+	}
+	finalize(messageUpdate : any | null) : WordArray {
+		if (messageUpdate != null && `${messageUpdate}` != '') {
+			this._append(messageUpdate);
+		}
+		const hash = this._doFinalize();
+		return hash;
+	}
+}
+
+export function SHA1(str : string) : string {
+	const sha1algo = new SHA1Algo()
+	const arr = sha1algo.finalize(str)
+	return Hex.stringify(arr)
+
+}
+
+export function HmacSHA1(message : string, key : string) : string {
+	const hasher = new SHA1Algo()
+	let _key = Utf8.parse(key)
+	const hasherBlockSize = hasher.blockSize;
+	const hasherBlockSizeBytes = hasherBlockSize * 4;
+	if (_key.sigBytes > hasherBlockSizeBytes) {
+		_key = hasher.finalize(key);
+	}
+	_key.clamp();
+	const oKey = new WordArray();
+	oKey.words = _key.words.copy()
+
+	for (let i = 0; i < hasherBlockSize; i += 1) {
+		oKey.words.setValue(i, oKey.words.getValue(i) ^ 0x5c5c5c5c)
+		_key.words.setValue(i, _key.words.getValue(i) ^ 0x36363636)
+	}
+	oKey.sigBytes = hasherBlockSizeBytes;
+	_key.sigBytes = hasherBlockSizeBytes;
+
+	hasher.reset()
+
+	hasher._data.concat(_key);
+	hasher._nDataBytes += _key.sigBytes;
+
+	hasher._process();
+
+	const innerHash = hasher.finalize(message);
+	hasher.reset()
+
+	const cloneKey = new WordArray()
+	cloneKey.words = oKey.words.copy()
+	cloneKey.sigBytes = oKey.sigBytes
+	const hmac = hasher.finalize(cloneKey.concat(innerHash));
+	return Hex.stringify(hmac);
+}

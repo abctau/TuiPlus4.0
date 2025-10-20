@@ -1,0 +1,100 @@
+<template>
+	<view :style="mainstickStyles" class="stickymain">
+		<view :style="`${stickyStyles} ${PosStyles}`" class="stickycontent">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+<script setup>
+	/**
+	 * Sticky 吸顶
+	 * @date 2025-05-31 12:07:19
+	 * @author TanYuan
+	 * @description 建一个在滚动时可以固定在顶部的内容块，支持配置吸顶元素的ID、层叠顺序、吸顶位置等
+	 * @example /pagesA/layout/sticky/sticky
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-sticky.html
+	 * @example /pagesA/layout/sticky/sticky
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} insId 吸顶元素的ID
+	 * @property {Number} zIndex 层叠顺序(默认：88)
+	 * @property {Number} stickyTop 吸顶位置，默认为0(默认：1)
+	 * @property {Number} scrollTop 滚动组件的top值(默认：1)
+	 * @event {Function} click 点击时触发
+	 */
+
+	import { useStyle } from '../../common/model/style.uts'
+	import { getDomRect } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface StickyProps extends CommonProps {
+		insId : string
+		zIndex : number
+		stickyTop : number
+		scrollTop : number
+	}
+
+	const props = withDefaults(defineProps<StickyProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		insId: '',
+		zIndex: 88,
+		stickyTop: 0,
+		scrollTop: 0
+	})
+
+	const { } = useTuiThemes(props)
+	const emit = defineEmits()
+	const instance = getCurrentInstance()?.proxy!
+	const windowsTop = ref<number>(uni.getWindowInfo().windowTop)
+	const stickyStyles = ref<string>(useStyle(`z-${props.zIndex} ${props.mainClass}`))
+	const PosStyles = ref<string>('')
+	const mainstickStyles = ref<string>('')
+	watch(() : number => props.scrollTop, () => {
+		nextTick(() => {
+			getDomRect('.stickycontent', instance).then((rect : NodeInfo) => {
+				getDomRect('.stickymain', instance).then((rects : NodeInfo) => {
+					if (rects.top! < props.stickyTop) {
+						const l = rects.left!
+						// #ifdef MP-WEIXIN
+						PosStyles.value = useStyle(`df dt-${props.stickyTop}px dl-${l}px`)
+						// #endif
+						// #ifndef MP-WEIXIN
+						PosStyles.value = useStyle(`df dt-${windowsTop.value + props.stickyTop}px dl-${l}px`)
+						// #endif
+					} else {
+						PosStyles.value = useStyle(``)
+					}
+				})
+				const h = rect.height!
+				mainstickStyles.value = useStyle(`h-${Math.floor(h)}px tdb`)
+			})
+		})
+	}, { immediate: true })
+</script>

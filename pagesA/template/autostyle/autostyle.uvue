@@ -1,0 +1,239 @@
+<template>
+	<t-page main-class="p-30 bg-#1B1B1F" :scroll-disabled="true">
+		<t-textarea v-model="inputValue" main-class="h-600 c-#1B1B1F" input-class="c-#1B1B1F"
+			placeholder-style="c-#1B1B1F" placeholder="请输入样式" type="success" effect="light"
+			clear-class="ocr"></t-textarea>
+		<t-row main-class="mt-30">
+			<t-button type="primary" @click="toCss" main-class="ocr mr-30 f">AutoStyleToCss</t-button>
+			<t-button type="success" @click="toStyle" main-class="ocr f">CssToAutoStyle</t-button>
+		</t-row>
+		<t-view v-if="formartValue!=''" main-class="mt-30 ">
+			<t-text main-class="slh-60 tdr tdb mb-30 tdp">
+				{{formartValue}}
+			</t-text>
+			<t-button type="success" @click="clipboardStyle">复制</t-button>
+		</t-view>
+	</t-page>
+</template>
+
+<script setup>
+	import { useStyle, TuiTrim, TuiIf } from '@/uni_modules/tui-plus';
+	import { styleMap } from './index'
+	const inputValue = ref<string>(`transform:scale(0.5);
+transform:rotateZ(90deg);
+transform:translate(50rpx);
+margin-bottom: 30rpx;
+padding: 24rpx;
+transform-origin:top left;
+`)
+	const formartValue = ref<string>('')
+	function toCss() {
+		formartValue.value = useStyle(inputValue.value).replaceAll(';', ';\n')
+	}
+	function toStyle() {
+		let sty : string = ''
+		const arr = inputValue.value.replaceAll('rpx', '').split(';')
+		arr.forEach((item : string) => {
+			const p : string[] = item.split(':')
+			if (p.length == 2) {
+				const ptrim = TuiTrim(p[0])
+				const d : string | null = styleMap.getString(ptrim)
+				const val_arr = p[1].split('(')
+				if (ptrim == 'transform') {
+					if (val_arr.length >= 2) {
+						const v = val_arr[1].split(')')[0].replace('-', 'n')
+						switch (val_arr[0]) {
+							case 'rotate':
+								sty += `atr-${v} `
+								break;
+							case 'rotateX':
+								sty += `atrx-${v} `
+								break;
+							case 'rotateY':
+								sty += `atry-${v} `
+								break;
+							case 'rotateZ':
+								sty += `atrz-${v} `
+								break;
+							case 'scale':
+								sty += `ats-${v} `
+								break;
+							case 'scaleX':
+								sty += `atsx-${v} `
+								break;
+							case 'scaleY':
+								sty += `atsy-${v} `
+								break;
+							case 'translate':
+								sty += `att-${v} `
+								break;
+							case 'translateX':
+								sty += `attx-${v} `
+								break;
+							case 'translateY':
+								sty += `atty-${v} `
+								break;
+							default:
+								break;
+						}
+					}
+				} else if (ptrim == 'transform-origin') {
+					sty += `ato-${p[1].trim().replace(' ', ',')} `
+				} else if (ptrim == 'flex-direction') {
+					switch (p[1].trim()) {
+						case 'row':
+							sty += `fl `
+							break;
+						case 'column':
+							sty += `fv `
+							break;
+						case 'row-reverse':
+							sty += `frr `
+							break;
+						case 'column-reverse':
+							sty += `fcr `
+							break;
+						default:
+							break;
+					}
+				} else if (ptrim == 'align-self') {
+					switch (p[1].trim()) {
+						case 'auto':
+							sty += `fasa `
+							break;
+						case 'center':
+							sty += `fasc `
+							break;
+						case 'flex-start':
+							sty += `fass`
+							break;
+						case 'flex-end':
+							sty += `fase `
+						case 'baseline':
+							sty += `fasb `
+							break;
+						case 'stretch':
+							sty += `fasst `
+							break;
+						default:
+							break;
+					}
+				}
+				else if (ptrim == 'align-items') {
+					switch (p[1].trim()) {
+						case 'center':
+							sty += `faic `
+							break;
+						case 'flex-start':
+							sty += `fais `
+							break;
+						case 'flex-end':
+							sty += `faie`
+							break;
+						case 'baseline':
+							sty += `faib `
+						case 'stretch':
+							sty += `faist `
+							break;
+						default:
+							break;
+					}
+				}
+				else if (ptrim == 'align-content') {
+					switch (p[1].trim()) {
+						case 'center':
+							sty += `facc `
+							break;
+						case 'flex-start':
+							sty += `facs `
+							break;
+						case 'flex-end':
+							sty += `face`
+							break;
+						case 'baseline':
+							sty += `facb `
+						case 'stretch':
+							sty += `facst `
+							break;
+						default:
+							break;
+					}
+				}
+				else if (ptrim == 'justify-content') {
+					switch (p[1].trim()) {
+						case 'flex-start':
+							sty += `fjcs `
+							break;
+						case 'flex-end':
+							sty += `fjce `
+							break;
+						case 'center':
+							sty += `fjcc `
+							break;
+						case 'space-between':
+							sty += `fjcb `
+						case 'space-around':
+							sty += `fjca `
+						case 'space-evenly':
+							sty += `fjcse `
+							break;
+						default:
+							break;
+					}
+				}
+				else if (ptrim == 'flex-wrap') {
+					switch (p[1].trim()) {
+						case 'wrap':
+							sty += `fww `
+							break;
+						case 'nowrap':
+							sty += `fwn `
+							break;
+						case 'wrap-reverse':
+							sty += `fwwr `
+							break;
+						default:
+							break;
+					}
+				}
+				else if (ptrim == 'box-sizing') {
+					switch (p[1].trim()) {
+						case 'none':
+							sty += `bzn `
+							break;
+						case 'border-box':
+							sty += `bzb `
+							break;
+						case 'content-box':
+							sty += `bzx `
+							break;
+						default:
+							break;
+					}
+				}
+				else {
+					if (TuiIf(d)) sty += `${d}-${TuiTrim(p[1])} `
+				}
+			}
+		})
+		formartValue.value = sty.trim()
+	}
+	function back() {
+		uni.navigateTo({
+			url: '/pages/index/index'
+		})
+	}
+	function clipboardStyle() {
+		uni.setClipboardData({
+			data: formartValue.value,
+			success: () => {
+				uni.showToast({
+					title: '复制成功',
+					icon: "success",
+					mask: true
+				})
+			},
+			fail: () => { }
+		});
+	}
+</script>

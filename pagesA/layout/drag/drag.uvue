@@ -1,0 +1,89 @@
+<template>
+	<t-page>
+		<t-card main-class="mltr-30" title="Drag 拖拽排序" sub-title="自研拖拽算法,丝滑不卡顿"></t-card>
+		<t-drag main-class="fl fww tdr ptlr-30" v-model="list1" item-class="w-180">
+			<template v-slot:default="{item,index}">
+				<t-view main-class="fc mr-30 tdb r-8 fl h-60">
+					<t-text :stop="true">{{(item as UTSJSONObject).getString('title')}}</t-text>
+				</t-view>
+			</template>
+		</t-drag>
+		<t-drag main-class="fl fww tdr ptlr-30" v-if="area==1" v-model="list" item-class="h-170 w-170">
+			<template v-slot:default="{item,index}">
+				<t-view main-class="fc mr-30 tdb tdr h-150">
+					<t-text :stop="true">{{(item as UTSJSONObject).getString('title')}}</t-text>
+				</t-view>
+			</template>
+		</t-drag>
+		<t-drag main-class="fl fww tdr ptlr-30" v-if="area==2" v-model="list" item-class="h-170 w-100%">
+			<template v-slot:default="{item,index}">
+				<t-view main-class="fc mr-30 tdb tdr h-150">
+					<t-text :stop="true">{{(item as UTSJSONObject).getString('title')}}</t-text>
+					<t-button type="p" size="mini" @click="del1(0)">删除</t-button>
+				</t-view>
+			</template>
+		</t-drag>
+		<t-popup direction="bottom" ref='popupbottom' :show-footer="false" :closeable="false">
+			<t-drag main-class="fl fww tdr ptlr-30" v-model="list" item-class="h-200 w-200">
+				<template v-slot:default="{item}">
+					<t-view main-class="fc mr-30 tdb tdr b h-170">
+						<t-text :stop="true">{{(item as UTSJSONObject).getString('title')}}</t-text>
+					</t-view>
+				</template>
+			</t-drag>
+		</t-popup>
+		<t-row main-class="p-30">
+			<t-button type="p" @click="area=1" main-class="mr-30 f">宫格模式</t-button>
+			<t-button type="p" @click="area=2" main-class="f">列表模式</t-button>
+		</t-row>
+		<t-button @click="show" main-class="m-30" type="p">弹层测试</t-button>
+		<t-row main-class="p-30">
+			<t-button main-class="mr-30 f" type="p" @click="add">增加数据</t-button>
+			<t-button main-class="f" type="p" @click="del">减少数据</t-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiGuid, getRandomInt } from '@/uni_modules/tui-plus';
+	const list = ref<UTSJSONObject[]>([
+		{ id: '1', title: '1' },
+		{ id: '2', title: '2' },
+		{ id: '3', title: '3' },
+		{ id: '4', title: '4' },
+		{ id: '5', title: '5' },
+		{ id: '6', title: '6' },
+		{ id: '7', title: '7' },
+		{ id: '8', title: '8' },
+		{ id: '9', title: '9' },
+		{ id: '10', title: '10' },
+		{ id: '11', title: '11' },
+		{ id: '12', title: '12' },
+		{ id: '13', title: '13' },
+		{ id: '14', title: '14' },
+		{ id: '15', title: '15' }
+	])
+	const list1 = ref<UTSJSONObject[]>([
+		{ id: '1', title: '首页' },
+		{ id: '2', title: '商品管理' },
+		{ id: '3', title: '订单管理' },
+	])
+	const area = ref<number>(1)
+	const popupbottom = ref<ComponentPublicInstance | null>(null)
+	function show() {
+		(popupbottom.value as ComponentPublicInstance).$callMethod('show')
+	}
+	function test() {
+		console.log('testtest')
+	}
+	function add() {
+		list.value.push({ id: TuiGuid(getRandomInt(5, 15)), title: TuiGuid(getRandomInt(5, 15)) })
+	}
+	function del1(index : number) {
+		list.value.splice(index, 1)
+		console.log(list.value.length)
+	}
+	function del() {
+		list.value.splice(0, 1)
+	}
+</script>

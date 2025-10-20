@@ -1,0 +1,37 @@
+<template>
+	<t-page title='分组' main-class='p-30'>
+		<t-card main-class='mltr-30' title='Group 分组'
+			sub-title="结构化的布局容器，用于将相关内容组织在一起，支持自定义标题、边框、以及内容和标题的样式，便于在页面中清晰地区分和展示不同模块的信息。"></t-card>
+		<t-section title="基本使用" type="p" main-class="tdb tdr mb-30"></t-section>
+		<t-group main-class="mb-30">
+			<t-text main-class="slh-50">姓名：张三</t-text>
+			<t-text main-class="slh-50">年龄：28</t-text>
+			<t-text main-class="slh-50">职业：软件工程师</t-text>
+			<t-text main-class="slh-50">居住地：北京</t-text>
+		</t-group>
+		<t-section title="标题+主题" type="p" main-class="tdb tdr mb-30"></t-section>
+		<t-group main-class="mb-30" title="产品特点" type='p'>
+			<t-text main-class="slh-50">高效节能</t-text>
+			<t-text main-class="slh-50">环保材料</t-text>
+			<t-text main-class="slh-50">人性化设计</t-text>
+			<t-text main-class="slh-50">智能操作</t-text>
+		</t-group>
+		<t-section title="标题+主题+浅色主题" type="p" main-class="tdb tdr mb-30"></t-section>
+		<t-group main-class="mb-30" title="市场分析" type='s' effect='l'>
+			<t-text main-class="slh-50">行业趋势：上升趋势</t-text>
+			<t-text main-class="slh-50">竞争对手：A公司、B公司</t-text>
+			<t-text main-class="slh-50">市场份额：15%</t-text>
+			<t-text main-class="slh-50">消费者偏好：高质量产品</t-text>
+		</t-group>
+		<t-col main-class="h-50"></t-col>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		}
+	}
+</script>

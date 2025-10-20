@@ -1,0 +1,63 @@
+import { isNumber } from '../model/test.uts'
+export type formValidationType = {
+	validation : boolean
+	message : string
+	key : string
+}
+export function formValidation(key : string, value : any | null, rule : UTSJSONObject[]) : formValidationType {
+	let mVal = `${value}`
+	let b : boolean = true
+	let msg : string[] = [] as string[]
+	function setValidation(message : string) : void {
+		b = false
+		msg.push(message)
+	}
+	rule.forEach((itemL : UTSJSONObject) => {
+		const vType = `${itemL.get('type')}`
+		const tipsMessage = `${itemL.get('message')}`
+		if (vType == 'required') {
+			if (mVal == '' || mVal == 'null') setValidation(tipsMessage)
+		} else if (vType == 'length') {
+			const min : number | null = itemL.getNumber('min')
+			const max : number | null = itemL.getNumber('max')
+			let _len : number
+			if (Array.isArray(value)) {
+				_len = (value as any[]).length
+			} else {
+				_len = mVal.length
+			}
+			if (min != null && max != null) {
+				if (_len < min || _len > max) setValidation(tipsMessage)
+			} else if (min != null) {
+				if (_len < min) setValidation(tipsMessage)
+			} else if (max != null) {
+				if (_len > max) setValidation(tipsMessage)
+			}
+		} else if (vType == 'range') {
+			const min : number | null = itemL.getNumber('min')
+			const max : number | null = itemL.getNumber('max')
+			if (isNumber(mVal)) {
+				const dval = parseFloat(mVal)
+
+				if (min != null && max != null) {
+					if (dval < min || dval > max) setValidation(tipsMessage)
+				} else if (min != null) {
+					if (dval < min) setValidation(tipsMessage)
+				} else if (max != null) {
+					if (dval > max) setValidation(tipsMessage)
+				}
+			} else {
+				setValidation(tipsMessage)
+			}
+		} else if (vType == 'function') {
+			const fun = itemL['fun'] as (e : any | null) => boolean
+			const rb = fun(value)
+			if (!rb) setValidation(tipsMessage)
+		}
+	})
+	return {
+		validation: b,
+		message: msg.join(','),
+		key
+	} as formValidationType
+}

@@ -1,0 +1,12 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="ext api"
+			sub-title="uni ext api，是一种需要下载UTS原生插件、以uni.开头的 API。它是uni对象的方法，但不预置在uni-app的runtime中，需要单独下载对应的插件,目前支持uni.login和uni.share"></t-card>
+		<t-button type="p" path="/pages/login/login" main-class="mb-30">uni.login</t-button>
+		<t-button type="p" path="/pages/login/login" main-class="mb-30">uni.share</t-button>
+	</t-page>
+</template>
+
+<script setup>
+
+</script>

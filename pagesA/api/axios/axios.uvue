@@ -1,0 +1,70 @@
+<template>
+	<t-page>
+		<introduction title='网络请求'>
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				网络请求工具旨在满足常见的HTTP交互需求，提供简洁的POST、GET、PUT、DELETE和UPLOAD方法实现。它专注于核心功能，避免过度复杂化，以便用户能够迅速集成和使用。该库的设计理念是追求实用性和便捷性，确保用户在简单的安装后即可高效地处理日常的请求任务。
+			</t-text>
+		</introduction>
+
+		<introduction title="演示">
+			<t-col main-class="tdb tdr p-20">
+				<t-text>请求地址:https://tool.yundie.xyz/api/</t-text>
+			</t-col>
+		</introduction>
+
+		<introduction title="设置请求方式">
+			<t-radio-group main-class="tdr tdb fl fww" v-model="method" type="p">
+				<t-radio value="GET">GET</t-radio>
+				<t-radio value="POST">POST</t-radio>
+			</t-radio-group>
+		</introduction>
+
+		<introduction title="设置header">
+			<t-view main-class="tdr tdb tdp">
+				<t-text main-class="mb-10">"Content-Type": "application/json"</t-text>
+				<t-text>"appid": config.appSelect</t-text>
+			</t-view>
+		</introduction>
+
+		<introduction title="请求拦截(在请求前组装请求参数)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				const token = state.token
+				const header = config.get('header') as UTSJSONObject
+				header.set('token', token)
+				config.set('header', header)
+			</t-text>
+		</introduction>
+
+		<introduction title="响应拦截(对响应结果处理)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				const resp : UTSJSONObject = res.data as UTSJSONObject
+				const code : Number = resp.getNumber('code') as number
+				if (code == 0) {
+				resolve(resp)
+				} else {
+				const message : string = resp.getString('message') as string
+				reject(new Error(`${message}`))
+				}
+			</t-text>
+		</introduction>
+		<introduction title="设置超时间">
+			<t-slider main-class="tdr tdb h-260 mb-30" direction="horizontal" :min="0" :max="2000" type="p" blockSize="60"
+				:disabled="false" :showValue="true" trackSize="20" v-model="values" />
+		</introduction>
+		<t-button main-class="mltr-30" type="p" @click="test">发送请求</t-button>
+		<t-row main-class="h-30"></t-row>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	const method = ref('POST')
+	const values = ref([1000])
+	function test() {
+		TuiApi('getMemoryUsage', {}).then(res => {
+			uni.showToast({
+				title: '请求成功'
+			})
+		})
+	}
+</script>

@@ -1,0 +1,51 @@
+<template>
+	<t-page title='数字'>
+		<t-card main-class='mlrt-30' title="Number 数字"
+			sub-title="两种字体风格，并允许主题颜色与字体大小的定制，使其在电商促销、金融数据展示等场景中尤为突出，增强了页面的视觉效果和用户交互体验。"></t-card>
+		<introduction title="自定义颜色(覆盖主题)" content-main-class="fl">
+			<t-number main-class="mb-20 s-45 tdb tdr tdp c-blue">200</t-number>
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp c-blue slh-100">300</t-number>
+		</introduction>
+		<introduction title="字体大小">
+			<t-row main-class="faie">
+				<t-number main-class="mb-20 s-45 tdb tdr tdp s-24 c-#ff5500">123</t-number>
+				<t-number type="error" mode='gl' main-class="mb-20 s-45 tdb tdr tdp s-48 c-#0055ff">678</t-number>
+			</t-row>
+		</introduction>
+		<introduction title="基础使用+显示类型">
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp">1234567890-00</t-number>
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp" type="info" size="large">1234567890-00</t-number>
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp" type="primary">1234567890-00</t-number>
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp" type="warning" size="small">1234567890-00</t-number>
+			<t-number mode='gl' main-class="mb-20 s-45 tdb tdr tdp" type="success" size="mini">1234567890-00</t-number>
+			<t-number mode='gl' main-class="s-45 tdb tdr tdp" type="error">1234567890-00</t-number>
+		</introduction>
+		<introduction title="基础使用+显示类型">
+			<t-number main-class="mb-20 s-45 tdb tdr tdp" effect="normal">1234567890-00</t-number>
+			<t-number main-class="mb-20 s-45 tdb tdr tdp" effect="dark" type="info">1234567890-00</t-number>
+			<t-number main-class="mb-20 s-45 tdb tdr tdp" effect="disabled" type="primary">1234567890-00</t-number>
+			<t-number main-class="mb-20 s-45 tdb tdr tdp" effect="light" type="warning">1234567890-00</t-number>
+			<t-number main-class="mb-20 s-45 tdb tdr tdp" effect="plain" type="success">1234567890-00</t-number>
+			<t-number type="error" main-class="mb-20 s-45 tdb tdr tdp">1234567890-00</t-number>
+		</introduction>
+		<t-col main-class='h-50'></t-col>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			}
+		},
+		onLoad() {
+
+		},
+		methods: {
+			onTap(e : UTSJSONObject) {
+				console.log(e)
+			}
+		}
+	}
+</script>

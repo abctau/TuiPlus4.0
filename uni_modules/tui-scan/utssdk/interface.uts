@@ -1,0 +1,16 @@
+export type ScanMode = 'camera' | 'image'
+
+export type ScanDataPosition = {
+	centerX : number,
+	centerY : number
+}
+
+export type ScanData = {
+	value : string,
+	position : ScanDataPosition
+}
+
+export type ScanResult = {
+	data : ScanData[],
+	scanMode : ScanMode
+}

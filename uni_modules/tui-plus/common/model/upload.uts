@@ -1,0 +1,92 @@
+import { getFileDigest } from '../lib/index.uts'
+export async function getTuiUploadOptions(res : ChooseImageSuccess) : Promise<UTSJSONObject[]> {
+	const q = [] as UTSJSONObject[]
+	const getExtension = (filename : string) : string => {
+		const dotIndex = filename.lastIndexOf('.');
+		if (dotIndex == -1 || dotIndex == 0) {
+			return '';
+		}
+		return filename.slice(dotIndex + 1);
+	}
+	for (let i = 0; i < res.tempFilePaths.length; i++) {
+		const tempFiles = res.tempFiles as ChooseImageTempFile[]
+		const path = `${res.tempFilePaths[i]}`
+		const item = {} as UTSJSONObject
+		item.path = path
+		// #ifdef APP
+		item.md5 = await getFileDigest(path)
+		item.type = getExtension(path)
+		// #endif
+		// #ifdef WEB
+		item.md5 = await getFileDigest(tempFiles[i])
+		item.type = getExtension(`${tempFiles[i].name}`)
+		// #endif
+		item.size = parseInt(`${tempFiles[i]['size']}`)
+		item.name = `${tempFiles[i]['name']}`
+		q.push(item)
+	}
+	return q
+}
+export async function getTuiUploadFileOptions(res : ChooseFileSuccess) : Promise<UTSJSONObject[]> {
+	const q = [] as UTSJSONObject[]
+	const getExtension = (filename : string) : string => {
+		const dotIndex = filename.lastIndexOf('.');
+		if (dotIndex == -1 || dotIndex == 0) {
+			return '';
+		}
+		return filename.slice(dotIndex + 1);
+	}
+	// #ifdef APP-ANDROID
+	const fileManager = uni.getFileSystemManager()
+	const cachePath = uni.env.USER_DATA_PATH + 'tui_cache/'
+	try {
+		fileManager.accessSync(cachePath)
+		fileManager.rmdirSync(cachePath, true)
+	} catch (e) {
+
+	}
+	fileManager.mkdirSync(cachePath, false)
+	// #endif
+	for (let i = 0; i < res.tempFiles.length; i++) {
+		const tempFiles = res.tempFiles as ChooseFileTempFile[]
+		const filename = `${tempFiles[i]['name']}`
+		let path = `${res.tempFiles[i].path}`
+		const item = {} as UTSJSONObject
+		// #ifdef APP-ANDROID
+		fileManager.copyFileSync(path, cachePath + filename)
+		path = cachePath + filename
+		// #endif
+		item.path = path
+		// #ifndef WEB
+		item.md5 = await getFileDigest(path)
+		item.type = getExtension(path)
+		// #endif
+		// #ifdef WEB
+		item.md5 = await getFileDigest(tempFiles[i])
+		item.type = getExtension(tempFiles[i].name)
+		// #endif
+		item.size = parseInt(`${tempFiles[i]['size']}`)
+		item.name = filename
+		q.push(item)
+	}
+	return q
+}
+export function TuiChooseImage(dc : number = 9, sourceType : string[] = ['album', 'camera'], sizeType : string[] = ['original', 'compressed']) : Promise<UTSJSONObject[]> {
+	return new Promise((
+		resolve : (res : UTSJSONObject[]) => void,
+		reject : (err : any | null) => void
+	) => {
+		uni.chooseImage({
+			sourceType: [...sourceType],
+			sizeType: [...sizeType],
+			count: dc,
+			success: (res : ChooseImageSuccess) => {
+				getTuiUploadOptions(res).then((rst : UTSJSONObject[]) => {
+					resolve(rst)
+				}).catch((er : any | null) => {
+					reject(er)
+				})
+			}
+		})
+	})
+}

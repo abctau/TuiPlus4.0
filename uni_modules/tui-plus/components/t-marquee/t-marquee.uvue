@@ -1,0 +1,138 @@
+<template>
+	<t-canvas v-bind="extendsAttrs" @initFinished="canvasInit" :main-class="`h-300 ${mainClass}`" />
+</template>
+
+<script setup>
+	/**
+	 * Marquee 跑马灯
+	 * @date 2025-08-15 11:27:01
+	 * @author TanYuan
+	 * @description canvas绘制 用于文本的滚动展示，常用于公告或提示信息。
+	 * @example /pagesA/other/marquee/marquee.uvue
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-marquee.html
+	 * @example /pagesA/other/marquee/marquee.uvue
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} speed 滚动速度(默认：1)
+	 * @property {Number} lineHeight 文本行高(默认：30)
+	 * @property {Boolean} loop 是否循环(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {UTSJSONObject[][]} list 滚动数据配置
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+
+	interface MarqueeProps extends CommonProps {
+		list : UTSJSONObject[][];
+		speed : number;
+		loop : boolean;
+		lineHeight : number
+	}
+
+	const props = withDefaults(defineProps<MarqueeProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as UTSJSONObject[][],
+		speed: 0.5,
+		direction: 'down',
+		loop: true,
+		lineHeight: 30
+	});
+	const { extendsAttrs } = useTuiThemes(props);
+	const emit = defineEmits(['scrollEnd', 'hoverStart', 'hoverEnd']);
+	let drawContext : CanvasContext | null = null;
+	let drawCtx : CanvasRenderingContext2D | null = null;
+	let animationFrameId : number = 0;
+	let offsetX = 0;
+	let offsetY = 0;
+	let isPaused = false;
+	let w : number = 0
+	let h : number = 0
+	let count : number = 0
+
+	function getText(e : number) : UTSJSONObject[] {
+		let len : number = props.list.length
+		let d : UTSJSONObject[] = []
+		if (e < len) {
+			d = props.list[e]
+		} else {
+			const r : number = e % len
+			d = props.list[r]
+		}
+		return d
+	}
+	function drawText(e : UTSJSONObject[], i : number) {
+		const ctx = drawCtx!
+		e.forEach((item : UTSJSONObject) => {
+			const x = (item.getNumber('x') ?? 10) + 10
+			const y = (i * props.lineHeight) + 10 + (offsetY % props.lineHeight)
+			ctx.font = `${item.fontSize ?? 18}px Arial`;
+			ctx.fillStyle = item.color ?? 'red';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(item.getString('text') ?? 'null', x, y);
+		})
+	}
+	function getDrawTexts() : UTSJSONObject[][] {
+		let arr : UTSJSONObject[][] = []
+		const s = Math.floor(Math.abs(offsetY) / props.lineHeight)
+		for (let i = 0; i < count; i++) {
+			arr.push(getText(i + s))
+		}
+		return arr
+	}
+	function draw() {
+		const ctx = drawCtx!
+		ctx.clearRect(0, 0, w, h)
+		const draws = getDrawTexts()
+		draws.forEach((item : UTSJSONObject[], index : number) => {
+			drawText(item, index)
+		})
+		if (animationFrameId != 0) drawContext!.cancelAnimationFrame(animationFrameId);
+		animationFrameId = drawContext!.requestAnimationFrame((_ : number) => {
+			offsetY -= props.speed
+			const resetThreshold = props.list.length * props.lineHeight;
+			if (Math.abs(offsetY) > resetThreshold) {
+				offsetY = offsetY % resetThreshold;
+			}
+			draw()
+		})
+	}
+	function canvasInit(canvasCtx : CanvasContext) {
+		drawContext = canvasCtx
+		drawCtx = canvasCtx.getContext('2d');
+		w = drawCtx?.canvas?.offsetWidth ?? 0
+		h = drawCtx?.canvas?.offsetHeight ?? 0
+		count = Math.ceil(h / props.lineHeight) + 1
+		draw();
+	}
+	onBeforeUnmount(() => {
+		if (animationFrameId != 0) drawContext!.cancelAnimationFrame(animationFrameId);
+	})
+</script>

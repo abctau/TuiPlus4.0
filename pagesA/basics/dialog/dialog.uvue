@@ -1,0 +1,38 @@
+<template>
+	<t-page main-class="p-30">
+		<t-dialog title="提示" direction="bottom" ref="centerDialog">
+			<template #button>
+				<t-button type="p" main-class="mb-30">底部菜单</t-button>
+			</template>
+			<t-view main-class="tdb m-30 p-30 r-50 fc">
+				<t-text main-class="">显示技巧提醒</t-text>
+				<t-icon type="p" name="apple-fill" main-class="s-100 mt-30"></t-icon>
+				<t-text main-class="sfwb s-40 mt-10">你学会了吗？</t-text>
+				<t-text main-class="p-20 sls-2 slh-45 w-80% sta-c" type="i">风格与drawer样式不同的时两边和底部有间隙？风格是否喜欢呢？</t-text>
+				<t-button type="p" main-class="r-100 mt-50 w-80%" @click="show">我知道了哇</t-button>
+			</t-view>
+		</t-dialog>
+		<t-dialog title="提示" direction="center" ref="centerDialog1" :popup-attrs="{'closeable':true}">
+			<template #button>
+				<t-button type="p">中间提示</t-button>
+			</template>
+			<t-view main-class="tdb r-20 fc w-650 p-30">
+				<t-text main-class="">显示技巧提醒</t-text>
+				<t-icon type="p" name="apple-fill" main-class="s-100 mt-30"></t-icon>
+				<t-text main-class="sfwb s-40 mt-10">你学会了吗？</t-text>
+				<t-text main-class="p-20 sls-2 slh-45 w-80% sta-c" type="i">风格与drawer样式不同的时两边和底部有间隙？风格是否喜欢呢？</t-text>
+				<t-button type="p" main-class="r-100 mt-50 w-80%" @click="show1">我知道了哇</t-button>
+			</t-view>
+		</t-dialog>
+	</t-page>
+</template>
+<script setup>
+	const centerDialog = ref<ComponentPublicInstance | null>(null)
+	const centerDialog1 = ref<ComponentPublicInstance | null>(null)
+	function show() {
+		centerDialog.value?.$callMethod('show')
+	}
+	function show1() {
+		centerDialog1.value?.$callMethod('show')
+	}
+</script>

@@ -1,0 +1,173 @@
+export class TuiAnimation {
+	aniConfig : UTSJSONObject = {
+		transformOrigin: "50% 50%",
+		duration: 500,
+		timingFunction: "linear",
+		delay: 0
+	} as UTSJSONObject
+	aniElement : UniElement
+	tranProperty = [] as Array<string>
+	styleProperty = {} as UTSJSONObject
+	transformProperty = {} as UTSJSONObject
+	isEventListener : boolean = false
+	isPlayAni : boolean = false
+	eventCallbackWrapper = null as UniCallbackWrapper | null
+	transitionpropertyLength : number = 0
+	constructor(dom : UniElement, config : UTSJSONObject = {}) {
+		this.aniConfig = {
+			duration: config.getNumber('duration') ?? 400,
+			timingFunction: config.getString('timingFunction') ?? "linear",
+			delay: config.getNumber('delay') ?? 0,
+			transformOrigin: config.getString('transformOrigin') ?? "50% 50%"
+		} as UTSJSONObject
+		this.aniElement = dom
+		if (this.isEventListener) return
+		this.eventCallbackWrapper = this.aniElement.addEventListener('transitionend', this.aniEventListener)
+		this.isEventListener = true
+	}
+	animationQueue = [] as UTSJSONObject[]
+	aniCallback : () => void = () => { }
+	removeEventListener() {
+		if (this.eventCallbackWrapper != null) this.aniElement.removeEventListener('transitionend', this.eventCallbackWrapper as UniCallbackWrapper);
+	}
+	aniEventListener : (e : UniEvent) => void = (_ : UniEvent) => {
+		this.isPlayAni = false
+		// #ifdef WEB
+		this.transitionpropertyLength--
+		if (this.transitionpropertyLength == 0) {
+			this.playAnimation()
+		}
+		// #endif
+		// #ifdef APP
+		this.playAnimation()
+		// #endif
+	}
+	tranSitionEnd(callback : () => void,) {
+		this.aniCallback = callback
+	}
+	reset() : TuiAnimation {
+		this.isPlayAni = false
+		return this
+	}
+	onTranSitionEnd(callback : () => void) { this.tranSitionEnd(callback) }
+	playAnimation() {
+		if (this.isPlayAni) return
+		if (this.animationQueue.length == 0) {
+			this.aniCallback()
+			return
+		}
+		this.isPlayAni = true
+		const aniItem = this.animationQueue[0]
+		this.transitionpropertyLength = (aniItem['tranProperty'] as string[]).length
+		this.aniElement.style.setProperty('transition-property', (aniItem['tranProperty'] as string[]).join(','))
+		this.aniElement.style.setProperty('transform-origin', `${aniItem.getString('aniConfig.transformOrigin')}`)
+		this.aniElement.style.setProperty('transition-duration', `${aniItem.getNumber('aniConfig.duration')}ms`)
+		this.aniElement.style.setProperty('transition-timing-function', `${this.aniConfig['timingFunction']}`)
+		this.aniElement.style.setProperty('transition-delay', `${aniItem.getNumber('aniConfig.delay')}`)
+		const mapstyleProperty = (aniItem['styleProperty'] as UTSJSONObject).toMap()
+		mapstyleProperty.forEach((val, key) => {
+			if (`${key}` == 'opacity') {
+				this.aniElement.style.setProperty(`${key}`, parseFloat(`${val}`))
+			} else {
+				this.aniElement.style.setProperty(`${key}`, `${val}`)
+			}
+		})
+		const tfProperty = [] as string[]
+		const maptransformProperty = (aniItem['transformProperty'] as UTSJSONObject).toMap()
+		maptransformProperty.forEach((val, key) => {
+			tfProperty.push(`${key}(${val})`)
+		})
+		this.aniElement.style.setProperty('transform', tfProperty.join(' '))
+		this.animationQueue.splice(0, 1)
+	}
+	step(e : UTSJSONObject = {}) : TuiAnimation {
+		const duration = e.getNumber('duration') ?? this.aniConfig.getNumber('duration')!
+		const timingFunction = e.getString('timingFunction') ?? this.aniConfig.getString('timingFunction')!
+		const delay = e.getNumber('delay') ?? this.aniConfig.getNumber('delay')!
+		const transformOrigin = e.getString('transformOrigin') ?? this.aniConfig.getString('transformOrigin')!
+		const config = {
+			duration,
+			timingFunction,
+			delay,
+			transformOrigin
+		} as UTSJSONObject
+		const animationItem = {
+			aniConfig: config,
+			tranProperty: [...this.tranProperty],
+			styleProperty: this.styleProperty,
+			transformProperty: this.transformProperty
+		} as UTSJSONObject
+		this.animationQueue.push(animationItem)
+		this.playAnimation()
+		this.export()
+		return this
+	}
+	export() {
+		this.tranProperty = []
+		this.styleProperty = {} as UTSJSONObject
+		this.transformProperty = {} as UTSJSONObject
+	}
+	setAniProperty(prop : string, val : string) : TuiAnimation {
+		if (!this.tranProperty.includes(prop)) this.tranProperty.push(prop)
+		this.styleProperty[prop] = val
+		return this
+	}
+	width(e : string) : TuiAnimation { return this.setAniProperty('width', e) }
+	height(e : string) : TuiAnimation { return this.setAniProperty('height', e) }
+	margin(e : string) : TuiAnimation { return this.setAniProperty('margin', e) }
+	marginTop(e : string) : TuiAnimation { return this.setAniProperty('margin-top', e) }
+	marginBottom(e : string) : TuiAnimation { return this.setAniProperty('margin-bottom', e) }
+	marginLeft(e : string) : TuiAnimation { return this.setAniProperty('margin-left', e) }
+	marginRight(e : string) : TuiAnimation { return this.setAniProperty('margin-right', e) }
+	left(e : string) : TuiAnimation { return this.setAniProperty('left', e) }
+	right(e : string) : TuiAnimation { return this.setAniProperty('right', e) }
+	top(e : string) : TuiAnimation { return this.setAniProperty('top', e) }
+	bottom(e : string) : TuiAnimation { return this.setAniProperty('bottom', e) }
+	padding(e : string) : TuiAnimation { return this.setAniProperty('padding', e) }
+	paddingLeft(e : string) : TuiAnimation { return this.setAniProperty('padding-left', e) }
+	paddingRight(e : string) : TuiAnimation { return this.setAniProperty('padding-right', e) }
+	paddingTop(e : string) : TuiAnimation { return this.setAniProperty('padding-top', e) }
+	paddingBottom(e : string) : TuiAnimation { return this.setAniProperty('padding-bottom', e) }
+	opacity(e : number) : TuiAnimation { return this.setAniProperty('opacity', e.toString()) }
+	backgroundColor(e : string) : TuiAnimation { return this.setAniProperty('background-color', e) }
+	borderColor(e : string) : TuiAnimation { return this.setAniProperty('border-color', e) }
+	borderTopColor(e : string) : TuiAnimation { return this.setAniProperty('border-top-color', e) }
+	borderBottomColor(e : string) : TuiAnimation { return this.setAniProperty('border-bottom-color', e) }
+	borderLeftColor(e : string) : TuiAnimation { return this.setAniProperty('border-left-color', e) }
+	borderRightColor(e : string) : TuiAnimation { return this.setAniProperty('border-right-color', e) }
+	transformOrigin(e : string) : TuiAnimation {
+		this.aniConfig['transformOrigin'] = e
+		return this
+	}
+	timingFunction(e : string) : TuiAnimation {
+		this.aniConfig['timingFunction'] = e
+		return this
+	}
+	delay(e : number) : TuiAnimation {
+		this.aniConfig['delay'] = e
+		return this
+	}
+	setTransformProperty(prop : string, val : string) : TuiAnimation {
+		if (!this.tranProperty.includes('transform')) this.tranProperty.push('transform')
+		this.transformProperty.set(prop, val)
+		return this
+	}
+	rotate(e : number) : TuiAnimation { return this.setTransformProperty('rotate', `${e}deg`) }
+	rotateX(e : number) : TuiAnimation { return this.setTransformProperty('rotateX', `${e}deg`) }
+	rotateY(e : number) : TuiAnimation { return this.setTransformProperty('rotateY', `${e}deg`) }
+	rotateZ(e : number) : TuiAnimation { return this.setTransformProperty('rotateZ', `${e}deg`) }
+	scale(e : number, ...args : number[]) : TuiAnimation {
+		let val : string = `${e}`
+		if (args.length > 0) val += `,${args[0]}`
+		return this.setTransformProperty('scale', val)
+	}
+	scaleX(e : number) : TuiAnimation { return this.setTransformProperty('scaleX', `${e}`) }
+	scaleY(e : number) : TuiAnimation { return this.setTransformProperty('scaleY', `${e}`) }
+	translate(e : string, ...args : string[]) : TuiAnimation {
+		let val : string = `${e}`
+		if (args.length > 0) val += `,${args[0]}`
+		return this.setTransformProperty('translate', val)
+	}
+	translateX(e : string) : TuiAnimation { return this.setTransformProperty('translateX', e) }
+	translateY(e : string) : TuiAnimation { return this.setTransformProperty('translateY', e) }
+}

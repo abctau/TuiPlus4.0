@@ -1,0 +1,114 @@
+<template>
+	<t-picker v-bind="extendsAttrs" :main-class="`${mainClass} m-0 p-0`" :value="valueId" @change="datePickerChange"
+		:show-unit="showUnit">
+		<t-picker-range v-for="(val, key) in dateRange" :key="key" :range="(val[2] as number[])" :unit="`${val[1]}`"
+			:name="`${val[0]}`"></t-picker-range>
+	</t-picker>
+</template>
+<script setup>
+	/**
+	 * PickerDate 日期选择器
+	 * @author TanYuan
+	 * @description 日期选择器组件，用于选择日期和时间，支持配置类型、模式、日期范围、格式化模式和初始值等。
+	 * @property {String} type 选择器类型
+	 * @property {Array<string>} mode 选择器模式，包括年、月、日、时、分、秒
+	 * @property {TuipickerDateRange} range 日期范围
+	 * @property {String} format 日期格式化模式
+	 * @property {String} value 初始日期值
+	 */
+	import { isNumber } from '../../common/model/test'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface PickerDateProps extends CommonProps {
+		showUnit : boolean
+		range : any[][]
+		format : string
+		value : string
+	}
+	const props = withDefaults(defineProps<PickerDateProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		showUnit: true,
+		range: [] as any[][],
+		format: 'yyyy-mm-dd hh:MM:ss',
+		value: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['cancel', 'change'])
+	const valueId = ref<string[]>([])
+	const dateRange = ref<any[][]>([])
+	dateRange.value = props.range
+	function getCurIndex(e : string) : number {
+		return dateRange.value.findIndex((item : any[]) : boolean => {
+			return `${item[0]}` == e
+		})
+
+	}
+	function datePickerChange(e : UTSJSONObject) {
+		const values : string[] = e.getArray<string>('values')!
+		const yx : number = getCurIndex('year')
+		const year : number = parseInt(`${values[yx]}`)
+		const mx = getCurIndex('month')
+		const month : number = parseInt(`${values[mx]}`)
+		const dx = getCurIndex('date')
+		const date = parseInt(`${values[dx]}`)
+		if (date > -1) {
+			nextTick(() => {
+				let dayCount : number = new Date(year, month, 0).getDate()
+				let maxMonth = (dateRange.value[dx][2] as number[])[1] as number
+				if (dayCount != maxMonth) {
+					dateRange.value[dx] = ['date', '日', [1, dayCount]]
+				}
+				if (date <= dayCount) {
+					emit('change', e)
+				}
+			})
+		} else {
+			emit('change', e)
+		}
+	}
+
+	watch(() : string => props.value, (val : string) => {
+		let valData : Date = new Date()
+		if (val != '') {
+			if (isNumber(val)) {
+				valData = new Date(parseInt(val))
+			} else {
+				valData = new Date(val)
+			}
+		}
+		const ids : string[] = []
+		props.range.forEach((item : any[]) => {
+			const type = `${item[0]}`
+			switch (type) {
+				case 'year':
+					ids.push(`${valData.getFullYear()}`)
+					break;
+				case 'month':
+					ids.push(`${valData.getMonth() + 1}`)
+					break;
+				case 'date':
+					ids.push(`${valData.getDate()}`)
+					break;
+				case 'hour':
+					ids.push(`${valData.getHours()}`)
+					break;
+				case 'minute':
+					ids.push(`${valData.getMinutes()}`)
+					break;
+				case 'second':
+					ids.push(`${valData.getSeconds()}`)
+					break;
+				default:
+					break;
+			}
+		})
+		valueId.value = ids
+	}, { immediate: true })
+</script>

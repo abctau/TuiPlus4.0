@@ -1,0 +1,24 @@
+export type QRMODE = {
+	MODE_NUMBER : number
+	MODE_ALPHA_NUM : number
+	MODE_8BIT_BYTE : number
+	MODE_KANJI : number
+}
+
+export type QRErrorCorrectLevel = {
+	L : number
+	M : number
+	Q : number
+	H : number
+}
+
+export type QRMaskPatternType = {
+	PATTERN000 : number
+	PATTERN001 : number
+	PATTERN010 : number
+	PATTERN011 : number
+	PATTERN100 : number
+	PATTERN101 : number
+	PATTERN110 : number
+	PATTERN111 : number
+}

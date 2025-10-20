@@ -1,0 +1,576 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`dr tvg ${mainClass}`">
+		<t-row main-class="fjcb faic h-100 plr-30">
+			<t-row :hover="true" @click="showselect">
+				<t-text main-class="sfwb">{{headerMonth}}</t-text>
+				<t-icon main-class="sfwb faic ml-10 mt-2" name="arrow-down-fill"></t-icon>
+			</t-row>
+			<t-row>
+				<t-text main-class="" :hover="true" @click="updateDraw(now())">今日</t-text>
+				<t-text main-class="ml-30" :hover="true" @click="valueReset">重置</t-text>
+			</t-row>
+		</t-row>
+		<t-drawable @initFinished="drawHeaderInitFinished" main-class="h-70"></t-drawable>
+		<swiper :circular="true" :current="current" :duration="200" :style="contentStyles" @change="swiperChange"
+			@touchmove.stop="touchmove" :disable-touch="disableTouch" :vertical="vertical" ref="calendarSwiperIns"
+			@click="select">
+			<swiper-item>
+				<t-drawable @initFinished="draw0InitFinished" main-class="twh-100%"></t-drawable>
+			</swiper-item>
+			<swiper-item>
+				<t-drawable @initFinished="draw1InitFinished" main-class="twh-100%"></t-drawable>
+			</swiper-item>
+			<swiper-item>
+				<t-drawable @initFinished="draw2InitFinished" main-class="twh-100%"></t-drawable>
+			</swiper-item>
+		</swiper>
+		<t-view main-class="da di-0 tvg" v-if="showMask">
+			<t-row main-class="fjcb faic h-100 plr-30">
+				<t-row :hover="true" @click="showMask=!showMask">
+					<t-text :type="type" main-class="sfwb">{{toosMonth}}</t-text>
+					<t-icon :type="type" main-class="sfwb faic ml-10 mt-2" name="arrow-down-fill"></t-icon>
+				</t-row>
+				<t-stepper main-class="w-250" :type="type" :modelValue="years" @change="stepperChange" effect="l"
+					:max="9999"></t-stepper>
+			</t-row>
+			<t-row main-class="fww fjcb f tdp">
+				<t-view :main-class="`w-30% h-140 fc tdr ${month==i?extendsBackgroundColor:''}`" v-for="i in 12"
+					@click="monthclick(i)" :key="i">
+					<t-text :main-class="month==i?extendsForegroundColor:''">{{i}}</t-text>
+				</t-view>
+			</t-row>
+			<t-row main-class="tdp fc pt-0">
+				<t-button type="e" effect="l" main-class="f mr-30" @click="showMask=!showMask">取消</t-button>
+				<t-button :type="type" main-class="f" @click="confirm">确认</t-button>
+			</t-row>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Calendar 日历
+	 * @date 2025-05-31 12:01:57
+	 * @author TanYuan
+	 * @description 于选择日期的日历组件，支持多种配置，包括悬停效果、类型、绑定值、标题、选中颜色、模式、视图模式、触摸禁用、垂直显示、已选日期、农历显示、显示月份背景、是否仅显示当前月份、节日显示、日期选择范围等。
+	 * @example /pagesA/form/calendar/calendar
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-calendar.html
+	 * @example /pagesA/form/calendar/calendar
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} closeValidate 作为表单子组件使用时是否关闭数据校验
+	 * @value true 是
+	 * @value false 否
+	 * @value true 是
+	 * @value false 否
+	 * @property {Array<string>} modelValue 日历组件的值
+	 * @property {String} title 作为表单子组件时的标题(默认：请选择日期)
+	 * @property {String} activeBackgroundColor 被选中日期的背景色(默认：#f56c6c)
+	 * @property {String} mode=[range|single|multiple] 日期选择模式(默认：range)
+	 * @value range 范围选择
+	 * @value single 单选
+	 * @value multiple 多选
+	 * @property {String} viewMode=[month|week] 日历视图模式(默认：month)
+	 * @value month 月日历
+	 * @value week 周日历
+	 * @property {Boolean} disableTouch 是否禁用触摸事件
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} vertical 是否垂直显示
+	 * @value true 是
+	 * @value false 否
+	 * @property {UTSJSONObject[]} selected 已选日期(默认：[])
+	 * @property {Boolean} lunar 是否显示农历(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showMonthBg 是否显示月份背景(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} monthShowCurrentMonth 是否仅显示当前月份
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} festival 是否显示节日(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} startDate 日期选择范围-开始日期
+	 * @property {String} endDate 日期选择范围-结束日期
+	 * @event {Function} click 点击时触发
+	 * @event {Function} change undefined
+	 * @event {Function} reset undefined
+	 */
+
+	import { CalendarDateType } from '@/uni_modules/tui-plus'
+	import { hexToRgba } from '../../common/model/color'
+	import { useStyle } from "../../common/model/style"
+	import { TuiDrawableContext } from '../../common/model/drawable'
+	import { Calendar } from '../../common/calendar/index.uts'
+	import { timeFormat } from '../../common/model/formart'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface CalendarProps extends CommonProps {
+		closeValidate : boolean
+		hover : boolean
+		type : string
+		modelValue : string[]
+		title : string
+		activeBackgroundColor : string
+		mode : string
+		viewMode : string
+		disableTouch : boolean
+		vertical : boolean
+		selected : UTSJSONObject[]
+		lunar : boolean
+		showMonthBg : boolean
+		monthShowCurrentMonth : boolean
+		festival : boolean
+		startDate : string
+		endDate : string
+	}
+	type CoordsType = {
+		x : number;
+		y : number;
+		width : number;
+		height : number;
+		data : CalendarDateType
+	}
+	const instance = getCurrentInstance()?.proxy!
+	function now() : string {
+		let date = new Date()
+		let year = date.getFullYear()
+		let month = `${date.getMonth() + 1}`.padStart(2, '0')
+		return `${year}-${month}-01`
+	}
+	const calendarSwiperIns = ref<UniElement | null>(null)
+	const draw0Ins = ref<TuiDrawableContext | null>(null)
+	const draw1Ins = ref<TuiDrawableContext | null>(null)
+	const draw2Ins = ref<TuiDrawableContext | null>(null)
+	const calendar = new Calendar()
+	let selectTimers : string[] = []
+	const coords : Map<number, CoordsType[]> = new Map<number, Array<CoordsType>>()
+	const timeData : Map<number, string> = new Map<number, string>()
+	const current = ref<number>(0)
+	const showMask = ref<boolean>(false)
+	const month = ref<number>(0)
+	const years = ref<number>(0)
+	const activeTime = ref<string>(now())
+	const props = withDefaults(defineProps<CalendarProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		closeValidate: false,
+		modelValue: [] as string[],
+		title: '请选择日期',
+		activeBackgroundColor: '#f56c6c',
+		mode: 'range',
+		viewMode: 'month',
+		disableTouch: false,
+		vertical: false,
+		selected: [] as UTSJSONObject[],
+		lunar: true,
+		showMonthBg: true,
+		monthShowCurrentMonth: false,
+		festival: true,
+		startDate: '',
+		endDate: ''
+	});
+	calendar.init(props.startDate, props.endDate)
+	const { extendsAttrs, getBackgroundToValue, extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'click', 'change', 'reset'])
+
+	watch(
+		() : string[] => props.modelValue,
+		(val : string[]) => {
+			selectTimers = val
+			if (props.mode == 'single' && val.length > 0) selectTimers = [val[0]]
+			if (props.mode == 'range' && val.length > 1) selectTimers = [val[0], val[1]]
+		},
+		{ immediate: true }
+	);
+	const toosMonth = computed(() : string => {
+		return timeFormat(`${years.value}-${month.value}-01`, 'yyyy年mm月')
+	})
+	const headerMonth = computed(() : string => {
+		return timeFormat(activeTime.value, 'yyyy年mm月')
+	})
+	const contentStyles = computed(() : string => {
+		let sty : string = props.viewMode == 'week' ? 'h-120' : 'h-720'
+		return useStyle(sty)
+	})
+	function dateComparison(time : string, time1 : string) : boolean {
+		function timehandl(t : string) : number {
+			let arr = t.split('-')
+			return new Date(parseInt(arr[0]), parseInt(arr[1]) - 1, parseInt(arr[2])).getTime()
+		}
+		const s = timehandl(time)
+		const e = timehandl(time1)
+		return s > e
+	}
+	function drawHeader(ctx : TuiDrawableContext) {
+		const date_header_map = ['一', '二', '三', '四', '五', '六', '日']
+		const width = ctx.width
+		const num = date_header_map.length
+		const one_width = width / num
+		ctx.reset()
+		for (let i = 0; i < num; i++) {
+			let box_left = i * one_width + 2
+			let box_width = one_width - 4
+			let box_height = 26
+			// 文本赋值
+			const text = date_header_map[i]
+			let text_left = box_width / 2 + box_left
+			let text_top = box_height / 2 + 8
+			ctx.font = '14'
+			ctx.textAlign = 'center'
+			ctx.fillText(text, text_left, text_top)
+			ctx.update()
+		}
+	}
+	function drawWeek(drawIndex : number, time : string) {
+		try {
+			const ctx = [draw0Ins.value, draw1Ins.value, draw2Ins.value][drawIndex] as TuiDrawableContext
+			const weeks = calendar.getWeeks(time, props.viewMode)
+			const width = ctx.width
+			const height = ctx.height
+			let week_len = weeks.length
+			const one_width = width / weeks[0].length
+			const one_height = height / week_len
+			const get_color = (color : any | null, full_date : string) : string => {
+				if (selectTimers.includes(full_date)) return '#ffffff'
+				if (color != null && color != '') return `${color}`
+				return getBackgroundToValue.value
+			}
+			//重置画布
+			const coord : CoordsType[] = []
+			timeData.set(drawIndex, time)
+			ctx.reset()
+			if (props.viewMode == 'month' && props.showMonthBg) {
+				ctx.font = '180px'
+				ctx.fillStyle = '#f2f2f2'
+				ctx.textAlign = 'center'
+				const nowDate : CalendarDateType = calendar.getDateInfo(time)
+				let month = nowDate.month
+				const cur_month = month < 10 ? '0' + month : month.toString()
+				ctx.fillText(cur_month, ctx.width / 2, ctx.height / 2 + 60)
+			}
+
+			for (let week = 0; week < week_len; week++) {
+				const week_item = weeks[week]
+				for (let day = 0; day < week_item.length; day++) {
+					const day_item = week_item[day]
+					if (day_item.disabled && props.monthShowCurrentMonth) continue;
+					const full_date = day_item.fullDate
+					let day_left = day * one_width + 2
+					let day_top = one_height * week
+					let day_width = one_width - 4
+					let day_height = one_height - 4
+
+					// 文本赋值
+					let text = day_item.date.toString()
+					let text_left = day * one_width + (one_width / 2)
+					let text_top = one_height * week + 25
+					const select_item = props.selected.find((item : UTSJSONObject) : boolean => `${item['date']}` == `${full_date}`)
+
+					ctx.font = '18'
+					ctx.textAlign = 'center'
+
+					// 日期是否禁用
+					if (day_item.disabled) {
+						ctx.fillStyle = '#ccc'
+					} else {
+						const setFontSty = (itemTime : string, activeColor : string, inactiveColor : string, bgColor : string) => {
+							if (selectTimers.includes(itemTime)) {
+								if (bgColor != '') ctx.fillStyle = bgColor
+								ctx.roundFillRect(day_left, day_top, day_width, day_height, 10)
+								ctx.beginPath()
+								ctx.fillStyle = activeColor
+							} else {
+								if (props.mode == 'range') {
+									if (selectTimers.length == 2) {
+										if (dateComparison(itemTime, selectTimers[0]) && dateComparison(selectTimers[1], itemTime)) {
+											ctx.fillStyle = hexToRgba(bgColor, 0.1)
+											ctx.roundFillRect(day_left, day_top, day_width, day_height, 10)
+											ctx.beginPath()
+											ctx.fillStyle = bgColor
+										} else {
+											ctx.fillStyle = inactiveColor
+										}
+									} else {
+										ctx.fillStyle = inactiveColor
+									}
+								} else {
+									ctx.fillStyle = inactiveColor
+								}
+							}
+						}
+						// 是否为今天
+						if (day_item.is_today) {
+							setFontSty(day_item.fullDate, '#fff', 'red', getBackgroundToValue.value)
+						} else {
+							// 是否为选中
+							setFontSty(day_item.fullDate, '#fff', '#333', getBackgroundToValue.value)
+						}
+
+						// 第一次渲染获取数据
+						// 存储坐标组，用于点击事件
+						const coordsitem : CoordsType = {
+							x: day_left,
+							y: day_top,
+							width: day_width,
+							height: day_height,
+							data: day_item
+						}
+						coord.push(coordsitem)
+						coords.set(drawIndex, coord)
+					}
+					ctx.fillText(text, text_left, text_top)
+					text = day_item.IDayCn
+					if (props.festival) text = calendar.getFestival(day_item)
+					if (day_item.is_today) text = '今天'
+					let lunar_left = day * one_width + (one_width / 2)
+					let lunar_top = one_height * week + 42
+					ctx.font = '12'
+					ctx.textAlign = 'center'
+
+					//判断是否有selectedt配置
+
+					if (select_item != null) {
+						if (select_item['info'] != null && select_item['info'] != '') {
+							ctx.fillStyle = get_color(select_item['infoColor'], full_date)
+							ctx.fillText(`${select_item['info']}`, lunar_left, lunar_top)
+						}
+						//绘制顶部信息
+						if (select_item['topInfo'] != null && select_item['topInfo'] != '') {
+							ctx.fillStyle = get_color(select_item['topInfoColor'], full_date)
+							ctx.fillText(`${select_item['topInfo']}`, lunar_left, lunar_top - 35)
+						}
+						//绘制顶部信息
+						if ((select_item['badge'] as boolean)) {
+							let radio = 5
+							if (select_item['badgeInfo'] != null && select_item['badgeInfo'] != '') radio = 8
+							ctx.arc(lunar_left + 15, lunar_top - 30, radio, 0, Math.PI * 2, false);
+							ctx.fillStyle = get_color(select_item['badgeColor'], '0')
+							ctx.fill();
+							ctx.closePath();
+							if (select_item['badgeInfo'] != null) {
+								ctx.beginPath()
+								ctx.font = '8'
+								ctx.fillStyle = '#ffffff'
+								ctx.fillText(`${select_item['badgeInfo']}`, lunar_left + 15, lunar_top - 28)
+							}
+							ctx.stroke()
+						}
+					} else {
+						//是否显示太农历
+						if (props.lunar) ctx.fillText(text, lunar_left, lunar_top)
+					}
+				}
+			}
+			ctx.update()
+		} catch (error) {
+			//TODO handle the exception
+		}
+	}
+	function addMonths(dateStr : string, months : number) {
+		let date = new Date(dateStr);
+		date.setMonth(date.getMonth() + months);
+		let year = date.getFullYear();
+		let month = `${date.getMonth() + 1}`.padStart(2, '0');
+		let day = `${date.getDate()}`.padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+	function updateDraw(t : string) {
+		if (current.value == 0) {
+			drawWeek(0, t)
+			drawWeek(1, addMonths(t, 1))
+			drawWeek(2, addMonths(t, -1))
+		}
+		if (current.value == 1) {
+			drawWeek(0, addMonths(t, -1))
+			drawWeek(1, t)
+			drawWeek(2, addMonths(t, 1))
+		}
+		if (current.value == 2) {
+			drawWeek(0, addMonths(t, 1))
+			drawWeek(1, addMonths(t, -1))
+			drawWeek(2, t)
+		}
+		activeTime.value = t
+	}
+	function touchmove(e : UniTouchEvent) {
+		e.preventDefault()
+	}
+	function selectListFormat(time : string) {
+		switch (props.mode) {
+			case 'single':
+				selectTimers = [time]
+				break;
+			case 'multiple':
+				const isDoes = (item : string) : boolean => item == time;
+				let k : number = selectTimers.findIndex(isDoes)
+				if (k == -1) {
+					selectTimers.push(time)
+				} else {
+					selectTimers.splice(k, 1)
+				}
+				break;
+			case 'range':
+				switch (selectTimers.length) {
+					case 1:
+						if (time == selectTimers[0]) {
+							selectTimers.splice(0, 1)
+							return
+						}
+						selectTimers.push(time)
+						break;
+					case 2:
+						if (time == selectTimers[0]) {
+							selectTimers.splice(0, 1)
+							return
+						}
+						if (time == selectTimers[1]) {
+							selectTimers.splice(1, 1)
+							return
+						}
+
+						if (dateComparison(time, selectTimers[0])) {
+							selectTimers[1] = time
+						} else {
+							selectTimers[0] = time
+						}
+						break;
+					default:
+						selectTimers = [time]
+						break;
+				}
+				break;
+		}
+		selectTimers.sort((a : string, b : string) : number => {
+			return dateComparison(a, b) ? 1 : -1
+		});
+	}
+
+	function clickGrid(x : number, y : number) {
+		if (coords.size == 0) return
+		const gridArray = coords.get(current.value) as Array<CoordsType>
+		for (let i = 0; i < gridArray.length; i++) {
+			const grid = gridArray[i]
+			const max_x = grid.x + grid.width
+			const max_y = grid.y + grid.height
+			const is_x_limit = grid.x < x && x < max_x
+			const is_y_limit = grid.y < y && y < max_y
+			const is_select = is_x_limit && is_y_limit
+			if (is_select) {
+				const data = grid.data
+				activeTime.value = data.fullDate
+				selectListFormat(activeTime.value)
+				drawWeek(current.value, activeTime.value)
+				emit('click', calendar.getDateInfo(data.fullDate))
+				emit('update:modelValue', selectTimers)
+				emit('change', selectTimers)
+			}
+		}
+	}
+	function select(e : UniPointerEvent) {
+		if (props.disabled) return
+		const el = calendarSwiperIns.value!
+		el.getBoundingClientRectAsync()!.then((rect : DOMRect) => {
+			const dom_x = rect.x
+			const dom_y = rect.y
+			// #ifdef MP-WEIXIN
+			const clientX = e.changedTouches[0].clientX;
+			const clientY = e.changedTouches[0].clientY
+			// #endif
+			// #ifndef MP-WEIXIN
+			const clientX = e.clientX
+			const clientY = e.clientY
+			// #endif
+			const x = clientX - dom_x
+			const y = clientY - dom_y
+			clickGrid(x, y)
+		})
+	}
+
+
+	function confirm() {
+		activeTime.value = timeFormat(`${years.value}-${month.value}-01`)
+		updateDraw(activeTime.value)
+		showMask.value = !showMask.value
+	}
+	function monthclick(e : number) {
+		month.value = e
+	}
+	function stepperChange(e : number) {
+		years.value = e
+	}
+	function showselect() {
+		const t = calendar.getDateInfo(activeTime.value)
+		years.value = t.year
+		month.value = t.month
+		showMask.value = !showMask.value
+	}
+	function valueReset() {
+		selectTimers = []
+		updateDraw(now())
+		emit('update:modelValue', selectTimers)
+		emit('change', selectTimers)
+		emit('reset')
+	}
+	function swiperChange(e : UniSwiperChangeEvent) {
+		const cur = e.detail.current
+		current.value = cur
+		const t = timeData.get(cur)!
+		activeTime.value = t
+		if (cur == 0) {
+			drawWeek(1, addMonths(t, 1))
+			drawWeek(2, addMonths(t, -1))
+		}
+		if (cur == 1) {
+			drawWeek(0, addMonths(t, -1))
+			drawWeek(2, addMonths(t, 1))
+		}
+		if (cur == 2) {
+			drawWeek(0, addMonths(t, 1))
+			drawWeek(1, addMonths(t, -1))
+		}
+	}
+	function drawHeaderInitFinished(ctx : TuiDrawableContext) {
+		drawHeader(ctx)
+	}
+	function draw0InitFinished(ctx : TuiDrawableContext) {
+		draw0Ins.value = ctx
+		activeTime.value = selectTimers.length > 0 ? selectTimers[0] : now()
+		drawWeek(0, activeTime.value)
+	}
+	function draw1InitFinished(ctx : TuiDrawableContext) {
+		draw1Ins.value = ctx
+		drawWeek(1, addMonths(activeTime.value, 1))
+	}
+	function draw2InitFinished(ctx : TuiDrawableContext) {
+		draw2Ins.value = ctx
+		drawWeek(2, addMonths(activeTime.value, -1))
+	}
+</script>

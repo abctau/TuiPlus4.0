@@ -1,0 +1,90 @@
+<template>
+	<t-page title='上传' main-class="p-30">
+		<t-card main-class="mb-30" title='图片上传'
+			sub-title="支持宝云扩展存储上传,可判断是否重复上传,节省扩展存储空间,上传逻辑需要自己编写,组件返回上传列表和文件文件哈希值,这里演示的是阿里云扩展存储上传文件,详细实现见模版个人资料头像上传"></t-card>
+		<t-section main-class="mb-30" title="支持宝云扩展存储上传说明"></t-section>
+		<t-col main-class="mb-30 tdb tdp tdr">
+			<t-text main-class="slh-55">1:选择文件，获取文件MD5校验值并返回本地缓存地址，前端采用缓存地址渲染图片</t-text>
+			<t-text main-class="slh-55">2:请求支付宝扩展存储获取授权和服务端存储路径</t-text>
+			<t-text main-class="slh-55">3:当用户提交表单或者提交表单时后台上传图片，这样可以不用等待上传结果卡界面</t-text>
+			<t-text main-class="slh-55">4:异步返回上传回调</t-text>
+		</t-col>
+		<t-section main-class="mb-30" title="基础功能-type"></t-section>
+		<t-col main-class="tdb tdp tdr fww">
+			<t-upload main-class="mrb-30" v-model="images" :count="3"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" type="success"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" type="info"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" type="warning"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" type="error"></t-upload>
+		</t-col>
+		<t-section main-class="mb-30" title="基础功能-effect"></t-section>
+		<t-row main-class="tdb tdp tdr fww">
+			<t-upload main-class="mrb-30" v-model="images" effect="normal" :count="3" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" effect="dark" :count="3" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" effect="disabled" :count="3" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" effect="light" :count="3" type="primary"></t-upload>
+		</t-row>
+		<t-section main-class="mb-30" title="基础功能-size"></t-section>
+		<t-row main-class="tdb tdp tdr fww mb-30">
+			<t-upload main-class="mrb-30" v-model="images" :count="3" size="large" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" size="medium" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" size="small" type="primary"></t-upload>
+			<t-upload main-class="mrb-30" v-model="images" :count="3" size="mini" type="primary"></t-upload>
+		</t-row>
+		<t-section main-class="mb-30" title="禁用关闭"></t-section>
+		<t-row main-class="tdb tdp tdr mb-30">
+			<t-upload v-model="images" :closed="false"></t-upload>
+		</t-row>
+		<t-section main-class="mb-30" title="禁用预览"></t-section>
+		<t-row main-class="tdb tdp tdr mb-30">
+			<t-upload v-model="images" :closed="false" :previewImage="false"></t-upload>
+		</t-row>
+		<t-section main-class="mb-30" title="状态"></t-section>
+		<t-col main-class="tdb tdp tdr mb-30">
+			<t-upload v-model="images2" main-class="mb-30" state-box-class="bg-rgba(0,0,0,0.8)"></t-upload>
+			<t-upload v-model="images2"></t-upload>
+		</t-col>
+		<t-section main-class="mb-30" title="自定义尺寸"></t-section>
+		<t-col main-class="tdb tdp tdr mb-30">
+			<t-upload v-model="images1" item-box-class="w-100% h-360 r-10" :count="1" :max-size="300">
+				<template #icon>
+					<t-image src="/pagesA/static/image/mqplavqy.png" :placeholder="true" main-class="twh-100%"></t-image>
+				</template>
+			</t-upload>
+		</t-col>
+		<t-button main-class="m-30" type='s' @click="submit">点提交表单后台开始上传，提升用户体验</t-button>
+		<t-row main-class="h-30"></t-row>
+	</t-page>
+</template>
+<script>
+	import { TuiApi } from '@/api/uriApi'
+	export default {
+		data() {
+			return {
+				images1: [] as string[],
+				images: [
+					{ url: '/pagesA/static/image/6527ae979850d.jpg' },
+					{ url: '/pagesA/static/image/65275c9ac3b1d.jpg' },
+					{ url: '/pagesA/static/image/652769fa89bcf.jpg' },
+				] as UTSJSONObject[],
+				images2: [
+					{ url: '/pagesA/static/image/6527ae979850d.jpg', status: { icon: 'warning', text: '文件超限' } },
+					{ url: '/pagesA/static/image/65275c9ac3b1d.jpg', status: { text: '上传中' } },
+					{ url: '/pagesA/static/image/652769fa89bcf.jpg', status: { text: '上传完成' } },
+				] as UTSJSONObject[]
+			};
+		},
+		methods: {
+			submit() {
+				const uploadList = this.images.filter((item : UTSJSONObject) : boolean => {
+					return (item.path != '' && item.path != null)
+				})
+				//获取上传
+				TuiApi('getUploadFileOptionsplus', { list: uploadList }).then(res => {
+					console.log(res)
+				})
+			}
+		}
+	}
+</script>

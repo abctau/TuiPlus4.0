@@ -1,0 +1,163 @@
+<template>
+	<t-lazy>
+		<t-popup direction="bottom" :type="type" ref='keybordpopup' :closeable="false">
+			<t-view main-class="tpg r-30rpx,30rpx,0rpx,0rpx">
+				<t-view main-class="h-80 fc">
+					<t-text main-class="sfwb">安全键盘</t-text>
+				</t-view>
+				<t-row v-if="mode=='car'" main-class="p-30 fc">
+					<template v-for="i in 8" :key="i">
+						<t-view
+							:main-class="`tdr twh-75 bs fc mr-10 ${carNumbers[i-1]=='bc-'+inactiveColor?'':'bc-'+getBackgroundToValue} ${current==i-1?'bc-red':''} ${current<7 && i==8?'bc-green':''} bw-2px `"
+							@click="selectitem(i)">
+							<t-text v-if="i==8&&carLen<8" main-class="sfwb s-20">新能源</t-text>
+							<t-text v-else>{{carNumbers[i-1]}}</t-text>
+						</t-view>
+						<t-text main-class="sfwb mr-10" v-if="i==2">•</t-text>
+					</template>
+				</t-row>
+				<t-keyboard-car v-if="mode=='car'" ref="stateChange" main-class="p-30" :type="type" @input="carInput"
+					@back="carBack"></t-keyboard-car>
+				<t-keybord-idcard v-if="mode=='idcard'" main-class="p-30" :type="type" @back="carBack" @input="carInput"
+					@confirm="carConfirm"></t-keybord-idcard>
+				<t-keybord-number v-if="mode=='number'" main-class="p-30" :type="type" @back="carBack" @input="carInput"
+					@confirm="carConfirm"></t-keybord-number>
+				<t-row v-if="mode=='car'" main-class="fjcb plrb-30">
+					<t-button :type="type" main-class="f mr-15" :size="size" effect="light"
+						@click="carCancel">取消</t-button>
+					<t-button :type="type" main-class="f mr-15" :size="size" effect="light"
+						@click="carClear">清空</t-button>
+					<t-button :type="type" main-class="f" :size="size" @click="carConfirm">确认</t-button>
+				</t-row>
+			</t-view>
+		</t-popup>
+	</t-lazy>
+</template>
+<script setup>
+	/**
+	 * Keyboard 自定义键盘
+	 * @date 2025-05-31 12:04:12
+	 * @author TanYuan
+	 * @description 支持车牌键盘-数字键盘-身份证键盘
+	 * @example /pagesA/layout/keyboard/keyboard
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-keyboard.html
+	 * @example /pagesA/layout/keyboard/keyboard
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：s)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[car|number|idcard] 键盘类型(默认：car)
+	 * @value car 车牌键盘
+	 * @value number 数字键盘
+	 * @value idcard 身份证键盘
+	 * @property {String} inactiveColor 键盘未激活时的颜色(默认：#E4E7ED)
+	 * @property {String} activeColor 键盘激活时的颜色
+	 * @event {Function} cancel 点击取消时触发
+	 * @event {Function} clear 清除按钮时触发
+	 * @event {Function} confirm 点击确认时触发
+	 * @event {Function} input 输入时触发
+	 * @event {Function} back 后退时触发
+	 * @event {Function} close 关闭时触发
+	 */
+	import { isChinese } from '../../common/model/test'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+	interface KeyboardProps extends CommonProps {
+		type : string
+		mode : string
+		value : string[]
+		inactiveColor : string
+		activeColor : string
+	}
+	const stateChange = ref<ComponentPublicInstance | null>(null)
+	const keybordpopup = ref<ComponentPublicInstance | null>(null)
+	const props = withDefaults(defineProps<KeyboardProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: 'car',
+		value: [] as string[],
+		inactiveColor: '#E4E7ED',
+		activeColor: '',
+	});
+	const { getBackgroundToValue } = useTuiThemes(props)
+	const emit = defineEmits(['cancel', 'clear', 'confirm', 'input', 'back', 'close'])
+	const carNumbers = ref<string[]>(['', '', '', '', '', '', '', ''])
+	const current = ref<number>(0)
+	const carLen = computed(() : number => {
+		return carNumbers.value.join('').length
+	})
+	function show() {
+		keybordpopup.value?.$callMethod('show')
+	}
+	function selectitem(i : number) {
+		current.value = i - 1
+		if (current.value == 0) {
+			stateChange.value?.$callMethod('stateChange', true)
+		} else {
+			stateChange.value?.$callMethod('stateChange', false)
+		}
+	}
+	function carCancel() {
+		emit('cancel')
+		show()
+	}
+	function carClear() {
+		emit('clear')
+		if (props.mode == 'car') {
+			current.value = 0
+			carNumbers.value = ['', '', '', '', '', '', '', ''];
+			stateChange.value?.$callMethod('stateChange', true)
+		}
+	}
+	function carConfirm() {
+		emit('confirm', carNumbers.value.join())
+		show()
+	}
+	function carInput(e : string) {
+		emit('input', e)
+		if (isChinese(e)) {
+			carNumbers.value[0] = e
+			current.value = 1
+		} else {
+			carNumbers.value[current.value] = e
+			if (current.value < 7) current.value++
+		}
+	}
+	function carBack() {
+		if (props.mode == 'car') {
+			if (carLen.value > 0 && carLen.value <= 8) {
+				carNumbers.value[current.value] = ''
+				if (current.value > 0) current.value--
+			}
+			if (carLen.value < 2) {
+				stateChange.value?.$callMethod('stateChange', true)
+			}
+		}
+	}
+	defineExpose({ show })
+</script>

@@ -1,0 +1,17 @@
+<template>
+	<t-page>
+		<t-card title="UTS图表" main-class="mltr-30"
+			sub-title="为 uniappx 量身定制的纯 UTS 图表引擎,这里只做了显示图表。和图表交互详细使用示例请见图表专用插件地址https://ext.dcloud.net.cn/plugin?id=21107"></t-card>
+		<t-card type="error" title="⭐ 重磅革新：单 Canvas 绘制多图表，性能飞跃" main-class="m-30"></t-card>
+		<toos-list :toos="xtoos"></toos-list>
+	</t-page>
+</template>
+<script setup>
+	import { TuiApi } from '@/api'
+	const xtoos = ref<UTSJSONObject[]>([])
+	onLoad((_) => {
+		TuiApi('xchartsTablesplus', {}, true).then((res : UTSJSONObject) => {
+			xtoos.value = res['data'] as UTSJSONObject[]
+		})
+	})
+</script>

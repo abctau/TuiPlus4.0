@@ -1,0 +1,215 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`tvg tdp-${size},,lrt dr ${mainClass}`">
+		<t-view>
+			<t-text type="info">{{title}}</t-text>
+			<t-text main-class="slhm-2">{{subTitle}}</t-text>
+		</t-view>
+		<t-view main-class="h-400 mt-10">
+			<t-canvas main-class="twh-100%" @initFinished="initFinished"></t-canvas>
+			<t-canvas :main-class="`da dl-${tranX}px dt-0 twh-100%`" @initFinished="blockInitFinished"></t-canvas>
+		</t-view>
+		<t-gesture main-class="faic fl dr h-100" @tuiTouchstart="touchmove" @tuiTouchmove="touchmove"
+			@tuiTouchend="touchend" @initFinished="barInitFinished">
+			<t-view main-class="bg-#ebebeb r-50 h-25 w-100%" />
+			<t-button v-bind="extendsAttrs" :left-icon="success?'checkboxs-circle-line':'arrow-right-double'"
+				:main-class="`ocr-g h-60 da r-150 w-45px attx-${moveX}px`"
+				:left-icon-class="`sfwb ${success?'ats-1.2':''}`" text-class="m-0"></t-button>
+		</t-gesture>
+		<t-icon name="closes-circle-fill" v-bind="extendsAttrs" main-class="da drt-20 ats-1.5"></t-icon>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * VerifyPuzzle 拼图验证
+	 * @date 2025-08-15 14:22:31
+	 * @author TanYuan
+	 * @description 纯前端验证，用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!
+	 * @example /pagesA/form/verify-puzzle/verify-puzzle.uvue
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-verify-puzzle.html
+	 * @example /pagesA/form/verify-puzzle/verify-puzzle.uvue
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {string[]} imgs 图片列表(默认：[] as string[])
+	 * @property {Number} blockSize 拼图滑块大小(默认：42)
+	 * @property {Number} blockRadius 滑块圆角(默认：10)
+	 * @property {Number} verifyRange 误差范围(默认：5)
+	 * @property {String} title 标题(默认：安全验证)
+	 * @property {String} subTitle 副标题(默认：拖动下方滑块完成拼图)
+	 * @event {Function} verify 触发验证时触发
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getRandomInt } from '../../common/model/util.uts';
+	interface VerifyPuzzleProps extends CommonProps {
+		imgs : string[]
+		blockRadius : number
+		blockSize : number
+		verifyRange : number
+		title : string
+		subTitle : string
+	}
+	const props = withDefaults(defineProps<VerifyPuzzleProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		imgs: [] as string[],
+		blockRadius: 10,
+		blockSize: 42,
+		verifyRange: 5,
+		title: '安全验证',
+		subTitle: '拖动下方滑块完成拼图'
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['verify'])
+	let bgCtx : CanvasRenderingContext2D | null = null
+	let bgContext : CanvasContext | null = null
+	let blockCtx : CanvasRenderingContext2D | null = null
+	let blockContext : CanvasContext | null = null
+	let blockX : number = 0
+	let blockY : number = 0
+	let images : Image[] = []
+	let cacheX : number = 0
+	const success = ref<boolean>(false)
+	const tranX = ref<number>(0)
+	let moveX = ref<number>(0)
+	let maxW : number = 0
+	function draw(
+		ctx : CanvasRenderingContext2D,
+		x : number,
+		y : number,
+		l : number,
+		r : number,
+		operation : "fill" | "clip",
+	) {
+		const PI = Math.PI;
+		ctx.save();
+		ctx.beginPath();
+		ctx.moveTo(x, y);
+		ctx.arc(x + l / 2, y - r + 2, r, 0.72 * PI, 2.26 * PI);
+		ctx.lineTo(x + l, y);
+		ctx.arc(x + l + r - 2, y + l / 2, r, 1.21 * PI, 2.78 * PI);
+		ctx.lineTo(x + l, y + l);
+		ctx.lineTo(x, y + l);
+		ctx.arc(x + r - 2, y + l / 2, r + 0.4, 2.76 * PI, 1.24 * PI, true);
+		ctx.lineTo(x, y);
+		ctx.lineWidth = 2;
+		ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+		ctx.stroke();
+		if (operation == 'fill') {
+			ctx.fill()
+		} else {
+			ctx.clip()
+		}
+		ctx.globalCompositeOperation = "destination-over";
+	}
+	function init() {
+		const l = props.blockSize
+		const r = props.blockRadius
+		const L = l + r * 2 + 3;
+		const ctx = bgCtx!
+		const bctx = blockCtx!
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		blockX = getRandomInt(L + 10, w - (L + 10));
+		blockY = getRandomInt(10 + r * 2, h - (L + 10));
+		draw(ctx, blockX, blockY, l, r, "fill");
+		draw(bctx, blockX, blockY, l, r, "clip");
+		const img : Image = images[getRandomInt(0, images.length - 1)]
+		bctx.restore();
+		ctx.drawImage(img, 0, 0, w, h);
+		tranX.value = -blockX
+		cacheX = -blockX
+	}
+	function reset() {
+		moveX.value = 0
+		const ctx = bgCtx!
+		const bctx = blockCtx!
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		ctx.clearRect(0, 0, w, h);
+		bctx.clearRect(0, 0, w, h);
+		init()
+	}
+	function barInitFinished(rect : NodeInfo) {
+		maxW = rect.width! - 45
+	}
+	function touchend(e : TuiTouchEvent) {
+		if (Math.abs(blockX - moveX.value) < props.verifyRange) {
+			success.value = true
+			emit("verify", true);
+		} else {
+			success.value = false
+			emit("verify", false);
+			reset()
+		}
+	}
+	function touchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		let d = e.offsetX - 23
+		if (d < 0) d = 0
+		if (d > maxW) d = maxW
+		moveX.value = d
+		tranX.value = cacheX + d
+	}
+	function getDrawImage(src : string) : Promise<Image> {
+		return new Promise((
+			resolve : (res : Image) => void,
+		) => {
+			const con = bgContext!
+			let image = con.createImage();
+			// #ifdef WEB
+			(image as any).crossOrigin = 'anonymous';
+			// #endif
+			image.src = src;
+			image.onload = () => {
+				resolve(image)
+			};
+		})
+	}
+	function blockInitFinished(e : CanvasContext) {
+		blockContext = e
+		blockCtx = e.getContext('2d')
+	}
+	function initFinished(e : CanvasContext) {
+		bgContext = e
+		bgCtx = e.getContext('2d')
+		const cacheImages : Promise<Image>[] = props.imgs.map((src : string) : Promise<Image> => {
+			return getDrawImage(src)
+		});
+		Promise.all(cacheImages).then((imgs : Image[]) => {
+			images = imgs
+			init()
+		})
+	}
+	defineExpose({
+		reset
+	})
+</script>

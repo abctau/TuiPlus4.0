@@ -1,0 +1,112 @@
+<template>
+	<t-text :mainClass="badgeStyles" @click="mainOnclick">{{textFormart}}</t-text>
+</template>
+
+<script setup>
+	/**
+	 * Badge 微标
+	 * @date 2025-05-31 12:01:45
+	 * @author TanYuan
+	 * @description 徽标组件用于显示数量提示或状态标识，支持多种尺寸、颜色和样式自定义，可显示数字、圆点或自定义内容，并支持数字溢出处理和零值显示控制。
+	 * @example /pagesA/basics/badge/badge
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-badge.html
+	 * @example /pagesA/basics/badge/badge
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} text 显示的值
+	 * @property {Boolean} dot 是否显示为圆点
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} max 最大值(默认：99)
+	 * @property {String} mode=[overflow|ellipsis|limit] 显示的模式(默认：overflow)
+	 * @value overflow 超过最大值后显示+
+	 * @value ellipsis 以...的形式显示
+	 * @value limit 数据的显示，显示如4.15K 4.15w
+	 * @event {Function} click 点击时触发
+	 */
+	import { isNumber } from '../../common/model/test'
+	import { TuiGetMeasureText } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface BadgeProps extends CommonProps {
+		text : string
+		size : string
+		dot : boolean
+		max : number
+		mode : string
+	}
+	const props = withDefaults(defineProps<BadgeProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: 'mini',
+		mainClass: '',
+		nativeClass: '',
+		text: '',
+		dot: false,
+		max: 99,
+		mode: 'overflow',
+	});
+	const { getFontSizeToValue, extendsSfcb } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+	const textFormart = computed(() : string => {
+		if (props.dot) return ''
+		if (isNumber(props.text)) {
+			let txt = props.text
+			const val = parseFloat(props.text)
+			const type : string = props.mode
+			if (type == "overflow" && val > props.max) txt = `${props.max}+`
+			if (type == "ellipsis" && val > props.max) txt = '...'
+			if (type == "limit") {
+				txt = val > 999 ? val >= 9999 ? Math.floor(val / 1e4 * 100) / 100 + "w" : Math.floor(val / 1e3 * 100) / 100 + "k" : txt
+			}
+			return `${txt}`
+		} else {
+			return props.text
+		}
+	})
+	const badgeStyles = computed(() : string => {
+		const w : number = TuiGetMeasureText(textFormart.value, getFontSizeToValue.value) + 8
+		let sty = `fc r-100 sta-c w-${w}px `
+		if (props.dot) sty += `twhr-${getFontSizeToValue.value}px `
+		sty += `${extendsSfcb.value} ${props.mainClass} `
+		return sty
+	})
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+</script>

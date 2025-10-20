@@ -1,0 +1,166 @@
+<template>
+	<t-view main-class="twh-100% bg-#efefef">
+		<t-list main-class="tw-100% f atr-180" :loadmore="false" :refresher-enabled="false" @touchstart="touchstart">
+			<t-list-item v-for="(item,index) in messages" :key="index" main-class="atr-180">
+				<t-view :main-class="`fl tdp ${item.getNumber('type')==1?'':'atsx-n1'}`">
+					<t-avatar :src="`${item.avatar}`"
+						:main-class="`twh-80 mr-10 ${item.getNumber('type')==1?'':'atsx-n1'}`"></t-avatar>
+					<t-view main-class="fais">
+						<t-text type="info"
+							:main-class="`mb-20 ${item.getNumber('type')==1?'':'atsx-n1'}`">{{item.username}}</t-text>
+						<t-text
+							:main-class="`bg-#fff tdr plr-20 ptb-10 wl-500 slh-40 ${item.getNumber('type')==1?'':'atsx-n1'}`">{{item.message}}</t-text>
+					</t-view>
+				</t-view>
+			</t-list-item>
+		</t-list>
+		<t-view main-class="dlbr-0 bg-#F7F7F7">
+			<t-row main-class="ptb-20 faic plr-30">
+				<t-icon name="im-yuyin" main-class="s-46 sfwb"></t-icon>
+				<t-input main-class="f mlr-25" v-model="msg"></t-input>
+				<t-icon name="im-biaoqing" main-class="s-46 sfwb mr-25" @click="showMeo"></t-icon>
+				<t-view main-class="ov">
+					<t-button v-if="msg.length>0" type="s" main-class="w-80" @click="send" size="mini">发送</t-button>
+					<t-icon v-else name="plus-circle" main-class="s-46 sfwb" @click="showFile"></t-icon>
+				</t-view>
+			</t-row>
+			<t-view v-show="file_show" main-class="h-400">
+				<t-grid :column="4">
+					<t-grid-item label="图片" icon-class="s-60" icon="im-xiangce"></t-grid-item>
+					<t-grid-item label="视频" icon-class="s-60" icon="im-shipintianchong"></t-grid-item>
+					<t-grid-item label="文件" icon-class="s-56" icon="im-a-wenjianjiawenjian"></t-grid-item>
+				</t-grid>
+			</t-view>
+			<t-list :loadmore="false" :refresherEnabled="false" main-class="h-400" v-show="meo_show">
+				<t-list-item main-class="fl plr-30 fjcc" v-for="(item,index) in comlists" :key="index">
+					<t-text :hover="true" v-for="(k,i) in item" :index="i" @click="addEmo(k)"
+						main-class="s-50 sls-5 slh-80">{{k}}</t-text>
+				</t-list-item>
+			</t-list>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	import { emo } from "./emo.uts"
+	const emo_list : string[][] = []
+	let emo_split = emo.split(',')
+	const len = emo_split.length
+	for (let i = 0; i < len; i += 10) {
+		emo_list.push(emo_split.slice(i, i + 10))
+	}
+	const comlists = ref<string[][]>(emo_list)
+	const file_show = ref<boolean>(false)
+	const meo_show = ref<boolean>(false)
+	const msg = ref<string>('')
+	const messages = ref<UTSJSONObject[]>([
+		// 用户消息
+		{
+			type: 1,
+			username: '张三',
+			avatar: 'https://picsum.photos/seed/user1/100/100.jpg',
+			message: '你好，请问这款手机什么时候发货？我上周下的单。',
+			timestamp: '2023-11-01 10:15:23'
+		},
+		// 客服消息
+		{
+			type: 2,
+			username: '客服小李',
+			avatar: 'https://picsum.photos/seed/support1/100/100.jpg',
+			message: '您好！非常抱歉，由于供应链问题，这款手机的发货时间延迟了，预计下周一开始陆续发货，请您耐心等待，给您带来不便敬请谅解！',
+			timestamp: '2023-11-01 10:17:45'
+		},
+		// 用户消息
+		{
+			type: 1,
+			username: '张三',
+			avatar: 'https://picsum.photos/seed/user1/100/100.jpg',
+			message: '好的，谢谢告知。请问有预计到货的具体日期吗？或者我可以取消订单吗？',
+			timestamp: '2023-11-01 10:20:12'
+		},
+		// 系统消息
+		{
+			type: 3,
+			username: '系统通知',
+			avatar: null, // 系统消息通常没有头像
+			message: '您的订单 #20231101001 已发货，物流单号：SF1234567890，请注意查收。',
+			timestamp: '2023-11-05 14:30:00'
+		},
+		// 用户消息
+		{
+			type: 1,
+			username: '李四',
+			avatar: 'https://picsum.photos/seed/user2/100/100.jpg',
+			message: '请问你们的充电器支持快充吗？',
+			timestamp: '2023-11-06 09:45:10'
+		},
+		// 客服消息
+		{
+			type: 2,
+			username: '客服小王',
+			avatar: 'https://picsum.photos/seed/support2/100/100.jpg',
+			message: '您好，是的，我们标配的充电器支持最高65W快充，可以满足您日常使用需求。',
+			timestamp: '2023-11-06 09:47:33'
+		},
+		// 用户消息
+		{
+			type: 1,
+			username: '李四',
+			avatar: 'https://picsum.photos/seed/user2/100/100.jpg',
+			message: '太好了！谢谢解答。',
+			timestamp: '2023-11-06 09:48:55'
+		},
+		// 用户消息
+		{
+			type: 1,
+			username: '王五',
+			avatar: 'https://picsum.photos/seed/user3/100/100.jpg',
+			message: '请问你们的手机有防水功能吗？能淋雨吗？',
+			timestamp: '2023-11-07 16:20:18'
+		},
+		// 客服消息
+		{
+			type: 2,
+			username: '客服小李',
+			avatar: 'https://picsum.photos/seed/support1/100/100.jpg',
+			message: '您好，我们的手机具备IP68级别的防尘防水能力，可以在日常生活中应对溅水和短时间浸泡（例如掉入水中），但不建议长时间浸泡或深度潜水。正常淋雨问题不大，但请尽快擦干。',
+			timestamp: '2023-11-07 16:22:40'
+		},
+		// 用户消息
+		{
+			type: 1,
+			username: '王五',
+			avatar: 'https://picsum.photos/seed/user3/100/100.jpg',
+			message: '明白了，谢谢！',
+			timestamp: '2023-11-07 16:23:05'
+		}
+	]);
+	let i = 0
+	function showFile() {
+		meo_show.value = false
+		file_show.value = !file_show.value
+	}
+	function showMeo() {
+		file_show.value = false
+		meo_show.value = !meo_show.value
+	}
+	function send() {
+		meo_show.value = false
+		file_show.value = false
+		messages.value.unshift({
+			type: 2,
+			username: '客服小李',
+			avatar: 'https://picsum.photos/seed/support1/100/100.jpg',
+			message: msg.value,
+			timestamp: '2023-11-07 16:22:40'
+		})
+		msg.value = ''
+	}
+	function touchstart() {
+		meo_show.value = false
+		file_show.value = false
+	}
+	function addEmo(e : string) {
+		msg.value += e
+	}
+</script>

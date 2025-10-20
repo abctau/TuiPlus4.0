@@ -1,0 +1,146 @@
+<template>
+	<t-view v-bind="extendsAttrs" @click="mainOnclick">
+		<slot></slot>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * CheckboxGroup 复选框组
+	 * @date 2025-05-31 12:02:19
+	 * @author TanYuan
+	 * @description 支持布局方向（横向或纵向）。不同的显示模式(radio、button、cell)丰富主题配置
+	 * @example /pagesA/form/checkbox-group/checkbox-group
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-checkbox-group.html
+	 * @example /pagesA/form/checkbox-group/checkbox-group
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} modelValue 组件的值
+	 * @property {String} childClass 统一设置子元素的样式，如果子组件也设置了main-class则会合并样式。后设置的样式覆盖前者样式
+	 * @property {Boolean} transition 统一设置子元素选择时是否开启动画，优先级低于子组件
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} duration 统一设置动画时间，优先级低于子组件(默认：200)
+	 * @property {String} labelClass 统一设置子组件标签样式。如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} icon 统一设置选中状态的图标 优先级低于子组件(默认：check-fill)
+	 * @property {String} iconBoxClass 统一设置子组件图标的盒子的样式，如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} activeClass 统一设置子组件被选中是的样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} inactiveClass 统一设置子组件未选中时的样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} iconClass 统一设置图标样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} activeIconClass 统一设置选中时图标的样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} inactiveIconClass 统一设置子组件图标未选中时的样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} activeLabelClass 统一设置子组件lable选中时的标签样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} inactiveLabelClass 统一设置子组件未选中是标签的样式 如子组件也设置了样式。则合并样式。后来居上原则。
+	 * @property {String} mode=[checkbox|button|cell] 统一设置子组件的显示模式 优先级低于子组件(默认：checkbox)
+	 * @value checkbox 复选框样式
+	 * @value button 按钮模式
+	 * @value cell 列表模式
+	 * @property {Boolean} border undefined(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} change 选中内容发生变化时触发
+	 */
+	import { CheckboxGroupProps, useTuiThemes, CheckBoxGroupAttrsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<CheckboxGroupProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: [] as string[],
+		childClass: "",
+		transition: false,
+		duration: 200,
+		labelClass: "",
+		icon: 'check-fill',
+		iconBoxClass: '',
+		activeClass: '',
+		inactiveClass: '',
+		iconClass: '',
+		activeIconClass: '',
+		inactiveIconClass: '',
+		activeLabelClass: '',
+		inactiveLabelClass: '',
+		mode: 'checkbox',
+		border: true
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['click', 'change', 'update:modelValue'])
+	const selectedValues = ref<string[]>(props.modelValue)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	provide('CheckGroupAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		modelValue: toRef<string[]>(() : string[] => props.modelValue),
+		childClass: toRef<string>(() : string => props.childClass),
+		transition: toRef<boolean>(() : boolean => props.transition),
+		duration: toRef<number>(() : number => props.duration),
+		labelClass: toRef<string>(() : string => props.labelClass),
+		icon: toRef<string>(() : string => props.icon),
+		iconBoxClass: toRef<string>(() : string => props.iconBoxClass),
+		activeClass: toRef<string>(() : string => props.activeClass),
+		inactiveClass: toRef<string>(() : string => props.inactiveClass),
+		iconClass: toRef<string>(() : string => props.iconClass),
+		activeIconClass: toRef<string>(() : string => props.activeIconClass),
+		inactiveIconClass: toRef<string>(() : string => props.inactiveIconClass),
+		activeLabelClass: toRef<string>(() : string => props.activeLabelClass),
+		inactiveLabelClass: toRef<string>(() : string => props.inactiveLabelClass),
+		mode: toRef<string>(() : string => props.mode),
+		border: toRef<boolean>(() : boolean => props.border)
+	} as CheckBoxGroupAttrsType)
+
+	provide('selectedValues', selectedValues)
+	watch(selectedValues, (e : string[]) => {
+		emit('change', e)
+		emit('update:modelValue', e)
+	}, { deep: true })
+	watch(() : string[] => props.modelValue, (e : string[]) => {
+		selectedValues.value = e
+	}, { deep: true })
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+		itemValidate()
+	}
+</script>

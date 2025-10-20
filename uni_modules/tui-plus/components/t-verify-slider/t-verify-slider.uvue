@@ -1,0 +1,173 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" @tuiTouchstart="touchstart" @tuiTouchmove="touchmove" @initFinished="initFinished"
+		@tuiTouchend="touchend" @tuiTouchcancel="touchend"
+		:main-class="`fl dr ${extendsPadding} ocr-g tdb-${type},l ${mainClass}`" @click="mainOnclick">
+		<t-text v-if="!verifyState" :main-class="`twh-100% da dlt-0 faic sta-c c-${inactiveColor}`"
+			size="small">{{title}}</t-text>
+		<t-view
+			:main-class="`fc h-100% w-${sliderH}px da dlt-0 tdb b-1px,s,${inactiveColor} ${verifyState?extendsBorder:''} ${verifyState&&activeColor!=''?'bc-'+activeColor:''}`"
+			:style="tranMovePos">
+			<t-icon v-if="!verifyState" :name="inactiveSliderIcon" :main-class="`c-${inactiveColor}`"></t-icon>
+			<t-icon v-else :name="activeSliderIcon" :type="type"
+				:main-class="activeColor!=''?'c-'+activeColor:''"></t-icon>
+		</t-view>
+		<t-view
+			:main-class="`h-100% ${extendsBackgroundColor} ${activeColor!=''?'bg-'+activeColor:''} da dlt-0 w-${tranX}px`">
+			<t-text v-if="!verifyState" :main-class="`h-100% w-${sliderW}px da dlt-0 faic sta-c c-#fff`"
+				size="small">{{title}}</t-text>
+			<t-view v-else main-class="da di-0 fc">
+				<t-text main-class="c-#fff" size="small">验证成功</t-text>
+			</t-view>
+		</t-view>
+		<t-view v-if="!verifyState"
+			:main-class="`h-100% w-${sliderH}px b-1px,d,${inactiveColor} dt.0 dl-${radomLeft}px da`">
+		</t-view>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	* VerifySlider 滑块验证
+	* @date 2025-05-31 12:08:25
+	* @author TanYuan
+	* @description 滑块验证码用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!
+	* @example /pagesA/form/verify/verify
+	* @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-verify-slider.html
+	* @example /pagesA/form/verify/verify
+	* @property {String} size=[large|medium|small|mini] 组件尺寸(默认：large)
+	* @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	* @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	* @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	* @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	* @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	* @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	* @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	* @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	* @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	* @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	* @property {Boolean} disabled=[false|true] 组件是否禁用
+	* @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	* @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	* @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	* @property {String} mainClass 组件根节点的样式。(默认: "")
+	* @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	* @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	* @value normal 正常
+	* @value dark 深色
+	* @value light 浅色
+	* @value plain 镂空
+	* @property {String} title 提示文本(默认：请拖动滑块到虚线框)
+	* @property {String} successTitle 验证成功提示文本(默认：验证成功)
+	* @property {String} activeSliderIcon 验证成功时滑块图标(默认：checkmark-circle-fill)
+	* @property {String} inactiveSliderIcon 验证失败时滑块图标(默认：arrow-right-double)
+	* @property {String} activeColor 验证成功时颜色
+	* @property {String} inactiveColor 验证失败时颜色(默认：#bfbfbf)
+	* @property {Number} verifyRange 验证容错范围(默认：10)
+	*/
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface VerifySliderProps extends CommonProps {
+		path : string;
+		hover : boolean;
+		type : string;
+		disabled : boolean;
+		stop : boolean;
+		effect : string;
+		size : string;
+		mainClass : string;
+		nativeClass : string;
+		title : string;
+		successTitle : string;
+		activeSliderIcon : string;
+		inactiveSliderIcon : string;
+		activeColor : string;
+		inactiveColor : string;
+		verifyRange : number;
+	}
+
+	const props = withDefaults(defineProps<VerifySliderProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: 'large',
+		mainClass: '',
+		nativeClass: '',
+		title: '请拖动滑块到虚线框',
+		successTitle: '验证成功',
+		activeSliderIcon: 'checkmark-circle-fill',
+		inactiveSliderIcon: 'arrow-right-double',
+		activeColor: '',
+		inactiveColor: '#bfbfbf',
+		verifyRange: 10,
+	});
+
+	const { extendsAttrs, extendsPadding, extendsBackgroundColor, extendsBorder } = useTuiThemes(props)
+
+	const startX = ref(0)
+	const startY = ref(0)
+	const tranX = ref(0)
+	const tranY = ref(0)
+	const moveY = ref(0)
+	const tranMovePos = ref('')
+	const sliderH = ref(0)
+	const sliderW = ref(0)
+	const maxMoveW = ref(0)
+	const radomLeft = ref(0)
+	const verifyState = ref(false)
+	const emit = defineEmits(['click'])
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+	const initFinished = (rect : NodeInfo) => {
+		sliderH.value = Math.floor(rect.height!)
+		sliderW.value = Math.floor(rect.width!)
+		maxMoveW.value = Math.floor(sliderW.value - sliderH.value)
+		radomLeft.value = Math.floor(Math.random() * (maxMoveW.value + 1))
+	}
+
+	const touchstart = (e : TuiTouchEvent) => {
+		if (verifyState.value) return
+		e.event.preventDefault()
+		startX.value = Math.floor(e.offsetX - sliderH.value / 2)
+		tranX.value = startX.value
+		tranMovePos.value = `transform: translateX(${tranX.value}px)`
+	}
+
+	const touchmove = (e : TuiTouchEvent) => {
+		if (verifyState.value) return
+		e.event.preventDefault()
+		tranX.value = e.offsetX - sliderH.value / 2
+		if (tranX.value < 0) tranX.value = 0
+		if (tranX.value > maxMoveW.value) tranX.value = maxMoveW.value
+		tranX.value = Math.floor(tranX.value)
+		tranMovePos.value = `transform: translateX(${tranX.value}px)`
+	}
+
+	const touchend = (_ : TuiTouchEvent) => {
+		if (Math.abs(tranX.value - radomLeft.value) < props.verifyRange) {
+			tranX.value = radomLeft.value
+			tranMovePos.value = `transform: translateX(${tranX.value}px)`
+			verifyState.value = true
+		} else {
+			tranX.value = 0
+			tranMovePos.value = `transform: translateX(${tranX.value}px)`
+			radomLeft.value = Math.floor(Math.random() * (maxMoveW.value + 1))
+		}
+	}
+</script>

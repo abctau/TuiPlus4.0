@@ -1,0 +1,108 @@
+<template>
+	<t-page main-class="p-30">
+		<t-section title="主题-type-开启动画" main-class="mb-30"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox :transition="true" @change="onChange" :checked="checked">石榴</t-checkbox>
+			<t-checkbox type="primary" icon="thumb-up" active-icon-class="ats-0.5" :transition="true">橙子</t-checkbox>
+			<t-checkbox type="error" :transition="true">橙子</t-checkbox>
+			<t-checkbox type="warning" :transition="true">梨子</t-checkbox>
+		</t-row>
+		<t-section title="size-large" main-class="mb-30 fww"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox :checked="true" type="p" size="large">石榴</t-checkbox>
+			<t-checkbox type="p" size="large">橙子</t-checkbox>
+			<t-checkbox type="p" size="large">香蕉</t-checkbox>
+			<t-checkbox type="p" size="large">橙子</t-checkbox>
+		</t-row>
+		<t-section title="size-medium" main-class="mb-30 fww"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox type="p" size="medium">石榴</t-checkbox>
+			<t-checkbox type="p" size="medium">橙子</t-checkbox>
+			<t-checkbox type="p" size="medium">香蕉</t-checkbox>
+			<t-checkbox type="p" size="medium" :disabled="true">橙子</t-checkbox>
+		</t-row>
+		<t-section title="size-small" main-class="mb-30 fww"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox type="p" size="small">石榴</t-checkbox>
+			<t-checkbox type="p" size="small">橙子</t-checkbox>
+			<t-checkbox type="p" size="small">香蕉</t-checkbox>
+			<t-checkbox type="p" size="small">橙子</t-checkbox>
+		</t-row>
+		<t-section title="size-mini" main-class="mb-30 fww"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox type="p" size="mini">石榴</t-checkbox>
+			<t-checkbox type="p" size="mini">橙子</t-checkbox>
+			<t-checkbox type="p" size="mini">香蕉</t-checkbox>
+			<t-checkbox type="p" size="mini">橙子</t-checkbox>
+		</t-row>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-section title="自定义图标 自定义样式 " main-class="mb-30"></t-section>
+			<t-checkbox type="primary" :transition="true" main-class="s-80" label-class="c-#666">梨子</t-checkbox>
+			<t-checkbox type="warning" :transition="true" active-class="bg-blue" active-label-class="c-red s-20"
+				inactive-label-class="c-blue s-30">梨子</t-checkbox>
+		</t-row>
+		<t-section title="动态增删" main-class="mb-30"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr">
+			<t-checkbox v-for="(item,index) in list" :key="index" icon="checkbox-blank-circle-fill"
+				active-icon-class="s-20" type="primary" size="l" :transition="true">{{item.label}}</t-checkbox>
+		</t-row>
+		<t-row>
+			<t-button main-class="mr-20" type="p" @click="add">增加</t-button>
+			<t-button type="e" @click="del">删除</t-button>
+		</t-row>
+		<t-section title="按钮模式" main-class="mtb-30"></t-section>
+		<t-row main-class="mb-30 fww tdb tdr tdp">
+			<t-checkbox main-class="mrb-20" size="large" active-class="bg-#fff" inactive-class="bg-#000"
+				active-label-class="c-#000" inactive-label-class="c-#fff" type="primary" mode="button">石榴</t-checkbox>
+			<t-checkbox main-class="mrb-20" size="medium" type="warning" mode="button" effect="l">橙子</t-checkbox>
+			<t-checkbox main-class="mrb-20" size="small" type="success" mode="button" effect="d">香蕉</t-checkbox>
+			<t-checkbox main-class="mrb-20" size="mini" type="error" mode="button">橙子</t-checkbox>
+			<t-checkbox main-class="mrb-20" size="mini" type="warning" mode="button">梨子</t-checkbox>
+		</t-row>
+		<t-col main-class="mb-30 fww tdb tdr">
+			<t-checkbox main-class="mb-10" type="primary" mode="button" size="large">石榴</t-checkbox>
+			<t-checkbox main-class="mb-10" type="warning" mode="button" size="medium">橙子</t-checkbox>
+			<t-checkbox main-class="mb-10" type="success" mode="button" size="small">香蕉</t-checkbox>
+			<t-checkbox main-class="mb-10" type="error" mode="button" size="mini">橙子</t-checkbox>
+			<t-checkbox main-class="mb-10" type="info" mode="button" size="mini">梨子</t-checkbox>
+		</t-col>
+		<t-section title="列表模式" main-class="mtb-30"></t-section>
+		<t-col main-class="tdb tdr">
+			<t-checkbox size="l" type="primary" mode="cell" :transition="true">石榴</t-checkbox>
+			<t-checkbox size="l" type="warning" icon="thumb-up" active-icon-class="ats-0.5" mode="cell"
+				:transition="true">橙子</t-checkbox>
+			<t-checkbox size="l" type="success" icon="checkbox-blank-circle-fill" icon-class="ats-0.5"
+				mode="cell">香蕉</t-checkbox>
+			<t-checkbox size="l" type="error" mode="cell" :transition="true">橙子</t-checkbox>
+			<t-checkbox size="l" type="warning" mode="cell" :transition="true">梨子</t-checkbox>
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiGuid } from '@/uni_modules/tui-plus'
+	type radiolisttype = {
+		value : string
+		label : string
+	}
+	const checked=ref<boolean>(false)
+	const list = ref<radiolisttype[]>([
+		{ value: '1', label: '石榴' },
+		{ value: '2', label: '橙子' },
+		{ value: '3', label: '香蕉' },
+		{ value: '4', label: '橙子' },
+		{ value: '5', label: '梨子' }
+	] as radiolisttype[])
+	function add() {
+		list.value.push({
+			value: TuiGuid(10),
+			label: TuiGuid(10)
+		} as radiolisttype)
+	}
+	function del() {
+		list.value.splice(1, 1)
+	}
+	function onChange(e : boolean) {
+		console.log(e)
+	}
+</script>

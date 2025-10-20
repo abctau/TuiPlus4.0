@@ -1,0 +1,122 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="subsectionStyles">
+		<t-view ref="subsectionins" :main-class="subsectionContentStyles">
+			<t-view :main-class="barStyles"></t-view>
+			<slot></slot>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Subsection 分段器
+	 * @date 2025-05-31 12:07:22
+	 * @author TanYuan
+	 * @description 可用于订单场景+菜单切换
+	 * @example /pagesA/layout/subsection/subsection
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-subsection.html
+	 * @example /pagesA/layout/subsection/subsection
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} current 当前激活的选项索引	(默认：1)
+	 * @property {String} barClass 移动区域的样式
+	 * @event {Function} change 当选项卡改变时触发
+	 */
+	import { SubsectionProps, useTuiThemes, SubsectionGroupPropsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<SubsectionProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		current: 0,
+		barClass: ''
+	});
+	const { extendsAttrs, extendsBackgroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+	const cur = ref(0)
+	const childNodeInfo : Map<number, NodeInfo> = new Map<number, NodeInfo>()
+	const curWidth = ref(0)
+	const curLeft = ref(0)
+	const boxLeft = ref(0)
+	const tranX = ref(0)
+	const subsectionins = ref<ComponentPublicInstance | null>(null)
+	function setBarRect(index : number) {
+		try {
+			subsectionins.value?.$callMethod('getInfo', (rect : NodeInfo) => {
+				const curRect = childNodeInfo.get(index)!
+				const curleft = curRect.left!
+				const curwidth = curRect.width!
+				const boxleft = rect.left!
+				curLeft.value = curleft
+				curWidth.value = Math.round(curwidth)
+				boxLeft.value = boxleft
+				const centerleft = curleft - boxleft
+				tranX.value = centerleft
+			})
+		} catch (error) { }
+	}
+	provide('subsectionGroupProps', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		current: toRef<number>(() : number => props.current),
+		barClass: toRef<string>(() : string => props.barClass),
+	} as SubsectionGroupPropsType)
+	provide('subsectionCurrent', cur)
+	provide('childChange', (value : number) => {
+		cur.value = value
+		setBarRect(cur.value)
+		nextTick(() => {
+			emit('change', cur.value)
+		})
+	})
+	provide('initNodesInfo', (key : number, nodeinfo : NodeInfo) => {
+		childNodeInfo.set(key, nodeinfo)
+		if (key == cur.value) setBarRect(cur.value)
+	})
+
+	watch(() : number => props.current, (val : number) => {
+		cur.value = val
+		setBarRect(val)
+	}, { immediate: true })
+	const barStyles = computed(() : string => {
+		return `atp-tr atd-200 da h-100% ${extendsBackgroundColor.value} ${props.barClass} w-${curWidth.value}px attx-${tranX.value}px`
+	})
+	const subsectionContentStyles = computed(() : string => {
+		return `fl faic f`
+	})
+	const subsectionStyles = computed(() : string => {
+		return `tdb-${props.type},l oh dr fl ${props.mainClass}`
+	})
+</script>

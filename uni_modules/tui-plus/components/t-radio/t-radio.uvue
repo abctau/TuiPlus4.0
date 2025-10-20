@@ -1,0 +1,306 @@
+<template>
+	<t-view :main-class="radioMainStyle" :stop="stop" :disabled="disabled" @click="wrapper">
+		<template v-if="modeMerge=='radio'">
+			<t-row :main-class="radioBoxStyles">
+				<t-row :main-class="radioViewStyles">
+					<t-icon :main-class="radioIconStyles" :name="icon"></t-icon>
+				</t-row>
+			</t-row>
+			<t-text :text="label" :main-class="radioLabelClass" :hover="true" :patternsValue="patternsValue"
+				:patternsReg="patternsReg" :patternsColor="patternsColor">
+				<slot></slot>
+			</t-text>
+		</template>
+		<template v-if="modeMerge=='button'">
+			<t-button :hover="true" :type="radio_state?typeMerge:'i'" :effect="radio_state?effectMerge:'l'"
+				:main-class="radioButtonStyles" :text-class="radioLabelClass">
+				<slot>
+					{{label}}
+				</slot>
+			</t-button>
+		</template>
+		<template v-if="modeMerge=='cell'">
+			<t-text :text="label" :main-class="radioLabelClass" :hover="true" :patternsValue="patternsValue"
+				:patternsReg="patternsReg" :patternsColor="patternsColor">
+				<slot></slot>
+			</t-text>
+			<t-row :main-class="radioBoxStyles">
+				<t-row :main-class="radioViewStyles">
+					<t-icon :main-class="radioIconStyles" :name="icon"></t-icon>
+				</t-row>
+			</t-row>
+		</template>
+	</t-view>
+
+</template>
+<script setup>
+	/**
+	 * Radio 单选
+	 * @date 2025-05-31 12:06:00
+	 * @author TanYuan
+	 * @description 单选支持多种样式模式（如基础、按钮、列表、标签），适用于表单或页面中的单选功能。它允许自定义样式、禁用状态
+	 * @example /pagesA/form/radio/radio
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-radio.html
+	 * @example /pagesA/form/radio/radio
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} transition 是否支持动画
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} border 是否显示边框(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} duration 动画时间(默认：200)
+	 * @property {Boolean} checked 选中状态
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} value 绑定的值
+	 * @property {String} label 显示文本
+	 * @property {String} labelClass 显示文本样式
+	 * @property {string[]} patternsValue 配置文本内需要高亮显示的文字内容(默认：[])
+	 * @property {any} patternsReg 高亮显示匹配模式
+	 * @property {String} patternsColor 高亮文本显示的颜色(默认：#ff0000)
+	 * @property {String} icon 图标(默认：check-fill)
+	 * @property {String} iconBoxClass 图标容器样式
+	 * @property {String} activeClass 选中时的组件的样式
+	 * @property {String} inactiveClass 未选中时的组件的样式
+	 * @property {String} iconClass 图标样式
+	 * @property {String} activeIconClass 选中时图标的样式
+	 * @property {String} inactiveIconClass 未选中时图标的样式
+	 * @property {String} activeLabelClass 选中时文本的样式
+	 * @property {String} inactiveLabelClass 未选中时文本的样式
+	 * @property {String} mode=[button|radio|cell] 显示模式(默认：radio)
+	 * @value button 按钮样式
+	 * @value radio 单选框模式
+	 * @value cell 列表模式
+	 * @event {Function} change 选中状态化生变化时触发
+	 */
+	import { pts } from '../../common/model/theme'
+	import { getPx } from '../../common/model/util'
+	import { getStyleProperty } from '../../common/model/style'
+	import { CommonProps, useTuiThemes, RadioGroupAttrsType } from '../../common/props/index.uts';
+	interface RadioProps extends CommonProps {
+		transition : boolean;
+		duration : number;
+		border : boolean;
+		checked : boolean;
+		value : string;
+		label : string;
+		labelClass : string;
+		patternsValue : string[];
+		patternsReg : string[];
+		patternsColor : string;
+		icon : string;
+		iconBoxClass : string;
+		activeClass : string;
+		inactiveClass : string;
+		iconClass : string;
+		activeIconClass : string;
+		inactiveIconClass : string;
+		activeLabelClass : string;
+		inactiveLabelClass : string;
+		mode : string;
+	}
+
+	const props = withDefaults(defineProps<RadioProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		transition: false,
+		duration: 200,
+		border: true,
+		checked: false,
+		value: '',
+		label: '',
+		labelClass: '',
+		patternsValue: [] as string[],
+		patternsReg: [] as string[],
+		patternsColor: '#ff0000',
+		icon: 'check-fill',
+		iconBoxClass: '',
+		activeClass: '',
+		inactiveClass: '',
+		iconClass: '',
+		activeIconClass: '',
+		inactiveIconClass: '',
+		activeLabelClass: '',
+		inactiveLabelClass: '',
+		mode: 'radio'
+	});
+	const emit = defineEmits(['change'])
+	const radio_state = ref<boolean>(false)
+
+	const childValue = inject<Ref<string> | null>('childValue', null)
+	const RadioGroupAttrs = inject<RadioGroupAttrsType | null>('RadioGroupAttrs', null)
+
+	const typeMerge = computed(() : string => {
+		return props.type != '' ? props.type : RadioGroupAttrs?.type?.value ?? ''
+	})
+
+	const modeMerge = computed(() : string => {
+		return props.mode != 'radio' ? props.mode : RadioGroupAttrs?.mode?.value ?? 'radio'
+	})
+
+	// 计算属性
+	const borderMerge = computed(() : boolean => {
+		return !props.border ? props.border : RadioGroupAttrs?.border?.value ?? false
+	})
+
+	const classMerge = computed(() : string => {
+		return `${RadioGroupAttrs?.childClass?.value ?? ''} ${props.mainClass}`
+	})
+
+	const hoverMerge = computed(() : boolean => {
+		return props.hover ? props.hover : RadioGroupAttrs?.hover?.value ?? false
+	});
+
+	const effectMerge = computed(() : string => {
+		return props.effect != '' ? props.effect : RadioGroupAttrs?.effect?.value ?? ''
+	});
+
+	const sizeMerge = computed(() : string => {
+		return props.size != '' ? props.size : RadioGroupAttrs?.size?.value ?? ''
+	});
+
+	const transitionMerge = computed(() : boolean => {
+		return props.transition ? props.transition : RadioGroupAttrs?.transition?.value ?? false
+	});
+
+	const durationMerge = computed(() : number => {
+		return props.duration != 200 ? props.duration : RadioGroupAttrs?.duration?.value ?? 200
+	});
+
+	const labelClassMerge = computed(() : string => {
+		return props.labelClass != '' ? props.labelClass : RadioGroupAttrs?.labelClass?.value ?? ''
+	});
+
+	const iconMerge = computed(() : string => {
+		return props.icon != 'check-fill' ? props.icon : RadioGroupAttrs?.icon?.value ?? 'check-fill'
+	});
+
+	const activeClassMerge = computed(() : string => {
+		return props.activeClass != '' ? props.activeClass : RadioGroupAttrs?.activeClass?.value ?? ''
+	});
+
+	const inactiveClassMerge = computed(() : string => {
+		return props.inactiveClass != '' ? props.inactiveClass : RadioGroupAttrs?.inactiveClass?.value ?? ''
+	});
+
+	const iconClassMerge = computed(() : string => {
+		return props.iconClass != '' ? props.iconClass : RadioGroupAttrs?.iconClass?.value ?? ''
+	});
+
+	const iconBoxClassMerge = computed(() : string => {
+		return props.iconBoxClass != '' ? props.iconBoxClass : RadioGroupAttrs?.iconBoxClass?.value ?? ''
+	});
+
+	const activeIconClassMerge = computed(() : string => {
+		return props.activeIconClass != '' ? props.activeIconClass : RadioGroupAttrs?.activeIconClass?.value ?? ''
+	});
+
+	const inactiveIconClassMerge = computed(() : string => {
+		return props.inactiveIconClass != '' ? props.inactiveIconClass : RadioGroupAttrs?.inactiveIconClass?.value ?? ''
+	});
+
+	const activeLabelClassMerge = computed(() : string => {
+		return props.activeLabelClass != '' ? props.activeLabelClass : RadioGroupAttrs?.activeLabelClass?.value ?? ''
+	});
+
+	const inactiveLabelClassMerge = computed(() : string => {
+		return props.inactiveLabelClass != '' ? props.inactiveLabelClass : RadioGroupAttrs?.inactiveLabelClass?.value ?? ''
+	});
+
+	const extendsBackgroundColor = computed(() => `tdb-${typeMerge.value},${effectMerge.value}`)
+	const getFontSizeToValue = computed(() => Math.round(getPx(pts(sizeMerge.value, getStyleProperty(classMerge.value, 'font-size'), false))))
+	const extendsBorder = computed(() => `tbc-${typeMerge.value},${effectMerge.value}`)
+	const extendsFontSize = computed(() => `tts-${sizeMerge.value},${getStyleProperty(classMerge.value, 'font-size')}`)
+	const extendsForegroundColor = computed(() => `tdc-${typeMerge.value},${effectMerge.value},${getStyleProperty(classMerge.value, 'color')}`)
+	const extendsPadding = computed(() => `tdp-${sizeMerge.value}`)
+
+	const radioLabelClass = computed(() : string => {
+		let state_sty = radio_state.value ? activeLabelClassMerge.value : inactiveLabelClassMerge.value
+		return `${extendsFontSize.value} ${labelClassMerge.value} ${state_sty}`
+	})
+	const radioButtonStyles = computed(() : string => {
+		let state_sty = radio_state.value ? activeClassMerge.value : inactiveClassMerge.value
+		let sty = `${iconBoxClassMerge.value} ${state_sty}`
+		return sty
+	})
+	const radioBoxStyles = computed(() : string => {
+		let state_sty = radio_state.value ? `${typeMerge.value == '' ? 'bw-1px bc-#ccc' : 'bw-0px'} ${extendsBackgroundColor.value} ${activeClassMerge.value}` : `bw-1px bc-#ccc ${inactiveClassMerge.value}`
+		let sty = 'bs '
+		if (modeMerge.value == 'radio') sty += 'mr-14 '
+		sty += `twhr-${Math.round(getFontSizeToValue.value * 1.6)}px  ${extendsBorder.value} ${iconBoxClassMerge.value} ${state_sty}`
+		return sty
+	})
+	const radioViewStyles = computed(() : string => {
+		let sty = `fc twh-100% `
+		if (transitionMerge.value) sty += `atp-tr atd-${durationMerge.value} attf `
+		sty += `ats-${radio_state.value ? 1 : 0}`
+		return sty
+	})
+	const radioIconStyles = computed(() : string => {
+		let state_sty = radio_state.value ? activeIconClassMerge.value : inactiveIconClassMerge.value
+		let sty = `ats-0.9 ${extendsFontSize.value} ${extendsForegroundColor.value} ${iconClassMerge.value} ${state_sty}`
+		return sty
+	})
+	const radioMainStyle = computed(() : string => {
+		let sty : string = ''
+		switch (modeMerge.value) {
+			case 'radio':
+				sty += `fl faic ${extendsPadding.value}`
+				break;
+			case 'cell':
+				sty += `fl fjcb ${extendsPadding.value} `
+				if (borderMerge.value) sty += 'bb-1rpx,s,#f5f5f5'
+				break;
+			default:
+				break;
+		}
+		sty += ` ${classMerge.value}`
+		return sty
+	})
+
+	function wrapper() {
+		radio_state.value = true
+		if (childValue != null) childValue.value = props.value
+	}
+
+	watch(radio_state, (val : boolean) => {
+		emit('change', val)
+	})
+
+	watch(() : boolean => props.checked, (val : boolean) => {
+		radio_state.value = val
+	}, { immediate: true })
+
+	watch(() : string | null => childValue?.value as string | null, (e : string | null) => {
+		if (e != null) radio_state.value = e == props.value ? true : false
+	}, { immediate: true })
+</script>

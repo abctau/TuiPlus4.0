@@ -1,0 +1,7 @@
+import { QRErrorCorrectLevel } from './qrtype.uts'
+export const ECL = {
+	L: 1,
+	M: 0,
+	Q: 3,
+	H: 2
+} as QRErrorCorrectLevel

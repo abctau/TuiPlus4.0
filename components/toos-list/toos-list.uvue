@@ -1,0 +1,99 @@
+<template>
+	<t-row main-class='faic ptb-30 plr-15 fww'>
+		<template v-for="(item,index) in toos" :key="index">
+			<t-col :hover="true" :span="12" :gutter="20" @click="toPage(`${item['path']}`)">
+				<t-col :main-class="`bg-${colors[index]} r-10 p-30 mb-30`">
+					<t-row main-class='fjcb faic'>
+						<t-text main-class="c-#fff s-35">{{item['title']}}</t-text>
+						<t-icon main-class="c-#fff s-50" :name="item['cuIcon']"></t-icon>
+					</t-row>
+					<t-row justify="b" main-class="fjcb mt-10">
+						<t-row main-class="faie">
+							<t-text
+								main-class="c-#fff s-40">{{`${(item['describe'] as string).charAt(0).toUpperCase()}`}}</t-text>
+							<t-text main-class="c-#fff s-35 ml-n5">{{formatDesc(`${item['describe']}`)}}</t-text>
+						</t-row>
+						<t-col main-class="fjce faie pb-8">
+							<t-line direction="row" length="20%" lineSize="5px" main-main-class="mb-n2"></t-line>
+							<t-line direction="row" length="80%" lineSize="2px"></t-line>
+						</t-col>
+					</t-row>
+				</t-col>
+			</t-col>
+		</template>
+	</t-row>
+</template>
+<script setup>
+	let count = 0
+	let colors = [
+		'#6739b6',
+		'#6739b6',
+		'#e03997',
+		'#e03997',
+		'#e54d42',
+		'#e54d42',
+		'#8799a3',
+		'#8799a3',
+		'#fbbd08',
+		'#fbbd08',
+		'#f37b1d',
+		'#f37b1d',
+		'#39b54a',
+		'#39b54a',
+		'#1cbbb4',
+		'#1cbbb4',
+		'#a5673f',
+		'#a5673f',
+		'#8dc63f',
+		'#8dc63f',
+		"#0081ff",
+		"#0081ff",
+		"#1cbbb4",
+		"#1cbbb4",
+		'#6739b6',
+		'#6739b6',
+		'#e03997',
+		'#e03997',
+		'#e54d42',
+		'#e54d42',
+		'#8799a3',
+		'#8799a3',
+		'#fbbd08',
+		'#fbbd08',
+		'#f37b1d',
+		'#f37b1d',
+		'#39b54a',
+		'#39b54a',
+		'#1cbbb4',
+		'#1cbbb4',
+		'#a5673f',
+		'#a5673f',
+		'#8dc63f',
+		'#8dc63f',
+		"#0081ff",
+		"#0081ff",
+		"#1cbbb4",
+		"#1cbbb4",
+	]
+	function toPage(path : string) {
+		uni.navigateTo({
+			url: path,
+			fail() {
+				uni.switchTab({
+					url: path
+				})
+			}
+		})
+	}
+	const props = defineProps({
+		toos: {
+			type: Array as PropType<Array<UTSJSONObject>>,
+			default: () : Array<UTSJSONObject> => [] as Array<UTSJSONObject>
+		}
+	})
+	const formatDesc = computed<(e : string) => string>(() : (e : string) => string => {
+		return (e : string) : string => {
+			return e.slice(1)
+		}
+	})
+</script>

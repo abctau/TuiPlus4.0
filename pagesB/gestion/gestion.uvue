@@ -1,0 +1,92 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="需求合作建议" main-class="mb-30" sub-title="感谢您的宝贵建议" />
+		<t-form ref="ruleForm" :rules="rules" main-class="tdr tdb tdp" :bottomLine="true" child-class="ptb-20">
+			<t-form-item label="类型" prop="type">
+				<t-radio-group v-model="(formData.type as string)" main-class="fl fww" type="p">
+					<t-radio v-for="(item,index) in typeList" :key="index"
+						:value="item.value">{{item.label}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="称呼" prop="name">
+				<t-input v-model="formData.name as string" main-class="f sta-r pr-0" effect="plain" placeholder="请输入称呼"
+					:border="false"></t-input>
+			</t-form-item>
+			<t-form-item label="电话" prop="phone">
+				<t-input v-model="formData.phone  as string" main-class="f sta-r pr-0" effect="plain" :border="false"
+					placeholder="请输入电话"></t-input>
+			</t-form-item>
+			<t-form-item label="QQ" prop="qq">
+				<t-input v-model="formData.qq  as string" main-class="f sta-r pr-0" effect="plain" :border="false"
+					placeholder="请输入QQ"></t-input>
+			</t-form-item>
+			<t-form-item label="微信" prop="wechat">
+				<t-input v-model="formData.wechat as string" main-class="f sta-r pr-0" effect="plain" :border="false"
+					placeholder="请输入微信"></t-input>
+			</t-form-item>
+			<t-form-item label="留言内容" prop="message" direction="column" :bottomLine="false" >
+				<t-textarea placeholder="请输入留言内容" v-model="(formData.message as string)" effect="plain"></t-textarea>
+			</t-form-item>
+			<t-row main-class="fc h-200">
+				<t-button main-class="mr-30 r-150 f" width="150" type="primary" @click="submitForm">提交</t-button>
+				<t-button type="error" main-class="r-150 f" width="150" @click="resetForm">重置</t-button>
+			</t-row>
+		</t-form>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	type formDataType = {
+		type : string
+		name : string
+		phone : string
+		qq : string
+		wechat : string
+		message : string
+	}
+	type radioOption = {
+		label : string
+		value : string
+	}
+	const typeList = ref<radioOption[]>([
+		{ label: '建议', value: '1' },
+		{ label: '需求', value: '2' },
+		{ label: '合作', value: '3' }
+	])
+	const rules = ref<UTSJSONObject>({
+		type: [{ type: 'required', message: '请选择类型' }],
+		message: [{ type: 'required', message: '请输入留言内容' }]
+	})
+	const ruleForm = ref<TFormComponentPublicInstance | null>(null)
+	const formData = ref<formDataType>({
+		type: '2',
+		name: '',
+		phone: '',
+		qq: '',
+		wechat: '',
+		message: ''
+	} as formDataType)
+	function resetForm() {
+		(ruleForm.value as TFormComponentPublicInstance).reset()
+	}
+	function submitForm() {
+		const validate : boolean = (ruleForm.value as TFormComponentPublicInstance).validate() as boolean
+		if (validate) {
+			TuiApi('replaceGestion', JSON.parse<UTSJSONObject>(JSON.stringify(formData.value))!).then(res => {
+				uni.navigateBack()
+			}).catch(err => {
+				uni.showToast({
+					title: '更新失败'
+				})
+			})
+		}
+	}
+	onLoad((e : OnLoadOptions) => {
+		if ('type' in e) {
+			formData.value.type = `${e['type']}`
+		} else {
+			formData.value.type = '1'
+		}
+	})
+</script>

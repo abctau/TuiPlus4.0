@@ -1,0 +1,206 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`twh-100% ${mainClass}`">
+		<camera style="width: 100%;height: 100%;" :flash="flash" :device-position="devicePosition" :mode="mode"
+			:resolution="resolution" :frame-size="frameSize" @stop="handleStop" @error="handleError"
+			@initdone="handleInitDone" @scancode="handleScanCode"></camera>
+		<t-view main-class="da di-0 fc bg-#000" v-if="!showcamera && !isRcodering">
+			<t-text v-bind="extendsAttrs" main-class="s-50 sfwb c-#fff">{{welcome}}</t-text>
+		</t-view>
+		<t-view main-class="da di-0" v-if="isRcodering">
+			<t-text type="success" main-class="c-red da drb-30 " mode="time" format="d天h时M分s秒"
+				:text="`${remain}`"></t-text>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * NativeCamera 组件用于集成原生摄像头功能，支持闪光灯控制、摄像头位置切换、模式设置等。
+	 * @displayName NativeCamera
+	 * @author TanYuan
+	 * @property {string} [flash='auto'] 控制闪光灯的模式
+	 * @property {string} [devicePosition='back'] 指定使用前置还是后置摄像头
+	 * @property {string} [mode='normal'] 摄像头的模式
+	 * @property {string} [resolution='high'] 摄像头的分辨率
+	 * @property {string} [frameSize='medium'] 摄像头捕获的帧大小
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface NativeCamearProps extends CommonProps {
+		mode : string
+		resolution : string
+		frameSize : string
+		welcome : string
+		quality : string
+		compressed : boolean
+	}
+	const devicePosition = ref<string>('back')
+	const isRcodering = ref<boolean>(false)
+	const showcamera = ref<boolean>(false)
+	const flash = ref<string>('auto')
+	const remain = ref<number>(0)
+	let timer : number = 0
+	let timeId : number = 0
+
+	const props = withDefaults(defineProps<NativeCamearProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: 'normal',
+		resolution: 'medium',
+		frameSize: 'medium',
+		welcome: '欢迎使用Tui',
+		quality: 'normal',
+		compressed: false
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['take', 'stop', 'error', 'initdone', 'scancode', 'recoder'])
+	function onsuccessRcoderVideo(url : string) {
+		emit('recoder', url)
+	}
+	function close() {
+		showcamera.value = false
+	}
+	function front() {
+		showcamera.value = true
+		devicePosition.value = 'front'
+	}
+	function back() {
+		showcamera.value = true
+		devicePosition.value = 'back'
+	}
+	function open() {
+		showcamera.value = true
+		front()
+	}
+	function stops() {
+		// #ifdef MP-WEIXIN
+		const ctx = wx.createCameraContext()
+		ctx.stopRecord({
+			compressed: true,
+			timeout: 300,
+			success(rst) {
+				console.log('rst', rst)
+				onsuccessRcoderVideo(rst.tempVideoPath || "")
+			},
+			fail(err) {
+				console.log(err)
+			}
+		})
+		// #endif
+		// #ifndef MP-WEIXIN
+		const context = uni.createCameraContext();
+		context?.stopRecord({
+			compressed: props.compressed,
+			success: (res : CameraContextStopRecordResult) => {
+				isRcodering.value = false
+				const url = res.tempVideoPath ?? ''
+				emit('recoder', url)
+				clearInterval(timer)
+				remain.value = 0
+			},
+			fail: (res : any) => {
+				clearInterval(timer)
+				remain.value = 0
+			}
+		} as CameraContextStopRecordOptions)
+		// #endif
+		close()
+	}
+	function start() {
+		// #ifndef MP-WEIXIN
+		const context = uni.createCameraContext();
+		context?.startRecord({} as CameraContextStartRecordOptions)
+		// #endif
+		// #ifdef MP-WEIXIN
+		const ctx = wx.createCameraContext()
+		ctx.startRecord({
+			quality: 'high',
+			timeout: 300,
+			timeoutCallback(rst) {
+				onsuccessRcoderVideo(rst.tempVideoPath || "")
+			},
+			success: (res) => {
+				clearInterval(timeId)
+				timeId = setTimeout(function () {
+					stops()
+				}, 297 * 1000);
+			},
+			fail(er) { }
+		})
+		// #endif
+		isRcodering.value = true
+		clearInterval(timer)
+		timer = setInterval(() => {
+			remain.value += 1000
+		}, 1000)
+	}
+	function setFlash(e : string) {
+		open()
+		flash.value == e
+	}
+	function flashOn() {
+		open()
+		flash.value = "on"
+	}
+	function flashOff() {
+		open()
+		flash.value = "off"
+	}
+	function take() {
+		if (showcamera.value) {
+			nextTick(() => {
+				const context = uni.createCameraContext();
+				context?.takePhoto({
+					quality: props.quality,
+					selfieMirror: false,
+					success: (res : CameraContextTakePhotoResult) => {
+						const url = res.tempImagePath ?? ''
+						emit('take', url)
+					},
+					fail: (e : any) => {
+						console.log("take photo", e);
+					}
+				} as CameraContextTakePhotoOptions)
+			})
+		} else {
+			uni.showToast({
+				title: '未开启摄像头'
+			})
+		}
+	}
+	
+	function handleStop(event : UniCameraStopEvent) {
+		emit('stop', event);
+	}
+	function handleError(event : UniCameraErrorEvent) {
+		emit('error', event);
+	}
+	function handleInitDone(event : UniCameraInitDoneEvent) {
+		emit('initdone', event);
+	}
+	function handleScanCode(event : any) {
+		emit('scancode', event);
+	}
+
+	onUnmounted(() => {
+		clearInterval(timeId)
+		clearInterval(timer)
+	})
+	defineExpose({
+		flashOn,
+		flashOff,
+		front,
+		back,
+		open,
+		close,
+		start,
+		stops,
+		take
+	})
+</script>

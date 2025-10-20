@@ -1,0 +1,98 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class='mb-30' title='TuiCrypto 加密解密工具集'
+			sub-title="强大的加密解密工具集，为您的应用提供安全的密码学支持。支持对称加密（如 AES）、非对称加密（如 RSA）、哈希摘要（如 SHA1、hmacSHA1、SHA256、hamcSHA256、、SHA512、hamcSHA512、MD5、hmacMd5）以及消息认证码（如 HMAC）等多种主流算法，满足数据加密、身份验证和完整性校验等安全需求。"></t-card>
+		<t-card main-class='mb-30' type="error" title='亮点' sub-title="纯UTS编写，不需要原生依赖，不需要自定义基座"></t-card>
+		<t-section main-class="mb-30" title="信息展示"></t-section>
+		<t-sticky main-class="w-690" :scrollTop="scrollTop" :stickyTop="0">
+			<t-view main-class="tdr tdb h-200 tdp">
+				<t-text main-class="w-100%">{{encinfo}}</t-text>
+			</t-view>
+		</t-sticky>
+		<t-button type="primary" main-class="mtb-30" @click="encrypt">RSA加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="decrypt">RSA解密（请先加密在测试）</t-button>
+		<t-button type="primary" main-class="mb-30" @click="aesEncrypt">Aes加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="aesDecrypt">Aes解密（请先加密在测试）</t-button>
+		<t-button type="primary" main-class="mb-30" @click="md5">md5加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="sah1">sah1加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="sha256">sha256加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="sha512">sha512加密</t-button>
+		<t-button type="primary" main-class="mb-30" @click="base64">base64编码解码</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiPmStyle, TuiCrypto } from '@/uni_modules/tui-plus'
+	const publicKey = `-----BEGIN PUBLIC KEY-----
+	MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCAvZKge9Ii7KkS5WMx58Ba7/+Z
+	wPWri9gkEaJdW3Z6Lj2KEpw+yGaXnh6I9EDREcBKemxFjyMcJJmjx5bi0xYzjOGa
+	Tb19NY4c8pZEFsIR29C5YtHmAU56FbLTXQvdq24fHODqNKNKDz6+IXQPgOQqSnDC
+	Et4Lq79GpSm/7C0HOQIDAQAB
+	-----END PUBLIC KEY-----`
+	const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+	MIICXAIBAAKBgQCAvZKge9Ii7KkS5WMx58Ba7/+ZwPWri9gkEaJdW3Z6Lj2KEpw+
+	yGaXnh6I9EDREcBKemxFjyMcJJmjx5bi0xYzjOGaTb19NY4c8pZEFsIR29C5YtHm
+	AU56FbLTXQvdq24fHODqNKNKDz6+IXQPgOQqSnDCEt4Lq79GpSm/7C0HOQIDAQAB
+	AoGAGzb37hD+xP8+Zo4zP/N7yD1/zOLrjA4N7OIFbrLNAtsPi0aP3P3EIjz8u3rW
+	0NttyNDEXpf5lhNunx6sGNsCkCocYRn8VI/Dw4lSRCscn5JO2jnXx4oe+fYlJfV2
+	mLI1D2acG6Af2mwaGwD4Lg44RwuPkrxUyKp9Q2yRPt43pgECQQDHK+0Ik9F0FE3b
+	nrDvXwp07sgKi4Tog9+adiBA6v/kNa9hpJbZA+IErnyzgTpuO/+c2i739XYhQiwg
+	99WqkpbhAkEApXkn9co8/o84SSh6Z34IH7Ilz4jWzmNFRnE2oMGWsgMBDUB/VQ3S
+	xf+ybHLLfmFCl5ZiZdQz1yzoqiyajN/zWQJAXhrWCwh0nWj+hHcNWHxKX4d2wuy6
+	5nVwj/WiNaoTL8thyzvN/kmEX/vldZboea8ljgHU0VmL8Bjo6sbOkKJkYQJASK+z
+	sfAoYtmeq+QwAI4IG4Qxv7woP3iz0YGhsXPYMlHHgH64cDAmSftL8P9sDBPFILla
+	d8iDDR4ZBceaDA/D4QJBALqECNWcFuLz8RMdx4NJUjbikIvIR/CnXwAIoVhQh24P
+	CUx+XrsweWK6llwlwDv1RUgElQkcje6drmFJEfBJ1WY=
+	-----END RSA PRIVATE KEY-----`
+	const rsa = TuiCrypto.rsa
+	const scrollTop = ref<number>(0)
+	const encinfo = ref('')
+	const key = '1234567890123456'; // 16 bytes key for AES-128, 32 bytes for AES-256 etc.
+	const iv = '1234567890123456'; // 16 bytes IV for AES-128, 32 bytes for AES-256 etc.
+	const text = '中文测试Hello, World!'; // 待加密的数据
+	let stext = ''
+	function encrypt() {
+		const originData = '我是加密的文本';
+		rsa.setPublicKey(publicKey)
+		encinfo.value = rsa.encryptAsync(originData)
+	}
+	function decrypt() {
+		rsa.setPrivateKey(privateKey)
+		encinfo.value = `Rsa解密信息：${rsa.decryptAsync(encinfo.value)}`
+	}
+	function aesEncrypt() {
+		stext = TuiCrypto.aes.encrypt(text, key, { iv })
+		encinfo.value = `Aes加密信息：${stext}`
+	}
+	function aesDecrypt() {
+		const atext = TuiCrypto.aes.decrypt(stext, key, { iv })
+		encinfo.value = `Aes解密信息：${atext}`
+	}
+	function md5() {
+		const a = TuiCrypto.sha.md5(text)
+		const b = TuiCrypto.sha.HmacMD5(a, iv)
+		encinfo.value = `MD5：${a}\r\nHmacMD5:${b}`
+	}
+	function sah1() {
+		const a = TuiCrypto.sha.sha1(text)
+		const b = TuiCrypto.sha.HmacSHA1(a, iv)
+		encinfo.value = `sha1：${a}\r\nHmacSHA1:${b}`
+	}
+	function sha256() {
+		const a = TuiCrypto.sha.sha256(text)
+		const b = TuiCrypto.sha.HmacSHA256(a, iv)
+		encinfo.value = `sha256：${a}\r\HmacSHA256:${b}`
+	}
+	function sha512() {
+		const a = TuiCrypto.sha.sha512(text)
+		const b = TuiCrypto.sha.HmacSHA512(a, iv)
+		encinfo.value = `sha512：${a}\r\HmacSHA512:${b}`
+	}
+	function base64() {
+		encinfo.value = TuiCrypto.base64.encrypt(text)
+		console.log(TuiCrypto.base64.decrypt(encinfo.value))
+	}
+	onPageScroll((e : OnPageScrollOptions) => {
+		scrollTop.value = e.scrollTop
+	})
+</script>

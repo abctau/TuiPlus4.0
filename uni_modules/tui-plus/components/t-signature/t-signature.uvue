@@ -1,0 +1,187 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`h-300 ${mainClass}`" @tuiTouchstart="onTuiTouchstart"
+		@tuiTouchmove="onTuiTouchmove" @tuiTouchend="onTuiTouchend" @tuiTouchcancel="onTuiTouchend">
+		<t-canvas ref="signaturecanvas" type="e" main-class="twh-100%" @initFinished="canvasInit"></t-canvas>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Signature 签名
+	 * @date 2025-05-31 12:06:50
+	 * @author TanYuan
+	 * @description 创建签名区域的组件，支持多种配置，包括线条颜色、大小、平滑模式等。
+	 * @example /pagesA/template/signature/signature
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-signature.html
+	 * @example /pagesA/template/signature/signature
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：primary)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} color 线条颜色
+	 * @property {Number} maxHistory 最大历史记录点数(默认：20)
+	 * @property {Number} lineSize 线条大小(默认：2)
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { c } from '../../common/model/theme'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const signaturecanvas = ref<TCanvasComponentPublicInstance | null>(null)
+	interface SignatureProps extends CommonProps {
+		color : string
+		lineSize : number
+		maxHistory : number
+	}
+	const props = withDefaults(defineProps<SignatureProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		color: '',
+		lineSize: 2,
+		maxHistory: 20
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+
+	type Point = {
+		x : number
+		y : number
+		c ?: string
+		w ?: number
+	}
+	type Line = Point[]
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
+	const points = ref<Point[]>([]);
+	const undoStack = ref<Line[]>([]);
+	const redoStack = ref<Line[]>([]);
+	const lastX = ref<number>(0);
+	const lastY = ref<number>(0);
+	const isDrawing = ref<boolean>(false);
+	const isempty = ref<boolean>(false);
+
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+	}
+	function onTuiTouchstart(e : TuiTouchEvent) {
+		if (props.disabled) return
+		isDrawing.value = true
+		isempty.value = false
+		lastX.value = e.offsetX
+		lastY.value = e.offsetY
+		points.value.push({
+			x: lastX.value,
+			y: lastY.value
+		} as Point)
+	}
+	function drawLine(point : Point, last : Point, lineWidth : number, strokeStyle : string) {
+		const ctx = canvasCtx.value!
+		ctx.lineWidth = lineWidth
+		ctx.strokeStyle = strokeStyle
+		ctx.lineCap = 'round'
+		ctx.lineJoin = 'round'
+		ctx.beginPath()
+		ctx.moveTo(last.x, last.y)
+		ctx.lineTo(point.x, point.y)
+		ctx.stroke()
+		ctx.closePath()
+	}
+	function onTuiTouchmove(e : TuiTouchEvent) {
+		if (props.disabled || !isDrawing.value) return
+		let x = e.offsetX
+		let y = e.offsetY
+		const lineWidth = props.lineSize
+		const strokeStyle = props.color != '' ? props.color : c(props.type, 'plain', '', false)
+		const point = { x, y } as Point
+		const last = { x: lastX.value, y: lastY.value } as Point
+		drawLine(point, last, lineWidth, strokeStyle)
+		points.value.push({ x: lastX.value, y: lastY.value, c: strokeStyle, w: lineWidth } as Point);
+		lastX.value = x
+		lastY.value = y
+	}
+	function onTuiTouchend(e : TuiTouchEvent) {
+		isDrawing.value = false
+		undoStack.value.push(points.value)
+		redoStack.value = [] as Line[]
+		points.value = [] as Point[]
+	}
+	function clear() {
+		const ctx = canvasCtx.value!
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		isempty.value = true
+		undoStack.value = [] as Line[]
+		redoStack.value = [] as Line[]
+		points.value = [] as Point[]
+	}
+	function undo() {
+		const ctx = canvasCtx.value!
+		if (redoStack.value.length == props.maxHistory && props.maxHistory != 0) {
+			return
+		}
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		if (undoStack.value.length > 0) {
+			const lastPath : Line = undoStack.value.pop()!;
+			redoStack.value.push(lastPath);
+			if (undoStack.value.length == 0) {
+				isempty.value = true
+				return
+			}
+			for (let l = 0; l < undoStack.value.length; l++) {
+				for (let i = 1; i < undoStack.value[l].length; i++) {
+					const last = undoStack.value[l][i - 1]
+					const point = undoStack.value[l][i]
+					drawLine(point, last, point.w!, point.c!)
+				}
+			}
+		}
+	}
+	function redo() {
+		if (redoStack.value.length < 1) return
+		const lastPath : Line = redoStack.value.pop()!;
+		undoStack.value.push(lastPath);
+		isempty.value = false
+		for (let l = 0; l < undoStack.value.length; l++) {
+			for (let i = 1; i < undoStack.value[l].length; i++) {
+				const last = undoStack.value[l][i - 1]
+				const point = undoStack.value[l][i]
+				drawLine(point, last, point.w!, point.c!)
+			}
+		}
+	}
+	function save() : Promise<string> {
+		return new Promise((
+			resolve : (res : string) => void
+		) => {
+			const ins = signaturecanvas.value!
+			ins.toDataURL().then((res : string) => {
+				resolve(res)
+			})
+		})
+	}
+	defineExpose({
+		clear,
+		undo,
+		redo,
+		save
+	})
+</script>

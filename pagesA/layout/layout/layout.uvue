@@ -1,0 +1,66 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title='Layout 分栏布局' sub-title="分栏布局组件提供灵活的栅格系统支持，通过简单的属性配置即可实现响应式列宽、偏移和间隔，实现简洁高效的页面布局。"></t-card>
+		<t-section title="示例" main-class="mtb-30"></t-section>
+		<t-row main-class="mb-15">
+			<t-col :span="8">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">8</t-text></t-row>
+			</t-col>
+			<t-col :span="8">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">8</t-text></t-row>
+			</t-col>
+			<t-col :span="8">
+				<t-row main-class="w-100% h-60px fc tdb-s"> <t-text main-class="c-#fff">8</t-text></t-row>
+			</t-col>
+		</t-row>
+		<t-row main-class="mb-15">
+			<t-col :span="6">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+		</t-row>
+		<t-row main-class="mb-15">
+			<t-col :span="8">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">8</t-text></t-row>
+			</t-col>
+			<t-col :span="16">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">16</t-text></t-row>
+			</t-col>
+		</t-row>
+		<t-section title="分栏偏移" main-class="mtb-30"></t-section>
+		<t-row main-class="mb-15">
+			<t-col :span="5">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">5</t-text></t-row>
+			</t-col>
+			<t-col :span="5" :offset="2">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">5</t-text></t-row>
+			</t-col>
+			<t-col :span="7" :offset="5">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">7</t-text></t-row>
+			</t-col>
+		</t-row>
+		<t-section title="间距" main-class="mtb-30"></t-section>
+		<t-row>
+			<t-col :span="6" :gutter="6">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6" :gutter="6">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6" :gutter="6">
+				<t-row main-class="w-100% h-60px fc tdb-e"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+			<t-col :span="6" :gutter="6">
+				<t-row main-class="w-100% h-60px fc tdb-s"><t-text main-class="c-#fff">6</t-text></t-row>
+			</t-col>
+		</t-row>
+	</t-page>
+</template>

@@ -1,0 +1,43 @@
+<template>
+	<t-page>
+		<t-card title="Gesture 手势" main-class='mltr-30'
+			sub-title="主要解决PC端不支持touchMove事件,避免了适配WEB端大量的条件渲染">
+		</t-card>
+		<t-gesture main-class="h-800 tdb tdp tdm tdr" @click="onclick" @tuiTouchstart="ontuiTouchstart"
+			@tuiTouchmove="ontuiTouchmove" @tuiTouchend="ontuiTouchend" @tuiTouchcancel="ontuiTouchcancel"
+			@transitionend="ontransitionend">
+			<t-text main-class="p-10">offsetX: {{touchEvn?.offsetX}}</t-text>
+			<t-text main-class="p-10">offsetY: {{touchEvn?.offsetY}}</t-text>
+			<t-text main-class="p-10">x: {{touchEvn?.x}}</t-text>
+			<t-text main-class="p-10">y: {{touchEvn?.y}}</t-text>
+			<t-text main-class="p-10">width: {{touchEvn?.rect?.width}}</t-text>
+			<t-text main-class="p-10">height: {{touchEvn?.rect?.height}}</t-text>
+			<t-text main-class="p-10">rect: {{touchEvn?.rect}}</t-text>
+		</t-gesture>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus';
+	const touchEvn = ref<TuiTouchEvent | null>(null)
+	function onclick(e : UniPointerEvent) {
+		console.log('onclick', e)
+	}
+	function ontuiTouchstart(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		touchEvn.value = e
+	}
+	function ontuiTouchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		touchEvn.value = e
+	}
+	function ontuiTouchend(e : TuiTouchEvent) {
+		touchEvn.value = e
+	}
+	function ontuiTouchcancel(e : TuiTouchEvent) {
+		touchEvn.value = e
+	}
+	function ontransitionend(e : UniEvent) {
+		console.log('ontransitionend', e)
+	}
+</script>

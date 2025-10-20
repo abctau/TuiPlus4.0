@@ -1,0 +1,193 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`tdb p-20 tdr ${mainClass}`">
+		<t-view :hover="true" main-class="fl faic pb-15 bb-1px,s,#f5f5f5 mb-20">
+			<t-text @click="onbase">请选择</t-text>
+			<t-icon main-class="mlr-8 sfwb" size="mini" name="arrow-right"></t-icon>
+			<t-view main-class="fl faic" v-for="([key,val],index) in selects" :key="index"
+				@click="onmenuselect(val as TypeCascaderOptions,index)">
+				<t-text main-class="s">{{(val as TypeCascaderOptions)['label']}}</t-text>
+				<t-icon v-if="index<selects.size-1" main-class="mlr-8 sfwb" size="mini" name="arrow-right"></t-icon>
+			</t-view>
+		</t-view>
+		<t-list :main-class="`h-200px ${scrollClass}`" :refresherEnabled="false" :loadmore="false">
+			<t-list-item v-for="(item,index) in list" :key="index" @click="onselect(item)">
+				<t-view :hover="true" main-class="fl fjcb ptb-20 faic" :disabled="item.disabled">
+					<t-text
+						:type="item.value == selectValue?type:''">{{`${item.label + ((item.disabled!=null && item.disabled!) ? '(禁用)' : '')}`}}</t-text>
+					<t-icon v-if="item.value == selectValue || ischild(item)" :type="item.value == selectValue?type:''"
+						:name="ischild(item)?'arrow-right':'checkbox-mark'"></t-icon>
+				</t-view>
+			</t-list-item>
+		</t-list>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Cascader 级联选择器
+	 * @date 2025-05-31 12:02:10
+	 * @author TanYuan
+	 * @description 级联选择器组件，多级菜单灵活选择,支持动态数据加载/支持禁用选项(内容区可滚动需要设置 scroll的高度,不设置高度会自适应)
+	 * @example /pagesA/form/cascader/cascader
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-cascader.html
+	 * @example /pagesA/form/cascader/cascader
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} modelValue 组件的值
+	 * @property {UTSJSONObject[]} option 选项数据，用于配置级联选择的数据源(默认：[])
+	 * @property {String} scrollClass 滚动容器的额外类名，用于自定义滚动容器的样式
+	 * @event {Function} change undefined
+	 * @event {Function} update:modelValue undefined
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface CascaderProps extends CommonProps {
+		modelValue : string[]
+		option : UTSJSONObject[]
+		scrollClass : string
+	}
+	type TypeCascaderOptions = {
+		value : string
+		label : string
+		disabled ?: boolean
+		children ?: TypeCascaderOptions[]
+	}
+	const selectValue = ref<string>('')
+	const activeIndex = ref<number>(0)
+	const selects = ref<Map<number, TypeCascaderOptions>>(new Map<number, TypeCascaderOptions>())
+	const list = ref<TypeCascaderOptions[]>([])
+	const props = withDefaults(defineProps<CascaderProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: [] as string[],
+		option: [] as UTSJSONObject[],
+		scrollClass: '',
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'update:modelValue'])
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	const selectsValue = computed(() : string[] => {
+		let v : string[] = []
+		selects.value.forEach((val : TypeCascaderOptions) => {
+			v.push(val.value)
+		})
+		return v
+	})
+	function onbase() {
+		activeIndex.value = 0
+		selects.value.clear()
+		list.value = JSON.parse<TypeCascaderOptions[]>(JSON.stringify(props.option)) as TypeCascaderOptions[]
+	}
+	function onmenuselect(val : TypeCascaderOptions, key : number) {
+		try {
+			const size = selects.value.size
+			if (key < size - 1) {
+				activeIndex.value = key
+				selects.value.forEach((_, k) => {
+					if (k > key) selects.value.delete(k)
+				})
+				list.value = val.children!
+			}
+		} catch (error) {
+			//TODO handle the exception
+		}
+	}
+	function ischild(item : TypeCascaderOptions) : boolean {
+		return (item.children != null && (item.children as TypeCascaderOptions[]).length > 0)
+	}
+	function onselect(item : TypeCascaderOptions) {
+		const isDisabled = (item.disabled != null && (item.disabled as boolean))
+		const c = ischild(item)
+		if (!isDisabled) {
+			selects.value.set(activeIndex.value, item)
+			selectValue.value = item.value
+			if (c) {
+				activeIndex.value++
+				list.value = item.children as TypeCascaderOptions[]
+			}
+		}
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function init() {
+		const opt : string[] = [...props.modelValue]
+		const optParse = JSON.parse<TypeCascaderOptions[]>(JSON.stringify(props.option)) as TypeCascaderOptions[]
+		selects.value.clear()
+		if (opt.length > 0) {
+			let i = 0
+			let lastOpt : TypeCascaderOptions[] = optParse
+			function findOpt(key : string, data : TypeCascaderOptions[]) {
+				const f = data.find((e : TypeCascaderOptions) : boolean => e.value == key);
+				if (f != null) selects.value.set(i, f as TypeCascaderOptions)
+				if (f != null && f.children != null && (f.children as TypeCascaderOptions[]).length > 0) {
+					lastOpt = f.children as TypeCascaderOptions[]
+					i++
+					if (i < opt.length) {
+						findOpt(opt[i], f.children as TypeCascaderOptions[])
+					}
+				}
+			}
+			findOpt(opt[i], optParse)
+			activeIndex.value = i
+			const lastSelect = selects.value.get(selects.value.size - 1)
+			if (lastSelect != null) {
+				selectValue.value = (lastSelect as TypeCascaderOptions).value
+			}
+			list.value = lastOpt
+
+		} else {
+			list.value = optParse
+		}
+	}
+	watch(
+		selectsValue,
+		(val : string[]) => {
+			if (!(JSON.stringify(val) == JSON.stringify(props.modelValue))) {
+				emit('change', val)
+				emit('update:modelValue', val)
+			}
+		}
+	);
+	watch(
+		() : string[] => props.modelValue,
+		(_ : string[]) => {
+			init()
+		},
+		{ immediate: true }
+	);
+	watch(
+		() : UTSJSONObject[] => props.option,
+		(_ : UTSJSONObject[]) => {
+			init()
+		},
+		{ immediate: true }
+	);
+</script>

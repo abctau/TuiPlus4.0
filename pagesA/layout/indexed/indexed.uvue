@@ -1,0 +1,38 @@
+<template>
+	<t-page title='索引导航(canvas绘制)' main-class='f' :scrollDisabled="true">
+		<t-indexed main-class="f" type="e" :list="dataList" @select="select"></t-indexed>
+		<t-card main-class='df dlb-0' title="索引导航"
+			sub-title="长列表渲染非常考验开发技巧,采用list组件虽能自动回收,但首次加载会卡住非常影响体验,该插件采用canvas绘制,利用虚拟滚动原理,每次只会绘制屏幕可见的十几个数据,不会卡页面,但是样式会固定,如有更丰富界面UI需求需要付费定制"></t-card>
+	</t-page>
+</template>
+
+<script>
+	import { TuiApi } from '@/api'
+	export default {
+		data() {
+			return {
+				dataList: [] as UTSJSONObject[]
+			};
+		},
+		created() {
+			TuiApi('indexsortdata',{},true).then(res => {
+				this.dataList = res['data'] as UTSJSONObject[]
+			})
+		},
+		methods: {
+			select(e : UTSJSONObject) {
+				if (e.getString('letter') != null) {
+					// 此逻辑点击了标题
+					uni.showToast({
+						title: e.getString('letter')!
+					})
+				} else {
+					uni.showToast({
+						title: e.getString('name')!
+					})
+				}
+				console.log(e)
+			}
+		}
+	}
+</script>

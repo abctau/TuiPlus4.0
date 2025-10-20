@@ -1,0 +1,118 @@
+<template>
+	<t-page title='工作管理' main-class="p-30">
+		<t-card title="Work任务编辑" main-class="mb-30" sub-title="未来工作,下一步工作安排" />
+		<t-form ref="ruleForm" :rules="rules" main-class="tdr tdb tdp" child-class="fv" direction="column">
+			<t-form-item label="任务类型" prop="type">
+				<t-radio-group v-model="(formData.type as string)" child-class="mb-20" main-class="fl fww" type="p">
+					<t-radio v-for="(item,index) in typeList" :key="index" :value="item.value">{{item.label}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="任务优先级" prop="priority">
+				<t-radio-group v-model="(formData.priority as string)" child-class="mb-20" main-class="fl fww" type="p">
+					<t-radio v-for="(item,index) in priorityList" :key="index"
+						:value="item.value">{{item.label}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="任务名称" prop="name">
+				<t-input main-class="w-100%" v-model="(formData.name as string)" effect="plain"
+					:border="true"></t-input>
+			</t-form-item>
+			<t-form-item label="任务描述" prop="description" :bottomLine="false">
+				<t-textarea main-class="w-100% h-300" v-model="(formData.description as string)" :maxlength="11000000"
+					:autoHeight="true" effect="plain" :border="true"></t-textarea>
+			</t-form-item>
+			<t-row main-class="fc mt-50">
+				<t-button main-class="mr-30" width="150" type="primary" @click="submitForm">提交</t-button>
+				<t-button type="error" width="150" @click="resetForm">重置</t-button>
+			</t-row>
+		</t-form>
+		<t-button main-class="mt-30" path="/pagesB/work/work-task" type="p">查看任务</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api/uriApi.uts'
+	type formDataType = {
+		type : string
+		priority : string
+		name : string
+		description : string
+	}
+	type radioOption = {
+		label : string
+		value : string
+	}
+	let curId = ''
+	const typeList = ref<radioOption[]>([
+		{ label: '需求', value: 'demand' },
+		{ label: 'BUG', value: 'bug' },
+	])
+	const priorityList = ref<radioOption[]>([
+		{ label: '立即处理', value: '1' },
+		{ label: '一般', value: '2' },
+	])
+	const rules = ref<UTSJSONObject>({
+		type: [{ type: 'required', message: '必填' }],
+		priority: [{ type: 'required', message: '必填' }],
+		name: [{ type: 'required', message: '请输入标题' }],
+		description: [{ type: 'required', message: '请输入工作内容' }]
+	})
+	const ruleForm = ref<TFormComponentPublicInstance | null>(null)
+	const formData = reactive<formDataType>({
+		type: 'bug',
+		priority: '1',
+		name: '',
+		description: '',
+	} as formDataType)
+	function resetForm() {
+		(ruleForm.value as TFormComponentPublicInstance).reset()
+	}
+	function submitForm() {
+		const validate : boolean = (ruleForm.value as TFormComponentPublicInstance).validate() as boolean
+		if (validate) {
+			try {
+				uni.showLoading({ title: '更新中' })
+				TuiApi('addWorkTask', {
+					type: formData.type,
+					name: formData.name,
+					description: formData.description,
+					priority: formData.priority,
+					_id: curId
+				} as UTSJSONObject).then(_ => {
+					uni.showToast({
+						title: "更新成功"
+					})
+					uni.navigateBack()
+				}).catch(_ => {
+					uni.showToast({
+						title: "任务更新失败"
+					})
+				})
+			} catch (error) {
+				uni.showToast({
+					title: "任务更新失败"
+				})
+			}
+		}
+	}
+	onLoad((e : OnLoadOptions) => {
+		if ('id' in e) {
+			curId = `${e['id']}`
+			const id = `${e['id']}`
+			TuiApi('getWorTask', {
+				current: 1,
+				pageSize: 10,
+				_id: curId
+			}).then((res : UTSJSONObject) => {
+				const data = res.getArray('data.list') as UTSJSONObject[]
+				if (data.length > 0) {
+					formData.type = `${data[0]['type']}`
+					formData.priority = `${data[0]['priority']}`
+					formData.name = `${data[0]['name']}`
+					formData.description = `${data[0]['description']}`
+					console.log(formData)
+				}
+			})
+		}
+	})
+</script>

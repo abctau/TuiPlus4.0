@@ -1,0 +1,63 @@
+<template>
+	<t-page title='文件管理器' main-class="p-30">
+		<t-card main-class="mtb-30 tdr tdb" title="文件管理器-文件选择"
+			sub-title="文件管理选择上传组件是一款用于便捷上传、管理和分享文件支持返回文件md5,用于服务端判断重复上传"></t-card>
+		<t-section title="基础使用" main-class="tdr tdb mb-30"></t-section>
+		<t-file-manager type="p" v-model="fiellist" main-class="tdr tdb mb-30 p-20"
+			@change="fileChange"></t-file-manager>
+		<t-section title="插槽自定义布局" main-class="tdr tdb mb-30"></t-section>
+		<t-file-manager v-model="fiellist1" main-class="tdr tdb mb-30 p-20" @change="fileChange">
+			<template #menu>
+				<t-button type="s">上传合同</t-button>
+			</template>
+			<template #default="{files}">
+				<t-row main-class="faic mt-20 ptb-30 fjcb" v-for="(item,index) in (files as UTSJSONObject[])"
+					:key="index">
+					<t-icon type='s' main-class="mr-10" name="integral"></t-icon>
+					<t-text type='s'>{{item.name}}</t-text>
+				</t-row>
+			</template>
+		</t-file-manager>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				fiellist: [{
+					name: '驾驶证'
+				}, {
+					name: '身份证',
+				}] as UTSJSONObject[],
+				fiellist1: [{
+					name: '合同一',
+				}, {
+					name: '合同二',
+				}] as UTSJSONObject[]
+			};
+		},
+		methods: {
+			fileChange(e : UTSJSONObject[]) {
+				console.log(e)
+				//上传逻辑
+				// const choose : ChooseImageSuccess = {
+				// 	errSubject: "",
+				// 	errMsg: "",
+				// 	tempFilePaths: [] as string[],
+				// 	tempFiles: [] as any[]
+				// }
+				// e-forEach((item : TuiFilesList) => {
+				// 	choose-tempFilePaths-push(item-realFilePath)
+				// 	// #ifdef WEB
+				// 	choose-tempFiles-push(item-file)
+				// 	// #endif
+				// })
+				// console-log(choose)
+				// uploadFileOptions(choose)-then(rst => {
+				// 	console-log(rst)
+				// })
+			}
+		}
+	}
+</script>

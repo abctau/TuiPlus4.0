@@ -1,0 +1,54 @@
+<template>
+	<t-page title='图标'>
+		<t-card main-class="mltr-30" title='Icon 图标' sub-title="200余款内置图标，支持字体编辑工具添加删除定义自己喜欢的图标,支持图片-"></t-card>
+		<introduction title="基础功能+主题展示">
+			<t-row>
+				<t-icon main-class="mr-30 s-50" name="setting" :disabled="true"></t-icon>
+				<t-icon main-class="mr-30 s-50" :hover="true" :disabled="true" name="phone-fill"
+					type="success"></t-icon>
+				<t-icon main-class="mr-30 s-50" name="map-fill" type="error" :hover="true" @click="test"></t-icon>
+				<t-icon main-class="mr-30 s-50" name="eye-fill" type="primary"></t-icon>
+				<t-icon main-class="mr-30 s-50" name="photo-fill" type="warning"></t-icon>
+				<t-icon main-class="mr-30 s-50" name="cube" type="primary"></t-icon>
+			</t-row>
+		</introduction>
+		<introduction title="主题尺寸">
+			<t-row>
+				<t-row main-class="mr-30 faic">
+					<t-text type="primary" main-class="mr-5" size="large">大</t-text>
+					<t-icon size="large" type="primary" name="mic"></t-icon>
+				</t-row>
+				<t-row main-class="mr-30 faic">
+					<t-text type="success" main-class="mr-5" size="large">中</t-text>
+					<t-icon main-class="mr-15" size="medium" :disabled="true" name="mic" type="success"></t-icon>
+				</t-row>
+				<t-row main-class="mr-30 faic">
+					<t-text type="error" main-class="mr-5" size="large">小</t-text>
+					<t-icon main-class="mr-15" size="small" name="mic" type="error"></t-icon>
+				</t-row>
+				<t-row main-class="mr-30 faic">
+					<t-text type="primary" main-class="mr-5" size="large">迷你</t-text>
+					<t-icon main-class="mr-15" size="mini" name="mic" type="primary"></t-icon>
+				</t-row>
+			</t-row>
+		</introduction>
+		<introduction title="样式设置">
+			<t-icon name="volume-fill" main-class="bg-#f56c6c r-200 twh-80 c-#fff s-50 sta slh-80" @click="test"
+				type="primary"></t-icon>
+		</introduction>
+		<introduction title="使用图片">
+			<t-icon :hover="true" size="large" type="primary" name="/pagesA/static/image/logo.png" @click="test"></t-icon>
+		</introduction>
+		<introduction title="使用图片">
+			<t-icon size="mini" type="primary" name="/pagesA/static/image/logo.png"></t-icon>
+		</introduction>
+		<introduction title="自定义尺寸">
+			<t-icon size="mini" main-class="s-250" type="primary" name="/pagesA/static/image/logo.png"></t-icon>
+		</introduction>
+	</t-page>
+</template>
+<script setup>
+	function test() {
+		console.log(123)
+	}
+</script>

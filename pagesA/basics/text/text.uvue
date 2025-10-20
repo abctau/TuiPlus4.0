@@ -1,0 +1,89 @@
+<template>
+	<t-page title='文本' main-class='p-30'>
+		<t-card title="Text 文本" main-class="mb-30" sub-title="丰富的主题色,支持日期格式化,敏感信息隐藏,金额格式化处理,高亮文本显示,且支持插槽高亮显示"></t-card>
+		<t-section title="主题颜色" main-class='mb-30' />
+		<t-row main-class="mb-30 tdr tdb tdp">
+			<t-text main-class="mr-15" @click="test" :hover="true">默认</t-text>
+			<t-text main-class="mr-15" type="success" :disabled="true">成功</t-text>
+			<t-text main-class="mr-15" type="error">危险</t-text>
+			<t-text main-class="mr-15" type="warning">警告</t-text>
+			<t-text main-class="mr-15" type="primary">主色</t-text>
+		</t-row>
+		<t-section title="主题-size" main-class='mb-30' />
+		<t-row main-class="mb-30 tdr tdb tdp">
+			<t-text main-class="mr-15" size="large" type="success">large</t-text>
+			<t-text main-class="mr-15" type="error" size="medium">medium</t-text>
+			<t-text main-class="mr-15" type="error" size="small">small</t-text>
+			<t-text main-class="mr-15" type="error" size="mini">mini</t-text>
+		</t-row>
+		<t-section title="主题-effect" main-class='mb-30' />
+		<t-row main-class="mb-30 tdr tdb tdp">
+			<t-text effect="normal" main-class="mr-15" type="error" @click="test" :hover="true">默认</t-text>
+			<t-text effect="dark" main-class="mr-15" type="error">成功</t-text>
+			<t-text effect="disabled" main-class="mr-15" type="error">危险</t-text>
+			<t-text effect="light" main-class="mr-15" type="error">警告</t-text>
+		</t-row>
+		<t-section title="日期格式化" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text type="info" main-class="mb-15" mode="date" text="2023-01-02T02:03:05"></t-text>
+			<t-text type="warning" main-class="mb-15" mode="date" text="2023/01/02 02:03:05"></t-text>
+			<t-text type="primary" main-class="mb-15" mode="date" text="2023-01-02 02:03:05"></t-text>
+			<t-text type="error" main-class="mb-15" mode="date" format="d天h时M分s秒" text="1612959739000"></t-text>
+			<t-text type="success" main-class="mb-15" mode="time" format='hh:MM:ss' text="50000"></t-text>
+			<t-text type="primary" main-class="mb-15" mode="date" format="yyyy-mm-dd"
+				text="2023-01-02T02:03:05"></t-text>
+			<t-text type="primary" main-class="mb-15" mode="date" format="yyyy-mm-dd" :text="textValue"></t-text>
+			<t-text type="success" main-class="mb-15" mode="time" format="d天h时M分s秒" text="50000"></t-text>
+			<button type='s' main-class="m-30" size='small' @click="test">测试变量</button>
+		</t-col>
+		<t-section title="敏感信息隐藏" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text mode="sensitive" main-class="mb-15" type="e" text="张"></t-text>
+			<t-text mode="sensitive" main-class="mb-15" type="s" text="王李"></t-text>
+			<t-text mode="sensitive" main-class="mb-15" type="w" text="赵钱孙"></t-text>
+			<t-text mode="sensitive" main-class="mb-15" type="p" text="18059547994"></t-text>
+		</t-col>
+		<t-section title="显示金额(显示5位小数)" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text mode="price" main-class="mb-15" type="error" :decimals="2" text="1234"></t-text>
+			<t-text mode="price" main-class="mb-15" type="success" :decimals="5" text="81681-25"></t-text>
+			<t-text mode="price" main-class="mb-15" type="warning" :decimals="2" text="81681-25885"></t-text>
+		</t-col>
+		<t-section title="高亮显示" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text :patternsValue="['重点内容', '电子邮件', '电话号码']" type="s" size="l" mode="light" @click="test"
+				text="此文本组件能够突出显示关键词，如电子邮件地址、电话号码等，点击可以快速启动相关操作，如拨打电话或发送邮件。">
+			</t-text>
+			<t-text :patternsReg="['\\b1[3456789]\\d{9}\\b','\\b[a-zA-Z0-9-_%+-]+@[a-zA-Z0-9--]+\\-[a-zA-Z]{2,}\\b']"
+				main-class="p-30 slh-45" mode="light" text="点击电话号码: 15329438335 或 电子邮件: test@example-com，以触发相应操作">
+			</t-text>
+		</t-col>
+		<t-section title="隐藏-省略号" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text type="warning" :lines="1" main-class="w-400 oh slh-100">这是一段很长的文本，用于测试单行超出隐藏的效果。</t-text>
+			<t-text type="error" :lines="1" main-class="w-400" :overflow="true">这段文本也是用于测试单行超出隐藏，但禁用了省略号。</t-text>
+		</t-col>
+		<t-section title="自定义样式覆盖" main-class='mb-30' />
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text type="i" main-class="c-#ff5500 slh-50" :overflow="false">这段文本展示了如何通过自定义样式来改变文本的显示效果</t-text>
+		</t-col>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				textValue: '1612959739000',
+			};
+		},
+		methods: {
+			test() {
+				this.textValue = '1602859739000'
+			}
+		},
+		onLoad() {
+
+		}
+	}
+</script>

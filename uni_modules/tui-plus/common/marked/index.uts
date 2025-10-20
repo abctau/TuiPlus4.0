@@ -1,0 +1,8 @@
+import { I_Marked } from './interface/interface';
+import { Marked } from './libs/Instance';
+
+export const useMarked = () : I_Marked => {
+	return new Marked();
+}
+export * from './interface/interface';
+export * from './libs/Instance';

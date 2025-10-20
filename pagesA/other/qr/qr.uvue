@@ -1,0 +1,52 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb" title="Qrcode 二维码"
+			sub-title="纯UTS编写二维码组件,canvas绘制,非webview,无需引用原生依赖 无需安装自定义基座"></t-card>
+		<t-section main-class="tdr tdb mb-30" title="基础功能+主题展示"></t-section>
+		<t-row main-class="tdr tdb mb-30 plrt-30 fc">
+			<t-col main-class="fc dx">
+				<t-qr main-class="twh-500" type='success' :text="qrstr" mode="circular" ref="qrins" :logo="logo"></t-qr>
+			</t-col>
+		</t-row>
+		<t-row main-class="ptb-30">
+			<t-button main-class="f mr-20" @click="logo='static/images/dcloud.png'" type="success">添加logo</t-button>
+			<t-button main-class="f" type="error" @click="logo=''">移除logo</t-button>
+		</t-row>
+		<t-row main-class="pb-30">
+			<t-button main-class="f mr-20" @click="takeSnapshot" type="warning">保存为图片</t-button>
+			<t-button type="p" main-class="f" @click="test">更新数据</t-button>
+		</t-row>
+
+		<t-section main-class="tdr tdb mb-30" title="圆点模式"></t-section>
+		<t-row main-class="tdr tdb mb-30 plrt-30 fjcb">
+			<t-col main-class="fc dx">
+				<t-qr main-class="w-200 h-200 mbr-20" mode="line" text="Tui" type="success"></t-qr>
+			</t-col>
+			<t-col main-class="fc dx">
+				<t-qr main-class="twh-200 mbr-20" mode="rect" text="Tui" type="error"></t-qr>
+			</t-col>
+			<t-col main-class="fc dx">
+				<t-qr main-class="twh-200 mbr-20" mode="circular" text="Tui" type="primary"></t-qr>
+			</t-col>
+		</t-row>
+		<t-section main-class="tdr tdb mb-30" title="云函数生成二维码(后端)"></t-section>
+		<t-image main-class="twh-300"
+			src='https://tool.yundie.xyz/api/getqr?text=%E6%AC%A2%E8%BF%8E%E4%BD%BF%E7%94%A8Tui'></t-image>
+	</t-page>
+</template>
+<script setup>
+	import { TuiGuid } from '@/uni_modules/tui-plus';
+	const qrstr = ref('欢迎使用Tui')
+	const logo = ref<string>('static/images/dcloud.png')
+	const qrins = ref<TQrComponentPublicInstance | null>(null)
+	function test() {
+		qrstr.value = TuiGuid(20)
+	}
+	function takeSnapshot() {
+		// (qrins.value as TQrComponentPublicInstance | null)?.toDataURL()?.then((url : string) => {
+		// 	uni.previewImage({
+		// 		urls: [url] as string[]
+		// 	})
+		// })
+	}
+</script>

@@ -1,0 +1,196 @@
+<template>
+	<t-page title='任务列表' :scrollDisabled="true" main-class='f'>
+		<t-subsection :current="1" type='p' size="medium" main-class="bg-#fff h-100 mb-30" @change="stateChange">
+			<t-subsection-item v-for="(item,index) in list" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+		<t-empty v-if='logs.length==0' mode="news" title="暂无任务" main-class="mt-160"></t-empty>
+		<t-list v-else main-class="f" ref="worklistins" @scrolltolower="scrolltolower"
+			@refresherrefresh="refresherrefresh">
+			<t-list-item v-for="(item,index) in logs" :key="index">
+				<t-card main-class="tdr tdb mlrb-30 " :title='item.name'
+					:path="`/pagesB/work/work-task-desc?id=${item._id}`"
+					:sub-title="`${formatTime(item.creation_time.toString())}`" :hover="true" :tag="tagFormart(item)"
+					:tag-class="tagcolor(item)">
+					<t-text main-class="mtb-20 c-#666 slh-40">{{item.description}}</t-text>
+					<t-row main-class='fjce plr-30 faic'>
+						<t-icon :path="`/pagesB/work/work?id=${item._id}`" :stop="true" :hover="true" name='edit-pen'
+							main-class="s-45 twh-80 slh-75 sta-c" type="primary"></t-icon>
+						<t-icon name="setting" :stop="true" size="large" type="success" :hover="true"
+							main-class="twh-80 sta-c slh-80" @click="showRadio(item)"></t-icon>
+						<t-icon name="trash" :stop="true" size="large" type="error" :hover="true"
+							main-class="twh-80 sta-c slh-80" @click="deleteTask(item,index)"></t-icon>
+					</t-row>
+				</t-card>
+			</t-list-item>
+		</t-list>
+		<t-form-modal main-class="w-600 df" ref="formedit" @confirm="onConfirm"></t-form-modal>
+	</t-page>
+</template>
+<script setup>
+	import { getWorTask, WorTaskList, WorTaskType, WorTaskResponse, TuiApi } from '@/api'
+	import { sleep, timeFormat } from '@/uni_modules/tui-plus'
+	const formedit = ref<ComponentPublicInstance | null>(null)
+	const worklistins = ref<ComponentPublicInstance | null>(null)
+	const formatTime = computed<(e : string) => string>(() : (e : string) => string => {
+		return (e : string) : string => {
+			return timeFormat(e, 'yyyy-mm-dd hh:MM:ss')
+		}
+	})
+	const list = ref<UTSJSONObject[]>([{
+		title: '排队中'
+	}, {
+		title: '开发中',
+	}, {
+		title: '已完成'
+	}])
+	const curNow = ref(1)
+	let activeid = '0'
+	function tagcolor(e : WorTaskList) : string {
+		let color = '#b2b2b2'
+		const step = `${e.step}`
+		if (step == '1') color = '#0000ff'
+		return `c.${color}`
+	}
+	function tagFormart(e : WorTaskList) : string {
+		let tag = '创建'
+		const step = `${e.step}`
+		if (step == '1') tag = '开发中'
+		if (step == '2') tag = '开发完成'
+		return tag
+	}
+	let lastPage = false
+	const current = ref(1)
+	const pageSize = ref(20)
+	const logs = ref<WorTaskList[]>([])
+	let loading : boolean = false
+	async function refresherrefresh() {
+		loading = false
+		await sleep(1000)
+		worklistins.value?.$callMethod('closerefresher')
+	}
+	function getlogs() : Promise<WorTaskList[]> {
+		return new Promise((
+			resolve : (res : WorTaskList[]) => void,
+			reject : (err : any | null) => void
+		) => {
+			uni.showLoading({
+				title: '加载中'
+			})
+			loading = true
+			getWorTask({
+				current: current.value,
+				pageSize: pageSize.value,
+				name: '',
+				step: `${curNow.value}`
+			}).then(async (res : WorTaskResponse) => {
+				lastPage = res.data.lastPage
+				await sleep(1000)
+				uni.hideLoading()
+				loading = false
+				resolve(res.data.list)
+				nextTick(() => {
+					if (lastPage) {
+						worklistins.value?.$callMethod('setLoadmore', 3)
+					} else {
+						worklistins.value?.$callMethod('setLoadmore', 0)
+					}
+				})
+			}).catch((err : any | null) => {
+				uni.hideLoading()
+				loading = false
+				reject(err)
+			})
+		})
+	}
+	function updatelogs() {
+		// loading = true
+		// TuiApi('getWorTask', {
+		// 	current: current.value,
+		// 	pageSize: pageSize.value,
+		// 	name: '',
+		// 	step: `${curNow.value}`
+		// }).then((res : UTSJSONObject) => {
+		// 	lastPage = res.getBoolean('data.lastPage')!
+		// 	uni.hideLoading()
+		// 	loading = false
+		// 	logs.value = JSON.parse<taskType[]>(JSON.stringify(res.getArray<UTSJSONObject>('data.list')!))!
+		// }).catch(err => {
+		// 	loading = false
+		// })
+	}
+	function onConfirm(e : UTSJSONObject) {
+		const step = e.getString('value')!
+		loading = true
+		TuiApi('updateWorkTask', { step: step, _id: activeid }).then(res => {
+			getlogs().then((res : WorTaskList[]) => {
+				logs.value = res
+			})
+		})
+	}
+	function stateChange(e : number) {
+		curNow.value = e
+		current.value = 1
+		getlogs().then((res : WorTaskList[]) => {
+			logs.value = res
+		})
+	}
+	function showRadio(item : WorTaskList) {
+		activeid = item._id
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		const val : string = item.step
+		edit.show({
+			title: '设置任务状态',
+			type: 'radio',
+			name: 'step',
+			value: val,
+			describe: item.name,
+			attrs: {
+				type: "p",
+				mainClass: 'fl fww',
+			},
+			contentClass: "w-690",
+			list: [
+				{
+					value: '0',
+					label: '创建'
+				},
+				{
+					value: '1',
+					label: '开发中'
+				}, {
+					value: '2',
+					label: '开发完成'
+				}
+			]
+		})
+	}
+	function scrolltolower() {
+		if (loading || lastPage) return
+		current.value++
+		getlogs().then((res : WorTaskList[]) => {
+			logs.value.push(...res)
+		})
+	}
+	getlogs().then((res : WorTaskList[]) => {
+		logs.value = res
+	})
+	function deleteTask(item : WorTaskList, index : number) {
+		uni.showModal({
+			title: `您确定删除【${item['name']}】吗？`,
+			success: (res) => {
+				if (res.confirm) {
+					TuiApi('delTask', { _id: item._id }).then(res => {
+						list.value.splice(index, 1)
+					}).catch((err) => {
+						uni.showToast({
+							icon: 'error',
+							title: `${(err as Error).message}`
+						})
+						console.log(err)
+					})
+				}
+			}
+		})
+	}
+</script>

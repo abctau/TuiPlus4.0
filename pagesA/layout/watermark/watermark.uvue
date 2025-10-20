@@ -1,0 +1,41 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title='WatermarkPlus 水印'
+			sub-title="Canvas绘制优势是性能高"></t-card>
+		<t-section main-class="tdr tdb mb-30" title="文字水印(Canvas 绘制)-type-size"></t-section>
+		<t-watermark content="欢迎使用Tui" main-class="tdr tdb h-500 mb-30" type='p' size="large" :xSpace="150"
+			:ySpace="120">
+			<t-col main-class="twh-100% fc">
+				<t-text>大号-间距设置</t-text>
+			</t-col>
+		</t-watermark>
+		<t-watermark content="欢迎使用Tui" main-class="tdr tdb h-500 mb-30 c-red" type='p' size="mini">
+			<t-col main-class="twh-100% fc">
+				<t-text>迷你-自定义颜色</t-text>
+			</t-col>
+		</t-watermark>
+		<t-watermark content="/pagesA/static/image/wark.png" main-class="tdr tdb h-500 mb-30 c-red"  :xSpace="150"
+			:ySpace="120">
+			<t-col main-class="twh-100% fc">
+				<t-text>图片水印</t-text>
+			</t-col>
+		</t-watermark>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			}
+		},
+		methods: {
+
+		}
+	}
+</script>
+
+<style>
+
+</style>

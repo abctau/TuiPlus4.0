@@ -1,0 +1,235 @@
+<template>
+	<t-page :scrollDisabled="true">
+		<tui-header @select="selectchange" @blur="onBlur"></tui-header>
+		<t-swiper-card :list="list1" main-class="mt-30" previousMargin="60" nextMargin="60" :autoplay="true"
+			@change="swiperChange">
+			<template #default={item}>
+				<t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject)['url']}`" />
+			</template>
+		</t-swiper-card>
+		<t-notice-bar main-class="mtlr-30" prefixIcon="volume-up" type="error" effect="light"
+			prefix-class="ats-1.2 sfwb" :barList="noticeBarList"></t-notice-bar>
+		<t-view main-class="tpg ov mtb-30">
+			<t-row main-class='mlr-30'>
+				<t-row main-class='f mr-30 p-30 tdr tdb faic'>
+					<t-col main-class="f">
+						<t-text main-class='sfwb mb-20 s-35'>组件</t-text>
+						<t-text>{{comStatistics.all_count}}</t-text>
+					</t-col>
+					<t-icon main-class="s-60 mr-10" name="/static/grid/grid (1).png"></t-icon>
+				</t-row>
+				<t-row main-class='f mr-30 p-30 tdr tdb faic' path="/pagesA/form/textarea/textarea?id=123">
+					<t-col main-class="f">
+						<t-text main-class='sfwb mb-20 s-35'>模版</t-text>
+						<t-text>{{comStatistics.uvue_count}}</t-text>
+					</t-col>
+					<t-icon main-class="s-60 mr-10" name="/static/grid/grid (4).png"></t-icon>
+				</t-row>
+			</t-row>
+		</t-view>
+		<t-list type="p" main-class="f" ref="ins" @scrolltolower="scrolltolower" @refresherrefresh="refresherrefresh"
+			:refresher-enabled="false" :loadmore="true">
+			<t-list-item v-for='(item,index) in componentList' :key="index">
+				<t-row main-class='mlrb-30 pl-30 tdb tdr faic fjcb' :hover="true" @click="nvto(`${item['path']}`)">
+					<t-row>
+						<t-text>{{item['tag']}}</t-text>
+						<t-text>{{item['name']}}</t-text>
+					</t-row>
+					<t-row main-class="faic ml-30">
+						<!-- <t-icon :stop="true" :name="item['icon']" type="s"
+							main-class="f h-90 slh-90 sta-c s-38 mr-50"></t-icon> -->
+						<!-- 	<t-icon :stop="true" name="thumb-up" main-class="f h-90 slh-90 sta-c s-38 mr-30"></t-icon>
+						<t-icon :stop="true" name="edit-pen" main-class="f h-90 slh-90 sta-c s-38 mr-30"
+							@click="editcom(item)"></t-icon> -->
+						<!-- <t-icon :stop="true" name="edit-pen" main-class="f h-90 slh-90 sta-c s-38 mr-30"
+							@click="editcom(item)"></t-icon> -->
+						<t-icon :stop="true" name="arrow-right" type="info"
+							main-class="f h-90 slh-90 sta-c s-32 mr-30"></t-icon>
+						<!-- <t-icon name="star" type="s" main-class="f h-90 slh-90 sta-c s-38"></t-icon>
+						 -->
+						<!-- <t-icon name="trash" type="e" @click="remove(item)" main-class="f h-90 slh-90 sta-c s-38"></t-icon> -->
+					</t-row>
+				</t-row>
+			</t-list-item>
+		</t-list>
+		<!-- <t-fab type="s" main-class="db-150 dr-30" :state="true" direction='column-top' spacing="20">
+			<t-fab-item :hover="true" path='/pagesA/api/share/share'>
+				<t-icon name="zhuanfa" main-class='c-#fff'></t-icon>
+				<t-text main-class='c-#fff' size="mini">分享</t-text>
+			</t-fab-item>
+			<t-fab-item :hover="true" path="/pagesA/template/skintheme/skintheme">
+				<t-icon name="moments" size="30" main-class='c-#fff'></t-icon>
+				<t-text main-class='c-#fff' size="mini">皮肤</t-text>
+			</t-fab-item>
+			<t-fab-item :hover="true" path="/pagesB/about/about">
+				<t-icon name="weixin-fill" main-class='c-#fff'></t-icon>
+				<t-text main-class='c-#fff' size="mini">我们</t-text>
+			</t-fab-item>
+			<t-fab-item :hover="true" path="/pagesB/im/im">
+				<t-icon name="server-fill" main-class='c-#fff'></t-icon>
+				<t-text main-class='c-#fff' size="mini">客服</t-text>
+			</t-fab-item>
+		</t-fab> -->
+	</t-page>
+</template>
+<script setup>
+	import { TuiApi } from '@/api'
+	import { TuiSleep, TuiSwiperEvent } from '@/uni_modules/tui-plus'
+	const ins = ref<TListComponentPublicInstance | null>(null)
+	const workType = ref<string>('completed')
+	const mask = ref(true)
+	const cur = ref(1)
+	const total = ref(0)
+	const pageSize = ref(20)
+	const list = ref<UTSJSONObject[]>([])
+	const componentList = ref<UTSJSONObject[]>([])
+	const sleep = new TuiSleep(1000)
+	let loading : boolean = false
+	const val = ref<string>('all')
+	const inputVal = ref('')
+	const noticeBarList = ref<string[]>([
+		'Tui-Plus 专注前端组件，打造轻量高效uni-app x UI组件库',
+		'Tui-xCharts为uniappx量身定制单Canvas绘制多个图表，避免DOM过多的性能开销，性能飞跃！',
+		'TuiToos ieda工具箱插件，自研`ipcRenderer`通信模块让任何前端项目都能与HBuilderX通信无缝结合 强大页面可视化 云数库schema结构可视化设计 AutoStyle样式转换，文档管理，接口管理功能等'
+	])
+	type statisticstype = {
+		all_count : number
+		uvue_count : number
+		canvas_count : number
+		native_count : number
+	}
+	const current = ref(0)
+	function swiperChange(e : TuiSwiperEvent) {
+		current.value = e.detail.current
+	}
+	const list1 = [
+		{
+			url: '/static/banner/introduce.jpg',
+			title: '',
+			poster: '',
+			type: ''
+		},
+		{
+			url: '/static/banner/charts.jpg',
+			title: '',
+			poster: '',
+			type: ''
+		}, {
+			url: '/static/banner/canvas.jpg',
+			title: '',
+			poster: '',
+			type: ''
+		}
+	] as UTSJSONObject[]
+	const comStatistics = ref<statisticstype>({ "all_count": 0, "uvue_count": 0, "canvas_count": 0, "native_count": 0 } as statisticstype)
+	TuiApi('componentStatistics', {}, true).then(res => {
+		comStatistics.value = JSON.parse<statisticstype>(JSON.stringify(res['data']))!
+	})
+	function getComponentList() : Promise<UTSJSONObject[]> {
+		return new Promise((
+			resolve : (rst : UTSJSONObject[]) => void
+		) => {
+			if (loading) return
+			loading = true
+			TuiApi('getComponentTest', {
+				"devstatus": workType.value,
+				"current": cur.value,
+				"pageSize": pageSize.value,
+				"keyword": inputVal.value,
+				"type": val.value
+			}, true).then((res : UTSJSONObject) => {
+				const lastPage = (res as UTSJSONObject).getBoolean('data.lastPage')!
+
+				sleep.call(() => {
+					cur.value++
+					loading = false
+					if (lastPage) {
+						ins.value!.setLoadmore(3)
+					} else {
+						//设置状态为0会销毁组件，避免loading会在后台运行
+						ins.value!.setLoadmore(0)
+					}
+					nextTick(() => {
+						resolve((res as UTSJSONObject).getArray('data.list') as UTSJSONObject[])
+					})
+				})
+			})
+		})
+	}
+	function refresherrefresh() {
+		loading = false
+		cur.value = 1
+		getComponentList().then((data : UTSJSONObject[]) => {
+			componentList.value = data
+			ins.value!.closerefresher()
+		})
+	}
+	function onSearch() {
+		ins.value!.showMask()
+		loading = false
+		cur.value = 1
+		getComponentList().then((data : UTSJSONObject[]) => {
+			ins.value!.hideMask()
+			nextTick(() => {
+				componentList.value = data
+				ins.value!.closerefresher()
+			})
+		})
+	}
+	function selectchange(e : string) {
+		nextTick(() => {
+			inputVal.value = ''
+			val.value = e
+			onSearch()
+		})
+	}
+	function nvto(url : string) {
+		uni.navigateTo({
+			url,
+			fail: (_) => {
+				uni.showModal({
+					title: '开发中'
+				})
+			}
+		})
+	}
+	function scrolltolower() {
+		getComponentList().then((data : UTSJSONObject[]) => {
+			componentList.value.push(...data)
+		})
+	}
+	function editcom(item : UTSJSONObject) {
+		const data = encodeURIComponent(JSON.stringify(item))
+		uni.navigateTo({
+			url: '/pagesA/template/pool/pool?data=' + data
+		})
+	}
+	function remove(item : UTSJSONObject) {
+		uni.showModal({
+			title: `您确定删除【${item['name']}】吗？`,
+			success: (res) => {
+				if (res.confirm) {
+					uni.showToast({
+						title: '权限不足'
+					})
+				}
+			}
+		})
+	}
+	function onBlur(e : string) {
+		if (inputVal.value != e) {
+			inputVal.value = e
+			val.value = 'all'
+			onSearch()
+		}
+	}
+	onUnload(() => {
+		sleep.clear()
+	})
+	onLoad(() => {
+		getComponentList().then((data : UTSJSONObject[]) => {
+			ins.value!.hideMask()
+			componentList.value = data
+		})
+	})
+</script>

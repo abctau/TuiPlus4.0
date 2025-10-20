@@ -1,0 +1,123 @@
+<template>
+	<t-view v-bind="extendsAttrs">
+		<t-canvas :main-class="skeletonStyles" @transitionend="transitionend" @initFinished="canvasInit">
+
+		</t-canvas>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Skeleton 骨架屏
+	 * @date 2025-05-31 12:06:54
+	 * @author TanYuan
+	 * @description canvas绘制,首屏加载更快,采用JSON数据配置Canvas画布绘制,减少过多DOM渲染影响首屏加载
+	 * @example /pagesA/layout/skeleton/skeleton
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-skeleton.html
+	 * @example /pagesA/layout/skeleton/skeleton
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：primary)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject[]	} option 选项数据，用于定义骨架屏的形状和位置(默认：[])
+	 * @property {String} drawClass 绘制类名，用于自定义样式
+	 * @property {Boolean} animate 是否启用动画(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 */
+
+	import { getStyleProperty } from '../../common/model/style'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface SkeletonProps extends CommonProps {
+		option : UTSJSONObject[]
+		drawClass : string
+		animate : boolean
+	}
+	const props = withDefaults(defineProps<SkeletonProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		option: [] as UTSJSONObject[],
+		drawClass: '',
+		animate: true
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits()
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null)
+	const istran = ref<boolean>(true)
+	const cw = ref(0)
+	const ch = ref(0)
+	const skeletonStyles = computed(() : string => {
+		return `twh-100% atp-o atd-1000 ${istran.value ? 'o-1' : 'o-0'}`
+	})
+	function fillRectRadio(x : number, y : number, width : number, height : number, radius : number) {
+		const r = Math.round(radius)
+		const w = Math.round(width)
+		const h = Math.round(height)
+		const ctx = canvasCtx.value!
+		ctx.beginPath()
+		ctx.moveTo(x, y + r)
+		ctx.arcTo(x, y + h, x + r, y + h, r)
+		ctx.arcTo(x + w, y + h, x + width, y + h - r, r)
+		ctx.arcTo(x + w, y, x + w - r, y, r)
+		ctx.arcTo(x, y, x, y + r, r)
+		ctx.fill()
+		ctx.closePath()
+	}
+	function draw() {
+		cw.value = canvasCtx.value!.canvas.offsetWidth
+		ch.value = canvasCtx.value!.canvas.offsetHeight
+		const ctx = canvasCtx.value!
+		let usercolor = getStyleProperty(props.mainClass, 'color')
+		if (usercolor == '') usercolor = '#e4e4e4'
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		props.option.forEach((item) => {
+			const type = `${item['type']}`
+			const x = parseFloat(`${item['x']}`)
+			const y = parseFloat(`${item['y']}`)
+			if (type == 'rect') {
+				const _width = Math.floor(cw.value * parseFloat(`${item['width']}`) - x)
+				ctx.fillStyle = usercolor
+				fillRectRadio(x, y, _width, parseFloat(`${item['height']}`), 3)
+			} else if (type == 'circle') {
+				ctx.fillStyle = usercolor
+				ctx.beginPath();
+				ctx.arc(x, y, parseFloat(`${item['radius']}`), 0, 2 * Math.PI, false)
+				ctx.fill()
+			}
+			ctx.fill()
+		})
+		if (props.animate) istran.value = false
+	}
+	function transitionend() {
+		istran.value = !istran.value
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+		draw()
+	}
+</script>

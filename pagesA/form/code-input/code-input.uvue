@@ -1,0 +1,90 @@
+<template>
+	<t-page title="验证码输入">
+		<t-card title="CodeInput" main-class="mtlr-20"
+			sub-title="组件用于输入验证码的高交互性组件，具有以下功能亮点：支持自定义样式、光标动画效果、显示或隐藏输入字符，适用于各种验证场景。使用场景包括登录、注册、身份验证等需要用户输入验证码的界面"></t-card>
+		<!-- https://cloud.tencent.com/developer/article/2177661 emoji -->
+		<introduction title="点模式">
+			<t-code-input main-class="mb-20" v-model="codeNumber1" dotSymbol="*"></t-code-input>
+			<t-code-input main-class="mb-20" v-model="codeNumber1" type="primary" dotSymbol="🍑"></t-code-input>
+			<t-code-input main-class="mb-20" v-model="codeNumber1" type="success" dotSymbol="🍄"></t-code-input>
+			<t-code-input main-class="mb-20" v-model="codeNumber1" type="error"
+				item-box-class="r-0 brw-0 btw-0 blw-0 mr-20" dotSymbol="🌶️"></t-code-input>
+			<t-code-input main-class="mb-20" v-model="codeNumber1" type="warning"
+				item-box-class="r-0 brw-0 btw-0 blw-0 mr-20" dotSymbol="🍆"></t-code-input>
+		</introduction>
+		<introduction title="基础功能-type">
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1"></t-code-input>
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1" type="info"></t-code-input>
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1" type="primary"></t-code-input>
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1" type="success"></t-code-input>
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1" type="error"></t-code-input>
+			<t-code-input main-class="mb-20 tdr tdb tdp" v-model="codeNumber1" type="warning"></t-code-input>
+		</introduction>
+		<t-lazy>
+			<introduction title="基础功能-size-光标样式">
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="large" item-box-class="fv" cursorClass="w-30 h-10"
+					type="primary"></t-code-input>
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="medium" item-box-class="fv" cursorClass="w-20 h-10"
+					type="success"></t-code-input>
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="small" item-box-class="fv" cursorClass="w-10 h-10"
+					type="error"></t-code-input>
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="mini" item-box-class="fv" cursorClass="w-5 h-10"
+					type="warning"></t-code-input>
+			</introduction>
+		</t-lazy>
+		<t-lazy>
+			<introduction title="基础功能-effect-禁用展示">
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="large" item-box-class="fv" :disabled="true"
+					cursorClass="w-30 h-10" type="primary" effect="normal"></t-code-input>
+				<t-code-input main-class="mb-20 tdr tdb tdp" size="large" item-box-class="fv" cursorClass="w-20 h-10"
+					:disabled="true" type="primary" effect="dark"></t-code-input>
+			</introduction>
+		</t-lazy>
+		<t-lazy>
+			<introduction title="横线模式">
+				<t-code-input main-class="mb-20" item-box-class="r-0 brw-0 btw-0 blw-0" mode="line"></t-code-input>
+				<t-code-input main-class="mb-20" item-box-class="r-0 brw-0 btw-0 blw-0" mode="line"
+					type="primary"></t-code-input>
+				<t-code-input main-class="mb-20" item-box-class="r-0 brw-0 btw-0 blw-0" mode="line"
+					type="success"></t-code-input>
+				<t-code-input main-class="mb-20" item-box-class="r-0 brw-0 btw-0 blw-0" mode="line"
+					type="error"></t-code-input>
+				<t-code-input main-class="mb-20" item-box-class="r-0 brw-0 btw-0 blw-0" mode="line"
+					type="warning"></t-code-input>
+			</introduction>
+		</t-lazy>
+		<t-lazy>
+			<introduction title="默认值">
+				<t-code-input main-class="mb-20" v-model="codeNumber6"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber6" type="primary"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber6" type="success"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber6" type="error"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber6" type="warning"></t-code-input>
+			</introduction>
+		</t-lazy>
+		<t-lazy>
+			<introduction title="设置长度">
+				<t-code-input main-class="mb-20" v-model="codeNumber1" :maxlength="2"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber1" :maxlength="3" type="primary"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber1" :maxlength="4" type="success"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber1" :maxlength="5" type="error"></t-code-input>
+				<t-code-input main-class="mb-20" v-model="codeNumber1" :maxlength="7" type="warning"></t-code-input>
+			</introduction>
+		</t-lazy>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				codeNumber1: '',
+				codeNumber2: '',
+				codeNumber3: '',
+				codeNumber4: '',
+				codeNumber5: '',
+				codeNumber6: '125',
+			};
+		}
+	}
+</script>

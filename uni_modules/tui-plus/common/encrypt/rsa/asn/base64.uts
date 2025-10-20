@@ -1,0 +1,75 @@
+import { TuiArray } from "../../core/array";
+
+export class Base64 {
+	re : RegExp = /-----BEGIN [^-]+-----([A-Za-z0-9+\/=\s]+)-----END [^-]+-----|begin-base64[^\n]+\n([A-Za-z0-9+\/=\s]+)==/
+	constructor() { }
+	decode(a : string) : number[] {
+		const decoder = new Map<string, number>()
+		const b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		const ignore = "= \n\r\t\u00A0\u2028\u2029";
+		for (let i = 0; i < 64; ++i) {
+			decoder.set(b64.charAt(i), i);
+		}
+		decoder.set('-', 62);
+		decoder.set('_', 63);
+		for (let i = 0; i < ignore.length; ++i) {
+			decoder.set(ignore.charAt(i), -1)
+		}
+		const out = new TuiArray();
+		let bits = 0;
+		let char_count = 0;
+		for (let i = 0; i < a.length; ++i) {
+			let c : string = a.charAt(i);
+			if (c == "=") {
+				break;
+			}
+			let cc : number | null = decoder.get(c);
+			if (cc == -1) {
+				continue;
+			}
+			if (cc == null) {
+				throw new Error("Illegal character at offset " + i);
+			}
+			bits |= cc!;
+			if (++char_count >= 4) {
+				out.setValue(out.length, (bits >> 16));
+				out.setValue(out.length, (bits >> 8) & 0xFF);
+				out.setValue(out.length, bits & 0xFF);
+				bits = 0;
+				char_count = 0;
+			}
+			else {
+				bits <<= 6;
+			}
+		}
+		switch (char_count) {
+			case 1:
+				throw new Error("Base64 encoding incomplete: at least 2 bits missing");
+			case 2:
+				out.setValue(out.length, (bits >> 10));
+				break;
+			case 3:
+				out.setValue(out.length, (bits >> 16));
+				out.setValue(out.length, (bits >> 8) & 0xFF);
+				break;
+		}
+		return out;
+	}
+	unarmor(_a : string) : number[] {
+		let a : string = _a
+		const base64 = new Base64()
+		const m = base64.re.exec(a);
+		if (m != null) {
+			if (m[1] != null) {
+				a = `${m[1]}`;
+			}
+			else if (m[2] != null) {
+				a = `${m[2]}`;
+			}
+			else {
+				throw new Error("RegExp out of sync");
+			}
+		}
+		return base64.decode(a);
+	}
+};

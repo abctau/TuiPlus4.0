@@ -1,0 +1,137 @@
+<template>
+	<t-canvas v-bind="extendsAttrs" @initFinished="canvasInit"></t-canvas>
+</template>
+<script setup>
+	/**
+	 * Barcode 条形码
+	 * @date 2025-05-31 12:01:48
+	 * @author TanYuan
+	 * @description Canvas绘制 组件是一个灵活的条形码生成器，支持多种编码类型，可自定义样式，适用于快速集成条形码显示。
+	 * @example /pagesA/other/barcode/barcode
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-barcode.html
+	 * @example /pagesA/other/barcode/barcode
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} text 条形码内容
+	 * @property {Number} pading 上下的间隙，单位是px(默认：20)
+	 * @property {String} encode codebar正常的数字字符条码 ean13国际通用物品编码(默认：ean13)
+	 */
+
+	import { codabar } from "../../common/barcode/codabar.uts"
+	import { ean13 } from "../../common/barcode/ean13.uts"
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface BarcodeProps extends CommonProps {
+		text : string
+		encode : string
+		pading : number
+	}
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null)
+	const props = withDefaults(defineProps<BarcodeProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		text: '',
+		encode: 'ean13',
+		pading: 20,
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	function draw() {
+		const ctx = canvasCtx.value!
+		const text = props.text
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		let code = ""
+		let eanCode = [] as string[]
+		if (props.encode == "codebar") {
+			code = new codabar(text).encode()
+		} else if (props.encode == "ean13") {
+			eanCode = new ean13(text).encode()
+			code = eanCode.join("")
+		}
+		let strCode = code.split("");
+		let linewidth = 2;
+		let totalWidth = strCode.length * (linewidth);
+		let barheight = ctx.canvas.offsetHeight - props.pading * 2;
+		let start_x = (ctx.canvas.offsetWidth - totalWidth) / 2
+		let start_y = props.pading
+		ctx.beginPath()
+		ctx.fillStyle = '#333333'
+
+		if (props.encode == "codebar") {
+			ctx.font = `bold 16px Arial`
+			let texts = text.split("")
+			let textwidth = texts.length * 16
+			// 绘制数字。
+			let sx = (ctx.canvas.offsetWidth - textwidth) / 2;
+			for (let a0 = 0; a0 < texts.length; a0++) {
+				ctx.fillText(texts[a0], (sx + (a0 * 16) + linewidth), (start_y + barheight))
+			}
+
+			for (let i = 0; i < strCode.length; i++) {
+				if (strCode[i] == "1") {
+					ctx.fillRect((i * linewidth + start_x + linewidth), start_y, linewidth, (barheight - 24))
+				}
+			}
+		} else if (props.encode == "ean13") {
+			let k = 0;
+			ctx.font = `bold 14px Arial`
+			ctx.fillText(text.substring(0, 1), (start_x - 10), (start_y + barheight))
+			for (let j = 0; j < eanCode.length; j++) {
+				let item = eanCode[j];
+				let itemcodeas = item.split("")
+				let offsetHeigt = (j == 0 || j == 2 || j == 4) ? 0 : 12
+				// 绘制数字。
+				if (j == 0) {
+					let ncsr = text.substring(1, 7).split("")
+					for (let a0 = 0; a0 < ncsr.length; a0++) {
+						ctx.fillText(ncsr[a0], (start_x + 10 + (a0 * 13) + linewidth), (start_y + barheight))
+					}
+				}
+				if (j == 3) {
+					let ncsr = text.substring(7).split("")
+					for (let a0 = 0; a0 < ncsr.length; a0++) {
+						ctx.fillText(ncsr[a0], ((ctx.canvas.offsetWidth / 2) + 10 + (a0 * 13) + linewidth), (start_y + barheight))
+					}
+				}
+
+				for (let i = 0; i < itemcodeas.length; i++) {
+					if (itemcodeas[i] == "1") {
+						ctx.fillRect((k * linewidth + start_x + linewidth), start_y, linewidth, (barheight - offsetHeigt))
+					}
+					++k;
+				}
+			}
+
+		}
+		ctx.fill()
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+		draw()
+	}
+</script>

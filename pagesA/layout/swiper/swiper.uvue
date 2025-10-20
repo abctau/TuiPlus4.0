@@ -1,0 +1,75 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb mb-30" title="Swiper 轮播图" sub-title="自研轮播实现,轻松实现卡片布局 画廊布局"></t-card>
+		<t-card main-class="tdr tdb mb-30" title="亮点"
+			sub-title="主要解决swiper组件APP端不支持previousMargin,nextMargin,无法实现卡片布局 画廊布局的痛点"></t-card>
+		<t-section title='横向卡片' main-class="tdr tdb mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30">
+			<t-swiper-card :list="list1" main-class="mt-30" class="swipercard" previousMargin="60" nextMargin="60"
+				:autoplay="true">
+				<template #default={item}>
+					<t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" /> 
+				</template>
+			</t-swiper-card>
+		</t-col>
+		<t-section title='纵向卡片' main-class="tdr tdb mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30">
+			<t-swiper-card :list="list" main-class="mt-30 w-300 h-600" class="swipercard" previousMargin="60"
+				nextMargin="60" :vertical="true" :autoplay="true">
+				<template #default={item}>
+					 <t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" /> 
+				</template>
+			</t-swiper-card>
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	const list1 = ref<UTSJSONObject[]>([])
+	const list = ref<UTSJSONObject[]>([])
+	let timer = 0
+	onLoad(() => {
+		timer = setTimeout(() => {
+			list.value = [
+				{
+					url: '/pagesA/static/image/swiper2.png',
+					title: '身无彩凤双飞翼，心有灵犀一点通,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳',
+					poster: '',
+					type: ''
+				}, {
+					url: '/pagesA/static/image/swiper1.png',
+					title: '谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳',
+					poster: '',
+					type: ''
+				}, {
+					url: '/pagesA/static/image/swiper2.png',
+					title: '身无彩凤双飞翼，心有灵犀一点通,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳',
+					poster: '',
+					type: ''
+				}
+			]
+			list1.value = [
+				{
+					url: '/pagesA/static/image/Z1.jpg',
+					title: '昨夜星辰昨夜风，画楼西畔桂堂东',
+					poster: 'https://life.yundie.xyz/pagesA/static/image/20230310/w400/a5e5aa163ae34d47b854c09649196fdb.png',
+					type: ''
+				},
+				{
+					url: '/pagesA/static/image/Z2.jpg',
+					title: '身无彩凤双飞翼，心有灵犀一点通,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳,谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳',
+					poster: '',
+					type: ''
+				}, {
+					url: '/pagesA/static/image/Z3.jpg',
+					title: '谁念西风独自凉，萧萧黄叶闭疏窗，沉思往事立残阳',
+					poster: '',
+					type: ''
+				}
+			]
+		}, 1000)
+	})
+	onUnload(() => {
+		clearTimeout(timer)
+	})
+</script>

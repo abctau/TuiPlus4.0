@@ -1,0 +1,33 @@
+<template>
+	<t-page title="Refresher" main-class='p-30'>
+		<t-card title="Refresher 刷新-加载" main-class="mb-30" sub-title="下拉刷新 和 上拉加载"></t-card>
+		<t-section title="基础功能+主题展示" main-class="mb-30"></t-section>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" default-icon-main-class="mr-5 s-35"></t-refresher>
+		</t-row>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="error" default-icon-main-class="mr-5-s-35"></t-refresher>
+		</t-row>
+		<t-section title="布局方向调整" main-class="mb-30"></t-section>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" :vertical="false"></t-refresher>
+		</t-row>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="error" :vertical="false"></t-refresher>
+		</t-row>
+
+		<t-section title="状态" main-class="mb-30"></t-section>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" :state="0"></t-refresher>
+		</t-row>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" :state="1"></t-refresher>
+		</t-row>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" :state="2"></t-refresher>
+		</t-row>
+		<t-row main-class="fc tdr tdb tdp mb-30">
+			<t-refresher type="p" :state="3"></t-refresher>
+		</t-row>
+	</t-page>
+</template>

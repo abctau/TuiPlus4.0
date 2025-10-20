@@ -1,0 +1,65 @@
+<template>
+	<t-page main-class="p-30">
+		<template>
+			<t-text main-class="sfwb s-30 p-30 tdr tdb mb-30" size="large">任务名称：{{task.name}}</t-text>
+			<t-text main-class="sfwb s-30 p-30 tdr tdb mb-30" size="large">任务描述：{{task.description}}</t-text>
+			<t-text main-class="sfwb s-30 p-30 tdr---ur tdb" size="large">任务进度</t-text>
+			<t-steps main-class="tdr---bl tdb h-600" lineClass="h-2px" type="p" :isEvenlyDistributed="true"
+				:current="task.step!=null ? parseInt(task.step!)+1: 1" direction="vertical">
+				<t-steps-item title="创建" :time="formatTime(`${task.creation_time}`)"></t-steps-item>
+				<t-steps-item title="开发中" :time="formatTime(`${task.start_time}`)"></t-steps-item>
+				<t-steps-item title="开发完成" :time="formatTime(`${task.end_time}`)"></t-steps-item>
+			</t-steps>
+		</template>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	import { timeFormat } from '@/uni_modules/tui-plus'
+	const formatTime = computed<(e : string) => string>(() : (e : string) => string => {
+		return (e : string) : string => {
+			if (e == 'null') {
+				return ''
+			} else {
+				return timeFormat(e, 'yyyy-mm-dd hh:MM:ss')
+			}
+		}
+	})
+	type taskType = {
+		_id : string;
+		creation_time : number
+		description : string
+		name : string
+		type : string
+		update_time : number
+		step ?: string
+		start_time ?: number
+		end_time ?: number
+	}
+	const current = ref(0)
+	const task = ref<taskType>({
+		_id: '',
+		creation_time: 0,
+		description: '',
+		name: '',
+		type: '',
+		update_time: 0,
+		step: null,
+		start_time: null,
+		end_time: null
+	} as taskType)
+	onLoad((e) => {
+		const id = `${e['id']}`
+		TuiApi('getWorTask', {
+			current: 1,
+			pageSize: 10,
+			_id: id
+		}).then((res : UTSJSONObject) => {
+			const data = res.getArray('data.list')!
+			if (data.length > 0) {
+				task.value = JSON.parse<taskType>(JSON.stringify(data[0]))!
+			}
+		})
+	})
+</script>

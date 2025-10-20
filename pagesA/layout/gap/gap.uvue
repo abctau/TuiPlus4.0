@@ -1,0 +1,24 @@
+<template>
+	<t-page title="间隔槽" main-class="p-30">
+		<t-card main-class="mb-30" title='' sub-title="提供空白区域，帮助内容元素更好地对齐和分布。"></t-card>
+		<t-section main-class="mb-30" title="基础功能-type"></t-section>
+		<t-gap main-class="mb-30"></t-gap>
+		<t-gap main-class="mb-30" type="primary"></t-gap>
+		<t-gap main-class="mb-30" type="success"></t-gap>
+		<t-gap main-class="mb-30" type="info"></t-gap>
+		<t-gap main-class="mb-30" type="warning"></t-gap>
+		<t-gap main-class="mb-30" type="error"></t-gap>
+		<t-section main-class="mb-30" title="基础功能-effect"></t-section>
+		<t-gap main-class="mb-30" effect="normal" type="primary"></t-gap>
+		<t-gap main-class="mb-30" effect="dark" type="primary"></t-gap>
+		<t-gap main-class="mb-30" effect="disabled" type="primary"></t-gap>
+		<t-gap main-class="mb-30" effect="light" type="primary"></t-gap>
+		<t-gap main-class="mb-30" effect="plain" type="primary"></t-gap>
+		<t-section main-class="mb-30" title="自定义颜色"></t-section>
+		<t-gap main-class='bg-#0055ff mb-30'></t-gap>
+		<t-section main-class="mb-30" title="设置宽高"></t-section>
+		<t-gap main-class="h-50 mb-30" type="p"></t-gap>
+		<t-section main-class="mb-30" title="设置上下边距"></t-section>
+		<t-gap main-class="mb-30"></t-gap>
+	</t-page>
+</template>

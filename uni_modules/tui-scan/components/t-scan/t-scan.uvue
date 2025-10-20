@@ -1,0 +1,228 @@
+<template>
+	<t-col @click="rescan" v-bind="extendsAttrs" :main-class="`dr ${mainClass} ${isPreviewing?'ff':'fn'}`">
+		<template v-if="pause">
+			<t-view main-class="twh-100% bg-#000 fc">
+				<t-text main-class="sfwb s-40 c-#fff">{{welcome}}</t-text>
+			</t-view>
+		</template>
+		<template v-else>
+			<tui-scan style="width: 100%;height: 100%;" ref='nativescan' @scanned="onScanned"
+				:is-previewing="isPreviewing" @pause="onPause"></tui-scan>
+			<slot v-if="mask && isPreviewing">
+				<t-canvas main-class='da twh-100%' @initFinished="maskCanvasInit"></t-canvas>
+			</slot>
+		</template>
+	</t-col>
+</template>
+<script setup>
+	/**
+	 * Scan 扫码
+	 * @date 2025-05-31 12:06:29
+	 * @author TanYuan
+	 * @description 支持自定义插槽自定义扫码布局,使用插槽记得设置:mask='false'
+	 * @example /pagesA/native/scan/scan
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-scan.html
+	 * @example /pagesA/native/scan/scan
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[qr|bar] 扫描模式(默认：qr)
+	 * @value qr 扫描二维码
+	 * @value bar 扫条码
+	 * @property {String} rectColor 矩形框颜色
+	 * @property {String} lineColor 线条颜色
+	 * @property {Number} lineHeight 扫描线的高度(默认：2)
+	 * @property {Boolean} mask 是否显示遮罩层(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} welcome 欢迎文本(默认：欢迎使用Tui)
+	 * @property {Boolean} isPreviewing 是否开启预览(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 */
+	import { ttc, TuiRequestAnimationFrame, TuiCancelAnimationFrame, useTuiThemes } from '@/uni_modules/tui-plus'
+	import { CommonProps } from '../../../tui-plus/common/props/index.uts'
+	import { ScanResult } from '@/uni_modules/tui-scan'
+	interface ScanProps extends CommonProps {
+		mode ?: string;
+		rectColor ?: string;
+		lineColor ?: string;
+		lineHeight ?: number;
+		mask ?: boolean;
+		welcome ?: string;
+		isPreviewing ?: boolean;
+	}
+
+	const props = withDefaults(defineProps<ScanProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: 'qr',
+		rectColor: '',
+		lineColor: '',
+		lineHeight: 2,
+		mask: true,
+		welcome: "欢迎使用Tui",
+		isPreviewing: true,
+	});
+	const emit = defineEmits(['scanned'])
+	const { extendsAttrs } = useTuiThemes(props)
+	const canvasMaskCtx = ref<CanvasRenderingContext2D | null>(null)
+	const animationTaskId = ref<number>(0)
+	const pause = ref<boolean>(false)
+	// #ifdef WEB
+	const nativescan = ref<any | null>(null)
+	// #endif
+	// #ifndef WEB
+	const nativescan = ref<TuiScanElement | null>(null)
+	// #endif
+	function rescan() {
+		pause.value = false
+		nextTick(() => {
+			const scan = nativescan.value!
+			scan.rescan()
+		})
+	}
+	function scanImage() {
+		pause.value = false
+		nextTick(() => {
+			const scan = nativescan.value!
+			// #ifdef MP-WEIXIN
+			scan.scanImageByURI()
+			// #endif
+			// #ifndef MP-WEIXIN
+			uni.chooseImage({
+				count: 1,
+				success: (res) => {
+					const path = res.tempFilePaths[0]
+					scan.scanImageByURI(path)
+				}, fail: (err) => {
+					console.log("err: ", JSON.stringify(err));
+				}
+			})
+			// #endif
+		})
+	}
+	function drawScannerLine(rectX : number, rectY : number, rectWidth : number, rectHeight : number) {
+		const ctx = canvasMaskCtx.value!;
+		const scannerLineHeight = props.lineHeight; // 扫描线的高度
+		const scannerLineWidth = rectWidth - 2; // 扫描线的宽度
+		let scannerLineY = rectY; // 扫描线的初始Y坐标
+		function animateScannerLine() {
+			if (animationTaskId.value != 0) TuiCancelAnimationFrame(animationTaskId.value)
+			if (pause.value) {
+				ctx.clearRect(0, 0, ctx.canvas.offsetWidth, ctx.canvas.offsetHeight)
+				return
+			}
+			ctx.clearRect(rectX + 1, rectY, rectWidth - 1, rectHeight)
+			const linecolor = ttc(props.type, '', props.lineColor, false)
+			ctx.fillStyle = linecolor; // 扫描线的颜色
+			ctx.fillRect(rectX + 1, scannerLineY, scannerLineWidth, scannerLineHeight);
+
+			// 更新扫描线的位置
+			if (props.mode == 'qr') {
+				scannerLineY += 2; // 扫描线的移动速度
+			} else {
+				scannerLineY += 0.5; // 扫描线的移动速度
+			}
+			if (scannerLineY > rectY + rectHeight - scannerLineHeight) {
+				scannerLineY = rectY; // 重置扫描线的位置
+			}
+			animationTaskId.value = TuiRequestAnimationFrame(() => {
+				animateScannerLine()
+			})
+		};
+		animateScannerLine()
+	}
+	function drawMask() {
+		const ctx = canvasMaskCtx.value!
+		// canvas的宽度和高度
+		const canvasWidth = ctx.canvas.offsetWidth;
+		const canvasHeight = ctx.canvas.offsetHeight;
+		if (!props.mask) {
+			ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+			return
+		}
+		// 设置矩形框的宽度和高度
+		let rectWidth = 300; // 矩形框的宽度
+		let rectHeight = 100; // 矩形框的高度
+		if (props.mode == 'qr') {
+			rectWidth = 200
+			rectHeight = 200
+		}
+		// 计算矩形框的起始坐标，使其位于画布中心
+		const rectX = (canvasWidth - rectWidth) / 2;
+		const rectY = (canvasHeight - rectHeight) / 2;
+		// 绘制矩形框
+		ctx.lineWidth = 4;
+		ctx.globalAlpha = 1;
+		ctx.strokeStyle = 'black';
+		ctx.globalAlpha = 0.5;
+		ctx.fillRect(0, 0, canvasWidth, rectY);
+		ctx.fillRect(0, rectY, rectX, rectHeight);
+		ctx.fillRect(0, rectY + rectHeight, canvasWidth, canvasHeight - rectHeight - rectY);
+		ctx.fillRect(rectX + rectWidth, rectY, canvasWidth - rectWidth - rectX, rectHeight);
+		ctx.globalAlpha = 1;
+		const rectcolor = ttc(props.type, '', props.rectColor, false)
+		ctx.strokeStyle = rectcolor;
+		ctx.moveTo(rectX + 15, rectY);
+		ctx.lineTo(rectX, rectY);
+		ctx.lineTo(rectX, rectY + 15);
+		ctx.moveTo(rectX + rectWidth - 15, rectY);
+		ctx.lineTo(rectX + rectWidth, rectY);
+		ctx.lineTo(rectX + rectWidth, rectY + 15);
+		ctx.moveTo(rectX + 15, rectY + rectHeight);
+		ctx.lineTo(rectX, rectY + rectHeight);
+		ctx.lineTo(rectX, rectY + rectHeight - 15);
+		ctx.moveTo(rectX + rectWidth - 15, rectY + rectHeight);
+		ctx.lineTo(rectX + rectWidth, rectY + rectHeight);
+		ctx.lineTo(rectX + rectWidth, rectY + rectHeight - 15);
+		ctx.stroke()
+		drawScannerLine(rectX, rectY, rectWidth, rectHeight);
+	}
+	function maskCanvasInit(ctx : CanvasContext) {
+		canvasMaskCtx.value = ctx.getContext('2d')
+		drawMask()
+	}
+	function onScanned(e : ScanResult) {
+		emit('scanned', e)
+	}
+	function onPause(e : boolean) {
+		pause.value = e
+		if (!pause.value && props.mask) {
+			drawMask()
+		}
+	}
+	onMounted(() => {
+		if (animationTaskId.value != 0) TuiCancelAnimationFrame(animationTaskId.value)
+	})
+	defineExpose({
+		scanImage,
+		rescan
+	})
+</script>

@@ -1,0 +1,42 @@
+<template>
+	<t-page title="画布" main-class="p-30">
+		<t-card title="Canvas 画布" main-class="mb-30" sub-title="统一写法 初始化更简单 增加pc端支持touchmove事件，通过事件返回绘制对象，简化了cannvas初始化配置等。Api使用方法和canvas一致"></t-card>
+		<t-canvas main-class='tdb h-400 tdr mb-30' @initFinished="initFun"></t-canvas>
+	</t-page>
+</template>
+
+<script setup>
+	function drawRoundedRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number) {
+		// ctx-fillStyle = '#007BFF';
+		// // ctx-beginPath();
+		// ctx-moveTo(x, y + radius);
+		// ctx-arcTo(x, y + height, x + radius, y + height, radius);
+		// ctx-arcTo(x + width, y + height, x + width, y + height - radius, radius);
+		// ctx-arcTo(x + width, y, x + width - radius, y, radius);
+		// ctx-arcTo(x, y, x, y + radius, radius);
+		// // ctx-closePath();
+		// ctx-fill();
+		// ctx-stroke()
+
+		ctx.fillStyle = '#007BFF';
+		ctx.fillRect(10, 10, 100, 100)
+		ctx.fill();
+
+	}
+	function initFun(ctx : CanvasContext) {
+		drawRoundedRect(ctx.getContext('2d')!, 10, 10, 50, 30, 15)
+		// ctx-save()
+		// ctx-clearRect(0, 0, ctx-canvas-width, ctx-canvas-height)
+		// ctx-beginPath()
+		// ctx-lineWidth = 2
+		// ctx-arc(75, 75, 50, 0, Math-PI * 2, true)
+		// ctx-moveTo(110, 75)
+		// ctx-arc(75, 75, 35, 0, Math-PI, false)
+		// ctx-moveTo(65, 65)
+		// ctx-arc(60, 65, 5, 0, Math-PI * 2, true)
+		// ctx-moveTo(95, 65)
+		// ctx-arc(90, 65, 5, 0, Math-PI * 2, true)
+		// ctx-stroke()
+		// ctx-restore()
+	}
+</script>

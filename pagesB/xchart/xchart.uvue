@@ -1,0 +1,74 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="⭐重磅革新:一个Canvas上绘制多图表 性能飞跃" type="error" effect="light"></t-card>
+		<t-card title="UTS图表" main-class="mb-30"
+			sub-title="为 uniappx 量身定制的纯 UTS 图表引擎 纯UTS图表，Canvas绘制，拒绝webview套壳 详细使用示例请见图表插件地址https://ext.dcloud.net.cn/plugin?id=21107"></t-card>
+		<t-xcharts v-if="canvasInsHeight>0" :main-class="`h-${canvasInsHeight}px tdr tdb`" @initFinished="initFinished"
+			@select="select"></t-xcharts>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	const tuixcharsins = ref<ComponentPublicInstance | null>(null)
+	import { TuiCharts, TuiDrawCharts } from '@/uni_modules/tui-plus'
+	const itemH : number = 287
+	let charts : TuiCharts | null = null
+	const select_data = ref<UTSJSONObject>({})
+	let opts : UTSJSONObject[] = []
+	const canvasInsHeight = ref<number>(0)
+	onLoad((e : OnLoadOptions) => {
+		const chartsType = `${e['type']}`
+		const data = { type: chartsType, current: 1, pageSize: 10, uts: true } as UTSJSONObject
+		TuiApi('getPagedCharts', data, true).then((res : UTSJSONObject) => {
+			opts = res.getArray('data.list') as UTSJSONObject[]
+			canvasInsHeight.value = opts.length * itemH
+		})
+	})
+	function initFinished(e : TuiCharts) {
+		charts = e
+		opts.forEach((item : UTSJSONObject, index : number) => {
+			const bar = e.add(index, item.getJSON('option')!)
+			bar.setCoordinates({ height: 287, xOffset: 0, yOffset: itemH * index })
+			bar.draw()
+		})
+	}
+	function select(e : UTSJSONObject) {
+		select_data.value = e
+	}
+	function test() {
+		const bar = charts!.add(7, opts[1].getJSON('option')!)
+		bar.setCoordinates({ height: 287, xOffset: 0, yOffset: itemH * 7 })
+		bar.draw()
+	}
+	function updatearcbar() {
+		const char = charts!
+		const bar = char.getDrawCharts(0)!
+		bar.update({
+			"series": [
+				{
+					"data": [
+						{ "value": 50 },
+						{ "value": 60 },
+						{ "value": 55 },
+						{ "value": 65 },
+						{ "value": 45 },
+						{ "value": 70 }
+					],
+					"name": "目标值"
+				},
+				{
+					"data": [
+						{ "value": 10 },
+						{ "value": 20 },
+						{ "value": 15 },
+						{ "value": 25 },
+						{ "value": 5 },
+						{ "value": 30 }
+					],
+					"name": "完成量"
+				}
+			]
+		})
+	}
+</script>

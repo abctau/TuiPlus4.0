@@ -1,0 +1,839 @@
+import { WordArray, Utf8, Base64 } from './core'
+import { TuiArray } from '../core/array'
+type OpenSSLFormatterType = {
+	stringify : (cipherParams : CipherParams) => string
+	parse : (openSSLStr : string) => CipherParams
+}
+type BlockCipherPadding = {
+	pad : (data : WordArray, blockSize : number) => void
+	unpad : (data : WordArray) => void
+}
+const HD = new TuiArray()
+HD.push(...[
+	1732584193,
+	4023233417,
+	2562383102,
+	271733878
+] as number[])
+class BlockCipherMode {
+	_prevBlock : TuiArray = new TuiArray()
+	_counter : TuiArray = new TuiArray()
+	_keystream : TuiArray = new TuiArray()
+	_cipher : AESAlgo
+	_iv : TuiArray
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		this._cipher = cipher;
+		this._iv = iv;
+	}
+	processBlock(words : TuiArray, offset : number) { }
+}
+function xorBlock(e : BlockCipherMode, words : TuiArray, offset : number, blockSize : number) {
+	let block : TuiArray;
+	const iv = e._iv;
+	if (iv.length > 0) {
+		block = iv;
+		e._iv = new TuiArray();
+	} else {
+		block = e._prevBlock;
+	}
+	for (let i = 0; i < blockSize; i += 1) {
+		const x : number = offset + i
+		words.setValue(x, words.getValue(x) ^ block.getValue(i));
+	}
+}
+
+class CBC extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends CBC {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			xorBlock(this, words, offset, blockSize);
+			cipher.encryptBlock(words, offset);
+			this._prevBlock = words.slices(offset, offset + blockSize);
+		}
+	};
+	static Decryptor = class extends CBC {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const thisBlock : TuiArray = words.slices(offset, offset + blockSize);
+			cipher.decryptBlock(words, offset);
+			xorBlock(this, words, offset, blockSize);
+			this._prevBlock = thisBlock;
+		}
+	};
+}
+
+const Pkcs7 : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => {
+		const blockSizeBytes = blockSize * 4;
+		const nPaddingBytes = blockSizeBytes - data.sigBytes % blockSizeBytes;
+		const paddingWord = nPaddingBytes << 24 | nPaddingBytes << 16 | nPaddingBytes << 8 | nPaddingBytes;
+		const paddingWords = new TuiArray();
+		for (let i = 0; i < nPaddingBytes; i += 4) {
+			paddingWords.push(paddingWord);
+		}
+		const padding = new WordArray(paddingWords, nPaddingBytes);
+		data.concat(padding);
+	},
+
+	unpad: (data : WordArray) => {
+		const _data = data;
+		const nPaddingBytes = _data.words.getValue(_data.sigBytes - 1 >>> 2) & 255;
+		_data.sigBytes -= nPaddingBytes;
+	}
+};
+
+class CipherParams extends UTSJSONObject {
+	constructor(cipherParams : UTSJSONObject) {
+		super()
+		for (let key in cipherParams) {
+			this[key] = cipherParams[key];
+		}
+	}
+	toStrings() {
+		return (this.get('formatter') as OpenSSLFormatterType).stringify(this);
+	}
+}
+const OpenSSLFormatter : OpenSSLFormatterType = {
+	stringify(cipherParams : CipherParams) : string {
+		const ciphertext : WordArray = cipherParams.get('ciphertext') as WordArray
+		let wordArray : WordArray = ciphertext;
+		return wordArray.toString(Base64);
+	},
+	parse(openSSLStr : string) : CipherParams {
+		let salt : WordArray = new WordArray();
+		const ciphertext = Base64.parse(openSSLStr);
+		const ciphertextWords = ciphertext.words;
+		if (ciphertextWords.getValue(0) == 1398893684 && ciphertextWords.getValue(1) == 1701076831) {
+			salt = new WordArray(ciphertextWords.slices(2, 4));
+			ciphertextWords.splice(0, 4);
+			ciphertext.sigBytes -= 16;
+		}
+		return new CipherParams({ ciphertext, salt });
+	}
+};
+
+
+function generateKeystreamAndEncrypt(that : BlockCipherMode, words : TuiArray, offset : number, blockSize : number, cipher : AESAlgo) {
+	const _words = words;
+	let keystream : TuiArray;
+	const iv = that._iv;
+	if (iv.length > 0) {
+		keystream = iv.slices(0);
+		that._iv = new TuiArray();
+	} else {
+		keystream = that._prevBlock;
+	}
+	cipher.encryptBlock(keystream, 0);
+	for (let i = 0; i < blockSize; i += 1) {
+		const x : number = offset + i
+		_words.setValue(x, _words.getValue(x) ^ keystream.getValue(i))
+	}
+}
+
+class CFB extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends CFB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			generateKeystreamAndEncrypt(this, words, offset, blockSize, cipher);
+			this._prevBlock = words.slices(offset, offset + blockSize);
+		}
+	};
+	static Decryptor = class extends CFB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const thisBlock = words.slices(offset, offset + blockSize);
+			generateKeystreamAndEncrypt(this, words, offset, blockSize, cipher);
+			this._prevBlock = thisBlock;
+		}
+	};
+}
+
+class CTR extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends CTR {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const _words = words;
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+
+			if (iv.length > 0) {
+				this._counter = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			const keystream = this._counter.slices(0);
+			cipher.encryptBlock(keystream, 0);
+			const bsize = blockSize - 1
+			this._counter.setValue(bsize, this._counter.getValue(bsize) + 1 | 0)
+			for (let i = 0; i < blockSize; i += 1) {
+				const x : number = offset + i
+				_words.setValue(x, _words.getValue(x) ^ keystream.getValue(i))
+			}
+		}
+	};
+	static Decryptor = class extends CTR {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const _words = words;
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+
+			if (iv.length > 0) {
+				this._counter = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			const keystream = this._counter.slices(0);
+			cipher.encryptBlock(keystream, 0);
+			const bsize = blockSize - 1
+			this._counter.setValue(bsize, this._counter.getValue(bsize) + 1 | 0)
+			for (let i = 0; i < blockSize; i += 1) {
+				const x : number = offset + i
+				_words.setValue(x, _words.getValue(x) ^ keystream.getValue(i))
+			}
+		}
+	};
+}
+const incWord = (word : number) => {
+	let _word = word;
+	if ((word >> 24 & 255) == 255) {
+		let b1 = word >> 16 & 255;
+		let b2 = word >> 8 & 255;
+		let b3 = word & 255;
+		if (b1 == 255) {
+			b1 = 0;
+			if (b2 == 255) {
+				b2 = 0;
+				if (b3 == 255) {
+					b3 = 0;
+				} else {
+					b3 += 1;
+				}
+			} else {
+				b2 += 1;
+			}
+		} else {
+			b1 += 1;
+		}
+		_word = 0;
+		_word += b1 << 16;
+		_word += b2 << 8;
+		_word += b3;
+	} else {
+		_word += 1 << 24;
+	}
+	return _word;
+};
+const incCounter = (counter : TuiArray) => {
+	counter.setValue(0, incWord(counter.getValue(0)));
+	if (counter.getValue(0) == 0) {
+		counter.setValue(1, incWord(counter.getValue(1)))
+	}
+	return counter;
+};
+
+class CTRGladman extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends CTRGladman {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const _words = words;
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+			if (iv.length > 0) {
+				this._counter = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			incCounter(this._counter);
+			const keystream = this._counter.slices(0);
+			cipher.encryptBlock(keystream, 0);
+			for (let i = 0; i < blockSize; i += 1) {
+				let x : number = offset + i
+				_words.setValue(x, _words.getValue(x) ^ keystream.getValue(i));
+			}
+		}
+	};
+	static Decryptor = class extends CTRGladman {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const _words = words;
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+			if (iv.length > 0) {
+				this._counter = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			incCounter(this._counter);
+			const keystream = this._counter.slices(0);
+			cipher.encryptBlock(keystream, 0);
+			for (let i = 0; i < blockSize; i += 1) {
+				let x : number = offset + i
+				_words.setValue(x, _words.getValue(x) ^ keystream.getValue(i));
+			}
+		}
+	};
+}
+
+class OFB extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends OFB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+			if (iv.length > 0) {
+				this._keystream = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			cipher.encryptBlock(this._keystream, 0);
+			for (let i = 0; i < blockSize; i += 1) {
+				const x = offset + i
+				words.setValue(x, words.getValue(x) ^ this._keystream.getValue(i))
+			}
+		}
+	};
+	static Decryptor = class extends OFB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			const cipher = this._cipher;
+			const { blockSize } = cipher;
+			const iv = this._iv;
+			if (iv.length > 0) {
+				this._keystream = iv.slices(0);
+				this._iv = new TuiArray();
+			}
+			cipher.encryptBlock(this._keystream, 0);
+			for (let i = 0; i < blockSize; i += 1) {
+				const x = offset + i
+				words.setValue(x, words.getValue(x) ^ this._keystream.getValue(i))
+			}
+		}
+	};
+}
+class ECB extends BlockCipherMode {
+	constructor(cipher : AESAlgo, iv : TuiArray) {
+		super(cipher, iv)
+	}
+	static Encryptor = class extends ECB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			this._cipher.encryptBlock(words, offset);
+		}
+	};
+	static Decryptor = class extends ECB {
+		constructor(cipher : AESAlgo, iv : TuiArray) {
+			super(cipher, iv)
+		}
+		override processBlock(words : TuiArray, offset : number) {
+			this._cipher.decryptBlock(words, offset);
+		}
+	};
+}
+
+
+
+const AnsiX923 : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => {
+		const dataSigBytes = data.sigBytes;
+		const blockSizeBytes = blockSize * 4;
+		const nPaddingBytes = blockSizeBytes - dataSigBytes % blockSizeBytes;
+		const lastBytePos = dataSigBytes + nPaddingBytes - 1;
+		data.clamp();
+		const x = lastBytePos >>> 2
+		data.words.setValue(x, data.words.getValue(x) | (nPaddingBytes << 24 - lastBytePos % 4 * 8))
+		data.sigBytes += nPaddingBytes;
+	},
+	unpad: (data : WordArray) => {
+		const nPaddingBytes = data.words.getValue(data.sigBytes - 1 >>> 2) & 255;
+		data.sigBytes -= nPaddingBytes;
+	}
+};
+const Iso10126 : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => {
+		const blockSizeBytes = blockSize * 4;
+		const nPaddingBytes = blockSizeBytes - data.sigBytes % blockSizeBytes;
+		const arr = new TuiArray()
+		arr.push(nPaddingBytes << 24)
+		data.concat(WordArray.random(nPaddingBytes - 1)).concat(new WordArray(arr, 1));
+	},
+	unpad: (data : WordArray) => {
+		const nPaddingBytes = data.words.getValue(data.sigBytes - 1 >>> 2) & 255;
+		data.sigBytes -= nPaddingBytes;
+	}
+};
+const ZeroPadding : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => {
+		const blockSizeBytes = blockSize * 4;
+		data.clamp();
+		let s : number = 0
+		if ((data.sigBytes % blockSizeBytes > 0) || blockSizeBytes > 0) s = 1
+		data.sigBytes += blockSizeBytes - s;
+	},
+	unpad: (data : WordArray) => {
+		const dataWords = data.words;
+		for (let i = data.sigBytes - 1; i >= 0; i -= 1) {
+			const a : number = dataWords.getValue(i >>> 2) >>> 24 - i % 4 * 8 & 255
+			if (a > 0) {
+				data.sigBytes = i + 1;
+				break;
+			}
+		}
+	}
+};
+const Iso97971 : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => {
+		const arr = new TuiArray()
+		arr.push(2147483648)
+		data.concat(new WordArray(arr, 1));
+		ZeroPadding.pad(data, blockSize);
+	},
+	unpad: (data : WordArray) => {
+		ZeroPadding.unpad(data);
+		data.sigBytes -= 1;
+	}
+};
+const NoPadding : BlockCipherPadding = {
+	pad: (data : WordArray, blockSize : number) => { },
+	unpad: (data : WordArray) => { }
+};
+
+const _SBOX = new TuiArray();
+const INV_SBOX = new TuiArray();
+const _SUB_MIX_0 = new TuiArray();
+const _SUB_MIX_1 = new TuiArray();
+const _SUB_MIX_2 = new TuiArray();
+const _SUB_MIX_3 = new TuiArray();
+const INV_SUB_MIX_0 = new TuiArray();
+const INV_SUB_MIX_1 = new TuiArray();
+const INV_SUB_MIX_2 = new TuiArray();
+const INV_SUB_MIX_3 = new TuiArray();
+const d = new TuiArray();
+for (let i = 0; i < 256; i += 1) {
+	if (i < 128) {
+		d.push(i << 1)
+	} else {
+		d.push(i << 1 ^ 283)
+	}
+}
+let x = 0;
+let xi = 0;
+for (let i = 0; i < 256; i += 1) {
+	let sx = xi ^ xi << 1 ^ xi << 2 ^ xi << 3 ^ xi << 4;
+	sx = sx >>> 8 ^ sx & 255 ^ 99;
+	_SBOX.setValue(x, sx)
+	INV_SBOX.setValue(sx, x);
+	const x2 = d.getValue(x);
+	const x4 = d.getValue(x2);
+	const x8 = d.getValue(x4);
+	let t = d.getValue(sx) * 257 ^ sx * 16843008;
+	_SUB_MIX_0.setValue(x, t << 24 | t >>> 8);
+	_SUB_MIX_1.setValue(x, t << 16 | t >>> 16);
+	_SUB_MIX_2.setValue(x, t << 8 | t >>> 24);
+	_SUB_MIX_3.setValue(x, t);
+	t = x8 * 16843009 ^ x4 * 65537 ^ x2 * 257 ^ x * 16843008;
+	INV_SUB_MIX_0.setValue(sx, t << 24 | t >>> 8);
+	INV_SUB_MIX_1.setValue(sx, t << 16 | t >>> 16);
+	INV_SUB_MIX_2.setValue(sx, t << 8 | t >>> 24);
+	INV_SUB_MIX_3.setValue(sx, t);
+	if (!(x > 0)) {
+		xi = 1;
+		x = xi;
+	} else {
+		x = x2 ^ d.getValue(d.getValue(d.getValue(x8 ^ x2)));
+		xi ^= d.getValue(d.getValue(xi));
+	}
+}
+const RCON : TuiArray = new TuiArray();
+RCON.push(...[0, 1, 2, 4, 8, 16, 32, 64, 128, 27, 54])
+class AESAlgo {
+	static keySize = 256 / 32;
+	static ivSize = 128 / 32;
+	blockSize = 128 / 32;
+	_minBufferSize = 0
+	_invKeySchedule = new TuiArray()
+	_keySchedule = new TuiArray()
+	cfg : UTSJSONObject
+	_xformMode : number
+	_key : WordArray
+	_mode : BlockCipherMode
+	_data = new WordArray();
+	_nDataBytes = 0;
+	_keyPriorReset : WordArray = new WordArray()
+	_nRounds = 0
+	constructor(xformMode : number, key : WordArray, cfg : UTSJSONObject) {
+		this._mode = new BlockCipherMode(this, (cfg.iv as WordArray).words)
+		this.cfg = cfg
+		this._xformMode = xformMode;
+		this._key = key;
+		this.reset();
+	}
+	createEncryptor(cipher : AESAlgo, iv : TuiArray, mode : string) : BlockCipherMode {
+		let modeCreator : BlockCipherMode;
+		switch (mode) {
+			case 'CBC':
+				modeCreator = new CBC.Encryptor(cipher, iv)
+				break;
+			case 'CFB,':
+				modeCreator = new CFB.Encryptor(cipher, iv)
+				break;
+			case 'CTR':
+				modeCreator = new CTR.Encryptor(cipher, iv)
+				break;
+			case 'CTRGladman':
+				modeCreator = new CTRGladman.Encryptor(cipher, iv)
+				break;
+			case 'ECB':
+				modeCreator = new ECB.Encryptor(cipher, iv)
+				break;
+			case 'OFB':
+				modeCreator = new OFB.Encryptor(cipher, iv)
+				break;
+			default:
+				modeCreator = new ECB.Encryptor(cipher, iv)
+				break;
+		}
+		return modeCreator
+	}
+
+	createDecryptor(cipher : AESAlgo, iv : TuiArray, mode : string) : BlockCipherMode {
+		let modeCreator : BlockCipherMode;
+		switch (mode) {
+			case 'CBC':
+				modeCreator = new CBC.Decryptor(cipher, iv)
+				break;
+			case 'CFB,':
+				modeCreator = new CFB.Decryptor(cipher, iv)
+				break;
+			case 'CTR':
+				modeCreator = new CTR.Decryptor(cipher, iv)
+				break;
+			case 'CTRGladman':
+				modeCreator = new CTRGladman.Decryptor(cipher, iv)
+				break;
+			case 'ECB':
+				modeCreator = new ECB.Decryptor(cipher, iv)
+				break;
+			case 'OFB':
+				modeCreator = new OFB.Decryptor(cipher, iv)
+				break;
+			default:
+				modeCreator = new ECB.Decryptor(cipher, iv)
+				break;
+		}
+		return modeCreator
+	}
+	reset() {
+		this._doReset();
+		const cfg = this.cfg
+		const iv : WordArray = cfg.iv as WordArray
+		const mode : string = cfg.mode as string
+		if (this._xformMode == 1) {
+			this._mode = this.createEncryptor(this, iv.words, mode)
+		} else {
+			this._mode = this.createDecryptor(this, iv.words, mode)
+			this._minBufferSize = 1;
+		}
+		this._data = new WordArray();
+		this._nDataBytes = 0;
+	}
+
+	_append(data : any) {
+		let m_data = data;
+		if (typeof m_data == "string") {
+			m_data = Utf8.parse(m_data);
+		}
+		this._data.concat(m_data as WordArray);
+		this._nDataBytes += m_data.sigBytes;
+	}
+	_process(doFlush : boolean) {
+		let processedWords : TuiArray = new TuiArray();
+		const { _data: data, blockSize } = this;
+		const dataWords = data.words;
+		const dataSigBytes = data.sigBytes;
+		const blockSizeBytes = blockSize * 4;
+		let nBlocksReady = dataSigBytes / blockSizeBytes;
+		if (doFlush) {
+			nBlocksReady = Math.ceil(nBlocksReady);
+		} else {
+			nBlocksReady = Math.max((nBlocksReady | 0) - this._minBufferSize, 0);
+		}
+		const nWordsReady = nBlocksReady * blockSize;
+		const nBytesReady = Math.min(nWordsReady * 4, dataSigBytes);
+		if (nWordsReady > 0) {
+			for (let offset = 0; offset < nWordsReady; offset += blockSize) {
+				this._doProcessBlock(dataWords, offset);
+			}
+			processedWords = dataWords.splices(0, nWordsReady);
+			data.sigBytes -= nBytesReady;
+		}
+		return new WordArray(processedWords, nBytesReady);
+	}
+
+	static createEncryptor(key : WordArray, cfg : UTSJSONObject) {
+		return new AESAlgo(1, key, cfg)
+	}
+
+	static createDecryptor(key : WordArray, cfg : UTSJSONObject) {
+		return new AESAlgo(2, key, cfg)
+	}
+
+	process(dataUpdate : WordArray) {
+		this._append(dataUpdate);
+		return this._process(false);
+	}
+
+	finalize(dataUpdate : WordArray) {
+		this._append(dataUpdate);
+		const finalProcessedData = this._doFinalize();
+		return finalProcessedData;
+	}
+
+	_doProcessBlock(words : TuiArray, offset : number) {
+		this._mode.processBlock(words, offset);
+	}
+	getPaddingType(padding : string) : BlockCipherPadding {
+		let blockPadding : BlockCipherPadding
+		switch (padding) {
+			case 'Pkcs7':
+				blockPadding = Pkcs7
+				break;
+			case 'AnsiX923':
+				blockPadding = AnsiX923
+				break;
+			case 'Iso10126':
+				blockPadding = Iso10126
+				break;
+			case 'Iso97971':
+				blockPadding = Iso97971
+				break;
+			case 'NoPadding':
+				blockPadding = NoPadding
+				break;
+			case 'ZeroPadding':
+				blockPadding = ZeroPadding
+				break;
+			default:
+				blockPadding = Pkcs7
+				break;
+		}
+		return blockPadding
+	}
+	_doFinalize() {
+		let finalProcessedBlocks : WordArray;
+		const padding = this.getPaddingType(this.cfg.getString('padding')!)
+		if (this._xformMode == 1) {
+			padding.pad(this._data, this.blockSize);
+			finalProcessedBlocks = this._process(true);
+		} else {
+			finalProcessedBlocks = this._process(true);
+			padding.unpad(finalProcessedBlocks);
+		}
+		return finalProcessedBlocks;
+	}
+
+	_doReset() {
+		let t : number;
+		if (this._nRounds > 0 && this._keyPriorReset == this._key) {
+			return;
+		}
+		this._keyPriorReset = this._key;
+		const key = this._keyPriorReset;
+		const keyWords = key.words;
+		const keySize = key.sigBytes / 4;
+		this._nRounds = keySize + 6;
+		const nRounds = this._nRounds;
+		const ksRows = (nRounds + 1) * 4;
+
+		for (let ksRow = 0; ksRow < ksRows; ksRow += 1) {
+			if (ksRow < keySize) {
+				this._keySchedule.setValue(ksRow, keyWords.getValue(ksRow));
+			} else {
+				t = this._keySchedule.getValue(ksRow - 1);
+				if (!(ksRow % keySize > 0)) {
+					t = t << 8 | t >>> 24;
+					t = _SBOX.getValue(t >>> 24) << 24 | _SBOX.getValue(t >>> 16 & 255) << 16 | _SBOX.getValue(t >>> 8 & 255) << 8 | _SBOX.getValue(t & 255);
+					t ^= RCON.getValue(ksRow / keySize | 0) << 24;
+				} else if (keySize > 6 && ksRow % keySize == 4) {
+					t = _SBOX.getValue(t >>> 24) << 24 | _SBOX.getValue(t >>> 16 & 255) << 16 | _SBOX.getValue(t >>> 8 & 255) << 8 | _SBOX.getValue(t & 255);
+				}
+				this._keySchedule.setValue(ksRow, this._keySchedule.getValue(ksRow - keySize) ^ t);
+			}
+		}
+		for (let invKsRow = 0; invKsRow < ksRows; invKsRow += 1) {
+			const ksRow = ksRows - invKsRow;
+			if (invKsRow % 4 > 0) {
+				t = this._keySchedule.getValue(ksRow);
+			} else {
+				t = this._keySchedule.getValue(ksRow - 4);
+			}
+			if (invKsRow < 4 || ksRow <= 4) {
+				this._invKeySchedule.setValue(invKsRow, t);
+			} else {
+				this._invKeySchedule.setValue(invKsRow, INV_SUB_MIX_0.getValue(_SBOX.getValue(t >>> 24)) ^ INV_SUB_MIX_1.getValue(_SBOX.getValue(t >>> 16 & 255)) ^ INV_SUB_MIX_2.getValue(_SBOX.getValue(t >>> 8 & 255)) ^ INV_SUB_MIX_3.getValue(_SBOX.getValue(t & 255)))
+			}
+		}
+	}
+	encryptBlock(M : TuiArray, offset : number) {
+		this._doCryptBlock(
+			M,
+			offset,
+			this._keySchedule,
+			_SUB_MIX_0,
+			_SUB_MIX_1,
+			_SUB_MIX_2,
+			_SUB_MIX_3,
+			_SBOX
+		);
+	}
+	decryptBlock(M : TuiArray, offset : number) {
+		const _M = M;
+		let t = _M.getValue(offset + 1);
+		_M.setValue(offset + 1, _M.getValue(offset + 3));
+		_M.setValue(offset + 3, t);
+		this._doCryptBlock(
+			_M,
+			offset,
+			this._invKeySchedule,
+			INV_SUB_MIX_0,
+			INV_SUB_MIX_1,
+			INV_SUB_MIX_2,
+			INV_SUB_MIX_3,
+			INV_SBOX
+		);
+		t = _M.getValue(offset + 1);
+		_M.setValue(offset + 1, _M.getValue(offset + 3));
+		_M.setValue(offset + 3, t);
+	}
+	_doCryptBlock(M : TuiArray, offset : number, keySchedule : TuiArray, SUB_MIX_0 : TuiArray, SUB_MIX_1 : TuiArray, SUB_MIX_2 : TuiArray, SUB_MIX_3 : TuiArray, SBOX : TuiArray) {
+		const _M = M;
+		const nRounds = this._nRounds;
+		let s0 = _M.getValue(offset) ^ keySchedule.getValue(0);
+		let s1 = _M.getValue(offset + 1) ^ keySchedule.getValue(1);
+		let s2 = _M.getValue(offset + 2) ^ keySchedule.getValue(2);
+		let s3 = _M.getValue(offset + 3) ^ keySchedule.getValue(3);
+		let ksRow = 4;
+		for (let round = 1; round < nRounds; round += 1) {
+			const t02 = SUB_MIX_0.getValue(s0 >>> 24) ^ SUB_MIX_1.getValue(s1 >>> 16 & 255) ^ SUB_MIX_2.getValue(s2 >>> 8 & 255) ^ SUB_MIX_3.getValue(s3 & 255) ^ keySchedule.getValue(ksRow);
+			ksRow += 1;
+			const t12 = SUB_MIX_0.getValue(s1 >>> 24) ^ SUB_MIX_1.getValue(s2 >>> 16 & 255) ^ SUB_MIX_2.getValue(s3 >>> 8 & 255) ^ SUB_MIX_3.getValue(s0 & 255) ^ keySchedule.getValue(ksRow);
+			ksRow += 1;
+			const t22 = SUB_MIX_0.getValue(s2 >>> 24) ^ SUB_MIX_1.getValue(s3 >>> 16 & 255) ^ SUB_MIX_2.getValue(s0 >>> 8 & 255) ^ SUB_MIX_3.getValue(s1 & 255) ^ keySchedule.getValue(ksRow);
+			ksRow += 1;
+			const t32 = SUB_MIX_0.getValue(s3 >>> 24) ^ SUB_MIX_1.getValue(s0 >>> 16 & 255) ^ SUB_MIX_2.getValue(s1 >>> 8 & 255) ^ SUB_MIX_3.getValue(s2 & 255) ^ keySchedule.getValue(ksRow);
+			ksRow += 1;
+			s0 = t02;
+			s1 = t12;
+			s2 = t22;
+			s3 = t32;
+		}
+		const t0 = (SBOX.getValue(s0 >>> 24) << 24 | SBOX.getValue(s1 >>> 16 & 255) << 16 | SBOX.getValue(s2 >>> 8 & 255) << 8 | SBOX.getValue(s3 & 255)) ^ keySchedule.getValue(ksRow);
+		ksRow += 1;
+		const t1 = (SBOX.getValue(s1 >>> 24) << 24 | SBOX.getValue(s2 >>> 16 & 255) << 16 | SBOX.getValue(s3 >>> 8 & 255) << 8 | SBOX.getValue(s0 & 255)) ^ keySchedule.getValue(ksRow);
+		ksRow += 1;
+		const t2 = (SBOX.getValue(s2 >>> 24) << 24 | SBOX.getValue(s3 >>> 16 & 255) << 16 | SBOX.getValue(s0 >>> 8 & 255) << 8 | SBOX.getValue(s1 & 255)) ^ keySchedule.getValue(ksRow);
+		ksRow += 1;
+		const t3 = (SBOX.getValue(s3 >>> 24) << 24 | SBOX.getValue(s0 >>> 16 & 255) << 16 | SBOX.getValue(s1 >>> 8 & 255) << 8 | SBOX.getValue(s2 & 255)) ^ keySchedule.getValue(ksRow);
+		ksRow += 1;
+		_M.setValue(offset, t0)
+		_M.setValue(offset + 1, t1)
+		_M.setValue(offset + 2, t2)
+		_M.setValue(offset + 3, t3)
+	}
+}
+function encryptAES(message : string, key : string, _cfg : UTSJSONObject = {}) : string {
+	const iv = _cfg.getString('iv') ?? ''
+	const mode = _cfg.getString('mode') ?? 'CBC'
+	const padding = _cfg.getString('padding') ?? 'Pkcs7'
+	const cfg = {
+		format: OpenSSLFormatter,
+		iv: Utf8.parse(iv),
+		mode,
+		padding
+	}
+	const _key = Utf8.parse(key)
+	const encryptor = AESAlgo.createEncryptor(_key, cfg);
+	const ciphertext = encryptor.finalize(Utf8.parse(message));
+	const cipherCfg = encryptor.cfg;
+	const encrypted = new CipherParams({
+		ciphertext,
+		key: _key,
+		iv: cipherCfg.iv,
+		// algorithm: AESAlgo,
+		mode: cipherCfg.mode,
+		padding: cipherCfg.padding,
+		blockSize: encryptor.blockSize,
+		formatter: cfg.format
+	});
+	return encrypted.toStrings();
+}
+function decryptAES(text : string, key : string, _cfg : UTSJSONObject = {}) : string {
+	const iv = _cfg.getString('iv') ?? ''
+	const mode = _cfg.getString('mode') ?? 'CBC'
+	const padding = _cfg.getString('padding') ?? 'Pkcs7'
+	const cfg = {
+		format: OpenSSLFormatter,
+		iv: Utf8.parse(iv),
+		mode,
+		padding
+	}
+	const _key = Utf8.parse(key)
+	function _parse(ciphertext : any, format : OpenSSLFormatterType) : CipherParams {
+		if (typeof ciphertext == "string") {
+			return format.parse(ciphertext);
+		}
+		return ciphertext as CipherParams
+	}
+	let _ciphertext = _parse(text, cfg.format as OpenSSLFormatterType);
+	const decrypted = AESAlgo.createDecryptor(_key, cfg).finalize(_ciphertext.get('ciphertext') as WordArray);
+	return decrypted.toString(Utf8);
+}
+export {
+	decryptAES,
+	encryptAES,
+};

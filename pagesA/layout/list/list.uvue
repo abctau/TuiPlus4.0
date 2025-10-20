@@ -1,0 +1,95 @@
+<template>
+	<t-page :scroll-disabled="true" main-class="p-30">
+		<t-card main-class='mb-30' title="List 滚动视图"
+			sub-title="对官方list-view组件的增强，增加自定义下拉刷新和上拉加载，增加WEB端和IOS端支持【scrollend】事件"></t-card>
+		<t-list type="p" main-class="f" ref="ins" @scrolltolower="scrolltolower" @refresherrefresh="refresherrefresh"
+			@scrollend="scrollend">
+			<t-list-item v-for='(item,index) in componentList' :key="index">
+				<t-row main-class='p-30 mb-30 tdb tdr fjcb'>
+					<t-text>{{item['tag']}}</t-text>
+					<t-text>{{item['name']}}</t-text>
+					<t-icon :name="item['icon']" :stop="true"></t-icon>
+					<t-icon name="thumb-up" :stop="true"></t-icon>
+					<t-icon name="edit-pen" :stop="true"></t-icon>
+					<t-icon name="star" :stop="true"></t-icon>
+					<t-icon name="trash" :stop="true"></t-icon>
+				</t-row>
+			</t-list-item>
+			<!-- <template #loadmore>
+				<text>加载更多</text>
+			</template>
+			<template #refresher>
+				<text>自定义下拉刷新</text>
+			</template> -->
+		</t-list>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	import { TuiSleep } from '@/uni_modules/tui-plus'
+	const ins = ref<TListComponentPublicInstance | null>(null)
+	const mask = ref(true)
+	const cur = ref(1)
+	const total = ref(0)
+	const pageSize = ref(20)
+	const list = ref<UTSJSONObject[]>([])
+	const componentList = ref<UTSJSONObject[]>([])
+	const sleep = new TuiSleep(1000)
+	let loading : boolean = false
+	function getComponentList() : Promise<UTSJSONObject[]> {
+		return new Promise((
+			resolve : (rst : UTSJSONObject[]) => void
+		) => {
+			if (loading) return
+			loading = true
+			TuiApi('getComponent', {
+				"current": cur.value,
+				"pageSize": pageSize.value,
+				"keyword": '',
+				"type": 'all',
+				devstatus: 'completed'
+			},true).then((res : UTSJSONObject) => {
+				const lastPage = (res as UTSJSONObject).getBoolean('data.lastPage')!
+				sleep.call(() => {
+					cur.value++
+					loading = false
+					if (lastPage) {
+						ins.value!.setLoadmore(3)
+					} else {
+						//设置状态为0会销毁组件，避免loading会在后台运行
+						ins.value!.setLoadmore(0)
+					}
+					nextTick(() => {
+						resolve((res as UTSJSONObject).getArray('data.list') as UTSJSONObject[])
+					})
+				})
+			})
+		})
+	}
+	function scrollend(e : UniScrollEvent) {
+		console.log(e)
+	}
+	function refresherrefresh() {
+		loading = false
+		cur.value = 1
+		getComponentList().then((data : UTSJSONObject[]) => {
+			componentList.value = data
+			ins.value!.closerefresher()
+		})
+	}
+	function scrolltolower() {
+		getComponentList().then((data : UTSJSONObject[]) => {
+			componentList.value.push(...data)
+		})
+	}
+	onUnload(() => {
+		sleep.clear()
+	})
+	onLoad(() => {
+		getComponentList().then((data : UTSJSONObject[]) => {
+			ins.value!.hideMask()
+			componentList.value = data
+		})
+	})
+</script>

@@ -1,0 +1,164 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="`fl faic ${mainClass}`" @tuiTouchmove="touchmove">
+		<view v-for="i in count" :key="i" class="rateiconitem">
+			<t-icon v-bind="extendsAttrs" :name="rateIcon(i)" :hover="true"
+				:main-class="`${i==count?'':'mr-20'} ${rateIconStyles} ${rateColor(i)}`"
+				@click="(e:UniPointerEvent)=>{setRateState(e,i)}"></t-icon>
+		</view>
+	</t-gesture>
+</template>
+
+<script setup>
+	/**
+	 * Rate 评分
+	 * @date 2025-05-31 12:06:10
+	 * @author TanYuan
+	 * @description 灵活多变，支持自定义评分星数，设定评分下限，并提供半星评分选项，以精细反映评价。用户可通过简单的触摸滑动或鼠标拖动
+	 * @example /pagesA/form/rate/rate
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-rate.html
+	 * @example /pagesA/form/rate/rate
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} modelValue 双向绑定的值(默认：1)
+	 * @property {Number} count 	显示的星星数量(默认：5)
+	 * @property {Boolean} readonly 是为只读
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} inactiveClass 未选中时的组件的样式(默认：c-#B2B2B2)
+	 * @property {String} activeClass 选中时的组件的样式
+	 * @property {String} iconClass 图标样式
+	 * @property {String} activeIcon 选中时的图标(默认：star-fill)
+	 * @property {Number} minCount 最少能选择的星星个数(默认：1)
+	 * @property {String} inactiveIcon 未选中时的图标(默认：star)
+	 * @event {Function} change undefined
+	 * @event {Function} click 点击时触发
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { getAllDomRect } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface RateProps extends CommonProps {
+		modelValue : number
+		count : number
+		readonly : boolean
+		inactiveClass : string
+		activeClass : string
+		iconClass : string
+		minCount : number
+		activeIcon : string
+		inactiveIcon : string
+	}
+
+	const props = withDefaults(defineProps<RateProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: 'l',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: 1,
+		count: 5,
+		readonly: false,
+		inactiveClass: 'c-#B2B2B2',
+		activeClass: '',
+		iconClass: '',
+		minCount: 1,
+		activeIcon: 'star-fill',
+		inactiveIcon: 'star'
+	});
+	const instance = getCurrentInstance()?.proxy!
+	const { extendsAttrs, extendsFontSize } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change', 'click'])
+	const val = ref<number>(0)
+	const iconNodeInfo = ref<NodeInfo[]>([])
+	const isTask = ref<boolean>(false)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	const rateIconStyles = computed(() : string => {
+		let sty = `${props.iconClass} ${extendsFontSize.value}`
+		return sty
+	})
+	function updateValue() {
+		nextTick(() => {
+			emit('change', val.value)
+			emit("update:modelValue", val.value)
+		})
+	}
+	function getRectIndex(x : number) : number {
+		let f = -1
+		if (isTask.value) return -1
+		isTask.value = true
+		for (let i = 0; i < props.count; i++) {
+			const rect = iconNodeInfo.value[i]
+			if (x > rect.left! && x < rect.right!) {
+				f = i
+				break;
+			}
+		}
+		isTask.value = false
+		return f + 1
+	}
+	function touchmove(e : TuiTouchEvent) {
+		const f = getRectIndex(e.x)
+		if (f > 0 && !props.disabled && !props.readonly) {
+			let v = f >= props.minCount ? f : props.minCount
+			if (v != val.value) {
+				val.value = f
+				updateValue()
+			}
+		}
+	}
+	function rateColor(i : number) : string {
+		return i <= val.value ? `${props.activeClass}` : `${props.inactiveClass}`
+	}
+	function rateIcon(i : number) : string {
+		return i <= val.value ? props.activeIcon : props.inactiveIcon
+	}
+	function setRateState(e : UniPointerEvent, i : number) {
+		if (!props.disabled && !props.readonly) {
+			val.value = i >= props.minCount ? i : props.minCount
+			emit('click', e)
+			updateValue()
+			nextTick(() => {
+				itemValidate()
+			})
+		}
+	}
+	watch(() : number => props.modelValue, (e : number) => {
+		if (e < props.minCount) {
+			val.value = props.minCount
+		} else if (e > props.count) {
+			val.value = props.count
+		} else {
+			val.value = e
+		}
+		if (val.value != e) updateValue()
+	}, { immediate: true })
+
+	onMounted(() => {
+		getAllDomRect('.rateiconitem', instance).then((recs : NodeInfo[][]) => {
+			iconNodeInfo.value = recs[0]
+		})
+	})
+</script>

@@ -1,0 +1,61 @@
+<template>
+	<t-page main-class="p-30 ov">
+		<t-card title='Card 分段器' main-class="tdr tdb mb-30" sub-title="可用于订单场景+菜单切换"></t-card>
+		<t-section title='基础功能-type-size' main-class="tdr tdb mb-30"></t-section>
+		<t-subsection :current="1" main-class="mb-30 r-100" type='e' size="large">
+			<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+		<t-subsection :current="1" main-class="mb-30 r-10" type='p' size="medium">
+			<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+		<t-subsection :current="1" main-class="mb-30 r-10" type='s' size="small">
+			<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+		<t-subsection :current="1" main-class="mb-30 r-10" type='w' size="mini">
+			<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+		 <t-section title='滑块样式' main-class="tdr tdb mb-30"></t-section>
+		 <t-subsection :current="1" main-class="mb-30 r-100 p-20" type='p' bar-class="r-100">
+		 	<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+		 		:value="index"></t-subsection-item>
+		 </t-subsection>
+		 <t-subsection :current="1" main-class="mb-30 r-10 p-15" type='p' bar-class="r-10">
+		 	<t-subsection-item v-for="(item,index) in list1" :icon="item.icon" :title="item.title" :key="index"
+		 		:value="index"></t-subsection-item>
+		 </t-subsection>
+	</t-page>
+</template>
+<script>
+	type SubsectionOption = {
+		title ?: string,
+		icon ?: string,
+	}
+	export default {
+		data() {
+			return {
+				list: [{
+					title: '未付款'
+				}, {
+					title: '待评价'
+				}, {
+					title: '已付款'
+				}] as SubsectionOption[],
+				list1: [{
+					icon: 'zhifubao',
+					title: '未付款'
+				}, {
+					title: '待评价',
+					icon: 'chat',
+				}, {
+					icon: 'red-packet',
+					title: '已付款'
+				}] as SubsectionOption[],
+				curNow: 1
+			};
+		}
+	}
+</script>

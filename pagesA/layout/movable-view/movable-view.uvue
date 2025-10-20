@@ -1,0 +1,54 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="解决APP端不支持 movable-view 相关组件，减少条件编译"></t-card>
+		<t-movable-area main-class="fl h-750 tdr tdb">
+			<t-movable-view main-class="twh-100 b mt-50 fc" :x="x" :y="y" direction="all" @end="toucnend"
+				@change="onChange">
+				<t-text>123</t-text>
+			</t-movable-view>
+			<t-movable-view main-class="twh-100 b mt-50 fc" :x="x" :y="y" direction="all" @end="toucnend"
+				@change="onChange">
+				<t-text>123</t-text>
+			</t-movable-view>
+			<t-movable-view main-class="twh-100 b mt-50 fc" :x="x" :y="y" direction="all" @end="toucnend"
+				@change="onChange">
+				<t-text>123</t-text>
+			</t-movable-view>
+		</t-movable-area>
+		<t-button type="p" main-class="mb-30" @click="tab">移动到0</t-button>
+		<t-button type="e" @click="tab1">移动到30</t-button>
+	</t-page>
+</template>
+<script>
+	import { TuiTouchEvent, TuiMovableTouchEvent } from '@/uni_modules/tui-plus'
+	export default {
+		data() {
+			return {
+				x: 0,
+				y: 0,
+			}
+		},
+		methods: {
+			toucnend(e : TuiMovableTouchEvent) {
+				console.log(e)
+			},
+			onChange(e : TuiMovableTouchEvent) {
+				if (e.source == 'touch') {
+					// console.log(e)
+				}
+			},
+			tab1() {
+				this.$nextTick(() => {
+					this.x = 0
+					this.y = 0
+				})
+			},
+			tab() {
+				this.$nextTick(() => {
+					this.x = 30
+					this.y = 30
+				})
+			}
+		}
+	}
+</script>

@@ -1,0 +1,58 @@
+<template>
+	<t-page>
+		<t-card heading="文本域" main-class="mb-30" sub-title="支持textarea所有属性，增加清除功能与字数统计，适配多种主题">
+		</t-card>
+		<introduction title="主题-type">
+			<t-textarea main-class="mb-30 h-100" input-class="f" placeholder="请输入内容" v-model="inputVal"
+				:disabled="disabled" :border="true" @clear="clear">默认按钮</t-textarea>
+			<t-button main-class="mb-30" type="success" @click="disabled=!disabled">{{disabled?'正常':'禁用'}}</t-button>
+			<t-textarea :disabled="disabled" main-class="mb-30" placeholder="请输入内容" v-model="inputVal" :maxlength="140"
+				:count="true" type="primary"></t-textarea>
+			<t-textarea :disabled="disabled" main-class="mb-30" placeholder="请输入内容" v-model="inputVal" type="success"
+				:password="true" size="l"></t-textarea>
+			<t-textarea :disabled="disabled" main-class="mb-30" placeholder="请输入内容" v-model="inputVal"
+				type="info"></t-textarea>
+			<t-textarea :disabled="disabled" main-class="mb-30" placeholder="请输入内容" v-model="inputVal"
+				type="warning"></t-textarea>
+			<t-textarea :disabled="disabled" :maxlength="200" main-class="mb-30" placeholder="请输入内容" v-model="inputVal"
+				type="error"></t-textarea>
+		</introduction>
+		<introduction title="主题-effect">
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="normal"
+				type="primary"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="dark"
+				type="success"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="disabled"
+				type="info"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="light"
+				type="warning"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" effect="plain" :border="true"
+				type="warning"></t-textarea>
+		</introduction>
+		<introduction title="主题-size">
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="large"
+				type="success"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="medium"
+				type="info"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="small"
+				type="warning"></t-textarea>
+			<t-textarea main-class="mb-30" placeholder="请输入内容" v-model="inputVal" size="mini" type="error"></t-textarea>
+		</introduction>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				inputVal: '8151',
+				disabled: false
+			};
+		},
+		methods: {
+			clear() {
+				console.log('清除')
+			}
+		}
+	}
+</script>

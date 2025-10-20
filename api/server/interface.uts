@@ -1,0 +1,38 @@
+import { ApiResponse } from '../interface'
+import { TuiTreeData } from '@/uni_modules/tui-plus'
+export type SlidetMenuListGoodsType = {
+	goods_name : string,
+	shop_price : string,
+	goods_id : number,
+	goods_img : string
+	sortKey : string
+}
+export type SlidetMenuListType = {
+	title : string
+	id : string
+	data : SlidetMenuListGoodsType[]
+}
+
+export type WorTaskList = {
+	_id : string;
+	creation_time : number;
+	description : string;
+	name : string;
+	priority : string;
+	step : string;
+	type : string;
+	update_time : number;
+	start_time : number;
+}
+
+export type WorTaskType = {
+	list : WorTaskList[];
+	total : number;
+	current : number;
+	pageSize : number;
+	lastPage : boolean;
+}
+
+export type SlidetMenuListResponse = ApiResponse<SlidetMenuListType[]>
+export type WorTaskResponse = ApiResponse<WorTaskType>
+export type DocsComponenResponse = ApiResponse<TuiTreeData[]>

@@ -1,0 +1,64 @@
+<template>
+	<t-page title='全局主题管理'>
+		<t-card main-class="m-30" title='皮肤设置' sub-title='TUI库皮肤管理功能为您提供了一个强大而灵活的工具，让您轻松地自定义和切换用户界面的外观。' />
+		<t-card main-class="mblr-30" title="亮点" sub-title="多套皮肤-完全自定义-实时预览-一键切换-皮肤导出与分享-全局应用-易于集成" />
+		<t-section title='我的皮肤' main-class="mlrb-30"></t-section>
+		<t-radio-group main-class="fv" v-model="curThemeId" @change='themChange'>
+			<t-row v-for="(item,index) in skinThemeList" :key="index" main-class='mlrb-30 tdb tdr faic plr-20'
+				:hover="true">
+				<t-radio main-class="f" :value="item.id">{{item.name}}</t-radio>
+				<t-row main-class="faic">
+					<t-icon :hover="true" main-class="mr-30 s-50" type='p' name="edit-pen" :stop="true"
+						:path="'/pagesA/template/editskintheme/editskintheme?id=' + item.id"></t-icon>
+					<t-icon :hover="true" name="trash" main-class="s-45" :stop="true" type='e'
+						@click="remove(item)"></t-icon>
+				</t-row>
+			</t-row>
+		</t-radio-group>
+		<t-button main-class="mblr-30" path="/pagesA/template/editskintheme/editskintheme" type="p">创建新皮肤</t-button>
+		<t-section title='官方皮肤' main-class="m-30"></t-section>
+		<t-row v-for="(item,index) in skinThemeCloudList" :key="index" main-class='mlrb-30 tdb tdr faic plr-20 h-90'>
+			<t-text main-class="f">{{item.name}}</t-text>
+			<t-button size="mini" type='s' suffix-icon="download" @click="down(item)" :icon-holder="false">下载</t-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiTheme, TuiSkinTheme } from '@/uni_modules/tui-plus'
+	import { TuiApi } from '@/api'
+	const theme = new TuiTheme()
+	const curTheme = theme.getCurSkinTheme()
+	const curThemeId = ref<string>(curTheme.id)
+	let skinThemeList = ref<TuiSkinTheme[]>(theme.getCachethemeList())
+	let skinThemeCloudList = ref<TuiSkinTheme[]>([])
+	function getThemeList() {
+		skinThemeList.value = theme.getCachethemeList()
+	}
+	function down(e : TuiSkinTheme) {
+		theme.add(e)
+		getThemeList()
+	}
+	onLoad((e : OnLoadOptions) => {
+		TuiApi('tuitheme', {}, true).then((res : UTSJSONObject) => {
+			skinThemeCloudList.value = JSON.parse<TuiSkinTheme[]>(JSON.stringify(res.getArray('data'))) as TuiSkinTheme[]
+		})
+	})
+	onPageShow(() => {
+		getThemeList()
+	})
+	function themChange(e : string) {
+		theme.updateCurSkinTheme(theme.getTheme(e))
+	}
+	function remove(e : TuiSkinTheme) {
+		uni.showModal({
+			title: `您确定删除【${e['name']}】主题吗？`,
+			success: (res) => {
+				if (res.confirm) {
+					theme.remove(e.id)
+					getThemeList()
+				}
+			}
+		})
+	}
+</script>

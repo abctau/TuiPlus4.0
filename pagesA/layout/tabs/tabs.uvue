@@ -1,0 +1,93 @@
+<template>
+	<view>
+		<t-page title="tabs" main-class="p-30">
+			<t-card title='Tabs 标签导航' main-class="tdr tdb mb-30" sub-title="组织和管理多个页面的切换"></t-card>
+			<t-section title='基础使用-type-size' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" bar-class="twhr-20" :current="current" @change="ontabschange" type="p"
+				size="large">
+				<t-tabs-item v-for="(item,i) in tabsList2" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" @change="ontabschange" type="e" size="medium">
+				<t-tabs-item v-for="(item,i) in tabsList2" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" @change="ontabschange" type="w" size="small">
+				<t-tabs-item v-for="(item,i) in tabsList2" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" @change="ontabschange" type="s" size="mini">
+				<t-tabs-item v-for="(item,i) in tabsList2" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-section title='禁用滚动+设置主题' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" @change="ontabschange" type="s" size="large"
+				:scrollable="true">
+				<t-tabs-item v-for="(item,i) in tabsList1" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<t-section title='滚动条插槽+右侧菜单按钮' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" @change="ontabschange" type="p" size="large"
+				:scrollable="true" rightIcon="list" bar-class="bgn w-30 h-10" right-icon-class="s-60">
+				<template v-slot:bar>
+					<t-image main-class="w-30 h-10" src="/pagesA/static/image/tabsline.png"></t-image>
+				</template>
+				<t-tabs-item v-for="(item,i) in tabsList1" :key="i" :value="i" :title="item.title"
+					:disabled="item.disabled==null?false:item.disabled" :badge="item.value!=null && (item.value!)>0"
+					:badge-attrs="{dot:item.dot ?? false,text:`${item.value==null?0:item.value}`}"></t-tabs-item>
+			</t-tabs>
+			<!-- <t-section title='禁用滚动+设置主题' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" type='p' :current="current" :tabs="tabsList1"></t-tabs>
+			<t-section title='bar样式设置' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" :current="current" :tabs="tabsList2" bar-class="twh-15"></t-tabs>
+			<t-section title='滚动条插槽+右侧菜单' main-class="tdr tdb mb-30"></t-section>
+			<t-tabs main-class="tdr tdb mb-30" rightIcon="list" :current="current" :tabs="tabsList1">
+				<template v-slot:bar>
+					<t-image main-class="w-30 h-10" src="/pagesA/static/image/tabsline-png"></t-image>
+				</template>
+			</t-tabs> -->
+		</t-page>
+	</view>
+</template>
+<script>
+	import { TuiApi } from '@/api'
+	type TuiTabsOption = {
+		disabled ?: boolean
+		dot ?: boolean
+		title : string
+		value ?: number
+	}
+	export default {
+		data() {
+			return {
+				current: 2,
+				rowsSize: [['35rpx', '600rpx'], ['35rpx', '300rpx'], ['35rpx', '500rpx'], ['35rpx', '400rpx']],
+				tabsList: [] as UTSJSONObject[],
+				tabsList1: [] as TuiTabsOption[],
+				tabsList2: [] as TuiTabsOption[]
+			};
+		},
+		created() {
+			TuiApi('testTabslist',{},true).then((res) => {
+				// this.tabsList = (res['data'] as UTSJSONObject)['list1'] as UTSJSONObject[]
+				this.tabsList1 = JSON.parse<TuiTabsOption[]>(JSON.stringify((res['data'] as UTSJSONObject)['list2'] as UTSJSONObject[])) as TuiTabsOption[]
+				this.tabsList2 = JSON.parse<TuiTabsOption[]>(JSON.stringify((res['data'] as UTSJSONObject)['list5'] as UTSJSONObject[])) as TuiTabsOption[]
+			})
+		},
+		methods: {
+			ontabschange(cur : number) {
+				console.log(cur)
+			},
+			iconClick() {
+				uni.showToast({
+					title: '点击右侧插槽'
+				})
+			}
+		},
+	}
+</script>

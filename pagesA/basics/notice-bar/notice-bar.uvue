@@ -1,0 +1,54 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class='tdr tdb mb-30' title="Noticon 通知 消息公告" sub-title="自研滚动实现,纵向消息也支持动画时长滚动速度设置"></t-card>
+		<t-section main-class='tdr tdb mb-30' title='基础功能+主题展示+图标+速度'></t-section>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" type="p" :barList="noticeBarList"
+			suffixIcon="map"></t-notice-bar>
+		<t-section main-class='tdr tdb mb-30' title='主题展示-浅色'></t-section>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" type="s" :duration="10000" effect='l'
+			:barList="noticeBarList" suffixIcon="map"></t-notice-bar>
+		<t-section main-class='tdr tdb mb-30' title='主题展示-镂空'></t-section>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" type="w" effect='p' :duration="5000"
+			:barList="noticeBarList" suffixIcon="map"></t-notice-bar>
+		<t-notice-bar main-class="mb-30-bw-0" prefixIcon="volume-up" type="i" effect='p' :duration="5000"
+			:barList="noticeBarList" suffixIcon="map"></t-notice-bar>
+		<t-section main-class='tdr tdb mb-30' title='主题展示-迷你-超大'></t-section>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" type="error" :barList="noticeBarList" suffixIcon="map"
+			size="mini"></t-notice-bar>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" prefix-class="ats-1.5" suffix-class="ats-1.5"
+			:duration="10000" type="s" :barList="noticeBarList" suffixIcon="map" size="l"></t-notice-bar>
+		<t-section main-class='tdr tdb mb-30' title='步进模式-主题-尺寸'></t-section>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" :duration="500" :interval="3000" type="s"
+			:barList="noticeBarList1" size="mini" suffixIcon="map" :step="true"></t-notice-bar>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" :duration="500" type="s" :interval="3000"
+			:barList="noticeBarList1" effect='p' size="s" suffixIcon="map" :step="true"></t-notice-bar>
+		<t-notice-bar main-class="mb-30" prefixIcon="volume-up" :vertical="true" :interval="3000" :duration="300"
+			type="p" effect='l' :barList="noticeBarList1" suffixIcon="map" :step="true"></t-notice-bar>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				noticeBarList1: [
+					'T-UI基于UNIAPP-X开发优秀的前端组件库',
+					'Android端编译为kotlin',
+					'iOS端编译为swift',
+					'web平台，编译为JavaScript',
+					'完全不使用js引擎、webview',
+					'性能完全达到了原生应用的功能'
+				],
+				noticeBarList: [
+					'T-UVUE-UI基于UNIAPP-X开发优秀的前端组件库',
+					'在Android端编译为kotlin，在iOS端编译为swift，在web平台，编译为JavaScript',
+					'在APP端完全不使用js引擎、webview，性能完全达到了原生应用的功能'
+				]
+			};
+		}
+	}
+</script>
+
+<style lang="scss">
+
+</style>

@@ -1,0 +1,43 @@
+<template>
+	<t-page>
+		<introduction title='节流'>
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				在事件被触发后，立即执行函数，然后在一段时间内（间隔时间）不再执行，直到间隔时间过后才能再次执行。
+			</t-text>
+		</introduction>
+		<introduction title="场景">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">
+				常用于秒杀活动，成千上万的用户在疯狂地点击“购买”按钮。如果每次点击都立即发送一个请求到服务器，服务器可能会因为大量的请求而崩溃。这时，节流就派上用场了。通过节流，无论用户点击多少次按钮，我们都可以控制每个用户在设定的时间间隔内（比如500毫秒）只发送一次请求。这样，就能有效地减轻服务器的压力，保证网站的稳定运行。
+			</t-text>
+		</introduction>
+		<introduction title="效果演示" :border="false">
+			<!-- <t-button type="p" :throttle="true" :tdTime="parseInt(list[curNow].title!)"
+				@click="onClick">快速点击测试触发时机</t-button> -->
+		</introduction>
+		<t-section main-class="m-30" title="时间间隔"></t-section>
+		<t-subsection :current="curNow" main-class="mlr-30 tdr tdb" type='p' size="medium">
+			<t-subsection-item v-for="(item,index) in list" :icon="item.icon" :title="item.title" :key="index"
+				:value="index"></t-subsection-item>
+		</t-subsection>
+	</t-page>
+</template>
+
+<script setup>
+	const list = ref<UTSJSONObject[]>([{
+		title: '1000'
+	}, {
+		title: '2000'
+	}, {
+		title: '5000'
+	}])
+	const curNow = ref(1)
+	function onClick() {
+		uni.showToast({
+			title: '事件被执行'
+		})
+	}
+</script>
+
+<style lang="scss">
+
+</style>

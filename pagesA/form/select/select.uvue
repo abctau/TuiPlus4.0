@@ -1,0 +1,89 @@
+<template>
+	<t-page main-class="p-30 f ov">
+		<t-card title="提示" main-class="mb-30" size="l" type="e"
+			sub-title="要注意层级控制，层级写在组件内部在安卓端不生效，请注意参考官方文档正确使用（https://doc.dcloud.net.cn/uni-app-x/css/z-index.html）"></t-card>
+		<t-section title="多选" main-class="mb-30"></t-section>
+		<t-row main-class="tdr tdb tdp mb-30">
+			<t-text>{{val.join('-')}}</t-text>
+		</t-row>
+		<t-select type="p" main-class="z-3 ov tvg" :modelValue="val" @change="selectchange">
+			<t-select-option v-for="(item,index) in options" :key="index" :label="item.label"
+				:value="item.value"></t-select-option>
+		</t-select>
+		<t-button @click="test" main-class="mtb-30 ov" type="p">双向绑定测试</t-button>
+		<t-view main-class="h-500"></t-view>
+		<!-- <t-section title="单选" main-class="mb-30"></t-section>
+		<t-select type="s" main-class="z-2 ov tvg" v-model="val1" @change="selectchange1">
+			<t-select-option v-for="(item,index) in options" :key="index" :label="item.label"
+				:value="item.value"></t-select-option>
+		</t-select>
+		<t-section title="单选-size" main-class="mtb-30"></t-section>
+		<t-select type="s" main-class="z-9 ov tvg" v-model="val1" @change="selectchange1" size="mini">
+			<t-select-option v-for="(item,index) in options" :key="index" :label="item.label"
+				:value="item.value"></t-select-option>
+		</t-select> -->
+	</t-page>
+</template>
+<script setup>
+	const val = ref<string[]>(['选项1', '选项3'])
+	const val1 = ref<string>('选项3')
+	type SelectOptions = {
+		value : string
+		label : string
+		disabled ?: boolean
+	}
+	const options = ref<SelectOptions[]>([])
+	function test() {
+		val.value = ['选项4', '选项5']
+	}
+	function test1() {
+		console.log('测试')
+	}
+	function selectchange1(e : any) {
+		console.log(e)
+	}
+	function selectchange(e : any) {
+		console.log(e)
+		val.value = e as string[]
+	}
+	onReady(() => {
+		//模拟接口请求
+		setTimeout(() => {
+			options.value = [{
+				value: '选项1',
+				label: '黄金糕'
+			}, {
+				value: '选项2',
+				label: '双皮奶',
+				disabled: true
+			}, {
+				value: '选项3',
+				label: '蚵仔煎'
+			}, {
+				value: '选项4',
+				label: '龙须面'
+			}, {
+				value: '选项5',
+				label: '北京烤鸭'
+			}, {
+				value: '选项11',
+				label: '北京烤鸭1'
+			}, {
+				value: '选项6',
+				label: 'A选项6'
+			}, {
+				value: '选项7',
+				label: 'A选项7'
+			}, {
+				value: '选项8',
+				label: 'A选项8'
+			}, {
+				value: '选项9',
+				label: 'A选项9'
+			}, {
+				value: '选项10',
+				label: 'A选项10'
+			}] as SelectOptions[]
+		}, 300)
+	})
+</script>

@@ -1,0 +1,49 @@
+<template>
+	<t-page title="Draw截图" class="p-30">
+		<t-drawable @initFinished="drawInitFinished" class="h-600 tdr tdb mb-30"></t-drawable>
+		<image class="tdr tdb" v-if="taskimage.length>0" :src="taskimage"></image>
+		<t-col class="p-30">
+			<button @click="drawhouse">画房子</button>
+			<button @click="snapshot">截图</button>
+			<button @click="clearDraw">清空画布</button>
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiDrawableContext } from '@/uni_modules/tui-plus'
+	const taskimage = ref<string>('')
+	let drawCcontext : TuiDrawableContext | null = null
+	function drawInitFinished(ctx : TuiDrawableContext) {
+		drawCcontext = ctx
+	}
+
+	function snapshot() {
+		let ctx = drawCcontext!
+		ctx.takeSnapshot().then((res : TakeSnapshotSuccess) => {
+			taskimage.value = res.tempFilePath
+		})
+	}
+	function drawhouse() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.lineWidth = 10;
+		// Wall
+		ctx.strokeRect(75, 140, 150, 110);
+		// Door
+		ctx.fillRect(130, 190, 40, 60);
+		// Roof
+		ctx.beginPath();
+		ctx.moveTo(50, 140);
+		ctx.lineTo(150, 60);
+		ctx.lineTo(250, 140);
+		ctx.closePath();
+		ctx.stroke();
+		ctx.update()
+	}
+	function clearDraw() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.update()
+	}
+</script>

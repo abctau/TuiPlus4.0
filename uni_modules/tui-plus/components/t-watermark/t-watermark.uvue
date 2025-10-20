@@ -1,0 +1,156 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`dr ${mainClass}`">
+		<t-canvas :main-class="watermarkStyles" @transitionend="transitionend" @initFinished="canvasInit">
+		</t-canvas>
+		<slot></slot>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Watermark 水印
+	 * @date 2025-05-31 12:08:37
+	 * @author TanYuan
+	 * @description Watermark 水印组件，用于在页面上添加水印效果，支持配置水印的数量、角度、间隔等。
+	 * @example /pagesA/layout/watermark/watermark
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-watermark.html
+	 * @example /pagesA/layout/watermark/watermark
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：large)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} content 水印文本内容
+	 * @property {String} imageClass 绘制图片的样式信息，公支持宽高设置
+	 * @property {Number} angle 水印的角度(默认：1)
+	 * @property {Number} xSpace 水平间距(默认：100)
+	 * @property {Number} ySpace 垂直间距(默认：80)
+	 * @event {Function} click 点击时触发
+	 */
+
+	import { hexToRgba } from '../../common/model/color'
+	import { getStyleProperty } from '../../common/model/style'
+	import { getPx } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface WatermarkProps extends CommonProps {
+		content : string
+		imageClass : string
+		angle : number
+		xSpace : number
+		ySpace : number
+	}
+	let canvasCtx : CanvasRenderingContext2D | null = null
+	let canvasContext : CanvasContext | null = null
+	const props = withDefaults(defineProps<WatermarkProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		content: '',
+		imageClass: '',
+		angle: -45,
+		xSpace: 100,
+		ySpace: 80
+	});
+	const { extendsAttrs, getFontSizeToValue, getColorToValue } = useTuiThemes(props)
+	const emit = defineEmits(['transitionend'])
+	function drawImage() {
+		let watermarkWidth = getPx(getStyleProperty(props.imageClass, 'width'))
+		let watermarkHeight = getPx(getStyleProperty(props.imageClass, 'height'))
+		if (watermarkWidth == 0) watermarkWidth = 80
+		if (watermarkHeight == 0) watermarkHeight = 80
+		const ctx = canvasCtx!
+		const context = canvasContext!
+		let image = context.createImage();
+		image.src = props.content
+		image.onload = () => {
+			// 设置水印透明度
+			const watermarkAlpha = 0.3; // 透明度范围从0（完全透明）到1（完全不透明）
+			// 设置水印间距
+			const xSpace = props.xSpace; // 水平间距
+			const ySpace = props.ySpace;  // 垂直间距
+			const w = ctx.canvas.offsetWidth
+			const h = ctx.canvas.offsetHeight
+			// 旋转整个画布
+			ctx.save();
+			ctx.translate(w / 2, h / 2); // 移动画布中心到画布中心
+			ctx.rotate(props.angle * Math.PI / 180); // 旋转画布45度
+			ctx.translate(-w / 2, -h / 2); // 移动画布中心回到原点
+			// 绘制平铺图片水印
+			for (let x = -w; x < w * 2; x += xSpace) {
+				for (let y = -h; y < h * 2; y += ySpace) {
+					// 设置全局透明度
+					ctx.globalAlpha = watermarkAlpha;
+
+					// 绘制图片水印
+					ctx.drawImage(image, x + xSpace / 2, y + ySpace / 2, watermarkWidth, watermarkHeight);
+				}
+			}
+			// 恢复画布状态
+			ctx.restore();
+		}
+	}
+	function draw() {
+		const ctx = canvasCtx!
+		const watermarkText = props.content
+		let fontSize = getFontSizeToValue.value
+		ctx.font = `${fontSize}px Arial`
+		ctx.fillStyle = hexToRgba(getColorToValue.value, 0.3); // 半透明白色
+		// 设置水印间距
+		const xSpace = props.xSpace; // 水平间距
+		const ySpace = props.ySpace;  // 垂直间距
+
+		// 绘制平铺旋转水印
+		for (let x = -ctx.canvas.offsetWidth; x < ctx.canvas.offsetWidth * 2; x += xSpace) {
+			for (let y = -ctx.canvas.offsetHeight; y < ctx.canvas.offsetHeight * 2; y += ySpace) {
+				// 保存当前绘图状态
+				ctx.save();
+				// 移动到绘制的起点
+				ctx.translate(Math.floor(x + xSpace / 2), Math.floor(y + ySpace / 2));
+				// 旋转45度
+				ctx.rotate(props.angle * Math.PI / 180);
+				// 绘制水印文字
+				ctx.fillText(watermarkText, 0, 0);
+				// 恢复绘图状态
+				ctx.restore();
+			}
+		}
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasContext = ctx
+		canvasCtx = ctx.getContext('2d')
+		if (props.content.includes('/')) {
+			drawImage()
+		} else {
+			draw()
+		}
+	}
+	const watermarkStyles = computed(() : string => {
+		return `da di-0`
+	})
+	function transitionend(e : UniEvent) {
+		emit('transitionend', e)
+	}
+</script>

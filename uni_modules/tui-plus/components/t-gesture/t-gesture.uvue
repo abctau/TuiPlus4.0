@@ -1,0 +1,239 @@
+<template>
+	<view ref="viewrect" class="tui-visible" @click="mainOnclick" :hover-stop-propagation="true"
+		:hover-class="hover?'tui-hove-class':''" :style="[{opacity:loading?'1':'0'},extendsViewStyle,themeDisabled]"
+		@touchstart="onTouchstart" @touchmove.stop="onTouchmove" @touchend="onTouchend" @touchcancel="onTouchcancel"
+		@mousedown="onMousedown" @transitionend="transitionend">
+		<!-- #ifdef MP -->
+		<view v-if="stop" @click.stop="mainOnclick" :style="['width: 100%;height: 100%;',extendsViewFilterPmStyle]">
+			<slot></slot>
+		</view>
+		<slot v-else></slot>
+		<!-- #endif -->
+		<!-- #ifndef MP -->
+		<slot></slot>
+		<!-- #endif -->
+	</view>
+</template>
+<script setup>
+	/**
+	 * Gesture 手势
+	 * @date 2025-05-31 12:03:47
+	 * @author TanYuan
+	 * @description 组件返回tuiTouchstart,tuiTouchmove,tuiTouchend,tuiTouchcancel事件主要解决PC端不支持touchMove事件,避免了适配WEB端大量的条件渲染
+	 * @example /pagesA/layout/gesture/gesture
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-gesture.html
+	 * @example /pagesA/layout/gesture/gesture
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @event {Function} tuiTouchmove 手指触摸后移动触发
+	 * @event {Function} tuiTouchend 手指触摸动作结束时触发
+	 * @event {Function} tuiTouchcancel 手指触摸动作被打断时触发，如来电提醒，弹窗，冒泡事件
+	 * @event {Function} transitionend 动画结束时触发
+	 * @event {Function} initFinished 初始化完成会返回组件的节点信息
+	 * @event {Function} click 点击时触发
+	 * @event {Function} tuiTouchstart 手指触摸动作开始时饮用
+	 */
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { getDomRect } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const viewrect = ref<UniElement | null>(null)
+	const instance = getCurrentInstance()?.proxy!
+	const props = withDefaults(defineProps<CommonProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		touchStop: false
+	});
+	const { extendsViewStyle, themeDisabled } = useTuiThemes(props)
+	const emit = defineEmits([
+		'click',
+		'tuiTouchstart',
+		'tuiTouchmove',
+		'tuiTouchend',
+		'tuiTouchcancel',
+		'transitionend',
+		'initFinished'
+	])
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+	function transitionend(e : UniEvent) {
+		emit('transitionend', e)
+	}
+
+	const isgetRect = ref(false)
+	const loading = ref(false)
+	// #ifdef WEB
+	const istouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0
+	// #endif
+
+	const getInfo = async () : Promise<NodeInfo> => {
+		return getDomRect('.tui-visible', instance)
+	}
+
+	function getRect(_e : any) : Promise<TuiTouchEvent> {
+		// #ifdef WEB
+		const e = _e
+		// #endif
+		// #ifndef WEB
+		const e = _e as UniTouchEvent
+		// #endif
+		return new Promise((
+			resolve : (res : TuiTouchEvent) => void,
+			_ : (err : Error) => void
+		) => {
+			viewrect.value?.getBoundingClientRectAsync()!.then((rec : DOMRect) => {
+				let x : number = 0
+				let y : number = 0
+				// #ifndef WEB
+				if (e.changedTouches.length > 0) {
+					x = e.changedTouches[0].clientX
+					y = e.changedTouches[0].clientY
+				}
+				// #endif
+				// #ifdef WEB
+				if (e.changedTouches) {
+					x = e.changedTouches[0].clientX
+					y = e.changedTouches[0].clientY
+				} else {
+					x = e.clientX
+					y = e.clientY
+				}
+				if (!e.touches) e.touches = [{
+					clientX: e.clientX,
+					clientY: e.clientY,
+					force: 1,
+					identifier: 0,
+					pageX: e.pageX,
+					pageY: e.pageY,
+					radiusX: 0,
+					radiusY: 0,
+					rotationAngle: 0,
+					screenX: e.screenX,
+					screenY: e.screenY,
+					target: e.target,
+				}]
+				// #endif
+				// #ifndef WEB
+				if (e.changedTouches.length > 0) {
+					resolve({ x, y, offsetX: x - rec.left, offsetY: y - rec.top, event: e, rect: rec } as TuiTouchEvent)
+					isgetRect.value = false
+				}
+				// #endif
+				// #ifdef WEB
+				resolve({ x, y, offsetX: x - rec.left, offsetY: y - rec.top, event: e, rect: rec } as TuiTouchEvent)
+				isgetRect.value = false
+				// #endif
+			})
+		})
+	}
+
+	const onTouchmove = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			emit('tuiTouchmove', result)
+		}
+	}
+
+	const onTouchstart = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			emit('tuiTouchstart', result)
+		}
+	}
+
+	const onTouchend = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			emit('tuiTouchend', result)
+		}
+	}
+
+	const onTouchcancel = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			emit('tuiTouchcancel', result)
+		}
+	}
+
+	// #ifdef WEB
+	const onPcTouchmove = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			emit('tuiTouchmove', result)
+		}
+	}
+
+	const onPcTouchend = async (e : UniTouchEvent) => {
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			if (!istouch) emit('tuiTouchend', result)
+			document.removeEventListener('mousemove', onPcTouchmove)
+			document.removeEventListener('mouseup', onPcTouchend)
+		}
+	}
+	// #endif
+
+	const onMousedown = async (e : UniTouchEvent) => {
+		// #ifdef WEB
+		if (!isgetRect.value) {
+			const result = await getRect(e)
+			if (!istouch) emit('tuiTouchstart', result)
+			document.addEventListener('mousemove', onPcTouchmove)
+			document.addEventListener('mouseup', onPcTouchend)
+		}
+		// #endif
+	}
+
+	onMounted(() => {
+		nextTick(() => {
+			loading.value = true
+			getInfo().then((rect : NodeInfo) => {
+				emit('initFinished', rect)
+			})
+		})
+	})
+</script>
+<style lang="scss">
+	.tui-hove-class {
+		opacity: 0.7;
+	}
+</style>

@@ -1,0 +1,93 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="Xcharts图表模版管理" main-class="mb-30" sub-title="百度图表翻译的UTS版图表,非webview" />
+		<t-form ref="ruleForm" :rules="rules" main-class="tdr tdb tdp" direction="column">
+			<t-form-item label="类型" prop="type">
+				<t-radio-group v-model="(formData.type as string)" type="p" main-class="fl fww">
+					<t-radio v-for="(item,index) in typeList" :key="index"
+						:value="`${item['value']}`">{{item['label']}}</t-radio>
+				</t-radio-group>
+			</t-form-item>
+			<t-form-item label="名称" prop="name">
+				<t-input main-class="w-100%" v-model="(formData.name as string)" effect="plain"
+					:border="true"></t-input>
+			</t-form-item>
+			<t-form-item label="参数" prop="option" :bottomLine="false">
+				<t-textarea main-class="w-100%-h-300" v-model="(formData.option as string)" :maxlength="11000000"
+					:border="true" :autoHeight="true" effect="plain"></t-textarea>
+			</t-form-item>
+			<t-row main-class="fc mt-50">
+				<t-button main-class="mr-30 w-150" type="primary" @click="submitForm">提交</t-button>
+				<t-button type="error" main-class="w-150" @click="resetForm">重置</t-button>
+			</t-row>
+		</t-form>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	type formDataType = {
+		type : string,
+		name : string,
+		option : string
+	}
+	const typeList = ref<UTSJSONObject[]>([
+		{ label: '柱状图', value: 'column' },
+		{ label: '山峰图', value: 'mount' },
+		{ label: '条状图', value: 'bar' },
+		{ label: '折线图', value: 'line' },
+		{ label: '区域图', value: 'area' },
+		{ label: '散点图', value: 'scatter' },
+		{ label: '混合图', value: 'mix' },
+		{ label: '饼图', value: 'pie' },
+		{ label: '圆环图', value: 'ring' },
+		{ label: '玫瑰图', value: 'rose' },
+		{ label: '雷达图', value: 'radar' },
+		{ label: '进度条', value: 'arcbar' },
+		{ label: '仪表盘', value: 'gauge' },
+		{ label: '漏斗图', value: 'funnel' },
+		{ label: '词云图', value: 'word' },
+		{ label: 'K线图', value: 'candle' },
+		{ label: '地图', value: 'map' },
+	])
+	const rules = ref<UTSJSONObject>({
+		type: [{ type: 'required', message: '请输入图表类型' }],
+		name: [{ type: 'required', message: '请输入图表类型' }],
+		option: [{ type: 'required', message: '请输入图表类型' }]
+	})
+	const ruleForm = ref<TFormComponentPublicInstance | null>(null)
+	const formData = ref<formDataType>({
+		type: '',
+		name: '',
+		option: '',
+	} as formDataType)
+	function resetForm() {
+		(ruleForm.value as TFormComponentPublicInstance).reset()
+	}
+	function submitForm() {
+		const validate : boolean = (ruleForm.value as TFormComponentPublicInstance).validate() as boolean
+		if (validate) {
+			try {
+				TuiApi('addCharts', {
+					type: formData.value.type,
+					name: formData.value.name,
+					option: JSON.parse(formData.value.option),
+					uts: true
+				} as UTSJSONObject).then(_ => {
+					uni.showToast({
+						title: "添加成功"
+					})
+					resetForm()
+				}).catch((error) => {
+					uni.showToast({
+						title: `${(error as UniError).message}`
+					})
+				})
+			} catch (error) {
+				uni.showToast({
+					title: "配置解析失败"
+				})
+			}
+		}
+	}
+</script>

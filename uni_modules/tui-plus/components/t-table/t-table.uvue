@@ -1,0 +1,207 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="tableMainStyles" ref="tableins">
+		<t-scroll direction="horizontal" :main-class="`twh-100% dr oh ${extendsRadius}`" :show-scrollbar="false"
+			:refresher-enabled="false" :loadmore="false">
+			<t-row :main-class="`bb-1px,s,${tableBorderColor} ${headerClass} ${borderClass} ${contentWidth}`">
+				<template v-for="(item,index) in headerData" :key="index">
+					<t-view
+						:main-class="`${extendsPadding} ${item.styles} ${border && index<headerData.length-1 ? `br-1px,s,${tableBorderColor} ${borderClass}` : ''}`">
+						<t-checkbox-state v-if="item.mode=='selection'" v-bind="extendsAttrs" main-class=""
+							ref="tablecheckboxallins" @select="selecChange"></t-checkbox-state>
+						<t-text v-bind="extendsAttrs"
+							:main-class="`sfwb ${item.textStyles} ${labelClass} ${item.labelClass}`"
+							v-else>{{item.label}}</t-text>
+						<t-sorting-button v-bind="extendsAttrs" main-class="b" size="mini" suffix-icon-class="mb-5"
+							@change="(e:number)=>sortChange(e,`${item.prop}`)"
+							v-if="item.getBoolean('sortable')!"></t-sorting-button>
+					</t-view>
+				</template>
+			</t-row>
+			<t-scroll v-show="tables.length>0" direction="vertical" :main-class="`f tvg ${contentWidth}`"
+				:show-scrollbar="false" :refresher-enabled="false" :loadmore="false" @scrolltoupper="scrolltoupper">
+				<t-view main-class=" fl">
+					<slot></slot>
+				</t-view>
+			</t-scroll>
+			<t-empty v-show="tables.length==0" title="暂无数据" main-class="w-100% h-100%" image-class="w-288 h-189 mt-n100"
+				title-class="s-32"></t-empty>
+		</t-scroll>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Table 表格
+	 * @date 2025-06-28 19:15:07
+	 * @author TanYuan
+	 * @description 支持水平滚动、选择行和自定义样式。能够灵活适应各种数据展示需求
+	 * @example /pagesA/layout/table/table
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-table.html
+	 * @example /pagesA/layout/table/table
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject[]} tables 表格数据(默认：[])
+	 * @property {String} contentClass 内容区样式
+	 * @property {String} headerClass 表头样式
+	 * @property {Boolean} border 是否显示边框
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} labelClass 标题样式
+	 * @property {String} borderClass 边框样式
+	 * @property {Boolean} stripe 是否显示斑马纹(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} stripeColor 自定义斑马纹颜色
+	 * @property {String} emptyText 数据为空时的显示文本(默认：暂无数据)
+	 * @property {String} rowKey 可选时的key值(默认：id)
+	 * @property {any} checkIds 默认选中的项(默认：[])
+	 * @event {Function} change 选择项选择时触发(e:string[])
+	 * @event {Function} sort 排序时触发(e:boolean)
+	 * @event {Function} scrolltolower 滚动到底时触发
+	 */
+	import { clearGroupKeys } from '../../common/model/async'
+	import { getStyleProperty } from '../../common/model/style'
+	import { c, ttc } from '../../common/model/theme'
+	import { hexToRgba } from '../../common/model/color'
+	import { TableProps, useTuiThemes, TableGroupAttrsType } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<TableProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		tables: [] as UTSJSONObject[],
+		contentClass: '',
+		headerClass: '',
+		border: false,
+		labelClass: '',
+		borderClass: '',
+		stripe: true,
+		stripeColor: '',
+		emptyText: '暂无数据',
+		rowKey: 'id',
+		checkIds: [] as Array<string>
+	});
+	const { extendsAttrs, extendsRadius, extendsPadding } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'sort', 'scrolltolower', 'scrolltoupper'])
+	const tablecheckboxallins = ref<ComponentPublicInstance[] | null>(null)
+	const headerData = ref<UTSJSONObject[]>([])
+	const selectIds = ref<string[]>([])
+	provide('tableGroupAttrs', {
+		path: toRef<string>(() : string => props.path),
+		hover: toRef<boolean>(() : boolean => props.hover),
+		type: toRef<string>(() : string => props.type),
+		disabled: toRef<boolean>(() : boolean => props.disabled),
+		stop: toRef<boolean>(() : boolean => props.stop),
+		effect: toRef<string>(() : string => props.effect),
+		size: toRef<string>(() : string => props.size),
+		mainClass: toRef<string>(() : string => props.mainClass),
+		nativeClass: toRef<string>(() : string => props.nativeClass),
+		tables: toRef<UTSJSONObject[]>(() : UTSJSONObject[] => props.tables),
+		contentClass: toRef<string>(() : string => props.contentClass),
+		headerClass: toRef<string>(() : string => props.headerClass),
+		border: toRef<boolean>(() : boolean => props.border),
+		labelClass: toRef<string>(() : string => props.labelClass),
+		borderClass: toRef<string>(() : string => props.borderClass),
+		stripe: toRef<boolean>(() : boolean => props.stripe),
+		stripeColor: toRef<string>(() : string => props.stripeColor),
+		emptyText: toRef<string>(() : string => props.emptyText),
+		rowKey: toRef<string>(() : string => props.rowKey),
+		checkIds: toRef<string[]>(() : string[] => props.checkIds),
+	} as TableGroupAttrsType)
+	provide('headerData', headerData)
+	provide('selectIds', selectIds)
+	provide('drawHeader', (e : UTSJSONObject, callback : (index : number) => void, ids : string[]) => {
+		const w = e.getString('width') ?? ''
+		const wsty = w == '' ? 'f' : `w-${w}`
+		if (e.getString('mode') == 'selection') selectIds.value = ids
+		callback(headerData.value.length)
+		const align : string = e.getString('align') ?? ''
+		let sty = `fl faic ${wsty}`
+		if (align == 'left') sty += ` fjcs`
+		if (align == 'center') sty += ` fjcc`
+		if (align == 'right') sty += ` fjce`
+		e.styles = sty
+		let textSty = `w-100%`
+		if (align == 'left') textSty += ` sta-l`
+		if (align == 'center') textSty += ` sta-c`
+		if (align == 'right') textSty += ` sta-r`
+		e.textStyles = textSty
+		headerData.value.push(e)
+	})
+	watch(selectIds, (ids : string[]) => {
+		const ins = tablecheckboxallins.value
+		if (ins != null) {
+			let s = 0
+			const il = ids.length
+			const tl = props.tables.length
+			if (il > 0 && il < tl) s = 2
+			if (il > 0 && il == tl) s = 1
+			ins[0].$callMethod('setChecked', s)
+		}
+		emit('change', ids)
+	}, { deep: true, immediate: true })
+	const themeColor = computed(() : string => {
+		return hexToRgba(ttc(props.type, '', '', false), 0.1)
+	})
+	const contentWidth = computed(() : string => {
+		let sty : string = 'w-100%'
+		const w = getStyleProperty(props.contentClass, 'width')
+		if (w != '') sty = `w-${w}`
+		return sty
+	})
+	const tableBorderColor = computed(() : string => {
+		let color : string = '#ebeef5'
+		if (themeColor.value != '') color = themeColor.value
+		return color
+	})
+	const tableMainStyles = computed(() : string => {
+		let sty = 'oh'
+		if (props.border) sty += ` b-1px,s,${tableBorderColor.value}`
+		sty += ` ${extendsRadius.value} h-500 oh ${props.mainClass} ${props.borderClass}`
+		return sty
+	})
+	const themeForeColor = computed(() : string => {
+		return c(props.type, props.effect, '', false)
+	})
+
+	function sortChange(state : number, field : string) {
+		emit('sort', { field, state })
+	}
+	function scrolltoupper(e : ScrollToUpperEvent) {
+		emit('scrolltoupper', e)
+	}
+	function selecChange(e : boolean) {
+		if (e) {
+			props.tables.forEach((item : UTSJSONObject) => {
+				let key : string = `${item[props.rowKey]}`
+				if (!selectIds.value.includes(key)) selectIds.value.push(key)
+			})
+		} else {
+			selectIds.value.splice(0, selectIds.value.length)
+		}
+	}
+</script>

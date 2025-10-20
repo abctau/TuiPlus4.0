@@ -1,0 +1,9 @@
+<template>
+	<t-page main-class="p-20">
+		
+	</t-page>
+</template>
+
+<script setup>
+
+</script>

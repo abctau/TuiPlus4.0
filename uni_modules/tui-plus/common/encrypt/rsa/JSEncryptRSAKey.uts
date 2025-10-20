@@ -1,0 +1,64 @@
+import { HexDecode } from "./asn/hex";
+import { Base64 } from "./asn/base64";
+import { ASN1 } from "./asn/asn1";
+import { RSAKey } from "./jsbn/rsa";
+import { parseBigInt } from "./jsbn/jsbn";
+
+export class JSEncryptRSAKey extends RSAKey {
+	constructor(key : string) {
+		super();
+		this.parseKey(key);
+	}
+	parseKey(pem : string) {
+		try {
+			const base64 = new Base64()
+			var modulus : string
+			var public_exponent : string
+			var reHex = /^\s*(?:[0-9A-Fa-f][0-9A-Fa-f]\s*)+$/;
+			var der = reHex.test(pem) ? HexDecode(pem) : base64.unarmor(pem);
+			 var asn1 = ASN1.decode(der);
+			const asnsub : ASN1[] = asn1.sub!
+			// if (asnsub.length == 3) {
+			// 	asn1 = asnsub[2]!.sub![0];
+			// }
+			if (asnsub.length == 9) {
+				modulus = asnsub[1].getHexStringValue();
+				this.n = parseBigInt(modulus, 16);
+				public_exponent = asnsub[2].getHexStringValue();
+				this.e = parseInt(public_exponent, 16);
+				var private_exponent = asnsub[3].getHexStringValue();
+				this.d = parseBigInt(private_exponent, 16);
+				var prime1 = asnsub[4].getHexStringValue();
+				this.p = parseBigInt(prime1, 16);
+				var prime2 = asnsub[5].getHexStringValue();
+				this.q = parseBigInt(prime2, 16);
+				var exponent1 = asnsub[6].getHexStringValue();
+				this.dmp1 = parseBigInt(exponent1, 16);
+				var exponent2 = asnsub[7].getHexStringValue();
+				this.dmq1 = parseBigInt(exponent2, 16);
+				var coefficient = asnsub[8].getHexStringValue();
+				this.coeff = parseBigInt(coefficient, 16);
+			} else if (asnsub.length == 2) {
+				if (asnsub[0].sub != null) {
+					var bit_string = asnsub[1];
+					var sequence = bit_string.sub![0];
+					modulus = sequence.sub![0].getHexStringValue();
+					this.n = parseBigInt(modulus, 16);
+					public_exponent = sequence.sub![1].getHexStringValue();
+					this.e = parseInt(public_exponent, 16);
+				} else {
+					modulus = asnsub[0].getHexStringValue();
+					this.n = parseBigInt(modulus, 16);
+					public_exponent = asnsub[1].getHexStringValue();
+					this.e = parseInt(public_exponent, 16);
+				}
+			} else {
+				return false;
+			}
+			return true;
+		} catch (ex) {
+			console.log(ex)
+			return false;
+		}
+	}
+}

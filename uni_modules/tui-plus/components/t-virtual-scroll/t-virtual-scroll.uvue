@@ -1,0 +1,130 @@
+<template>
+	<t-scroll v-bind="extendsAttrs" :mainClass="`h-1000 ${mainClass}`" @scroll="scroll" :refresherEnabled="false"
+		:scroll-top="scrollTop" @touchend="touchend" @touchstart="touchstart">
+		<t-view :main-class="virtualContentStyles">
+			<template v-for="(item,index) in list" :key="index">
+				<t-view v-if="index>=min&&index<=max"
+					:main-class="`da dltr-0 dt-${rowHeight*index}px ${itemClass} h-${rowHeight}px`">
+					<slot :item="item" :index="index"></slot>
+				</t-view>
+			</template>
+		</t-view>
+	</t-scroll>
+</template>
+<script setup>
+	/**
+	 * VirtualScroll 虚拟滚动
+	 * @date 2025-08-15 14:37:25
+	 * @author TanYuan
+	 * @description 只会渲染可见的内容，支持动态增删内容
+	 * @example /pagesA/layout/virtual-scroll/virtual-scroll
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-virtual-scroll.html
+	 * @example /pagesA/layout/virtual-scroll/virtual-scroll
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} list 数据源(默认：[] as any[])
+	 * @property {Number} rowHeight 每行的高度(默认：120)
+	 * @property {String} itemClass 行盒的样式
+	 * @property {Number} scrollTop 滚动位置
+	 * @event {Function} scrollend 滚动到底部时触发
+	 */
+	import { getStyleProperty } from '../../common/model/style';
+	import { getPx } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface VirtualScrollProps extends CommonProps {
+		list : any[]
+		rowHeight : number
+		itemClass : string
+		scrollTop : number
+	}
+	const props = withDefaults(defineProps<VirtualScrollProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as any[],
+		rowHeight: 120,
+		itemClass: '',
+		scrollTop: 0,
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+
+	const emit = defineEmits(['scrollend']);
+
+	// 数据
+	const min = ref(0);
+	const max = ref(5);
+	const timer = ref(0);
+	const st = ref(0);
+	const ost = ref(-1);
+
+	// 计算属性
+	const virtualContentStyles = computed(() => `h-${props.list.length * props.rowHeight}px`);
+
+	// 方法
+	const touchstart = (e : UniTouchEvent) => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		// #endif
+	};
+
+	const touchend = (e : UniTouchEvent) => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		timer.value = setInterval(() => {
+			if (ost.value == st.value) {
+				emit('scrollend', { detail: { scrollTop: st.value } });
+				clearInterval(timer.value);
+			}
+			ost.value = st.value;
+		}, 200);
+		// #endif
+	};
+
+	const scroll = (e : UniScrollEvent) => {
+		const t = e.detail.scrollTop;
+		const rh = props.rowHeight;
+		const len = props.list.length;
+		st.value = t;
+		let ch = getPx(getStyleProperty(props.mainClass, 'height'));
+		if (ch == 0) ch = getPx('1000rpx');
+		let sx = Math.floor(Math.abs(t) / rh);
+		if (sx < 0) sx = 0;
+		let ex = Math.floor(sx + (ch / rh)) + 5;
+		if (ex >= len) ex = len - 1;
+		min.value = sx;
+		max.value = ex;
+	};
+
+	// 生命周期
+	onUnmounted(() => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		// #endif
+	});
+</script>

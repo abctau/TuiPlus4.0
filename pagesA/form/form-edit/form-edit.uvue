@@ -1,0 +1,627 @@
+<template>
+	<t-page main-class="p-30" title="动态表单-窗口模式">
+		<t-card main-class="mb-30" title="FormModal 动态表单-窗口模式" sub-title="JSON配置,弹出编辑框的一种形式"></t-card>
+		<t-card main-class="mb-30" title="后端 JSON attrs字段配置说明" sub-title="attrs可绑定事件和ref,实现表单各组件的关联控制"></t-card>
+		<t-button main-class="mb-30" @click="showStepper" type="p">步进器(stepper)</t-button>
+		<t-button main-class="mb-30" @click="showDate" type="p">日期(picker-date)</t-button>
+		<t-button main-class="mb-30" @click="showPca" type="p">省市区(picker-pca)</t-button>
+		<t-button main-class="mb-30" @click="showCustom" type="p">自定义数据(picker-custom)</t-button>
+		<t-button main-class="mb-30" @click="showRadio" type="p">单选(radio)</t-button>
+		<t-button main-class="mb-30" @click="showCheckbox" type="p">多选(checkbox)</t-button>
+		<t-button main-class="mb-30" @click="showInput" type="p">输入框(input)</t-button>
+		<t-button main-class="mb-30" @click="showRate" type="p">评分(rate)</t-button>
+		<t-button main-class="mb-30" @click="showCode" type="p">验证码(code)</t-button>
+		<t-button main-class="mb-30" @click="showSwitch" type="p">开关(switch)</t-button>
+		<t-button main-class="mb-30" @click="showUpload" type="p">上传(upload)</t-button>
+		<t-button main-class="mb-30" @click="showSelect" type="p">下拉选择(select-适用于PC端)</t-button>
+		<t-button main-class="mb-30" @click="showSelect1" type="p">下拉选择(select-适用于移动端)</t-button>
+		<t-button main-class="mb-30" @click="showSlider" type="p">滑块(slider)</t-button>
+		<t-button main-class="mb-30" @click="showTextarea" type="p">文本域(textarea)json配置attrs input事件</t-button>
+		<t-button main-class="mb-30" @click="showPickerColor" type="p">色彩选择(picker-color)</t-button>
+		<t-button main-class="mb-30" @click="showCalendar" type="p">日历(calendar)</t-button>
+		<t-button main-class="mb-30" @click="showCascader" type="p">级联(cascader)</t-button>
+		<t-button main-class="mb-30" @click="showFileManager" type="p">文件选择(fileManager)</t-button>
+		<t-form-modal ref="formedit" @confirm="onConfirm" type="p"></t-form-modal>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	const list = ref<UTSJSONObject[]>([])
+	const formedit = ref<TFormModalComponentPublicInstance | null>(null)
+	const images = [
+		{ url: '/pagesA/static/image/6527ae979850d.jpg' }
+	] as UTSJSONObject[]
+	const sliderValue : number[] = [0, 105, 500]
+	const stepperValue : number = 15
+	const selectVal = '选项1'
+	const options = [{
+		value: '选项1',
+		label: '黄金糕'
+	}, {
+		value: '选项2',
+		label: '双皮奶',
+		disabled: true
+	}, {
+		value: '选项3',
+		label: '蚵仔煎'
+	}, {
+		value: '选项4',
+		label: '龙须面'
+	}, {
+		value: '选项5',
+		label: '北京烤鸭'
+	}]
+	function showCustom() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '学院',
+			type: 'picker-custom',
+			name: 'scholl',
+			value: [] as string[],
+			describe: "",
+			attrs: {
+				list: [
+					[
+						{ "id": "1", "title": "北京大学文学院" },
+						{ "id": "2", "title": "清华大学历史学院" },
+						{ "id": "3", "title": "复旦大学哲学院" },
+						{ "id": "4", "title": "中国人民大学法学院" },
+						{ "id": "5", "title": "上海交通大学经济学院" },
+						{ "id": "6", "title": "浙江大学管理学院" },
+						{ "id": "7", "title": "南京大学教育学院" },
+						{ "id": "8", "title": "北京外国语大学外国语学院" },
+						{ "id": "9", "title": "武汉大学数学科学学院" },
+						{ "id": "10", "title": "华中科技大学物理学院" },
+						{ "id": "11", "title": "西安交通大学化学学院" },
+						{ "id": "12", "title": "四川大学生命科学学院" },
+						{ "id": "13", "title": "电子科技大学计算机科学与技术学院" },
+						{ "id": "14", "title": "北京邮电大学信息科学与技术学院" },
+						{ "id": "15", "title": "南京师范大学地理科学学院" },
+						{ "id": "16", "title": "同济大学环境学院" },
+						{ "id": "17", "title": "北京师范大学心理学院" },
+						{ "id": "18", "title": "华东师范大学体育学院" },
+						{ "id": "19", "title": "中央美术学院美术学院" },
+						{ "id": "20", "title": "中央音乐学院音乐学院" }
+					]
+				]
+			},
+			contentClass: "w-600"
+		})
+	}
+	function showStepper() {
+		// <t-stepper class="mb.25" v-model="vala" :min="3" :max="99"></t-stepper>
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "步进器",
+			"contentClass": "tdr", //弹出内容最外层标签的样式
+			"name": "primarynormal",
+			"type": "stepper",
+			"attrs": { min: 3, max: 99 },
+			"value": stepperValue,
+			"describe": "好友们可以在我的个人资料页看到，方便认出我"
+		})
+	}
+	function showSlider() {
+		// <t-slider class="tdr-tdb-h.260-mb.30" direction="horizontal" :min="0" :max="500" type="p" blockSize="60"
+		// 	:disabled="false" :showValue="true" trackSize="20" v-model="sliderValue" showMode="after" />
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "滑块",
+			"name": "primarynormal",
+			"type": "slider",
+			"attrs": { direction: 'horizontal', min: 0, max: 500, blockSize: '60', disabled: false, showValue: true, trackSize: '20', showMode: 'after' },
+			"value": sliderValue,
+			"describe": ""
+		})
+	}
+	function showSelect() {
+		// <t-select class="mb.30" v - model="val" : options = "options" > </t-select>
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "下拉选择",
+			"name": "primarynormal",
+			"type": "select",
+			"list": options,
+			"value": selectVal,
+			"attrs": { closeable: false, mainClass: "z-1 ov" },
+			"describe": ""
+		})
+	}
+	function showSelect1() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "下拉选择",
+			"name": "primarynormal",
+			"type": "pickerSelect",
+			"value": selectVal,
+			"contentClass": 'w-690',
+			"attrs": { embeddable: true, "list": options, contentClass: 'h-350', mainClass: "mt-n30 ov" },
+			"describe": ""
+		})
+	}
+	function showUpload() {
+		// <t-upload v - model="images" : count = "3" > </t-upload>
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "上传",
+			"name": "primarynormal",
+			"type": "upload",
+			"attrs": {},
+			"value": images,
+			"describe": ""
+		})
+	}
+	function showSwitch() {
+		// <t-switch v-model="switch5" type="p" activeIcon="volume-up" inactiveIcon="volume-off"></t-switch>
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "开关",
+			"name": "primarynormal",
+			"type": "switch",
+			"attrs": { activeIcon: 'volume-up', inactiveIcon: 'volume-off' },
+			"value": true,
+			"describe": ""
+		})
+	}
+	function showRate() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "评分",
+			"name": "primarynormal",
+			"type": "rate",
+			"attrs": { "size": "large", "mainClass": "s-65 mtb-40" },
+			"value": 3,
+			"describe": ""
+		})
+	}
+	function showCode() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			"title": "验证码",
+			"name": "primarynormal",
+			"type": "code",
+			"attrs": {
+				dot: true, dotSymbol: "*", autoFocus: true, maxlength: 4, inputType: 'number'
+			},
+			"value": "",
+			"describe": ""
+		})
+	}
+	function showCalendar() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: "日历",
+			name: "calendar",
+			type: "calendar",
+			attrs: {},
+			value: [] as string[],
+			describe: "",
+			contentClass: 'w-690'
+		})
+	}
+	function showCascader() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: "级联选择器",
+			name: "cascader",
+			type: "cascader",
+			attrs: {
+				option: [{
+					"value": "zhinan",
+					"label": "指南",
+					"children": [
+						{
+							"value": "shejiyuanze",
+							"label": "设计原则",
+							"children": [
+								{
+									"value": "yizhi",
+									"label": "一致",
+									"disabled": true
+								},
+								{
+									"value": "fankui",
+									"label": "反馈"
+								},
+								{
+									"value": "xiaolv",
+									"label": "效率"
+								},
+								{
+									"value": "kekong",
+									"label": "可控"
+								}
+							]
+						},
+						{
+							"value": "daohang",
+							"label": "导航",
+							"children": [
+								{
+									"value": "cexiangdaohang",
+									"label": "侧向导航"
+								},
+								{
+									"value": "dingbudaohang",
+									"label": "顶部导航"
+								}
+							]
+						}
+					]
+				},
+				{
+					"value": "zujian",
+					"label": "组件",
+					"children": [
+						{
+							"value": "basic",
+							"label": "Basic",
+							"children": [
+								{
+									"value": "layout",
+									"label": "Layout 布局"
+								},
+								{
+									"value": "color",
+									"label": "Color 色彩"
+								},
+								{
+									"value": "typography",
+									"label": "Typography 字体"
+								},
+								{
+									"value": "icon",
+									"label": "Icon 图标"
+								},
+								{
+									"value": "button",
+									"label": "Button 按钮"
+								}
+							]
+						},
+						{
+							"value": "form",
+							"label": "Form",
+							"children": [
+								{
+									"value": "radio",
+									"label": "Radio 单选框"
+								},
+								{
+									"value": "checkbox",
+									"label": "Checkbox 多选框"
+								},
+								{
+									"value": "input",
+									"label": "Input 输入框"
+								},
+								{
+									"value": "input-number",
+									"label": "InputNumber 计数器"
+								},
+								{
+									"value": "select",
+									"label": "Select 选择器"
+								},
+								{
+									"value": "cascader",
+									"label": "Cascader 级联选择器"
+								},
+								{
+									"value": "switch",
+									"label": "Switch 开关"
+								},
+								{
+									"value": "slider",
+									"label": "Slider 滑块"
+								},
+								{
+									"value": "time-picker",
+									"label": "TimePicker 时间选择器"
+								},
+								{
+									"value": "date-picker",
+									"label": "DatePicker 日期选择器"
+								},
+								{
+									"value": "datetime-picker",
+									"label": "DateTimePicker 日期时间选择器"
+								},
+								{
+									"value": "upload",
+									"label": "Upload 上传"
+								},
+								{
+									"value": "rate",
+									"label": "Rate 评分"
+								},
+								{
+									"value": "form",
+									"label": "Form 表单"
+								}
+							]
+						},
+						{
+							"value": "data",
+							"label": "Data",
+							"children": [
+								{
+									"value": "table",
+									"label": "Table 表格"
+								},
+								{
+									"value": "tag",
+									"label": "Tag 标签"
+								},
+								{
+									"value": "progress",
+									"label": "Progress 进度条"
+								},
+								{
+									"value": "tree",
+									"label": "Tree 树形控件"
+								},
+								{
+									"value": "pagination",
+									"label": "Pagination 分页"
+								},
+								{
+									"value": "badge",
+									"label": "Badge 标记"
+								}
+							]
+						},
+						{
+							"value": "notice",
+							"label": "Notice",
+							"children": [
+								{
+									"value": "alert",
+									"label": "Alert 警告"
+								},
+								{
+									"value": "loading",
+									"label": "Loading 加载"
+								},
+								{
+									"value": "message",
+									"label": "Message 消息提示"
+								},
+								{
+									"value": "message-box",
+									"label": "MessageBox 弹框"
+								},
+								{
+									"value": "notification",
+									"label": "Notification 通知"
+								}
+							]
+						},
+						{
+							"value": "navigation",
+							"label": "Navigation",
+							"children": [
+								{
+									"value": "menu",
+									"label": "NavMenu 导航菜单"
+								},
+								{
+									"value": "tabs",
+									"label": "Tabs 标签页"
+								},
+								{
+									"value": "breadcrumb",
+									"label": "Breadcrumb 面包屑"
+								},
+								{
+									"value": "dropdown",
+									"label": "Dropdown 下拉菜单"
+								},
+								{
+									"value": "steps",
+									"label": "Steps 步骤条"
+								}
+							]
+						},
+						{
+							"value": "others",
+							"label": "Others",
+							"children": [
+								{
+									"value": "dialog",
+									"label": "Dialog 对话框"
+								},
+								{
+									"value": "tooltip",
+									"label": "Tooltip 文字提示"
+								},
+								{
+									"value": "popover",
+									"label": "Popover 弹出框"
+								},
+								{
+									"value": "card",
+									"label": "Card 卡片"
+								},
+								{
+									"value": "carousel",
+									"label": "Carousel 走马灯"
+								},
+								{
+									"value": "collapse",
+									"label": "Collapse 折叠面板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"value": "ziyuan",
+					"label": "资源",
+					"children": [
+						{
+							"value": "axure",
+							"label": "Axure Components"
+						},
+						{
+							"value": "sketch",
+							"label": "Sketch Templates"
+						},
+						{
+							"value": "jiaohu",
+							"label": "组件交互文档"
+						}
+					]
+				}
+				]
+			},
+			value: [] as string[],
+			describe: "",
+			contentClass: 'w-690'
+		})
+	}
+	function showFileManager() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: "文件选择",
+			name: "fileManager",
+			type: "fileManager",
+			attrs: {},
+			value: [] as UTSJSONObject[],
+			describe: "",
+			contentClass: 'w-690'
+		})
+	}
+
+	function showPickerColor() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: "颜色设置",
+			name: "primarynormal",
+			type: "color",
+			attrs: {},
+			value: "#2979ff",
+			describe: "",
+			contentClass: 'w-690'
+		})
+	}
+	function showDate() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: "输入日期",
+			name: "date",
+			type: "date",
+			attrs: { format: "yyyy-mm-dd" },
+			value: "2024-12-11",
+			describe: "日期相关描述，可为空",
+			contentClass: "w-600"
+		})
+	}
+	function showTextarea() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '文本域标题',
+			type: 'textarea',
+			name: 'field',
+			value: '文本内容',
+			attrs: {
+				placeholder: "欢迎使用Tui", onInput: (e : UniInputEvent) => {
+					uni.showToast({
+						title: e.detail.value
+					})
+				}
+			}, //可以绑定事件
+			describe: '好友们可以在我的个人资料页看到，方便认出我'
+		})
+	}
+	function showCheckbox() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '性别 ',
+			type: 'checkbox',
+			name: 'Gender',
+			value: ['3'],
+			describe: '好友们可以在我的个人资料页看到，方便认出我',
+			attrs: {
+				icon: "checkbox-blank-circle-fill",
+				childClass: "p-0 ml-15",
+				transition: false
+			},
+			list: [
+				{
+					value: '1',
+					label: '男'
+				},
+				{
+					value: '2',
+					label: '女'
+				}, {
+					value: '3',
+					label: '保密'
+				}
+			]
+		})
+	}
+	function showRadio() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '性别 ',
+			type: 'radio',
+			name: 'Gender',
+			value: '2',
+			describe: '好友们可以在我的个人资料页看到，方便认出我',
+			attrs: { childClass: "p-0 ml-15" },
+			list: [
+				{
+					value: '1',
+					label: '男'
+				},
+				{
+					value: '2',
+					label: '女'
+				}, {
+					value: '3',
+					label: '保密'
+				}
+			]
+		})
+	}
+	function showPca() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '城市选择 ',
+			type: 'city',
+			name: 'city',
+			value: ['120000', '120200', '120225'],
+			describe: "",
+			attrs: {
+				list: list.value
+			},
+			contentClass: "w-600"
+		})
+	}
+	function showInput() {
+		const edit = formedit.value as TFormModalComponentPublicInstance
+		edit.show({
+			title: '手机号',
+			type: 'input',
+			name: 'phone',
+			value: '456789',
+			attrs: {
+				mode: 'number',
+				maxlength: 11,
+				placeholder: "请输入手机号"
+			},
+			describe: '好友们可以在我的个人资料页看到，方便认出我'
+		})
+	}
+	function onConfirm(e : UTSJSONObject) {
+		console.log(e)
+	}
+	onLoad((_) => {
+		TuiApi('citydata', {}, true).then(res => {
+			list.value = res.getArray('data') as UTSJSONObject[]
+		})
+	})
+</script>

@@ -1,0 +1,19 @@
+import { TuiRequestAnimationFrame, TuiCancelAnimationFrame } from "./util"
+const renderQueue : Ref<boolean>[] = []
+let isTaskExecuting = false
+let taskTime : number = -1
+export function addToRenderQueue(e : Ref<boolean> | null = null) {
+	if (e != null) renderQueue.push(e)
+	if (isTaskExecuting) return
+	if (renderQueue.length > 0) {
+		isTaskExecuting = true
+		if (taskTime != -1) TuiCancelAnimationFrame(taskTime)
+		taskTime = TuiRequestAnimationFrame(() => {
+			const loading : Ref<boolean> = renderQueue[0]
+			loading.value = true
+			renderQueue.splice(0, 1)
+			isTaskExecuting = false
+			if (renderQueue.length > 0) addToRenderQueue()
+		})
+	}
+}

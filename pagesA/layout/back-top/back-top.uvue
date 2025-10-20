@@ -1,0 +1,50 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb mb-30" title='BackTop' subTitle="一键引入，自动监听滚动，轻松实现平滑返回页面顶部功能"></t-card>
+		<t-section main-class="tdr tdb mb-30" title="向上滑动200px显示按钮"></t-section>
+		<t-col main-class="mb-30 tdr tdb tdp">
+			<t-text main-class="sfwb" size="large">未来科技城市景观</t-text>
+			<t-text
+				main-class="slh-80">在未来的某个时代，科技已经彻底改变了人们的生活。夜晚的城市景观被霓虹灯光和全息广告照亮，飞行汽车在摩天大楼间穿梭。在这个充满活力的氛围中，一位市民正在使用一款高科技装置，可能是一款智能手机或平板电脑，其界面呈现出全息效果。这个场景融合了传统的中国建筑元素与超现代设计，展现了未来科技的魅力。在这个未来时代，我们的城市已经发展成为一座充满奇迹的科技堡垒。夜晚，城市的每个角落都散发着耀眼的光芒。那些建筑物不再是冰冷的钢筋水泥，而是融合了智能材料，能够根据环境变化自动调节温度和光线。</t-text>
+			<t-image main-class="h-800 w-100%" src="https://life.yundie.xyz/t-uvue-ui/iai3a1.png" />
+			<t-text main-class="slh-80">
+				在这座城市中心，有一座名为“智慧之塔”的建筑，它不仅是城市的地标，更是科技发展的象征。智慧之塔高耸入云，塔身由无数块全息屏幕组成，实时展示着全球各地的新闻、天气预报和公共信息。
+
+				在这繁华的街角，市民们正沉浸在这科技带来的便利之中。那位正在使用高科技装置的市民，名叫小李，他正通过全息界面与远在地球另一端的家人视频通话。这款装置不仅可以实现全息通话，还能根据用户的需求，提供实时翻译、生活助手等功能。
+
+				在街道的另一边，一家全息餐厅吸引了众多食客。餐厅内的餐桌都是智能化的，顾客只需在桌面上点选菜品，全息投影便会呈现出食物的立体图像，供顾客欣赏。而在后厨，机器人厨师正根据订单精确地烹饪美食。
+
+				此外，这座城市的交通系统也发生了翻天覆地的变化。飞行汽车穿梭在摩天大楼之间，它们采用清洁能源，实现了零排放。道路上的无人驾驶公交车，时刻保持着最佳运行状态，为市民提供便捷的出行服务。
+
+				在这个充满活力的城市中，传统文化与现代科技完美融合。古老的寺庙和园林被赋予了新的生命，通过全息投影技术，让游客们仿佛穿越时空，感受历史的沧桑。而那些传统的节日庆典，也在科技的加持下，变得更加丰富多彩。
+			</t-text>
+		</t-col>
+		<t-back-top :offset="200" type="error" :scrollTop="scrollTop"
+			main-class="df dr-150 db-150 s-50 twh-100 fc tdb-e r-100 c-#fff" @click="onBacktop"></t-back-top>
+		<!-- <t-back-top :offset="200" main-class="dr-150 db-150 s-50" icon="arrowtext" @click="onBacktop"></t-back-top>
+		<t-back-top main-class="dr-250 db-150 s-50" icon="arrowtext" :offset="200" @click="onBacktop">
+			<t-icon name='rocket' main-class="c-#fff s-45 dr-250 db-150"></t-icon>
+		</t-back-top> -->
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				scrollTop: 0
+			};
+		},
+		onPageScroll(e) {
+			this.scrollTop = e.scrollTop
+		},
+		methods: {
+			onBacktop() {
+				uni.pageScrollTo({
+					scrollTop: 0,
+					duration: 300
+				});
+			}
+		}
+	}
+</script>

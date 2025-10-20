@@ -1,0 +1,372 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" @tuiTouchstart="tuiTouchstart" @tuiTouchmove="tuiTouchmove"
+		@tuiTouchend="tuiTouchend" @tuiTouchcancel="tuiTouchend">
+		<t-canvas main-class="twh-100%" @initFinished="init"></t-canvas>
+	</t-gesture>
+</template>
+<script setup>
+	/**
+	 * Slider 滑块
+	 * @date 2025-05-31 12:06:57
+	 * @author TanYuan
+	 * @description canvas绘制,支持显示百分比或者显示值,支持多滑块,滑块数据取决于绑定value值数组的长度
+	 * @example /pagesA/form/slider-plus/slider-plus
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-slider.html
+	 * @example /pagesA/form/slider-plus/slider-plus
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} direction=[horizontal|vertical] 组件绘制方式(默认：horizontal)
+	 * @value horizontal 水平方向
+	 * @value vertical 垂直方向
+	 * @property {Number} min 最小值(默认：1)
+	 * @property {Number} max 最大值(默认：100)
+	 * @property {any} modelValue 双向绑定的值
+	 * @property {String} activeColor 已选择的颜色
+	 * @property {String} inactiveColor 未选择的颜色
+	 * @property {String} blockSize 滑块的大小尺寸(默认：50)
+	 * @property {String} fontSize 字体大小(默认：28rpx)
+	 * @property {Boolean} showValue 是否显示值
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} showValuePosition 是否显示单位(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} decimalPlaces 保留的小数位数(默认：1)
+	 * @property {String} trackSize 滑块轨道的尺寸	(默认：5)
+	 * @property {String} showMode=[after|before] 滑块数值的显示模式(默认：before)
+	 * @value after 在滑块后面显示值
+	 * @value before 在滑块前面显示值
+	 * @event {Function} change 值发生变化时触发
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { b, ttc } from '../../common/model/theme'
+	import { getPx, addUnit, TuiGetMeasureText } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface SliderProps extends CommonProps {
+		direction ?: string
+		min ?: number
+		max ?: number
+		modelValue ?: number[]
+		activeColor ?: string
+		inactiveColor ?: string
+		blockSize ?: string
+		fontSize ?: string
+		showValue ?: boolean
+		showValuePosition ?: boolean
+		decimalPlaces ?: number
+		trackSize ?: string
+		showMode ?: string
+	}
+	const instance = getCurrentInstance()?.proxy!
+	const props = withDefaults(defineProps<SliderProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		direction: 'horizontal',
+		min: 0,
+		max: 100,
+		modelValue: [] as number[],
+		activeColor: '',
+		inactiveColor: '',
+		blockSize: '50',
+		fontSize: '28rpx',
+		showValue: false,
+		showValuePosition: true,
+		decimalPlaces: 0,
+		trackSize: '5',
+		showMode: 'before'
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const blocksize = ref<number>(getPx(addUnit(props.blockSize)));
+	const tracksize = ref<number>(getPx(addUnit(props.trackSize)));
+	const sliderHeight = ref<number>(0);
+	const sliderWidth = ref<number>(0);
+	const progressLen = ref<number>(0);
+	const coordinates = ref<number[]>([]);
+	const CanvasContextIns = ref<CanvasContext | null>(null);
+	const context = ref<CanvasRenderingContext2D | null>(null);
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	const activeIndex = ref<number>(0);
+	const values = ref<number[]>([]);
+	if (props.modelValue.length == 0) {
+		values.value = [props.min]
+	} else {
+		values.value = [...props.modelValue]
+	}
+
+	function drawVaue() {
+		try {
+			const ctx = context.value!
+			ctx.fillStyle = ttc(props.type, props.effect, props.activeColor, false)
+			const fontsize = getPx(addUnit(props.fontSize))
+			ctx.font = `${fontsize}px Arial`
+			values.value.forEach((item : number, index : number) => {
+				let val = ''
+				if (props.showValue) {
+					val = `${item}`
+				} else if (props.showValuePosition) {
+					val = `${(((item - props.min) / (props.max - props.min)) * 100).toFixed(props.decimalPlaces)}%`
+				}
+				let left = blocksize.value / 2
+				if (props.direction == 'vertical') {
+					ctx.textBaseline = 'middle';
+					let y = Math.round(coordinates.value[index] + left)
+					if (props.showMode == 'before') {
+						const x = Math.round((sliderWidth.value / 2) - left)
+						ctx.textAlign = 'right'
+						ctx.fillText(`${val}`, x, y)
+					} else {
+						const x = Math.round((sliderWidth.value / 2) + left)
+						ctx.textAlign = 'left'
+						ctx.fillText(`${val}`, x, y)
+					}
+				} else {
+					// 获取文本的宽度
+					let textWidth : number = TuiGetMeasureText(val, fontsize)
+					ctx.textAlign = 'center'
+					let x = Math.round(coordinates.value[index] + left)
+					if (x + (textWidth / 2) > (sliderWidth.value - 4)) {
+						ctx.textAlign = 'left'
+						x = sliderWidth.value - textWidth - 4
+					} else if ((textWidth / 2) > x - 4) {
+						ctx.textAlign = 'left'
+						x = 4
+					}
+					if (props.showMode == 'before') {
+						const y = Math.round((sliderHeight.value / 2) - left - 2)
+						ctx.fillText(`${val}`, x, y)
+					} else {
+						ctx.textBaseline = 'top';
+						const y = Math.round((sliderHeight.value / 2 + left))
+						ctx.fillText(`${val}`, x, y)
+					}
+				}
+			})
+		} catch (error) { }
+	}
+	function drawBlock() {
+		try {
+			const blockcolor = b(props.type, props.effect, props.activeColor, false)
+			coordinates.value.forEach((movelen) => {
+				const ctx = context.value!
+				const size = blocksize.value / 2
+				ctx.beginPath()
+				if (props.direction == 'vertical') {
+					ctx.arc(Math.round(sliderWidth.value / 2), Math.round(movelen + size), Math.round(size - 4), 0, Math.PI * 2, false)
+				} else {
+					ctx.arc(Math.round(movelen + size), Math.round(sliderHeight.value / 2), Math.round(size - 4), 0, Math.PI * 2, false)
+				}
+				ctx.closePath()
+				ctx.fillStyle = blockcolor
+				ctx.fill()
+				ctx.lineWidth = 4
+				ctx.strokeStyle = '#fff'
+				ctx.stroke()
+			})
+		} catch (error) { }
+	}
+	function fillRectRadio(x : number, y : number, width : number, height : number, radius : number) {
+		const r = Math.round(radius)
+		const w = Math.round(width)
+		const h = Math.round(height)
+		const ctx = context.value!
+		ctx.beginPath()
+		ctx.moveTo(x, y + r)
+		ctx.arcTo(x, y + h, x + r, y + h, r)
+		ctx.arcTo(x + w, y + h, x + width, y + h - r, r)
+		ctx.arcTo(x + w, y, x + w - r, y, r)
+		ctx.arcTo(x, y, x, y + r, r)
+		ctx.closePath()
+		ctx.fill()
+	}
+	function drawBackground() {
+		try {
+			const ctx = context.value!
+			ctx.fillStyle = props.inactiveColor != '' ? props.inactiveColor : '#f2f2f2'
+			if (props.direction == 'vertical') {
+				const y = blocksize.value / 2
+				const x = (sliderWidth.value - tracksize.value) / 2
+				const width = tracksize.value
+				const height = progressLen.value
+				const radius = tracksize.value / 2
+				fillRectRadio(x, y, width, height, radius)
+			} else {
+				const x = blocksize.value / 2
+				const y = (sliderHeight.value - tracksize.value) / 2
+				const width = progressLen.value
+				const height = tracksize.value
+				const radius = tracksize.value / 2
+				fillRectRadio(x, y, width, height, radius)
+			}
+		} catch (error) { }
+	}
+	function drawProgress() {
+		try {
+			const ctx = context.value!
+			ctx.fillStyle = b(props.type, props.effect, props.activeColor, false)
+			const arr : number[] = coordinates.value.map((item : number) : number => item)
+			arr.sort((a : number, b : number) : number => a - b)
+
+			if (props.direction == 'vertical') {
+				const y = blocksize.value / 2
+				const x = (sliderWidth.value - tracksize.value) / 2
+				const width = tracksize.value
+				const radius = tracksize.value / 2
+				if (values.value.length > 1) {
+					arr.forEach((item, index) => {
+						if (index < arr.length - 1) {
+							const height = arr[index + 1] - item
+							fillRectRadio(x, y + item, width, height, radius)
+						}
+					})
+				} else if (values.value.length == 1) {
+					fillRectRadio(x, y, width, arr[0], radius)
+				}
+			} else {
+				const x = blocksize.value / 2
+				const y = (sliderHeight.value - tracksize.value) / 2
+				const height = tracksize.value
+				const radius = tracksize.value / 2
+				if (values.value.length > 1) {
+					arr.forEach((item, index) => {
+						if (index < arr.length - 1) {
+							const width = arr[index + 1] - item
+							fillRectRadio(x + item, y, width, height, radius)
+						}
+					})
+				} else if (values.value.length == 1) {
+					fillRectRadio(x, y, arr[0], height, radius)
+				}
+			}
+		} catch (error) { }
+	}
+	function draw() {
+		try {
+			const ctx = context.value!
+			ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+			drawBackground()
+			drawProgress()
+			drawBlock()
+			if (props.showValue || props.showValuePosition) drawVaue()
+		} catch (error) { }
+	}
+	function setValue() {
+		let arr : number[] = []
+		coordinates.value.forEach((item, index) => {
+			let val = Math.floor(item / progressLen.value * props.max)
+			if (val < props.min) val = props.min
+			if (val > props.max) val = props.max
+			values.value[index] = val
+			arr.push(val)
+		})
+		arr.sort((a : number, b : number) : number => a - b)
+	}
+	function getActiveIndex(target : number) : number {
+		let dif = Math.abs(coordinates.value[0] - target)
+		let min = 0
+		for (let i = 0; i < coordinates.value.length; i++) {
+			const newDif = Math.abs(coordinates.value[i] - target)
+			if (newDif < dif) {
+				dif = newDif
+				min = i
+			}
+		}
+		return min
+	}
+	function getMoveLen(e : TuiTouchEvent) : number {
+		let move : number
+		if (props.direction == 'vertical') {
+			move = e.offsetY
+		} else {
+			move = e.offsetX
+		}
+		move = Math.floor(move - (blocksize.value / 2))
+		if (move < 0) move = 0
+		if (move > progressLen.value) move = progressLen.value
+		return move
+	}
+	function tuiTouchstart(e : TuiTouchEvent) {
+		if (props.disabled) return
+		const move = getMoveLen(e)
+		activeIndex.value = getActiveIndex(move)
+		coordinates.value[activeIndex.value] = move
+		setValue()
+		draw()
+	}
+	function tuiTouchmove(e : TuiTouchEvent) {
+		if (props.disabled) return
+		e.event.preventDefault()
+		const move = getMoveLen(e)
+		coordinates.value[activeIndex.value] = move
+		setValue()
+		draw()
+	}
+	const tuiTouchend = (_ : TuiTouchEvent) => {
+		emit('change', [...values.value])
+		emit('update:modelValue', [...values.value])
+
+		nextTick(() => {
+			itemValidate()
+		})
+
+	}
+	function proLen(value : number) : number {
+		return progressLen.value * ((value - props.min) / (props.max - props.min))
+	}
+	function init(ctx : CanvasContext | null) {
+		try {
+			CanvasContextIns.value = ctx
+			context.value = ctx?.getContext('2d')
+			sliderHeight.value = context.value!.canvas.offsetHeight
+			sliderWidth.value = context.value!.canvas.offsetWidth
+			progressLen.value = props.direction == 'vertical' ? sliderHeight.value - blocksize.value : sliderWidth.value - blocksize.value
+			values.value.forEach((item) => {
+				coordinates.value.push(proLen(item))
+			})
+			draw()
+		} catch (error) { }
+	}
+	function resetDraw(value : any) {
+		values.value = [...(value as number[])] as number[]
+		coordinates.value = []
+		init(CanvasContextIns.value)
+		draw()
+	}
+	watch(() : number[] => props.modelValue, (val : number[]) => {
+		nextTick(() => {
+			if (val.length == 0) {
+				resetDraw([props.min])
+			} else {
+				resetDraw(val)
+			}
+		})
+	})
+</script>

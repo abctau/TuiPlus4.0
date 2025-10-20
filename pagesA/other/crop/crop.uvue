@@ -1,0 +1,38 @@
+<template>
+	<t-page title="裁剪" main-class="p-30">
+		<t-card main-class="mb-30" title="t-crop 裁剪"
+			sub-title="Canvas实现,PC端支持鼠标滚轮,支持手势缩放移动等-开放旋转缩放导出等API,实现自定义布局"></t-card>
+		<t-col main-class="h-1000 tdr">
+			<t-crop ref='crop' src="/static/crop.jpg" main-class="bg-#000"></t-crop>
+		</t-col>
+		<t-button type="p" text-class="f">菜单自定义开放旋转缩放导出等API,实现自定义布局更灵活的布局</t-button>
+		<t-row main-class="p-30 mt-30 tdr tdb">
+			<t-button main-class="mr-30" type="primary" size='mini' @click="save">保存</t-button>
+			<t-button main-class="mr-30" type="primary" size='mini' @click="rotate">旋转</t-button>
+			<t-button main-class="mr-30" type="primary" size='mini' @click="zoomIn">放大</t-button>
+			<t-button main-class="mr-30" type="primary" size='mini' @click="zoomOut">缩小</t-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script setup>
+	const crop = ref<TCropComponentPublicInstance | null>(null)
+	function save() {
+		const ins = crop.value as TCropComponentPublicInstance
+		ins.takeSnapshot().then((res : string) => {
+			uni.previewImage({ urls: [res] })
+		})
+	}
+	function rotate() {
+		const ins = crop.value as TCropComponentPublicInstance
+		ins.rotate()
+	}
+	function zoomIn() {
+		const ins = crop.value as TCropComponentPublicInstance
+		ins.zoom(0.01)
+	}
+	function zoomOut() {
+		const ins = crop.value as TCropComponentPublicInstance
+		ins.zoom(-0.01)
+	}
+</script>

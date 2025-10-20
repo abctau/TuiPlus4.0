@@ -1,0 +1,25 @@
+export class TuiDebounce {
+	private timer = 0
+	private flag = false
+	debounce(func : () => void, wait : number = 500) : void {
+		clearTimeout(this.timer)
+		this.timer = setTimeout(() => {
+			func()
+			clearTimeout(this.timer)
+			this.timer = 0
+		}, wait)
+	}
+	throttle(func : () => void, wait : number = 500) : void {
+		if (!this.flag) {
+			func()
+			this.flag = true
+			clearTimeout(this.timer)
+			this.timer = setTimeout(() => {
+				this.flag = false
+			}, wait)
+		}
+	}
+	clear() {
+		clearTimeout(this.timer)
+	}
+}

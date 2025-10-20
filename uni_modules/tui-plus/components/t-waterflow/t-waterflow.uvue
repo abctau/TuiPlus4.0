@@ -1,0 +1,243 @@
+<template>
+	<!-- #ifdef APP-ANDROID || APP-IOS -->
+	<waterflow :cross-axis-count="crossAxisCount" :cross-axis-gap="crossAxisGap" :main-axis-gap="mainAxisGap"
+		:style="waterflowStyles" :padding="padding" :associative-container="associativeContainer" :bounces="bounces"
+		:upper-threshold="upperThreshold" :lower-threshold="lowerThreshold" :scroll-top="scrollTop"
+		:scroll-into-view="scrollIntoView" :scroll-with-animation="scrollWithAnimation"
+		:refresher-enabled="refresherEnabled" :refresher-threshold="refresherThreshold"
+		:refresher-max-drag-distance="refresherMaxDragDistance" refresher-default-style="none"
+		:refresher-background="refresherBackground" :refresher-triggered="refresherTriggereds"
+		:show-scrollbar="showScrollbar" :custom-nested-scroll="customNestedScroll" @refresherpulling="refresherpulling"
+		@refresherrefresh="refresherrefresh" @refresherrestore="refresherrestore" @refresherabort="refresherabort"
+		@scrolltoupper="scrolltoupper" @scrolltolower="scrolltolower" @scroll="scroll" @scrollend="scrollend">
+		<slot></slot>
+		<flow-item slot="refresher" v-if="refresherEnabled" type=2 :style="refresherStyle">
+			<t-refresher v-bind="extendsAttrs" :state="refresherState"></t-refresher>
+		</flow-item>
+		<flow-item slot="load-more" v-if="loadmore" type=6 :style="loadmoreStyle">
+			<t-loadmore v-bind="extendsAttrs" main-class="" :status="loadmoreStatus" :line="false"></t-loadmore>
+		</flow-item>
+	</waterflow>
+	<!-- #endif -->
+	<!-- #ifndef APP-ANDROID || APP-IOS -->
+	<t-scroll direction="vertical" :associative-container="associativeContainer" :bounces="bounces"
+		ref="waterflowscrollins" :style="waterflowStyles" :upper-threshold="upperThreshold"
+		:lower-threshold="lowerThreshold" :scroll-top="scrollTop" :scroll-into-view="scrollIntoView"
+		:scroll-with-animation="scrollWithAnimation" :refresher-enabled="refresherEnabled"
+		:refresher-threshold="refresherThreshold" :refresher-max-drag-distance="refresherMaxDragDistance"
+		refresher-default-style="none" :refresher-background="refresherBackground"
+		:refresher-triggered="refresherTriggered" :show-scrollbar="showScrollbar"
+		:custom-nested-scroll="customNestedScroll" @refresherpulling="refresherpulling" :loadmore="loadmore"
+		:loadmoreBoxClass="loadmoreBoxClass" :refresherBoxClass="refresherBoxClass" @refresherrefresh="refresherrefresh"
+		@refresherrestore="refresherrestore" @refresherabort="refresherabort" @scrolltoupper="scrolltoupper"
+		@scrolltolower="scrolltolower" @scroll="scroll" @scrollend="scrollend">
+		<t-animation :main-class="contentStyle" ref="waterfallins" @initFinished="initFinished">
+			<slot v-if="waterflowWidth>0"></slot>
+		</t-animation>
+	</t-scroll>
+	<!-- #endif -->
+</template>
+
+<script setup>
+	import { useStyle } from '../../common/model/style'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface WaterflowProps extends CommonProps {
+		crossAxisCount : number;
+		mainAxisGap : number;
+		crossAxisGap : number;
+		padding : number[];
+		associativeContainer : string;
+		bounces : boolean;
+		upperThreshold : number;
+		lowerThreshold : number;
+		scrollTop : number;
+		showScrollbar : boolean;
+		scrollIntoView : string;
+		scrollWithAnimation : boolean;
+		refresherEnabled : boolean;
+		refresherThreshold : number;
+		refresherMaxDragDistance : number;
+		refresherBackground : string;
+		refresherTriggered : boolean;
+		customNestedScroll : boolean;
+		loadmore : boolean;
+		loadmoreBoxClass : string;
+		refresherBoxClass : string;
+	}
+	const props = withDefaults(defineProps<WaterflowProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		crossAxisCount: 2,
+		mainAxisGap: 10,
+		crossAxisGap: 10,
+		padding: [10, 10, 10, 10] as number[],
+		associativeContainer: '',
+		bounces: true,
+		upperThreshold: 50,
+		lowerThreshold: 50,
+		scrollTop: 0,
+		showScrollbar: false,
+		scrollIntoView: '',
+		scrollWithAnimation: true,
+		refresherEnabled: false,
+		refresherThreshold: 45,
+		refresherMaxDragDistance: 80,
+		refresherBackground: 'transparent',
+		refresherTriggered: false,
+		customNestedScroll: false,
+		loadmore: false,
+		loadmoreBoxClass: '',
+		refresherBoxClass: ''
+	});
+	const _scrollTop = ref<number>(props.scrollTop)
+	let childTop = ref<number>(props.scrollTop)
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(["scroll", "scrollend", "refresherpulling", "refresherrefresh", "refresherrestore", "refresherabort", "scrolltoupper", "scrolltolower"])
+	const waterflowStyles = computed(() : string => {
+		return useStyle(props.mainClass)
+	})
+	// #ifdef APP-ANDROID || APP-IOS
+	const loadmoreStatus = ref(1);
+	const refresherState = ref(0);
+	const loadmoreStyle = computed(() : string => useStyle(`h-60px w-100% fc ${props.loadmoreBoxClass}`));
+	const refresherStyle = computed(() : string => useStyle(`h-60px w-100% fc ${props.refresherBoxClass}`));
+	const refresherTriggereds = ref<boolean>(props.refresherTriggered)
+	// #endif
+	// #ifndef APP-ANDROID || APP-IOS
+	const waterflowscrollins = ref<ComponentPublicInstance | null>(null)
+	const waterfallins = ref<TAnimationComponentPublicInstance | null>(null)
+	const waterflowWidth = ref<number>(0)
+	const waterflowItemHeights = ref<number[]>([])
+	for (let i = 0; i < props.crossAxisCount; i++) {
+		waterflowItemHeights.value.push(props.padding[0])
+	}
+	const contentHeight = computed(() : string => {
+		const maxValue = Math.min(...waterflowItemHeights.value);
+		return useStyle(`h-${Math.floor(maxValue)}px`)
+	})
+	const contentStyle = computed(() : string => {
+		const p : number[] = props.padding
+		return `dr p-${p[0]}px,${p[1]}px,${p[2]}px,${p[3]}px`
+	})
+
+	provide('crossAxisCount', toRef<number>(() : number => props.crossAxisCount))
+	provide('mainAxisGap', toRef<number>(() : number => props.mainAxisGap))
+	provide('crossAxisGap', toRef<number>(() : number => props.crossAxisGap))
+	provide('padding', toRef<number[]>(() : number[] => props.padding))
+	provide('waterflowWidth', waterflowWidth)
+	provide('waterflowItemHeights', waterflowItemHeights)
+	provide('childTop', childTop)
+	provide('updateHeight', () => {
+		const maxValue = Math.max(...waterflowItemHeights.value);
+		const ins = waterfallins.value!
+		const ani = ins.createAnimation({})
+		ani.height(maxValue + props.padding[2] + 'px').step({ duration: 0 })
+		ins.exports()
+	})
+
+	function initFinished(rect : NodeInfo) {
+		waterflowWidth.value = rect.width!
+	}
+
+	// #endif
+	function scroll(e : ScrollEvent) {
+		childTop.value = e.detail.scrollTop
+		emit('scroll', e)
+	}
+
+	function scrollend(e : ScrollEvent) {
+		emit('scrollend', e)
+	}
+
+	function refresherpulling(e : RefresherEvent) {
+		// #ifdef APP-ANDROID || APP-IOS
+		refresherState.value = 1;
+		// #endif
+		emit('refresherpulling', e)
+	}
+
+	function refresherrefresh(e : RefresherEvent) {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowItemHeights.value = [props.padding[0], props.padding[1], props.padding[2], props.padding[3]]
+		// #endif
+		// #ifdef APP-ANDROID || APP-IOS
+		refresherState.value = 2;
+		refresherTriggereds.value = true;
+		// #endif
+		emit('refresherrefresh', e)
+	}
+	function refresherrestore(e : RefresherEvent) {
+		// #ifdef APP-ANDROID || APP-IOS
+		refresherState.value = 1;
+		// #endif
+		emit('refresherrestore', e)
+	}
+
+	function refresherabort(e : RefresherEvent) {
+		emit('refresherabort', e)
+	}
+
+	function scrolltoupper(e : ScrollToUpperEvent) {
+		emit('scrolltoupper', e)
+	}
+
+	function scrolltolower(e : ScrollToLowerEvent) {
+		// #ifdef APP-ANDROID || APP-IOS
+		if (loadmoreStatus.value != 3) {
+			loadmoreStatus.value = 2;
+			emit('scrolltolower', e);
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS
+		emit('scrolltolower', e)
+		// #endif
+	}
+	const waterflowMainStyles = computed(() : string => {
+		return `f ${props.mainClass}`
+	})
+	const setLoadmore = (status : number) => {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowscrollins.value?.$callMethod('setLoadmore', status)
+		// #endif
+		// #ifdef APP-ANDROID || APP-IOS
+		loadmoreStatus.value = status;
+		// #endif
+	};
+	const showMask = () => {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowscrollins.value?.$callMethod('showMask')
+		// #endif
+	};
+
+	const hideMask = () => {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowscrollins.value?.$callMethod('hideMask')
+		// #endif
+	};
+
+	const closerefresher = () => {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowscrollins.value?.$callMethod('closerefresher')
+		// #endif
+		// #ifdef APP-ANDROID || APP-IOS
+		refresherTriggereds.value = false
+		// #endif
+	};
+	const getInfo = (callback : (e : NodeInfo) => void) => {
+		// #ifndef APP-ANDROID || APP-IOS
+		waterflowscrollins.value?.$callMethod('getInfo', callback)
+		// #endif
+	};
+	defineExpose({
+		getInfo,
+		setLoadmore,
+		closerefresher
+	})
+</script>

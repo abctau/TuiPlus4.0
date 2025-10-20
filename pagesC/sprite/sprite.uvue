@@ -1,0 +1,52 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb mb-30" title="Sprite 序列帖动画" sub-title="Canvas绘制，支持播放、暂停等控制功能，实现动画交互展示"></t-card>
+		<t-section main-class="tdr tdb mb-30" title="自动播放"></t-section>
+		<t-sprite main-class="twh-400 tdr tdb mb-30 ml-175" :frames="frames" :autoplay="true" :loop="true"></t-sprite>
+		<t-section title="手动控制" main-class="tdr tdb mtb-30"></t-section>
+		<t-sprite main-class="twh-400 tdr tdb ml-175" :frames="frames" ref="spriteins"></t-sprite>
+		<t-col main-class="mt-60">
+			<t-button type="p" main-class="mb-30" @click="play">播放</t-button>
+			<t-button type="p" main-class="mb-30" @click="pause">暂停</t-button>
+			<t-button type="p" main-class="mb-30" @click="resume">继续</t-button>
+			<t-button type="p" main-class="mb-30" @click="stops">停止</t-button>
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	const spriteins = ref<ComponentPublicInstance | null>(null);
+	const arr : string[] = [];
+	for (let i = 0; i < 54; i++) {
+		arr.push(`/pagesC/static/tinified/${i}.png`);
+	}
+	const frames = ref(arr);
+
+	// 播放方法
+	function play() {
+		if (spriteins.value != null) {
+			spriteins.value.$callMethod('play');
+		}
+	}
+
+	// 暂停方法
+	function pause() {
+		if (spriteins.value != null) {
+			spriteins.value.$callMethod('pause');
+		}
+	}
+
+	// 继续方法
+	function resume() {
+		if (spriteins.value != null) {
+			spriteins.value.$callMethod('resume');
+		}
+	}
+
+	// 停止方法
+	function stops() {
+		if (spriteins.value != null) {
+			spriteins.value.$callMethod('stops');
+		}
+	}
+</script>

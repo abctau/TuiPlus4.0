@@ -1,0 +1,47 @@
+<template>
+	<t-page title="格式转换">
+		<t-card title="格式转换" sub-title="支持金额,大小写,时间格式等字符串转换" main-class="mlrt-30"></t-card>
+		<introduction title="priceFormat(金额格式化)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">priceFormat('123456.78', 2, ',', '￥')=>{{priceFormatResult}}</t-text>
+		</introduction>
+		<introduction title="sensitiveWordFilter(敏感词过滤)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">sensitiveWordFilter('张三丰', '*')=>{{sensitiveWordFilterResult}}</t-text>
+		</introduction>
+		<introduction title="upperMoney(大写金额)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">upperMoney('123456.78')=>{{upperMoneyResult}}</t-text>
+		</introduction>
+		<introduction title="fmtMoney(金额格式化)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">fmtMoney('123456.78', false) => {{fmtMoneyResult}}</t-text>
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">fmtMoney('123456.78', true) => {{fmtMoneyResult2}}</t-text>
+		</introduction>
+		<introduction title="diffdate(时间差)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">diffdate(1636027200000) => {{diffdateResult}}</t-text>
+		</introduction>
+		<introduction title="timeToDate(时间戳转日期时分秒)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">timeToDate(1636027200000) => {{timeToDateResult}}</t-text>
+		</introduction>
+		<introduction title="timeFormat(时间格式化)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">timeFormat('2022-01-01') => {{timeFormatResult}}</t-text>
+		</introduction>
+		<introduction title="parseTimeData(时间数据解析)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">parseTimeData(1636027200000) => {{parseTimeDataResult}}</t-text>
+		</introduction>
+		<introduction title="objTimeData(时间数据对象)">
+				<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">objTimeData(1636027200000) => {{objTimeDataResult}}</t-text>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+	import { priceFormat, sensitiveWordFilter, upperMoney, fmtMoney, diffdate, timeToDate, dateFormat, timeFormat, parseTimeData, objTimeData} from '@/uni_modules/tui-plus'
+	const priceFormatResult = priceFormat('123456.78', 2, ',', '￥')
+	const sensitiveWordFilterResult = sensitiveWordFilter('张三丰', '*');
+	const upperMoneyResult = upperMoney('123456.78');
+	const fmtMoneyResult = fmtMoney('123456.78', false);
+	const fmtMoneyResult2 = fmtMoney('123456.78', true);
+	const diffdateResult = diffdate(1636027200000);
+	const timeToDateResult = timeToDate(1636027200000);
+	const timeFormatResult = timeFormat('2022-01-01');
+	const parseTimeDataResult = parseTimeData(1636027200000);
+	const objTimeDataResult = objTimeData(1636027200000);
+</script>

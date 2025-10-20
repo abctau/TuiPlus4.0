@@ -1,0 +1,44 @@
+export function HexDecode(a : string) : number[] {
+	let hex : string = "0123456789ABCDEF";
+	const ignore = "\n\r\t\u00A0\u2028\u2029";
+	const decoder = new Map<string, number>()
+	for (let i = 0; i < 16; ++i) {
+		decoder.set(hex.charAt(i), i)
+	}
+	hex = hex.toLowerCase();
+	for (let i = 10; i < 16; ++i) {
+		decoder.set(hex.charAt(i), i)
+	}
+	for (let i = 0; i < ignore.length; ++i) {
+		decoder.set(ignore.charAt(i), -1)
+	}
+	const out : number[] = [];
+	let bits : number = 0;
+	let char_count = 0;
+	for (let i = 0; i < a.length; ++i) {
+		const c : string = a.charAt(i);
+		if (c == "=") {
+			break;
+		}
+		let cc : number | null = decoder.get(c);
+		if (cc == -1) {
+			continue;
+		}
+		if (cc == null) {
+			throw new Error("Illegal character at offset " + i);
+		}
+		bits |= cc!;
+		if (++char_count >= 2) {
+			out[out.length] = bits;
+			bits = 0;
+			char_count = 0;
+		}
+		else {
+			bits <<= 4;
+		}
+	}
+	if (char_count > 0) {
+		throw new Error("Hex encoding incomplete: 4 bits missing");
+	}
+	return out;
+}

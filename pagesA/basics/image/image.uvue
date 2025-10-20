@@ -1,0 +1,20 @@
+<template>
+	<t-page main-class="p-30">
+		<t-section main-class="mb-30" title="基础功能"></t-section>
+		<t-image src="/pagesA/static/image/D1.jpg" main-class="h-350 w-100% tdr mb-30" :fade-show="true"></t-image>
+		<t-section main-class="mb-30" title="开启预览"></t-section>
+		<t-image src="/pagesA/static/image/D2.jpg" main-class="h-350 w-100% tdr mb-30" :preview="true"
+			:loading="false"></t-image>
+		<t-section main-class="mb-30" title="loading属性配置"></t-section>
+		<t-image src="/pagesA/static/image/D1.jpg" main-class="h-350 w-100% tdr mb-30"
+			:loadingAttrs="{name:'setting',type:'p',size:'l','mainClass':'s-200'}" :fade-show="true"></t-image>
+		<t-section main-class="mb-30" title="加载错误占位图"></t-section>
+		<t-image main-class="twh-350 tdr" src="https://ll-yundie-xyz/pagesA/static/loginbg1.jpeg" :placeholder="true"></t-image>
+		<t-section main-class="mb-30" title="自定义加载错误占位图"></t-section>
+		<t-image main-class="twh-350 tdr" src="https://ll-yundie-xyz/pagesA/static/loginbg1.jpeg" :placeholder="true"
+			placeholder-image="/pagesA/static/image/D2.jpg"></t-image>
+	</t-page>
+</template>
+<script setup>
+
+</script>

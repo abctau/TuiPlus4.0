@@ -1,0 +1,170 @@
+<template>
+	<t-canvas v-bind="extendsAttrs" @initFinished="canvasInit"></t-canvas>
+</template>
+<script setup>
+	/**
+	 * Barrage 弹幕
+	 * @date 2025-05-31 12:01:51
+	 * @author TanYuan
+	 * @description 高性能canvas绘制，减少DOM渲染，在页面中实现滚动文字效果，让内容展示更加生动有趣。用户可以自定义弹幕的样式、速度和内容，适用于直播、互动活动等场景，提升用户体验和互动性。
+	 * @example /pagesA/layout/barrage/barrage
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-barrage.html
+	 * @example /pagesA/layout/barrage/barrage
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} trackHeight 弹幕轨道的高度(默认：30)
+	 */
+
+	import { TuiRequestAnimationFrame, TuiCancelAnimationFrame } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface BarageProps extends CommonProps {
+		trackHeight : number
+	}
+	const props = withDefaults(defineProps<BarageProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		trackHeight: 30
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	class Danmu {
+		text : string
+		x : number
+		y : number
+		speed : number
+		fontSize : number
+		ctx : CanvasRenderingContext2D
+		constructor(text : string, x : number, y : number, _fontSize : number, speed : number, _ctx : CanvasRenderingContext2D) {
+			this.text = text;
+			this.x = x;
+			this.y = y;
+			this.speed = speed;
+			this.ctx = _ctx
+			this.fontSize = _fontSize
+		}
+
+		update() {
+			this.x -= this.speed;
+		}
+		draw() {
+			this.ctx.font = `${this.fontSize}px sans-serif`;
+			this.ctx.fillStyle = 'white';
+			this.ctx.fillText(this.text, this.x, this.y + 10);
+		}
+	}
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null)
+	const tracks = ref<Danmu[][]>([])
+	const trackCount = ref(0)
+	const timer = ref(0)
+	function measureText(text : string, fontSize : number) : number {
+		let width : number = 0;
+		let textArr : string[] = text.split('');
+		for (let i = 0; i < textArr.length; i++) {
+			let item = textArr[i];
+			if (/[a-zA-Z]/.test(item)) {
+				width += 7;
+			} else if (/[0-9]/.test(item)) {
+				width += 5.5;
+			} else if (/\./.test(item)) {
+				width += 2.7;
+			} else if (/-/.test(item)) {
+				width += 3.25;
+			} else if (/:/.test(item)) {
+				width += 2.5;
+			} else if (/[\u4e00-\u9fa5]/.test(item)) {
+				width += 10;
+			} else if (/\(|\)/.test(item)) {
+				width += 3.73;
+			} else if (/\s/.test(item)) {
+				width += 2.5;
+			} else if (/%/.test(item)) {
+				width += 8;
+			} else {
+				width += 10;
+			}
+		}
+		return width * fontSize / 10;
+	}
+	function animate() {
+		const ctx = canvasCtx.value!
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		ctx.clearRect(0, 0, w, h); // 清除画布
+		tracks.value.forEach((track : Danmu[]) => {
+			track.forEach((danmu : Danmu, index : number) => {
+				if (danmu.x < -measureText(danmu.text, 16)) {
+					track.splice(index, 1); // 弹幕移出屏幕后删除
+				} else {
+					danmu.update(); // 更新弹幕位置
+					danmu.draw(); // 绘制弹幕
+				}
+			});
+		});
+		TuiCancelAnimationFrame(timer.value)
+		timer.value = TuiRequestAnimationFrame(() => {
+			animate()
+		})
+	};
+	function canvasInit(ctx : CanvasContext) {
+		canvasCtx.value = ctx.getContext('2d')
+		trackCount.value = Math.floor(canvasCtx.value!.canvas.offsetHeight / props.trackHeight)
+		for (let i = 0; i < trackCount.value; i++) {
+			tracks.value.push([]);
+		}
+		animate();
+	}
+	function findAvailableTrack(width : number) : number {
+		const ctx = canvasCtx.value!
+		const w = ctx.canvas.offsetWidth
+		for (let i = 0; i < tracks.value.length; i++) {
+			const track : Danmu[] = tracks.value[i];
+			if (track.length == 0 || track.every(danmu => danmu.x + measureText(danmu.text, 16) < w - width)) {
+				return i;
+			}
+		}
+		return -1; // 没有可用轨道
+	}
+	function createDanmu(text : string, fontSize : number, speed : number) {
+		const ctx = canvasCtx.value!
+		const danmuWidth = measureText(text, 16)
+		let trackIndex = findAvailableTrack(danmuWidth);
+		const w = ctx.canvas.offsetWidth
+		if (trackIndex != -1) {
+			const y = trackIndex * props.trackHeight + props.trackHeight / 2; // 弹幕的垂直位置
+			const danmu = new Danmu(text, w, y, fontSize, speed, ctx);
+			tracks.value[trackIndex].push(danmu);
+		}
+	}
+	onUnmounted(() => {
+		TuiCancelAnimationFrame(timer.value)
+	})
+	defineExpose({
+		createDanmu
+	})
+</script>

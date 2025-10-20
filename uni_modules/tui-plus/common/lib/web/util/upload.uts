@@ -1,0 +1,42 @@
+import SparkMD5 from './spark-md5.js'
+export function getFileDigest(file) : Promise<string> {
+	const calculate = () : Promise<string> => {
+		return new Promise((
+			resolve : (res : string) => void,
+			reject : (_ : UniError) => void
+		) => {
+			let fileReader = new FileReader(),
+				blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice,
+				chunkSize = 2097152,
+				chunks = Math.ceil(file.size / chunkSize),
+				currentChunk = 0,
+				spark = new SparkMD5();
+			fileReader.onload = function (e) {
+				spark.appendBinary(e.target.result); // append binary string  
+				currentChunk++;
+
+				if (currentChunk < chunks) {
+					loadNext();
+				} else {
+					resolve(spark.end())
+				}
+			};
+
+			function loadNext() {
+				var start = currentChunk * chunkSize,
+					end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+
+				fileReader.readAsBinaryString(blobSlice.call(file, start, end));
+			};
+			loadNext();
+		});
+	}
+	return new Promise((
+		resolve : (res : string) => void,
+		reject : (_ : UniError) => void
+	) => {
+		calculate().then(resp => {
+			resolve(resp)
+		})
+	})
+}

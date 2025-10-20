@@ -1,0 +1,29 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="tdr tdb mb-30" title='AsyncHeight' subTitle="不同区域，相同分组的高度会保持同步。"></t-card>
+		<t-view main-class="tdr tdb mb-30">
+			<t-async-height group="group1" main-class="b-1px,s,#ccc">
+				<text>分组1</text>
+			</t-async-height>
+			<t-async-height group="group2" main-class="b-1px,s,#ccc">
+				<text>分组2</text>
+				<text>分组2</text>
+			</t-async-height>
+		</t-view>
+		<t-view main-class="tdr tdb mb-30">
+			<t-async-height group="group1" main-class="b-1px,s,#ccc">
+				<text>分组1</text>
+				<text>相同的分组高度会保持一致</text>
+			</t-async-height>
+			<t-async-height group="group2" main-class="b-1px,s,#ccc">
+				<text>分组2</text>
+				<text>分组2</text>
+				<text>分组2</text>
+				<text>分组2</text>
+				<text>分组2</text>
+				<text>分组2</text>
+				<text>分组2</text>
+			</t-async-height>
+		</t-view>
+	</t-page>
+</template>

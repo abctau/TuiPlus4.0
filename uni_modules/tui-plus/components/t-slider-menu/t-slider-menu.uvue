@@ -1,0 +1,161 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`h-500 dr ${mainClass}`" @initFinished="initFinished">
+		<t-list main-class="h-100% tpg" :scroll-top="contentScrollTop" @scrollend="scroll" :refresherEnabled="false"
+			:loadmore="false">
+			<template v-for="(item,index) in list" :key="index">
+				<t-list-item v-if="index<renderIndex">
+					<t-view main-class="ml-180" @initFinished="contentinitFinished">
+						<slot :item="item" :index="index"></slot>
+					</t-view>
+				</t-list-item>
+			</template>
+		</t-list>
+		<t-virtual-scroll main-class="da w-180 dtl-0 h-100% tpg" :list="tempLlist" :row-height="virtualRowHeight"
+			:scroll-top="menuScrollTop">
+			<template v-slot:default="{item,index}">
+				<t-view :main-class="`w-100% h-${virtualRowHeight}px`" @click="selectMenus(index as number)"
+					:hover="true">
+					<t-row :main-class="`h-${virtualRowHeight}px faic ${isactive(`${index}`)?'bg-#fff':'tpg'}`">
+						<t-view
+							:main-class="`w-14 mr-15 h-40% tdb-p r-0,8,8,0 ${isactive(`${index}`)?'o-1':'o-0'}`"></t-view>
+						<t-text>{{(item as UTSJSONObject)[titleKey]}}</t-text>
+					</t-row>
+				</t-view>
+			</template>
+		</t-virtual-scroll>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * SliderMenu 侧边分类
+	 * @date 2025-05-31 12:07:00
+	 * @author TanYuan
+	 * @description 布局灵活，适配任何数据格式，组件内部使用list-view内存回收无需担心数据太多的性能问题,采用了逐帧渲染技术,解决listview首次加载慢的问题,左侧列表使用的虚拟滚动技术
+	 * @example /pagesA/layout/slider-menu/slider-menu
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-slider-menu.html
+	 * @example /pagesA/layout/slider-menu/slider-menu
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any[]} list 数据源(默认：[])
+	 * @property {Number} virtualRowHeight 左侧菜单的行高(默认：45)
+	 * @property {Number} current 当前滚动位置的索引(默认：1)
+	 * @property {String} titleKey 标题显示字段的key(默认：title)
+	 * @event {Function} change 滚动位置发生变体时触发 返回滚动位置项的索引
+	 */
+	import { TuiDebounce } from '../../common/model/debounce'
+	import { TuiRequestAnimationFrame } from '../../common/model/util'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface SliderMenuProps extends CommonProps {
+		list : any[]
+		virtualRowHeight : number
+		current : number
+		titleKey : string
+	}
+	const props = withDefaults(defineProps<SliderMenuProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		list: [] as any[],
+		virtualRowHeight: 45,
+		current: 0,
+		titleKey: 'title'
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change'])
+
+	defineSlots<{
+		left : { item : any, index : number }
+		default : { item : any, index : number }
+	}>()
+
+	const cur = ref<number>(0);
+	const boxHeight = ref<number>(0);
+	const boxTop = ref<number>(0);
+	const menuScrollTop = ref<number>(0);
+	const contentScrollTop = ref<number>(0);
+	const contentRectTops = ref<number[]>([]);
+	const deb = new TuiDebounce();
+	const renderIndex = ref<number>(0);
+	function isactive(index : string) {
+		return index == `${cur.value}`
+	}
+	function animationFrame() {
+		renderIndex.value++
+		if (renderIndex.value < props.list.length) TuiRequestAnimationFrame(() => {
+			animationFrame()
+		})
+	}
+	function scroll(e : UniScrollEvent) {
+		const t = e.detail.scrollTop
+		const f = contentRectTops.value.findIndex((i) => i > t)
+		if (f > -1) {
+			cur.value = f
+			deb.debounce(() => {
+				emit('change', f)
+				menuScrollTop.value = f * props.virtualRowHeight - boxHeight.value / 2 + props.virtualRowHeight / 2
+			}, 50)
+		}
+	}
+	function contentinitFinished(rect : NodeInfo) {
+		const t = rect.top!
+		contentRectTops.value.push(Math.floor(t * 100) / 100)
+	}
+	function initFinished(rect : NodeInfo) {
+		boxHeight.value = rect.height!
+		boxTop.value = rect.top!
+	}
+	function selectMenus(e : number) {
+		cur.value = e
+		const st = contentRectTops.value[cur.value]
+		contentScrollTop.value = st - boxTop.value
+		menuScrollTop.value = e * props.virtualRowHeight - boxHeight.value / 2 + props.virtualRowHeight / 2
+		emit('change', cur.value)
+	}
+
+	watch(() : any[] => props.list, (e : any[]) => {
+		animationFrame()
+	}, { immediate: true })
+
+	watch(() : number => props.current, (e : number) => {
+		cur.value = e
+	}, { immediate: true })
+
+	onMounted(() => {
+		nextTick(() => {
+			animationFrame()
+		})
+	})
+	onUnmounted(() => {
+		deb.clear()
+	})
+
+	const tempLlist = computed(() : UTSJSONObject[] => {
+		return JSON.parse<UTSJSONObject[]>(JSON.stringify(props.list)) as UTSJSONObject[]
+	})
+</script>

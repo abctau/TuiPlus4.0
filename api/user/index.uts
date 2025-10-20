@@ -1,0 +1,14 @@
+import axios from '../../axios/axios.uts'
+import { loginPasswordResponse, signResponse } from './interface.uts'
+
+export function updatePerson(data : any = {}, cache : boolean = false) : Promise<UTSJSONObject> {
+	return axios.post('updateUsers', data, cache)
+}
+
+export function loginPassword(data : any = {}, cache : boolean = false) : Promise<loginPasswordResponse> {
+	return axios.post<loginPasswordResponse>('signature', data, cache)
+}
+
+export function sign(data : any = {}, cache : boolean = false) : Promise<signResponse> {
+	return axios.post<signResponse>('sign', data, cache)
+}

@@ -1,0 +1,403 @@
+export function parseColor(color : string) : string {
+	const colors = {
+		'white': '#ffffff',
+		'black': '#000000',
+		'red': '#ff0000',
+		'green': '#00ff00',
+		'blue': '#0000ff',
+		'yellow': '#ffff00',
+		'cyan': '#00ffff',
+		'magenta': '#ff00ff',
+		'lime': '#00ff00',
+		'maroon': '#800000',
+		'olive': '#808000',
+		'silver': '#c0c0c0',
+		'teal': '#008080',
+	}
+
+	if (colors[color] == null) {
+		return color
+	} else {
+		return colors[color] as string
+	}
+}
+/**
+ * hexToRgba 修改透明度
+ *
+ * @param {String} hex 颜色值
+ * @param {Number} alpha 透明度
+ * @return String
+ */
+export function hexToRgba(hex : string, opacity : number = 0.5) : string {
+	let _hex = hex
+	if (hex.indexOf('#') == -1) {
+		_hex = parseColor(hex)
+	}
+	const hexVal = _hex.replace(';', '')
+	const hexArr = hexVal.split(':')
+	const toRgba = (hexNumber : string) : string => {
+		return 'rgba(' + parseInt('0x' + hexNumber.slice(1, 3)) + ',' + parseInt('0x' + hexNumber.slice(3, 5)) + ',' + parseInt('0x' + hexNumber.slice(5, 7)) + ',' + opacity + ')'
+	}
+	if (hexArr.length > 1) {
+		return `${hexArr[0]}: ${toRgba(hexArr[1])}; `
+	} else {
+		return toRgba(`${hexArr[0]} `)
+	}
+}
+
+export function rgbaToHex(rgbaString : string) : string {
+	// 正则表达式用于匹配rgba颜色格式
+	const rgbaRegex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d*(?:\.\d+)?)\)$/;
+
+	// 使用正则表达式匹配颜色字符串
+	const match = rgbaString.match(rgbaRegex);
+
+	// 如果匹配成功，转换每个颜色组件为十六进制
+	if (match?.length == 5) {
+		const newMathch = [...match.slice(1)] as string[]
+		const rgbarr = newMathch.map((x : string, index : number) : string => {
+			if (index == 3) {
+				return x == '1' ? '' : Math.floor(parseFloat(x) * 255).toString(16).padStart(2, '0')
+			} else {
+				return parseInt(x).toString(16).padStart(2, '0')
+			}
+		})
+		return '#' + rgbarr.join('').toUpperCase()
+	}
+
+	// 如果匹配失败，返回空字符串或错误信息
+	return '';
+}
+
+/**
+ * rgbToHex 
+ * @param {String} rgb 颜色值
+ * @return String
+ */
+export function rgbToHex(rgbString : string) : string {
+	// 正则表达式用于匹配rgb颜色格式
+	const rgbRegex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+	// 使用正则表达式匹配颜色字符串
+	const match = rgbString.match(rgbRegex);
+	// 如果匹配成功，转换每个颜色组件为十六进制
+	if (match?.length == 4) {
+		const newMathch = [...match.slice(1)] as string[]
+		const rgbarr = newMathch.map((x : string) : string => parseInt(x).toString(16).padStart(2, '0'))
+		return '#' + rgbarr.join('').toUpperCase()
+	}
+
+	// 如果匹配失败，返回空字符串或错误信息
+	return '';
+}
+
+/**
+* 十六进制转换为rgb或rgba,返回的格式为 rgba（255，255，255，0.5）字符串
+* sHex为传入的十六进制的色值
+* alpha为rgba的透明度
+*/
+export function colorToRgba(color : string, alpha : number) : string {
+	color = rgbToHex(color)
+
+	// 十六进制颜色值的正则表达式
+	const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/
+
+	// 16进制颜色转为RGB格式
+	let sColor = color.toLowerCase()
+	if (sColor != '' && reg.test(sColor)) {
+		if (sColor.length == 4) {
+			let sColorNew = '#'
+			for (let i = 1; i < 4; i += 1) {
+				sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1))
+			}
+			sColor = sColorNew
+		}
+
+		// 处理六位的颜色值
+		const sColorChange = [] as number[]
+		for (let i = 1; i < 7; i += 2) {
+			sColorChange.push(parseInt(`0x${sColor.slice(i, i + 2)}`))
+		}
+
+		return `rgba(${sColorChange.join(',')},${alpha})`
+	}
+
+	return sColor
+}
+
+/**
+ * 求两个颜色之间的渐变值
+ * @param {string} startColor 开始的颜色
+ * @param {string} endColor 结束的颜色
+ * @param {number} step 颜色等分的份额
+ * */
+export function colorGradient(startColor : string, endColor : string, step : number) : string[] {
+
+	let _hexToRgb = (sColor : string) : number[] => {
+		const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/
+		sColor = sColor.toLowerCase()
+		if (sColor != '' && reg.test(sColor)) {
+			if (sColor.length == 4) {
+				let sColorNew = '#'
+				for (let i = 1; i < 4; i += 1) {
+					sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1))
+				}
+				sColor = sColorNew
+			}
+
+			// 处理六位的颜色值
+			const sColorChange = [] as number[]
+			for (let i = 1; i < 7; i += 2) {
+				sColorChange.push(parseInt(`0x${sColor.slice(i, i + 2)}`))
+			}
+
+			return sColorChange
+		} if (/^(rgb|RGB)/.test(sColor)) {
+			const arr = sColor.replace(/(?:\(|\)|rgb|RGB)*/g, '').split(',')
+			return arr.map((val : string) : number => parseInt(val))
+		}
+
+		return []
+	}
+
+	// 转换为rgb数组模式
+	const startRGB = _hexToRgb(startColor)
+	const endRGB = _hexToRgb(endColor)
+
+	if (startRGB.length == 0 || endRGB.length == 0) {
+		return [startColor, endColor]
+	}
+
+	const startR = startRGB[0]
+	const startG = startRGB[1]
+	const startB = startRGB[2]
+	const endR = endRGB[0]
+	const endG = endRGB[1]
+	const endB = endRGB[2]
+
+	const sR = (endR - startR) / step // 总差值
+	const sG = (endG - startG) / step
+	const sB = (endB - startB) / step
+	const colorArr = [] as string[]
+	for (let i = 0; i < step; i++) {
+		// 计算每一步的hex值
+		let hex = rgbToHex(`rgb(${Math.round((sR * i + startR))},${Math.round((sG * i + startG))},${Math.round((sB
+			* i + startB))})`)
+		// 确保第一个颜色值为startColor的值
+		if (i == 0) hex = rgbToHex(startColor)
+		// 确保最后一个颜色值为endColor的值
+		if (i == step - 1) hex = rgbToHex(endColor)
+		colorArr.push(hex)
+	}
+
+	return colorArr
+}
+
+/**
+ * RGB颜色值转HSV颜色值
+ * @param r 红色
+ * @param g 绿色
+ * @param b 蓝色
+ * @returns HSV
+ * @example
+ * const rgbColor: RGBColor = { r: 0, g: 188, b: 121 };
+ * const hsvColor: HSVColor = rgb2hsv(rgbColor);
+ * console.log(hsvColor); // 输出：{ h: 159, s: 1.0, v: 0.74 }
+ */
+export function rgb2hsv(r : number, g : number, b : number) : number[] {
+	const r1 = r / 255;
+	const g1 = g / 255;
+	const b1 = b / 255;
+
+	const max = Math.max(r1, g1, b1);
+	const min = Math.min(r1, g1, b1);
+	let hue : number = 0;
+	let s : number;
+	const v = max;
+
+	const d = max - min;
+	s = max == 0 ? 0 : d / max;
+
+	if (max == min) {
+		hue = 0; // achromatic
+	} else {
+		switch (max) {
+			case r1:
+				hue = (g1 - b1) / d + (g1 < b1 ? 6 : 0);
+				break;
+			case g1:
+				hue = (b1 - r1) / d + 2;
+				break;
+			case b1:
+				hue = (r1 - g1) / d + 4;
+				break;
+		}
+		hue /= 6;
+	}
+	const h = hue * 360;
+	return [h, s, v];
+};
+
+/**
+ * HSV颜色值转RGB颜色值
+ * @param h [0, 360]
+ * @param s [0, 1]
+ * @param v [0, 1]
+ * @returns RGB
+ * @example
+ * const hsvColor: HSVColor = { h: 159, s: 1.0, v: 0.74 };
+ * const rgbColor: RGBColor = hsv2rgb(hsvColor);
+ * console.log(rgbColor); // 输出：{ r: 0, g: 189, b: 123 }
+ */
+export function hsv2rgb(h : number, s : number, v : number) : number[] {
+	const hue = h / 60;
+	const saturation = s;
+	const value = v;
+
+	const chroma = value * saturation;
+	const x = chroma * (1 - Math.abs((hue % 2) - 1));
+	const m = value - chroma;
+
+	let r = 0;
+	let g = 0;
+	let b = 0;
+
+	if (hue >= 0 && hue < 1) {
+		r = chroma;
+		g = x;
+		b = 0;
+	} else if (hue >= 1 && hue < 2) {
+		r = x;
+		g = chroma;
+		b = 0;
+	} else if (hue >= 2 && hue < 3) {
+		r = 0;
+		g = chroma;
+		b = x;
+	} else if (hue >= 3 && hue < 4) {
+		r = 0;
+		g = x;
+		b = chroma;
+	} else if (hue >= 4 && hue < 5) {
+		r = x;
+		g = 0;
+		b = chroma;
+	} else if (hue >= 5 && hue < 6) {
+		r = chroma;
+		g = 0;
+		b = x;
+	}
+
+	return [
+		Math.round((r + m) * 255),
+		Math.round((g + m) * 255),
+		Math.round((b + m) * 255)
+	]
+}
+
+export function RandomHexColor() : string {
+	let randomColor = Math.random().toString(16).substring(2, 8);
+	return '#' + randomColor;
+}
+
+function getChannelRange(pixels : number[][], channel : number) : number {
+	let min = 255;
+	let max = 0;
+
+	for (const pixel of pixels) {
+		const value = pixel[channel];
+		if (value < min) min = value;
+		if (value > max) max = value;
+	}
+
+	return max - min;
+}
+
+export function getPalette(pixels : number[], colorCount = 5, quality = 10) {
+	// 存储像素数组
+	const pixelArray : number[][] = [];
+
+	// 根据质量参数跳过一些像素
+	for (let i = 0; i < pixels.length; i += 4 * quality) {
+		const r : number = pixels[i];
+		const g : number = pixels[i + 1];
+		const b : number = pixels[i + 2];
+
+		// 忽略透明或接近透明的像素
+		if (pixels[i + 3] < 128) continue;
+
+		pixelArray.push([r, g, b]);
+	}
+
+	// 初始颜色桶包含所有像素
+	const buckets = [pixelArray];
+
+	// 切分颜色桶直到达到所需数量
+	while (buckets.length < colorCount) {
+		// 寻找下一个要切分的桶
+		let maxRange = 0;
+		let bucketToSplit : number[][] = [];
+		let splitChannel = 0;
+
+		for (const bucket of buckets) {
+			// 如果桶太小则跳过
+			if (bucket.length < 2) continue;
+
+			// 计算桶中各通道的范围
+			const rRange = getChannelRange(bucket, 0);
+			const gRange = getChannelRange(bucket, 1);
+			const bRange = getChannelRange(bucket, 2);
+
+			// 获取最大范围
+			const maxChannelRange = Math.max(rRange, gRange, bRange);
+
+			// 更新最大范围
+			if (maxChannelRange > maxRange) {
+				maxRange = maxChannelRange;
+				bucketToSplit = bucket;
+
+				// 确定要切分的通道
+				if (maxChannelRange == rRange) splitChannel = 0;
+				else if (maxChannelRange == gRange) splitChannel = 1;
+				else splitChannel = 2;
+			}
+		}
+
+		// 如果没有桶可以切分则退出
+		if (bucketToSplit.length > 0) break;
+
+		// 按通道值排序桶
+		bucketToSplit.sort((a, b) => a[splitChannel] - b[splitChannel]);
+
+		// 找到中位索引
+		const medianIndex = Math.floor(bucketToSplit.length / 2);
+
+		// 切分桶
+		const bucketIndex = buckets.indexOf(bucketToSplit);
+		buckets.splice(bucketIndex, 1);
+
+		buckets.push(bucketToSplit.slice(0, medianIndex));
+		buckets.push(bucketToSplit.slice(medianIndex));
+	}
+
+	// 计算每个桶的平均颜色
+	const palette : number[][] = [];
+	for (const bucket of buckets) {
+		if (bucket.length == 0) continue;
+
+		let rSum = 0, gSum = 0, bSum = 0;
+
+		for (const pixel of bucket) {
+			rSum += pixel[0];
+			gSum += pixel[1];
+			bSum += pixel[2];
+		}
+
+		const r = Math.round(rSum / bucket.length);
+		const g = Math.round(gSum / bucket.length);
+		const b = Math.round(bSum / bucket.length);
+
+		palette.push([r, g, b]);
+	}
+
+	return palette;
+}

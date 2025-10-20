@@ -1,0 +1,104 @@
+<template>
+	<t-page title="悬浮按钮" main-class="ov">
+		<t-card main-class='m-30' title="Fab 悬浮按钮" sub-title="动态的展开和收起子菜单，支持多种展开方向，如垂直、水平以及圆形扩散，支持自由拖拽"></t-card>
+		<t-fab type="p" main-class="dr-30 dt-74px" :state="false" direction='row-left' spacing="20">
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="apple-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="integral-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="account-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+		<t-fab type="w" main-class="dl-30 db-30" :state="true" direction='row-right' spacing="20">
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="apple-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="integral-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="account-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+		<t-fab type="s" main-class="dt-145px dl-30" :state="true" direction='column-bottom' spacing="20">
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="apple-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="integral-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="account-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+		<t-fab type="e" main-class="db-150 dr-30" :state="true" direction='column-top' spacing="20">
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="apple-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="integral-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="account-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+		<t-fab type="p" main-class="dl-350 dt-450" :state="true" direction='round' :startRtateDeg="160" spacing="20">
+			<t-fab-item>
+				<t-icon name="weixin-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+		<t-fab type="e" main-class="dl-350 dt-850" :state="true" direction='round' :startRtateDeg="160">
+			<t-fab-item>
+				<t-icon name="weixin-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="home" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="server-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="apple-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="integral-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+			<t-fab-item>
+				<t-icon name="account-fill" main-class="c-#fff"></t-icon>
+			</t-fab-item>
+		</t-fab>
+	</t-page>
+</template>

@@ -1,0 +1,113 @@
+<template>
+	<t-page title="分页" main-class='p-30'>
+		<t-card main-class="mb-30" title="Pagination 分页" sub-title="数据量大,数据分页加载.."></t-card>
+		<template v-if="area==1">
+			<t-section title="默认+全部功能开启+主题展示" main-class="mb-30"></t-section>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="normal" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="primary"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="error" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="warning"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="success"
+				:current="current"></t-pagination>
+		</template>
+		<template v-if="area==2">
+			<t-section title="图标模式" main-class="mb-30"></t-section>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="normal" mode="2"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="primary" mode="2"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="error" mode="2"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="warning" mode="2"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="success" mode="2"
+				:current="current"></t-pagination>
+		</template>
+		<template v-if="area==3">
+			<t-section title="禁用首页未页按钮" main-class="mb-30"></t-section>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="normal" mode="2" :showFirstButton="false"
+				:showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="primary" mode="2" :showFirstButton="false"
+				:showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="error" mode="2" :showFirstButton="false"
+				:showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="warning" mode="2" :showFirstButton="false"
+				:showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30" :total="total" type="success" mode="2" :showFirstButton="false"
+				:showLastButton="false" :current="current"></t-pagination>
+		</template>
+		<template v-if="area==4">
+			<t-section title="禁用上一页下一页按钮" main-class="mb-30"></t-section>
+			<t-pagination size="mini" main-class="mb-30-h.70" :total="total" type="normal" mode="2"
+				:showFirstButton="false" :showPreButton="false" :showNextButton="false" :showLastButton="false"
+				:current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30-h.70" :total="total" type="primary" mode="2"
+				:showFirstButton="false" :showLastButton="false" :current="current" :showPreButton="false"
+				:showNextButton="false"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30-h.70" :total="total" type="error" mode="2"
+				:showFirstButton="false" :showLastButton="false" :current="current" :showPreButton="false"
+				:showNextButton="false"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30-h.70" :total="total" type="warning" mode="2"
+				:showFirstButton="false" :showLastButton="false" :current="current" :showPreButton="false"
+				:showNextButton="false"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30-h.70" :total="total" type="success" mode="2"
+				:showFirstButton="false" :showLastButton="false" :current="current" :showPreButton="false"
+				:showNextButton="false"></t-pagination>
+		</template>
+		<template v-if="area==5">
+			<t-section title="禁用首页未页按钮" main-class="mb-30"></t-section>
+			<t-pagination size="mini" main-class="mb-30 w-200" :total="total" type="normal" mode="2" pageType="1"
+				:showFirstButton="false" :showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30 w-200" :total="total" type="primary" mode="2" pageType="1"
+				:showFirstButton="false" :showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30 w-200" :total="total" type="error" mode="2" pageType="1"
+				:showFirstButton="false" :showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30 w-200" :total="total" type="warning" mode="2" pageType="1"
+				:showFirstButton="false" :showLastButton="false" :current="current"></t-pagination>
+			<t-pagination size="mini" main-class="mb-30 w-200" :total="total" type="success" mode="2" pageType="1"
+				:showFirstButton="false" :showLastButton="false" :current="current"></t-pagination>
+		</template>
+		<template v-if="area==6">
+			<t-section title="主题-尺寸-mini" main-class="mb-30"></t-section>
+			<t-pagination pageType="1" size="mini" main-class="mb-30" :total="total" type="primary"
+				:current="current"></t-pagination>
+			<t-section title="主题-尺寸-small" main-class="mb-30"></t-section>
+			<t-pagination pageType="1" main-class="mb-30" :total="total" type="error" :current="current"
+				size="small"></t-pagination>
+			<t-section title="主题-尺寸-medium" main-class="mb-30"></t-section>
+			<t-pagination pageType="1" main-class="mb-30" :total="total" type="warning" :current="current"
+				size="medium"></t-pagination>
+			<t-section title="主题-尺寸-large" main-class="mb-30"></t-section>
+			<t-pagination pageType="1" main-class="mb-30" :total="total" type="success" :current="current"
+				size="large"></t-pagination>
+		</template>
+		<t-row main-class='fww tdb tdr tdp'>
+			<t-button type="p" main-class="mrb-30" size="small" @click="area=1">默认+全部功能开启</t-button>
+			<t-button type="e" main-class="mrb-30" size="small" @click="area=2">图标模式</t-button>
+			<t-button type="s" main-class="mrb-30" size="small" @click="area=3">禁用首页未页按钮</t-button>
+			<t-button type="w" main-class="mrb-30" size="small" @click="area=4">禁用上一页下一页按钮</t-button>
+			<t-button type="p" main-class="mrb-30" size="small" @click="area=5">简约模式</t-button>
+			<t-button type="e" main-class="mrb-30" size="small" @click="area=6">主题尺寸展示</t-button>
+		</t-row>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				area: 6,
+				current: 15,
+				total: 300,
+			}
+		},
+		methods: {
+
+		},
+		onReady() {
+
+		}
+	}
+</script>

@@ -1,0 +1,108 @@
+<template>
+	<t-view v-bind="extendsAttrs" ref="subsectionitemins" :main-class="subsectionItemStyles" @click="mainOnclick">
+		<slot>
+			<t-icon v-if="icon!=''" :size="subsectionSize" :name="icon"
+				:main-class="`mr-8 ${stateColor}`"></t-icon>
+			<t-text :size="subsectionSize" :text="`${title}`" :main-class="`${stateColor}`"></t-text>
+		</slot>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * SubsectionItem 分段器
+	 * @date 2025-05-31 12:07:25
+	 * @author TanYuan
+	 * @description 可用于订单场景+菜单切换
+	 * @example /pagesA/layout/subsection/subsection
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-subsection-item.html
+	 * @example /pagesA/layout/subsection/subsection
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Number} value 当前选项的值(默认：1)
+	 * @property {string | null} icon 图标
+	 * @property {string | null} title 标题
+	 * @event {Function} click 点击时触发
+	 */
+	import { getStyleProperty } from '../../common/model/style'
+	import { CommonProps, SubsectionGroupPropsType, useTuiThemes } from '../../common/props/index.uts';
+	interface ViewProps extends CommonProps {
+		value : number
+		icon : string
+		title : string
+	}
+	const props = withDefaults(defineProps<ViewProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		value: 0,
+		icon: '',
+		title: '',
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+	const subsectionitemins = ref<ComponentPublicInstance | null>(null)
+	const subsectionGroupProps = inject<SubsectionGroupPropsType>('subsectionGroupProps')
+	const childChange = inject<(value : number) => void>('childChange')
+	const initNodesInfo = inject<(key : number, nodeinfo : NodeInfo) => void>('initNodesInfo')
+	const current = inject<Ref<number>>('subsectionCurrent')
+
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation();
+		if (childChange != null) childChange(props.value)
+		emit('click', e)
+	}
+
+	const partenClass = computed(() : string => {
+		return subsectionGroupProps?.mainClass?.value ?? ''
+	})
+	const subsectionSize = computed(() : string => {
+		return subsectionGroupProps?.size?.value ?? ''
+	})
+	const subsectionType = computed(() : string => {
+		return subsectionGroupProps?.type?.value ?? ''
+	})
+	const subsectionEffect = computed(() : string => {
+		return subsectionGroupProps?.effect?.value ?? ''
+	})
+	const stateColor = computed(() : string => {
+		return current!.value == props.value ? `tdc-${subsectionType.value},${subsectionEffect.value},${getStyleProperty(partenClass.value, 'color')}` : ''
+	})
+	const subsectionItemStyles = computed(() : string => {
+		return `fl f fc tdp-${subsectionSize.value} ${props.mainClass}`
+	})
+
+	onMounted(() => {
+		nextTick(() => {
+			subsectionitemins.value?.$callMethod('getInfo', (rect : NodeInfo) => {
+				if (initNodesInfo != null) initNodesInfo(props.value, rect)
+			})
+		})
+	})
+</script>

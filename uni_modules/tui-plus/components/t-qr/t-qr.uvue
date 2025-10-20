@@ -1,0 +1,181 @@
+<template>
+	<t-canvas v-bind="extendsAttrs" @initFinished="canvasInit" ref="qrins"></t-canvas>
+</template>
+<script setup>
+	/**
+	 * Qr 二维码
+	 * @date 2025-05-31 12:05:57
+	 * @author TanYuan
+	 * @description 纯UTS开发二维码组件,canvas绘制,非webview,无需引用原生依赖 无需安装自定义基座
+	 * @example /pagesA/other/qr/qr
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-qr.html
+	 * @example /pagesA/other/qr/qr
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} text 二维码内容
+	 * @property {String} mode=[1|2] 二维码显示的模式(默认：1)
+	 * @value line 线条模式二维码
+	 * @value circular 圆点模式二维码
+	 * @value rect 矩形二维码
+	 */
+
+	import { QRCode } from '../../common/qr/QRCode'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface QrProps extends CommonProps {
+		text : string
+		mode : string
+		logo : string
+	}
+	const props = withDefaults(defineProps<QrProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		text: '',
+		mode: 'rect',
+		logo: ''
+	});
+	const { extendsAttrs, getColorToValue } = useTuiThemes(props)
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null)
+	const canvasContextIns = ref<CanvasContext | null>(null)
+	const qrins = ref<ComponentPublicInstance | null>(null)
+	function utf16to8(str : string) : string {
+		const len = str.length
+		let out : string = ''
+		for (let i = 0; i < len; i++) {
+			const c = str.charCodeAt(i) as number
+			if ((c >= 0x0001) && (c <= 0x007F)) {
+				out += str.charAt(i)
+			} else if (c > 0x07FF) {
+				out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F))
+				out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F))
+				out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F))
+			} else {
+				out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F))
+				out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F))
+			}
+		}
+		return out
+	}
+	function draw() {
+		//样式2
+		const ctx = canvasCtx.value!
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		const qr = new QRCode(-1, 2);
+		const code = props.text
+		qr.addData(utf16to8(code));
+		qr.make();
+		const cells = qr.modules
+		const cw = ctx.canvas.offsetWidth
+		const ch = ctx.canvas.offsetHeight
+		const tileW = cw / cells.length
+		const tileH = ch / cells.length
+		const foregColor = getColorToValue.value
+		const backColor = ''
+		const radius = tileW / 2
+		function isPositionDetectionPattern(i : number, j : number, width : number) : boolean {
+			// 左上角
+			if (i < 7 && j < 7) return true;
+			// 右上角
+			if (i > width - 8 && j < 7) return true;
+			// 左下角
+			if (i < 7 && j > width - 8) return true;
+			return false;
+		}
+		cells.forEach((row, rdx) => {
+			row.forEach((cell, cdx) => {
+				const b = (cell as boolean)
+				ctx.fillStyle = b ? foregColor : backColor != '' ? backColor : '#ffffff'
+				const w = (Math.ceil((cdx + 1) * tileW) - Math.floor(cdx * tileW))
+				const h = (Math.ceil((rdx + 1) * tileH) - Math.floor(rdx * tileH))
+				const isPostion = isPositionDetectionPattern(rdx, cdx, cells.length);
+				switch (props.mode) {
+					case 'line':
+						let sh = isPostion ? h : h / 2
+						ctx.fillRect(Math.round(cdx * tileW), Math.round(rdx * tileH), w, sh)
+						break;
+					case 'circular':
+						if (b) {
+							if (isPostion) {
+								ctx.fillRect(Math.round(cdx * tileW), Math.round(rdx * tileH), w, h)
+							} else {
+								const x = cdx * tileW
+								const y = rdx * tileH
+								const cx = x + radius
+								const cy = y + radius
+								ctx.beginPath();
+								ctx.arc(cx, cy, radius, 0, 2 * Math.PI, false);
+								ctx.fill();
+							}
+						}
+						break;
+					case 'rect':
+					default:
+						ctx.fillRect(Math.round(cdx * tileW), Math.round(rdx * tileH), w, h)
+						ctx.fill();
+						break;
+				}
+			})
+		})
+		if (props.logo != '') {
+			let image = canvasContextIns.value!.createImage();
+			// #ifdef WEB
+			(image as any).crossOrigin = 'anonymous';
+			// #endif
+			image.src = props.logo;
+			image.onload = () => {
+				const logoWidth = cw / 4;
+				const logoHeight = ch / 4;
+				const x = (cw - logoWidth) / 2;
+				const y = (ch - logoHeight) / 2;
+				ctx.fillStyle = "#fff"
+				ctx.fillRect(x, y, logoWidth, logoHeight)
+				let zoom = logoWidth * 0.15
+				let size = zoom * 2
+				ctx.drawImage(image, x + zoom, y + zoom, logoWidth - size, logoHeight - size);
+			};
+		}
+	}
+	function toDataURL() : Promise<string> | null {
+		return qrins.value?.$callMethod('toDataURL') as Promise<string> | null
+	}
+	function canvasInit(ctx : CanvasContext) {
+		canvasContextIns.value = ctx
+		canvasCtx.value = ctx.getContext('2d')
+		draw()
+	}
+	watch(() : string => props.logo, (e : string) => {
+		canvasInit(canvasContextIns.value!)
+	})
+	watch(() : string => props.text, (e : string) => {
+		canvasInit(canvasContextIns.value!)
+	})
+	defineExpose({
+		toDataURL
+	})
+</script>

@@ -1,0 +1,13 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="Marked 富文本" sub-title="原生组件实现，非webview套壳。从uni-ai x中分离出来的，"></t-card>
+		<t-card main-class="mb-30" type="e" title="注意" sub-title="markdown组件依赖 uni-highlight插件需要到官网插件市场下载"></t-card>
+		<t-marked :nodes="nodes"></t-marked>
+	</t-page>
+</template>
+
+<script setup>
+	//注意markdown组件依赖 uni-highlight插件需要到官网插件市场下载
+	import testMarkdownText from './markdownText.uts';
+	const nodes = ref<string>(testMarkdownText)
+</script>

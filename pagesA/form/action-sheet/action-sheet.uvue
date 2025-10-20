@@ -1,0 +1,69 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="ActionMenu" subTitle="从底部操作菜单(分享等菜单)-插槽用法灵活布局"></t-card>
+		<t-action-menu title="请选择" main-class="" button-text="取消">
+			<template v-slot:button>
+				<t-button type="p" main-class="mb-30">菜单</t-button>
+			</template>
+			<t-col main-class="mtb-20">
+				<t-row main-class="tdp-l fc tvg mb-2px" :hover="true" v-for="i in 3">
+					<t-text>选项{{i}}</t-text>
+				</t-row>
+			</t-col>
+		</t-action-menu>
+		<t-action-menu title="分享到" main-class="tdr-,,12" button-text="取消">
+			<template v-slot:button>
+				<t-button type="e" main-class="mb-30">分享</t-button>
+			</template>
+			<t-row main-class="mtb-10 tvg">
+				<swiper style="height: 200rpx;width:100%;">
+					<swiper-item style="display: flex;flex-direction: row;align-items: center;justify-content: center;">
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/qq.png"></t-image>
+							<t-text>QQ</t-text>
+						</t-col>
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/zfb.png"></t-image>
+							<t-text>支付宝</t-text>
+						</t-col>
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/dy.png"></t-image>
+							<t-text>抖音</t-text>
+						</t-col>
+					</swiper-item>
+					<swiper-item style="display: flex;flex-direction: row;align-items: center;justify-content: center;">
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/tb.png"></t-image>
+							<t-text>淘宝</t-text>
+						</t-col>
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/tm.png"></t-image>
+							<t-text>天猫</t-text>
+						</t-col>
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/jd.png"></t-image>
+							<t-text>京东</t-text>
+						</t-col>
+						<t-col main-class="faic mlbr-40">
+							<t-image main-class="twh-60 mb-10" src="/pagesA/static/image/pdd.png"></t-image>
+							<t-text>拼多多</t-text>
+						</t-col>
+					</swiper-item>
+				</swiper>
+			</t-row>
+		</t-action-menu>
+		<t-action-menu title="请选择" main-class="tdr m-30" button-text="取消">
+			<template v-slot:button>
+				<t-button type="s" main-class="mb-30">设置样式</t-button>
+			</template>
+			<t-col main-class="mtb-10">
+				<t-row main-class="tdp-l fc tvg mb-2px" :hover="true" v-for="i in 3">
+					<t-text>选项{{i}}</t-text>
+				</t-row>
+			</t-col>
+		</t-action-menu>
+	</t-page>
+</template>
+<script setup>
+
+</script>

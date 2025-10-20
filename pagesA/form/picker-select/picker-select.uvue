@@ -1,0 +1,103 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="PickerSelect 选择列表" main-class="mb-30"
+			sub-title="t-select的另一个版本，适用于移动端，t-select一般适用于PC端"></t-card>
+		<t-section title="弹窗-远程搜索示例" main-class="mb-30"></t-section>
+		<t-picker-select v-model="val5" valueKey="value" labelKey="label" :remote-method="search" title="请选择菜单"
+			:remote="true" main-class="tdr tdb mb-30" size="large">
+		</t-picker-select>
+		<t-text main-class="tdr tdb tdp mb-30">值：{{val5}}</t-text>
+		<t-button type="primary" @click="test5">双向绑定测试</t-button>
+
+		<t-picker-select v-model="val4" valueKey="value" labelKey="label" :remote-method="search" title="请选择菜单"
+			:remote="true" main-class="tdr tdb mb-30" size="large">
+		</t-picker-select>
+		<t-text main-class="tdr tdb tdp mb-30">值：{{val4.join('-')}}</t-text>
+		<t-button type="primary" @click="test3">双向绑定测试</t-button>
+
+		<t-col main-class="tdr tdb tdp mb-30">
+			<t-text main-class="slh-70">values:{{pickerSelectChange.getArray('values')?.join(',')}}</t-text>
+			<t-text main-class="slh-70">labels:{{pickerSelectChange.getArray('labels')?.join(',')}}</t-text>
+		</t-col>
+
+		<t-section main-class="mb-30" title="嵌入式-多选（v-model为数组则为多选）"></t-section>
+		<t-picker-select v-model="val3" :list="list" :embeddable="true" valueKey="value" labelKey="label"
+			main-class="tdr tdb mb-30" size="large">
+		</t-picker-select>
+
+		<t-text main-class="tdr tdb tdp mb-30">值：{{val3.join('-')}}</t-text>
+		<t-button type="primary" @click="test">双向绑定测试</t-button>
+		<t-section main-class="mb-30" title="嵌入式-单选（v-model为字符串则为单选）"></t-section>
+		<t-picker-select v-model="val2" :list="list" :embeddable="true" valueKey="value" labelKey="label"
+			main-class="tdr tdb mb-30" size="large">
+		</t-picker-select>
+		<t-text main-class="tdr tdb tdp mb-30">值：{{val2}}</t-text>
+		<t-button type="primary" @click="test2">双向绑定测试</t-button>
+	</t-page>
+</template>
+<script setup>
+	const val1 = ref<string>('food3');
+	const val2 = ref<string>('food1');
+	const val5 = ref<string>('food3');
+	const val3 = ref<string[]>(['food4', 'food5']);
+	const val4 = ref<string[]>(['food4', 'food5']);
+	const pickerSelectChange = ref<UTSJSONObject>({});
+
+	const list = ref<UTSJSONObject[]>([
+		{ value: 'food1', label: '披萨', disabled: true },
+		{ value: 'food2', label: '寿司', disabled: true },
+		{ value: 'food3', label: '汉堡' },
+		{ value: 'food4', label: '拉面' },
+		{ value: 'food5', label: '饺子' },
+		{ value: 'food11', label: '馄饨' },
+		{ value: 'food6', label: '蛋糕' },
+		{ value: 'food7', label: '冰淇淋' },
+		{ value: 'food8', label: '巧克力' },
+		{ value: 'food9', label: '薯条' },
+		{ value: 'food10', label: '蛋挞' }
+	]);
+
+	const search = (e : string) : Promise<UTSJSONObject[]> => {
+		return new Promise((
+			resolve : (res : UTSJSONObject[]) => void
+		) => {
+			// 这里模拟uni.showLoading
+			console.log('搜索中');
+			setTimeout(() => {
+				if (e == '') {
+					// 这里模拟uni.hideLoading
+					resolve(list.value);
+				} else {
+					const filteredList = list.value.filter((item : UTSJSONObject) => {
+						return (item.getString('label') as string).toLocaleLowerCase().includes(e);
+					});
+					// 这里模拟uni.hideLoading
+					resolve(filteredList);
+				}
+			}, 500);
+		});
+	};
+	function test5() {
+		val5.value = 'food6'
+	}
+	function test() {
+		// val3.value = ['food3', 'food4']
+		val3.value.push('food3')
+	}
+	function test3() {
+		// val4.value = ['food6', 'food7']
+		val4.value.push('food6')
+	}
+	function test2() {
+		val2.value = 'food3'
+	}
+	const checkChange = (e : UTSJSONObject) => {
+		console.log(e)
+		pickerSelectChange.value = e;
+	};
+
+	const radioChange = (e : UTSJSONObject) => {
+		console.log(JSON.stringify(e))
+		pickerSelectChange.value = e;
+	};
+</script>

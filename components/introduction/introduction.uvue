@@ -1,0 +1,21 @@
+<template>
+	<t-col main-class="mltr-30">
+		<t-section main-class="mb-30 tdr" :title="title" :sub-title="subTitle"></t-section>
+		<t-view main-class="tdp tdb tdr">
+			<slot></slot>
+		</t-view>
+	</t-col>
+</template>
+
+<script setup>
+	const props = defineProps({
+		title: {
+			type: String,
+			default: ''
+		},
+		subTitle: {
+			type: String,
+			default: ''
+		}
+	})
+</script>

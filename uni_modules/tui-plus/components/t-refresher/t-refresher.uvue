@@ -1,0 +1,134 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="refresherStyles" @click="mainOnclick">
+		<t-loading v-if="state==2" v-bind="extendsAttrs" :main-class="iconStyles" :name="stateIcon"></t-loading>
+		<t-icon v-else="state==2" v-bind="extendsAttrs" :main-class="iconStyles" :name="stateIcon"></t-icon>
+		<t-text v-bind="extendsAttrs" :text="stateText" :main-class="textClass"></t-text>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Refresher 下拉刷新
+	 * @date 2025-05-31 12:06:16
+	 * @author TanYuan
+	 * @description 下拉刷新 和 上拉加载
+	 * @example /pagesA/basics/refresher/refresher
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-refresher.html
+	 * @example /pagesA/basics/refresher/refresher
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {Boolean} vertical 是否纵向排列(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} state=[0|1|2|3|4] 表示当前刷新状态(默认：1)
+	 * @value 0 默认状态
+	 * @value 1 下拉时候的状态
+	 * @value 2 下拉到设置的距离后的状态
+	 * @value 3 松开时的状态
+	 * @value 4 松开后执行操作成功状态
+	 * @property {String} defaultIcon 默认状态时的图标(默认：arrow-down-circle)
+	 * @property {String} iconClass 图标样式
+	 * @property {String} pullingIcon 下拉刷新时的图标(默认：arrow-up-circle)
+	 * @property {String} refreshingIcon 刷新状态下的图标，默认为'spinner'(默认：spinner)
+	 * @property {String} refreshingEndIcon 刷新完成状态下的图标，默认为'checkbox-mark'	(默认：checkbox-mark)
+	 * @property {String} defaultText 默认状态下的文本，默认为'继续下拉刷新'(默认：继续下拉刷新)
+	 * @property {String} pullingText 下拉状态下的文本，默认为'松开立即刷新'(默认：松开立即刷新)
+	 * @property {String} refreshingText 刷新状态下的文本，默认为'正在刷新'(默认：正在刷新)
+	 * @property {String} refreshingEndText 新完成状态下的文本，默认为'刷新成功'(默认：刷新成功)
+	 * @property {String} textClass 文本的样式
+	 * @event {Function} click 点击时触发
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface RefresherProps extends CommonProps {
+		vertical : boolean
+		state : number
+		defaultIcon : string
+		iconClass : string
+		pullingIcon : string
+		refreshingIcon : string
+		refreshingEndIcon : string
+		defaultText : string
+		pullingText : string
+		refreshingText : string
+		refreshingEndText : string
+		textClass : string
+	}
+	const props = withDefaults(defineProps<RefresherProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		vertical: true,
+		state: 0,
+		defaultIcon: 'arrow-down-circle',
+		iconClass: '',
+		pullingIcon: 'arrow-up-circle',
+		refreshingIcon: 'spinner',
+		refreshingEndIcon: 'checkbox-mark',
+		defaultText: '继续下拉刷新',
+		pullingText: '松开立即刷新',
+		refreshingText: '正在刷新',
+		refreshingEndText: '刷新成功',
+		textClass: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits()
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+	const stateText = computed(() : string => {
+		let arr : string[] = [props.defaultText, props.pullingText, props.refreshingText, props.refreshingEndText]
+		return arr[props.state]
+	})
+	const stateIcon = computed(() : string => {
+		let arr : string[] = [props.defaultIcon, props.pullingIcon, props.refreshingIcon, props.refreshingEndIcon]
+		return arr[props.state]
+	})
+	const iconStyles = computed(() : string => {
+		let sty : string = props.vertical ? 'mb-10 ' : 'mr-10 '
+		sty += `ats-1.1 ${props.iconClass}`
+		return sty
+	})
+	const refresherStyles = computed(() : string => {
+		let sty : string = props.vertical ? 'fv ' : 'fl '
+		sty += `f fc ${props.mainClass}`
+		return sty
+	})
+</script>

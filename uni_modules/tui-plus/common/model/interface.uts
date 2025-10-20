@@ -1,0 +1,208 @@
+// 日历 
+export type LunarInfoType = {
+	lYear : number;
+	lMonth : number;
+	lDay : number;
+	IMonthCn : string;
+	IDayCn : string;
+	cYear : number;
+	cMonth : number;
+	cDay : number;
+	gzYear ?: string;
+	gzMonth ?: string;
+	gzDay ?: string;
+	isToday : boolean;
+	isLeap : boolean;
+	nWeek ?: number;
+	ncWeek ?: string;
+	isTerm ?: boolean;
+	Term ?: string;
+	astro ?: string
+}
+
+export type CalendarDateType = {
+	lYear : number;
+	lMonth : number;
+	lDay : number;
+	IMonthCn : string;
+	IDayCn : string;
+	fullDate : string;
+	year : number;
+	month : number;
+	date : number;
+	day : number;
+	week : number;
+	astro : string,
+	zodiac : string,
+	gzYear : string,
+	gzMonth : string,
+	gzDay : string,
+	disabled : boolean;
+	is_today : boolean;
+	data ?: LunarInfoType
+}
+// tree 树组件start
+export type TuiTreeData = {
+	id : string
+	label : string
+	disabled ?: boolean
+	children ?: TuiTreeData[]
+}
+
+export type TuiTreePlusData = {
+	item : TuiTreeData
+	ins : ComponentPublicInstance
+	index : number
+	callback : (data : TuiTreeData[], e : TuiTreePlusData) => void
+}
+
+export type TuiTreeEditData = {
+	item : TuiTreeData
+	ins : ComponentPublicInstance
+	index : number
+	callback : (label : string, e : TuiTreeEditData) => void
+}
+
+export type TuiTreeDeleteData = {
+	item : TuiTreeData
+	ins : ComponentPublicInstance
+	index : number
+	list : TuiTreeData[]
+	callback : (e : TuiTreeDeleteData) => void
+}
+
+export type TuiTreeLoad = (id : string) => Promise<TuiTreeData[]>
+// tree 树组件end
+//手势统一 start
+export type TuiTouchEvent = {
+	x : number
+	y : number
+	offsetX : number
+	offsetY : number
+	event : UniTouchEvent
+	rect : DOMRect
+}
+//手势统一 end
+
+export type TuiMovableTouchEvent = {
+	x : number
+	y : number
+	source : string
+}
+
+//元素监听 start
+export type TuiVisibilitySensorChange = {
+	ins : ComponentPublicInstance
+	state : boolean
+	mark : string
+}
+//元素监听 end
+
+//Tabs start
+export type TuiTabsOption = {
+	disabled ?: boolean
+	isDot ?: boolean
+	title : string
+	value ?: number
+}
+//Tabs end
+
+//TabBar start
+export type TuiTabBarOption = {
+	activeIcon ?: string,
+	inactiveIcon ?: string,
+	raised ?: boolean,
+	label ?: string,
+	badgeValue ?: number
+}
+//TabBar end
+
+//swiper start
+export type TuiSwiperEventDetail = {
+	current : number
+	source : string
+	currentItemId ?: string
+	dx ?: number
+}
+export type TuiSwiperEvent = {
+	detail : TuiSwiperEventDetail
+	type : string
+}
+//swiper end
+
+//Table start
+export type TuiTableSortEvent = {
+	field : string
+	state : number
+}
+//Table end
+
+//Table start
+export type TuiCheckedEvent = {
+	value : string
+	state : boolean
+}
+//Table end
+
+//Table start
+export type TuiColorChangeEvent = {
+	hex : string
+	rgba : string
+}
+//Table end
+
+//Scroll start
+export type TuiScrollEventDetail = {
+	scrollHeight : number
+	scrollWidth : number
+	scrollLeft : number
+	scrollTop : number
+	delta : number
+	source : string
+	scrollDirection : string
+}
+export type TuiScrollEvent = {
+	detail : TuiScrollEventDetail
+	type : string
+	target : UniElement | null
+	timeStamp : number
+}
+//Scroll end
+
+//Picker start
+export type TuiPickerColumnChange = {
+	item : UTSJSONObject
+	index : number
+}
+
+export type TuiPickerCityChange = {
+	values : string[]
+	keys : string[]
+	data : TuiPickerColumnChange[]
+}
+
+//Picker end
+
+//分享API start
+/**
+ * 错误码
+ * 根据uni错误码规范要求，建议错误码以90开头，以下是错误码示例：
+ * - 9010001 类型不对
+ * - 9010002 缺少文件路径
+ * - 9010003 文件路径不正确
+ */
+export type ShareErrorCode = 9010001 | 9010002 | 9010003 | 9010004 | -1;
+export interface ShareFail extends IUniError {
+	errCode : ShareErrorCode
+};
+//分享API end
+export type ShareOption = {
+	type : string
+	title ?: string
+	summary ?: string
+	path ?: string
+	imageUrl ?: string // 无用
+	success ?: (res : any) => void
+	fail ?: (res : ShareFail) => void
+	complete ?: (res : any) => void
+}

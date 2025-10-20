@@ -1,0 +1,143 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fc tdb tdr ${extendsPadding} ${mainClass}`">
+		<t-text v-bind="extendsAttrs" main-class="sfwb" :text="title"></t-text>
+		<t-text v-bind="extendsAttrs" main-class="mt-30" :text="lable"></t-text>
+		<t-image :src="src" :main-class="`twhr-${themeSize}px fc tvg mt-30 atr-${baseRotateDeg + rotateDeg}`"></t-image>
+		<t-view :main-class="`r-1000 mt-30 w-100% bg-${inactiveColor}`" @initFinished="initFinished">
+			<t-gesture :main-class="`twhr-${themeSize}px fc ${extendsBackgroundColor} attx-${translateX}px`"
+				@tuiTouchstart="touchstart" @tuiTouchmove="touchmove" @tuiTouchend="touchend"
+				@tuiTouchcancel="touchend">
+				<t-icon v-bind="extendsAttrs" :main-class="`${type==''?'c-#333':'c-#fff'} sfwb`"
+					:name="verifyState?activeBarIcon:inactiveBarIcon"></t-icon>
+			</t-gesture>
+		</t-view>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * VerifyRotate 旋转验证
+	 * @date 2025-05-31 12:08:22
+	 * @author TanYuan
+	 * @description 滑块验证码用于机器人验证,常用于接口访问防止机器频繁操作浪费资源!
+	 * @example /pagesA/form/verify-rotate/verify-rotate
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-verify-rotate.html
+	 * @example /pagesA/form/verify-rotate/verify-rotate
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认：plain)
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} src 验证图片的地址
+	 * @property {String} title 标题(默认：安全验证)
+	 * @property {String} lable 标签(默认：拖动滑块至图片正确的角度)
+	 * @property {String} successTitle 验证成功提示文本(默认：验证成功)
+	 * @property {String} activeBarIcon 验证成功滑块图标(默认：checkbox-mark)
+	 * @property {String} inactiveBarIcon 验证失败滑块图标名称(默认：arrow-right-double)
+	 * @property {String} activeColor 验证成功前景色
+	 * @property {String} inactiveColor 验证失败的颜色(默认：#eeeeee)
+	 * @property {Number} verifyRange 验证容错范围(默认：10)
+	 * @event {Function} success 验证成功是触发
+	 * @event {Function} fail 验证失败时触发
+	 */
+	import { getRandomInt } from '../../common/model/util'
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface VerifyRotateProps extends CommonProps {
+		type : string
+		src : string
+		title : string
+		lable : string
+		successTitle : string
+		activeBarIcon : string
+		inactiveBarIcon : string
+		activeColor : string
+		inactiveColor : string
+		verifyRange : number
+	}
+
+	const props = withDefaults(defineProps<VerifyRotateProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		src: '',
+		title: '安全验证',
+		lable: '拖动滑块至图片正确的角度',
+		successTitle: '验证成功',
+		activeBarIcon: 'checkbox-mark',
+		inactiveBarIcon: 'arrow-right-double',
+		activeColor: '',
+		inactiveColor: '#eeeeee',
+		verifyRange: 10
+	})
+
+	const { extendsAttrs, extendsPadding, getFontSizeToValue, extendsBackgroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['success', 'fail'])
+
+	const verifyState = ref(false)
+	const startX = ref(0)
+	const translateX = ref(0)
+	const maxW = ref(0)
+	const baseRotateDeg = ref(0)
+	const rotateDeg = ref(0)
+
+	const themeSize = computed(() => getFontSizeToValue.value * 2.5)
+
+	const initFinished = (rect : NodeInfo) => {
+		maxW.value = Math.floor(rect.width! - themeSize.value)
+	}
+
+	const mounted = () => {
+		baseRotateDeg.value = getRandomInt(150, 300)
+	}
+
+	const touchstart = (e : TuiTouchEvent) => {
+		if (verifyState.value) return
+		startX.value = e.x
+	}
+
+	const touchmove = (e : TuiTouchEvent) => {
+		if (verifyState.value) return
+		e.event.preventDefault()
+		translateX.value = e.x - startX.value
+		if (translateX.value < 0) translateX.value = 0
+		if (translateX.value > maxW.value) translateX.value = maxW.value
+		rotateDeg.value = translateX.value / maxW.value * 360
+	}
+
+	const touchend = () => {
+		if (verifyState.value) return
+		if (Math.abs(rotateDeg.value + baseRotateDeg.value - 360) <= props.verifyRange) {
+			verifyState.value = true
+			emit('success')
+		} else {
+			verifyState.value = false
+			baseRotateDeg.value = getRandomInt(150, 300)
+			translateX.value = 0
+			rotateDeg.value = 0
+			emit('fail')
+		}
+	}
+</script>

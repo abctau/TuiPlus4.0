@@ -1,0 +1,375 @@
+<template>
+	<t-page title="Draw" main-class='p-30'>
+		<t-card main-class="mb-30" title="Draw 原生绘制"
+			sub-title="虽然有功能强大的Canvas组件,但是在长列表绘制场景,原生draw仍然有一定的优势,drawable组件返回TuiDrawableContext对象统一H5和APP端的写法,并对Draw功能增强/后续继续增强它的绘制能力"></t-card>
+		<t-drawable @initFinished="drawInitFinished" main-class="h-600 tdr tdb mb-30"></t-drawable>
+		<t-button main-class="mb-30" type="p" @click="measureText">文字测量</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawImage">画图片</t-button>
+		<t-button main-class="mb-30" type="p" @click="roundRect">画圆角矩形(空心)</t-button>
+		<t-button main-class="mb-30" type="p" @click="roundFillRect">画圆角矩形(实心)</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawBall">drawBall</t-button>
+		<t-button main-class="mb-30" type="p" @click="snapshot">截图</t-button>
+		<t-button main-class="mb-30" type="p" @click="clearDraw">清空画布</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawRect">drawRect</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawArcTo">drawArcTo</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawPoint">drawPoint</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawhouse">画房子</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawStar">画星星</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawCircles">绘制圆形</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawTexttest">绘制文字</t-button>
+		<t-button main-class="mb-30" type="p" @click="drawLines">绘制线条</t-button>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiDrawableContext } from '@/uni_modules/tui-plus'
+	let yy = 160
+	let drawCcontext : TuiDrawableContext | null = null
+	function drawInitFinished(ctx : TuiDrawableContext) {
+		drawCcontext = ctx
+	}
+	const texts = [
+		'HBuilderX，轻巧、极速，极客编辑器',
+		'uni-app x，终极跨平台方案',
+		'uniCloud，js serverless云服务',
+		'uts，大一统语言',
+		'uniMPSdk，让你的App具备小程序能力',
+		'uni-admin，开源、现成的全端管理后台',
+		'uni-id，开源、全端的账户中心',
+		'uni-pay，开源、云端一体、全平台的支付',
+		'uni-ai，聚合ai能力',
+		'uni-cms，开源、云端一体、全平台的内容管理平台',
+		'uni-im，开源、云端一体、全平台的im即时消息',
+		'uni统计，开源、完善、全平台的统计报表',
+		'......'
+	]
+	// function createLinearGradient() {
+	// 	let ctx = drawCcontext!
+	// 	ctx.reset()
+	// 	ctx.createLinearGradient(0, 0, 200, 0)
+	// }
+	function roundFillRect() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.lineWidth = 6;
+		ctx.beginPath()
+		ctx.fillStyle = '#0055ff'; // 填充颜色
+		ctx.roundFillRect(60, 80, 50, 50, 10)
+		ctx.beginPath()
+		// ctx.strokeStyle = '#ff5500'; // 填充颜色
+		ctx.fillStyle = '#ff5500'; // 填充颜色
+		ctx.roundFillRect(10, 10, 200, 50, 10)
+
+		ctx.update()
+	}
+	function roundRect() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.lineWidth = 6;
+		ctx.strokeStyle = '#f56c6c'; // 填充颜色
+		ctx.roundRect(60, 80, 50, 50, 10)
+		ctx.stroke()
+		ctx.beginPath()
+		ctx.fillStyle = '#ff5500'; // 填充颜色
+		ctx.roundRect(10, 10, 200, 50, 10)
+		ctx.stroke()
+		ctx.update()
+	}
+	function measureText() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.font = '20px'
+		ctx.fillText('欢迎使用Tui', 10, 50)
+		const textWidth = ctx.measureText('欢迎使用Tui')
+		ctx.fillText(`测量宽度为${textWidth}px`, 10, 80)
+		ctx.update()
+	}
+	function drawImage() {
+		uni.chooseImage({
+			success: (res) => {
+				let ctx = drawCcontext!
+				ctx.reset()
+				ctx.drawImage(res.tempFilePaths[0], 10, 0, 150, 150)
+			}
+		})
+	}
+	function snapshot() {
+		uni.navigateTo({
+			url: "/pagesA/basics/screenshot/screenshot"
+		})
+	}
+	function drawBall() {
+		uni.navigateTo({
+			url: "/pagesA/basics/drawBall/drawBall"
+		})
+	}
+	function drawRect() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		// Create path
+		ctx.moveTo(30, 90);
+		ctx.lineTo(110, 20);
+		ctx.lineTo(240, 130);
+		ctx.lineTo(60, 130);
+		ctx.lineTo(190, 20);
+		ctx.lineTo(270, 90);
+		ctx.closePath();
+
+		// Fill path
+		ctx.fillStyle = "green";
+		ctx.fill("evenodd");
+		ctx.update()
+
+	}
+	function drawArcTo() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.beginPath();
+		ctx.moveTo(50, 20);
+		ctx.bezierCurveTo(230, 30, 150, 60, 50, 100);
+		ctx.stroke();
+
+		ctx.fillStyle = "blue";
+		// start point
+		ctx.fillRect(50, 20, 10, 10);
+		// end point
+		ctx.fillRect(50, 100, 10, 10);
+
+		ctx.fillStyle = "red";
+		// control point one
+		ctx.fillRect(230, 30, 10, 10);
+		// control point two
+		ctx.fillRect(150, 70, 10, 10);
+		ctx.update()
+	}
+	function drawPoint() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.beginPath()
+		ctx.lineWidth = 2
+		ctx.arc(75, 75, 50, 0, Math.PI * 2, false)
+		ctx.moveTo(110, 75)
+		ctx.arc(75, 75, 35, 0, Math.PI, false)
+		ctx.moveTo(65, 65)
+		ctx.arc(60, 65, 5, 0, Math.PI * 2, false)
+		ctx.moveTo(95, 65)
+		ctx.arc(90, 65, 5, 0, Math.PI * 2, false)
+		ctx.stroke()
+		ctx.update()
+		// let ctx = drawCcontext!
+		// ctx.reset()
+		// for (let i = 0; i < 6; i++) {
+		// 	for (let j = 0; j < 6; j++) {
+		// 		console.log(`rgb(0,${Math.floor(255 - 42.5 * i)},${Math.floor(255 - 42.5 * j)})`)
+		// 		ctx.strokeStyle = `rgb(0,${Math.floor(255 - 42.5 * i)},${Math.floor(255 - 42.5 * j)})`;
+		// 		ctx.beginPath();
+		// 		ctx.arc(12.5 + j * 25, 12.5 + i * 25, 10, 0, Math.PI * 2, true);
+		// 		ctx.stroke();
+		// 	}
+		// }
+		// for (let i = 0; i < 6; i++) {
+		// 	for (let j = 0; j < 6; j++) {
+		// 		ctx.fillStyle = `rgb(${Math.floor(255 - 42.5 * i)},${Math.floor(255 - 42.5 * j)},0)`;
+		// 		ctx.fillRect(180 + j * 25, i * 25, 25, 25);
+		// 	}
+		// }
+		// ctx.update()
+	}
+	function drawhouse() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.lineWidth = 10;
+		// Wall
+		ctx.strokeRect(75, 140, 150, 110);
+		// Door
+		ctx.fillRect(130, 190, 40, 60);
+		// Roof
+		ctx.beginPath();
+		ctx.moveTo(50, 140);
+		ctx.lineTo(150, 60);
+		ctx.lineTo(250, 140);
+		ctx.closePath();
+		ctx.stroke();
+		ctx.update()
+	}
+	function drawText() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.font = "18px Arial"
+		ctx.textAlign = "center"
+		ctx.fillStyle = '#000000';
+		for (var i = 0; i < texts.length; i++) {
+			let value = texts[i]
+			if (i % 2 == 0) {
+				ctx.fillText(value, ctx.width / 2, (30 * (i + 1)))
+			} else {
+				ctx.lineWidth = 0.5
+				ctx.strokeText(value, ctx.width / 2, (30 * (i + 1)))
+			}
+		}
+		ctx.update()
+	}
+	function drawTexttest() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		// ctx.strokeStyle = '#ff0000'
+		// ctx.beginPath()
+		// ctx.moveTo(0, 30)
+		// ctx.lineTo(300, 10)
+		// ctx.stroke()
+		ctx.font = "20px"
+		ctx.fillStyle = 'red'
+		ctx.fillText('红色', 20, 30)
+		ctx.font = "80px"
+		ctx.fillStyle = 'blue'
+		ctx.fillText('蓝色', 20, 180)
+		// ctx.font = "30px"
+		// ctx.fillText('Hello World', 150, 30)
+		// ctx.beginPath()
+		// ctx.moveTo(0, 30)
+		// ctx.lineTo(300, 30)
+		// ctx.stroke()
+		ctx.update()
+	}
+	function drawDashedLine(pattern : Array<number>, ctx : TuiDrawableContext) {
+		ctx.beginPath();
+		ctx.setLineDash(pattern);
+		ctx.moveTo(0, yy);
+		ctx.lineTo(300, yy);
+		ctx.stroke();
+		yy += 15;
+	}
+	function drawLines() {
+		yy = 160
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.lineWidth = 10;
+
+		["round", "bevel", "miter"].forEach((join, i) => {
+			ctx.lineJoin = join;
+			ctx.beginPath();
+			ctx.moveTo(5, 10 + i * 40);
+			ctx.lineTo(50, 50 + i * 40);
+			ctx.lineTo(90, 10 + i * 40);
+			ctx.lineTo(130, 50 + i * 40);
+			ctx.lineTo(170, 10 + i * 40);
+			ctx.stroke();
+		});
+		ctx.lineWidth = 1
+		var space = 170
+		ctx.strokeStyle = '#09f';
+		ctx.beginPath();
+		ctx.moveTo(10 + space, 10);
+		ctx.lineTo(140 + space, 10);
+		ctx.moveTo(10 + space, 140);
+		ctx.lineTo(140 + space, 140);
+		ctx.stroke();
+		// Draw lines
+		ctx.strokeStyle = 'black';
+		['butt', 'round', 'square'].forEach((lineCap, i) => {
+			ctx.lineWidth = 15;
+			ctx.lineCap = lineCap;
+			ctx.beginPath();
+			ctx.moveTo(25 + space + i * 50, 10);
+			ctx.lineTo(25 + space + i * 50, 140);
+			ctx.stroke();
+		});
+		ctx.lineWidth = 1;
+		drawDashedLine([], ctx);
+		drawDashedLine([2, 2], ctx);
+		drawDashedLine([10, 10], ctx);
+		drawDashedLine([20, 5], ctx);
+		drawDashedLine([15, 3, 3, 3], ctx);
+		drawDashedLine([20, 3, 3, 3, 3, 3, 3, 3], ctx);
+		ctx.lineDashOffset = 18;
+		drawDashedLine([12, 3, 3], ctx);
+		ctx.lineDashOffset = 0
+		ctx.setLineDash([0])
+		ctx.update()
+	}
+	function drawCircles() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		for (var i = 0; i < 4; i++) {
+			for (var j = 0; j < 3; j++) {
+				ctx.beginPath();
+				var x = 25 + j * 50;               // x coordinate
+				var y = 25 + i * 50;               // y coordinate
+				var radius = 20;                    // Arc radius
+				var startAngle = 0;                     // Starting point on circle
+				var endAngle = Math.PI + (Math.PI * j) / 2; // End point on circle
+				var clockwise = i % 2 == 0 ? false : true; // clockwise or anticlockwise
+
+				ctx.arc(x, y, radius, startAngle, endAngle, clockwise);
+
+				if (i > 1) {
+					ctx.fill();
+				} else {
+					ctx.stroke();
+				}
+			}
+		}
+		ctx.update()
+	}
+	function drawStar() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.beginPath();
+		var horn = 5; // 画5个角
+		var angle = 360 / horn; // 五个角的度数
+		// 两个圆的半径
+		var R = 50;
+		var r = 20;
+		// 坐标
+		var x = 100;
+		var y = 100;
+		for (var i = 0; i < horn; i++) {
+			// 角度转弧度：角度/180*Math.PI
+			// 外圆顶点坐标
+			ctx.lineTo(Math.cos((18 + i * angle) / 180.0 * Math.PI) * R + x, -Math.sin((18 + i * angle) / 180.0 * Math.PI) * R + y);
+			// 內圆顶点坐标
+			ctx.lineTo(Math.cos((54 + i * angle) / 180.0 * Math.PI) * r + x, -Math.sin((54 + i * angle) / 180.0 * Math.PI) * r + y);
+		}
+		// closePath：关闭路径，将路径的终点与起点相连
+		ctx.closePath();
+		ctx.lineWidth = 3;
+		ctx.fillStyle = '#E4EF00';
+		ctx.strokeStyle = "red";
+		ctx.fill();
+		ctx.stroke();
+
+		ctx.lineWidth = 10;
+		ctx.beginPath()
+		ctx.moveTo(170, 100)
+		ctx.lineTo(255, 15)
+		ctx.lineTo(340, 100)
+		ctx.closePath()
+		ctx.fill()
+		ctx.strokeStyle = "blue"
+		ctx.stroke()
+		ctx.beginPath()
+		ctx.moveTo(170, 145)
+		ctx.lineTo(255, 45)
+		ctx.lineTo(340, 145)
+		ctx.closePath()
+		ctx.fill()
+		ctx.strokeStyle = "gray"
+		ctx.stroke()
+		// 未设置beginPath，导致上下表现一致，与前端一致
+		ctx.moveTo(170, 190)
+		ctx.lineTo(255, 90)
+		ctx.lineTo(340, 190)
+		ctx.closePath()
+		ctx.fillStyle = "orange"
+		ctx.fill()
+		ctx.strokeStyle = "khaki"
+		ctx.stroke()
+		ctx.update()
+	}
+	function clearDraw() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.update()
+	}
+</script>
+

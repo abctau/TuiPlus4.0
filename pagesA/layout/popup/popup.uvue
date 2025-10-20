@@ -1,0 +1,56 @@
+<template>
+	<t-page>
+		<t-card main-class="mlrt-30" title="Popup 弹出层"
+			sub-title="功能丰富的弹出层解决方案，支持自定义显示状态、过渡效果、持续时间、弹出方向以及灵活的样式控制"></t-card>
+		<introduction title='方向'>
+			<t-button main-class='mb-30' type="primary" @click="popupShow('popupleft')">左侧弹出(关闭动画效果)</t-button>
+			<t-button main-class='mb-30' type="primary" @click="popupShow('popupright')">右侧弹出</t-button>
+			<t-button main-class='mb-30' type="primary" @click="popupShow('popuptop')">顶部弹出</t-button>
+			<t-button main-class='mb-30' type="primary" @click="popupShow('popupbottom')">底部弹出</t-button>
+			<t-button type="primary" @click="popupShow('popupcenter')">中间弹出</t-button>
+		</introduction>
+		<t-popup direction="left" ref='popupleft' :show-footer="true" :transition="false" type="e" size="mini">
+			<t-col main-class="w-550 h-100% fc">
+				<t-button type="error" @click="popupShow('popupleft')">点我关闭(关闭动画)</t-button>
+			</t-col>
+		</t-popup>
+		<t-popup direction="right" ref='popupright' :show-footer="true" :mask-close="false">
+			<t-col main-class="w-550 h-100% fc ">
+				<t-button type="error" @click="popupShow('popupright')">点我关闭(禁用遮罩层关闭)</t-button>
+			</t-col>
+		</t-popup>
+		<t-popup direction="top" ref='popuptop' :show-footer="true">
+			<t-col main-class='h-600 fc w-750 r-0px,0px,30rpx,30rpx'>
+				<t-button type="error" @click="popupShow('popuptop')">点我关闭</t-button>
+			</t-col>
+		</t-popup>
+		<t-popup direction="bottom" ref='popupbottom' :show-footer="true" :closeable="true">
+			<t-col main-class="h-800 fc w-750 r-30rpx,30rpx,0rpx,0rpx">
+				<t-button type="error" @click="popupShow('popupbottom')">点我关闭</t-button>
+			</t-col>
+		</t-popup>
+		<t-popup direction="center" ref='popupcenter' :show-footer="true" :closeable="true">
+			<t-col main-class="h-400 fc w-500">
+			</t-col>
+		</t-popup>
+		<t-view main-class="h-5000"></t-view>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		},
+		onLoad() {
+
+		},
+		methods: {
+			popupShow(ref : string) {
+				(this.$refs[ref] as ComponentPublicInstance).$callMethod('show')
+			}
+		}
+	}
+</script>

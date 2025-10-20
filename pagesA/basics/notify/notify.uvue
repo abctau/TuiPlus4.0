@@ -1,0 +1,64 @@
+<template>
+	<t-page>
+		<t-card main-class="mltr-30" title='Notice 通知提示列表' sub-title="..."></t-card>
+		<introduction title="基础功能">
+			<t-button type="primary" @click="addMessage">随机一条默认配置消息</t-button>
+		</introduction>
+		<introduction title="设置图标">
+			<t-button type="error" @click="addMessage1('close-circle')">错误</t-button>
+		</introduction>
+		<introduction title="插槽测试">
+			<t-button type="primary" main-class="mb-30" @click="addMessage2">show</t-button>
+		</introduction>
+		<t-notify ref="notify" main-class="m-30 df dt-100 w-690">
+
+		</t-notify>
+		<t-notify ref="notifyslot" main-class="m-30 df dt-100 w-690">
+			<t-text main-class="h-150 w-690 sta-c faic bg-blue mb-30 tdr c-#fff" type="p">我是插槽消息</t-text>
+		</t-notify>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+			};
+		},
+		methods: {
+			random(min : number, max : number) : number {
+				if (min >= 0 && max > 0 && max >= min) {
+					const gab = max - min + 1
+					return Math.floor(Math.random() * gab + min)
+				}
+				return 0
+			},
+			addMessage() {
+				const notify : ComponentPublicInstance = this.$refs['notify'] as ComponentPublicInstance
+				let not = ['欢迎使用Tui', '欢迎使用Tui', '晓云含雨却低徊', '大江东去浪淘尽']
+				let typelist = ['primary', 'error', 'warning', 'success']
+				notify.$callMethod('add', {
+					type: typelist[this.random(0, 3)],
+					text: not[this.random(0, 3)],
+					duration: 1000
+				})
+			},
+			addMessage2() {
+				const notify : ComponentPublicInstance = this.$refs['notifyslot'] as ComponentPublicInstance
+				notify.$callMethod('add', {duration:1000})
+			},
+			addMessage1(icon : string) {
+				const notify : ComponentPublicInstance = this.$refs['notify'] as ComponentPublicInstance
+				let not = ['欢迎使用Tui', '欢迎使用Tui', '晓云含雨却低徊', '大江东去浪淘尽']
+				let typelist = ['primary', 'error', 'warning', 'success']
+				notify.$callMethod('add', {
+					type: typelist[this.random(0, 3)],
+					text: not[this.random(0, 3)],
+					duration: 1000,
+					icon
+				})
+			}
+		}
+
+	}
+</script>

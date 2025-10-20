@@ -1,0 +1,190 @@
+<template>
+	<t-page :scrollDisabled="true">
+		<t-card main-class="mlr-30" title='Waterfal 瀑布流' sub-title="app端为官方瀑布流组件，虚拟滚动原理。只会渲染屏幕可见范围的元素"></t-card>
+		<t-waterflow main-class="f" ref="ins" :loadmore="true" @scrolltolower="scrolltolower" :refresherEnabled="false"
+			@refresherrefresh="refresherrefresh">
+			<t-waterfall-item v-for="(item,index) in goods" :key="index">
+				<t-col main-class="tdr oh tdb">
+					<image :src="`${item.goods_img}`" style="width: 100%;height: 400rpx;">
+					</image>
+					<t-col main-class="p-10">
+						<t-text main-class="slh-50">{{item.goods_name}}</t-text>
+						<t-text main-class="slh-50">索引：{{index}}</t-text>
+						<t-text mode="price" type="error" :text="`${item.shop_price}`" :decimals="2"></t-text>
+					</t-col>
+				</t-col>
+			</t-waterfall-item>
+		</t-waterflow>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiApi } from '@/api'
+	import { TuiGuid, randomArray, sleep } from '@/uni_modules/tui-plus'
+	const ins = ref<ComponentPublicInstance | null>(null)
+	const cur = ref<number>(1)
+	const goods = ref<UTSJSONObject[]>([])
+	const list : UTSJSONObject[] = [
+		{
+			"goods_name": "便携式折叠电炒煮",
+			"goods_id": 580,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01sIB82T1JaecYg06Mx_!!2212954981045-0-cib.jpg",
+			"shop_price": "209.99",
+			"sortKey": "861aeb9d-6961-4612-a774-0fa40a290463"
+		},
+		{
+			"goods_name": "仙女暖暖裤套装暖暖套装女厚珊瑚绒家居套装外穿百搭宽松懒人套装",
+			"goods_id": 183,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01uUUAy2273Qdy9KixX_!!1742327741-0-cib.jpg",
+			"shop_price": "24.99",
+			"sortKey": "c331efcc-5862-4087-8e7b-f3d01733ee41"
+		},
+		{
+			"goods_name": "HIH玻尿酸护手精华液",
+			"goods_id": 413,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01cJm8Da1GtwQde9Mxq_!!3953840681-0-cib.jpg",
+			"shop_price": "7.99",
+			"sortKey": "a7f5dfa4-a5f5-4629-8cdc-17d929c8e80f"
+		},
+		{
+			"goods_name": "新爆款发热马甲智能加热马甲电热男女发热服恒温全身加热背心",
+			"goods_id": 628,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01bnfmQA1o4MuTlOMGI_!!2214217985171-0-cib.jpg",
+			"shop_price": "57.99",
+			"sortKey": "586b2e55-20e7-4281-8793-38d6c7f649d1"
+		},
+		{
+			"goods_name": "RUJI如肌微分子蓝铜胜肽修护次抛精华液",
+			"goods_id": 408,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01alOaOX1Q3raTCsbvV_!!2208833191921-0-cib.jpg",
+			"shop_price": "11.99",
+			"sortKey": "aa2096b9-bd2b-4676-a7cd-194b12abf0b9"
+		},
+		{
+			"goods_name": "多功能一体电热锅",
+			"goods_id": 556,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01SqiVz52IJsdD71133_!!4078739266-0-cib.jpg",
+			"shop_price": "58.99",
+			"sortKey": "1f6d9819-4044-467c-bc82-78e65254823b"
+		},
+		{
+			"goods_name": "黄鸭不锈钢电煮锅",
+			"goods_id": 586,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01nVEwL22NMhD2zxDGp_!!1011719949-0-cib.jpg",
+			"shop_price": "20.99",
+			"sortKey": "5a127d47-ba77-4d76-aa8d-58ce7fd179d7"
+		},
+		{
+			"goods_name": "负离子导入仪 家用面部祛斑精华液",
+			"goods_id": 395,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01pi34az1Mukpf4EFF3_!!4185071495-0-cib.jpg",
+			"shop_price": "17.99",
+			"sortKey": "509db427-0b20-4b49-822d-9a3118c6014c"
+		},
+		{
+			"goods_name": "手工兔子中秋灯笼diy材料包古风手提玉兔花灯卡通中秋节礼物",
+			"goods_id": 284,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN014oobfK1tlUD072U98_!!3837835942-0-cib.jpg",
+			"shop_price": "3.99",
+			"sortKey": "5e7c70c9-3441-42c6-a4f5-2ff55f025c35"
+		},
+		{
+			"goods_name": "一代马卡龙伸缩收纳支架三合一充电线logo礼品一拖三数据线",
+			"goods_id": 376,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01fBWm9k1JZHRcDKv7p_!!2213311141042-0-cib.jpg",
+			"shop_price": "9.99",
+			"sortKey": "8753789e-b24e-4a8f-846d-75442982ba43"
+		},
+		{
+			"goods_name": "咬一口数据线保护套适用于苹果充电线充电防折断固线器",
+			"goods_id": 382,
+			"goods_img": "/goods/20230308/4bdc250221ee43cb45d55f4501d9145f.jpg",
+			"shop_price": "8.99",
+			"sortKey": "a7a0f024-a250-4bef-9a94-24325c66b375"
+		},
+		{
+			"goods_name": "瓷雅多肽修护冻干粉套盒",
+			"goods_id": 423,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01Aj0UGc1Nky1ajzyGv_!!3020621609-0-cib.jpg",
+			"shop_price": "84.99",
+			"sortKey": "10e41bcb-4f6f-414c-ab97-089ae5aed408"
+		},
+		{
+			"goods_name": "光腿神器秋冬加绒加厚肤色丝袜女外穿裸感无痕显瘦打底连裤袜G15",
+			"goods_id": 347,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01zqrkRk1Qz73Q0vGvI_!!2211886552046-0-cib.jpg",
+			"shop_price": "7.99",
+			"sortKey": "df75a9b8-3435-4a2f-8a9e-5580a357ca24"
+		},
+		{
+			"goods_name": "适用于opporeno8钢化膜 K10全屏pro全透明reno7高清A93手机6膜A97",
+			"goods_id": 363,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01yN0Psn1fphCgEzUdV_!!2214235314056-0-cib.jpg",
+			"shop_price": "8.99",
+			"sortKey": "8bf339c2-39cb-465d-a310-f1c3caee1f47"
+		},
+		{
+			"goods_name": "韩版简约情侣双肩包",
+			"goods_id": 621,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01N0WVDD1OM49NpOuxj_!!2214682831690-0-cib.jpg",
+			"shop_price": "22.99",
+			"sortKey": "2a7dcc41-fd59-42a1-a21b-341b0dee9be2"
+		},
+		{
+			"goods_name": "德国OIDIRE电煮锅",
+			"goods_id": 555,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN015tbiVe2DH4CvMAyHR_!!2550168583-0-cib.jpg",
+			"shop_price": "119.99",
+			"sortKey": "52142154-3a24-45ba-9f04-351bd75c2433"
+		},
+		{
+			"goods_name": "时尚简约游旅行背包",
+			"goods_id": 613,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01EGgrPN1k00ZvuWbjE_!!2212762114620-0-cib.jpg",
+			"shop_price": "42.99",
+			"sortKey": "7811f364-c1e0-440e-9449-748f3f0c5f25"
+		},
+		{
+			"goods_name": "国药集团美容院烟酰胺原液修护肌肤屏玻尿酸补水障美白淡斑精华液",
+			"goods_id": 400,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01TjZNcV1NKP5PEoPKd_!!3378701551-0-cib.jpg",
+			"shop_price": "16.99",
+			"sortKey": "6b63ccd0-b42e-4c50-aecb-90df22e543bd"
+		},
+		{
+			"goods_name": "全优冲刺100分试卷一二三四五六年级上下册小学生语文数学模拟卷",
+			"goods_id": 301,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN01fqZaqo2B0v0RjVTR1_!!2005738277-0-cib.jpg",
+			"shop_price": "2.99",
+			"sortKey": "8a3a6611-36b2-49f1-962c-d49dda26b299"
+		},
+		{
+			"goods_name": "不锈钢小剪刀办公文具剪剪纸剪刘海剪子线头剪手工剪纸家用",
+			"goods_id": 272,
+			"goods_img": "https://life.yundie.xyz/tuiplus/static/goods/O1CN010bmrJ71KJzrTPQb0Y_!!3984911144-0-cib.jpg",
+			"shop_price": "4.99",
+			"sortKey": "ca3c6bc7-3b2a-4b32-a32e-714233bd743f"
+		}
+	]
+	function getGoodsList() {
+		if (goods.value.length > 100) {
+			ins.value?.$callMethod('setLoadmore', 1)
+		} else {
+			goods.value.push(...list)
+		}
+	}
+	getGoodsList()
+	function scrolltolower() {
+		cur.value++
+		getGoodsList()
+	}
+	function refresherrefresh() {
+		goods.value = []
+		nextTick(() => {
+			goods.value = randomArray(list) as UTSJSONObject[]
+			sleep(3000).then(() => {
+				ins.value?.$callMethod('closerefresher')
+			})
+		})
+	}
+</script>

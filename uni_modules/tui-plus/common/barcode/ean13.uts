@@ -1,0 +1,87 @@
+/**
+ * 商品条码严格按照国际通用码
+ * @author tmzdy
+ * @description 资料参考：https://zhuanlan.zhihu.com/p/120676811
+ */
+class ean13 {
+	//编码数据
+	data=""
+	//护码
+	safeCode = "101"
+	middleCode = "01010"
+	//编码方式，我们中国是6：LGGGLL
+	EAN13_STRUCTURE = [
+		'LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG',
+		'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'
+	];
+	
+	
+	constructor(text:string) {
+		let data = text;
+		if (data.search(/^[0-9]{12}$/)!= -1  as number ) {
+			data += (this.checksum(data)).toString();
+		}
+		this.data = data.toUpperCase();
+	}
+	//校验码。
+	checksum(codestr:string):number{
+		const res = codestr.substring(0, 12).split('')
+		const resNumber = res.map((n:string):number => parseInt(n))
+			
+		const jg=resNumber.reduce((sum:number, a:number, idx:number):number => (idx % 2) > 0 ? sum + a * 3 : sum + a, 0);
+	
+		return (10 - (jg % 10)) % 10;
+	}
+	//按钮编码规则提取逻辑值，
+	getEan13Str(key:string):string[]{
+		if(key=="L") return [ 
+			'0001101', '0011001', '0010011', '0111101', '0100011',
+			'0110001', '0101111', '0111011', '0110111', '0001011'
+		]
+		if(key=="G") return [
+			'0100111', '0110011', '0011011', '0100001', '0011101',
+			'0111001', '0000101', '0010001', '0001001', '0010111'
+		]
+		if(key=="R") return [ 
+			'1110010', '1100110', '1101100', '1000010', '1011100',
+			'1001110', '1010000', '1000100', '1001000', '1110100'
+		]
+		return [] as string[];
+	}
+	
+	encodeByGuzhe(dataStr:string, structure:string):string{
+		let encoded = dataStr.split('')
+		let atrartys = [] as string[][]
+		for(let i=0;i<encoded.length;i++){
+			let chart = structure.substring(i,i+1)
+			atrartys.push(this.getEan13Str(chart))
+		}
+		
+		let encoded_str = atrartys.map((val:string[], idx:number):string => {
+			let stur = dataStr.substring(idx,idx+1)
+			return val[parseInt(stur)]
+		});
+		
+		return encoded_str.join("")
+	};
+	encode():string[] {
+		// 取编码方式。
+		let codeFang = this.EAN13_STRUCTURE[parseInt(this.data.substring(0,1))]
+		//取后面的12位数字
+		let data = this.data.substring(1,13)
+		let leftCode = data.substring(0,6)
+		let rightCode = data.substring(6,13)
+		
+		let left_code_str = this.encodeByGuzhe(leftCode,codeFang);
+		//右资料码按规则是物料码+校验码
+		let right_code_str = this.encodeByGuzhe(rightCode,"RRRRRR");
+		// 组合码制
+		//护码+左资料码+中间码+右资料码+护码
+		// let totalcode = this.safeCode+left_code_str+this.middleCode+right_code_str+this.safeCode
+		return [this.safeCode,left_code_str,this.middleCode,right_code_str,this.safeCode]
+	}
+
+	
+}
+
+export { ean13 };

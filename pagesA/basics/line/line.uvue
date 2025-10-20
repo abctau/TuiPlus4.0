@@ -1,0 +1,58 @@
+<template>
+	<t-page>
+		<t-card main-class="mlrt-30" title="Line 线条" sub-title=" 创建线条，提供丰富的样式和行为配置。通过 type 属性，可设置线条主题。"></t-card>
+		<introduction title="基础功能">
+			<t-col main-class="tdr tdb tdp">
+				<t-line main-class='mtb-30' type="success"></t-line>
+				<t-line main-class='mtb-30' type="error"></t-line>
+				<t-line main-class='mtb-30' type="primary"></t-line>
+				<t-line main-class='mtb-30' type="warning"></t-line>
+			</t-col>
+		</introduction>
+		<introduction title="纵向">
+			<t-row main-class="tdr tdb tdp">
+				<t-line direction="col" main-class='m-30' length="300rpx"></t-line>
+				<t-line direction="col" main-class='m-30' length="300rpx" type="success"></t-line>
+				<t-line direction="col" main-class='m-30' length="300rpx" type="error"></t-line>
+				<t-line direction="col" main-class='m-30' length="300rpx" type="primary"></t-line>
+				<t-line direction="col" main-class='m-30' length="300rpx" type="warning"></t-line>
+			</t-row>
+		</introduction>
+		<introduction title="虚线">
+			<t-col main-class="tdr tdb tdp">
+				<t-line main-class='mtb-30' lineStyle="dashed"></t-line>
+				<t-line main-class='mtb-30' type="success" lineStyle="dashed"></t-line>
+				<t-line main-class='mtb-30' type="error" lineStyle="dashed"></t-line>
+				<t-line main-class='mtb-30' type="primary" lineStyle="dashed"></t-line>
+				<t-line main-class='mtb-30' type="warning" lineStyle="dashed"></t-line>
+			</t-col>
+		</introduction>
+		<introduction title="更细的线条">
+			<t-col main-class="tdr tdb tdp">
+				<t-line main-class='mtb-30' :hairline="true"></t-line>
+				<t-line main-class='mtb-30' type="success" :hairline="true"></t-line>
+				<t-line main-class='mtb-30' type="error" :hairline="true"></t-line>
+				<t-line main-class='mtb-30' type="primary" :hairline="true"></t-line>
+				<t-line main-class='mtb-30' type="warning" :hairline="true"></t-line>
+			</t-col>
+		</introduction>
+		<introduction title="设置线条宽度">
+			<t-col main-class="tdr tdb tdp">
+				<t-line main-class='mtb-30' lineSize="10rpx"></t-line>
+				<t-line main-class='mtb-30' lineSize="20rpx" type="success"></t-line>
+				<t-line main-class='mtb-30' lineSize="30rpx" type="error"></t-line>
+				<t-line main-class='mtb-30' lineSize="40rpx" type="primary"></t-line>
+				<t-line main-class='mtb-30' lineSize="50rpx" type="warning"></t-line>
+			</t-col>
+		</introduction>
+		<introduction title="自定义颜色">
+			<t-col main-class="tdr tdb tdp">
+				<t-line main-class='mtb-30 c-red' lineSize="10rpx"></t-line>
+			</t-col>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+
+</script>

@@ -1,0 +1,82 @@
+<template>
+	<t-page>
+		<t-navbar :main-class="navbarStyle" title="导航栏" :type="navbarType" @back="leftClick" right-icon="setting"
+			@rightClick="rightClick"></t-navbar>
+		<t-card main-class="mlrt-30" title="Navbar 导航栏" sub-title="自定义导航栏,支持透明背景,渐变背景"></t-card>
+		<t-col main-class="p-30">
+			<t-col main-class="tdb tdr mb-30 pt-10">
+				<t-section title='尺寸'></t-section>
+				<t-row main-class="p-30 fww">
+					<t-button type='p' main-class="mrb-15" @click="setNav('')">默认(44px)</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setNav('h-38px')">38</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setNav('h-88px')">88</t-button>
+				</t-row>
+			</t-col>
+			<t-col main-class="tdb tdr mb-30 pt-10">
+				<t-section title='主题背景'></t-section>
+				<t-row main-class="p-30 fww fais">
+					<t-button type='p' main-class="mrb-15" @click="setType('normal')">normal</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setType('info')">info</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setType('primary')">primary</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setType('error')">error</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setType('warning')">warning</t-button>
+					<t-button type='p' main-class="mr-15" @click="setType('success')">success</t-button>
+				</t-row>
+			</t-col>
+			<t-col main-class="tdb tdr mb-30 pt-10">
+				<t-section title='自定义背景'></t-section>
+				<t-row main-class="p-30 fww fais">
+					<t-button type='p' main-class="mrb-15" @click="setNav('bg-#00aa7f')">#00aa7f</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setNav('bir-blue,red')">渐变</t-button>
+					<t-button type='p' main-class="mrb-15" @click="setNav('bg')">透明</t-button>
+				</t-row>
+			</t-col>
+			<t-section title='插槽' main-class="mb-30 tdr"></t-section>
+			<t-navbar type="p" :fixed="false" :placeholder="false" main-class="tdr"
+				back-view-class="tdb plr-20 ptb-15 r-60 faic">
+				<template v-slot:left>
+					<t-row main-class="faic">
+						<t-icon name="arrow-leftward"></t-icon>
+						<t-line direction="column" line-size="5px" main-class="#bcbcbc mlr-20" length="24"></t-line>
+						<t-icon name="home-fill" main-class=""></t-icon>
+					</t-row>
+				</template>
+				<template v-slot:center>
+					<t-text main-class="c-#fff sfwb">插槽定制样式</t-text>
+				</template>
+				<template v-slot:right>
+					<t-icon name="setting" size="large" :hover="true" main-class="c-#fff" :stop="true"></t-icon>
+				</template>
+			</t-navbar>
+		</t-col>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				navbarStyle: '',
+				navbarType: 'normal'
+			}
+		},
+		methods: {
+			leftClick() {
+				uni.showToast({
+					title: "点击左侧图标"
+				})
+			},
+			rightClick() {
+				uni.showToast({
+					title: "点击右侧图标"
+				})
+			},
+			setNav(sty : string) {
+				this.navbarStyle = sty
+			},
+			setType(type : string) {
+				this.navbarStyle = ''
+				this.navbarType = type
+			}
+		}
+	}
+</script>

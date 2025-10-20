@@ -1,0 +1,49 @@
+<template>
+	<t-page title="颜色工具">
+		<t-card main-class='mlrt-30' title='颜色处理' sub-title="提供颜色之间各种转换"></t-card>
+		<introduction title="parseColor(颜色字符串解析)">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">parseColor('red')=>{{parseColorResult}}</t-text>
+		</introduction>
+		<introduction title="hexToRgba(十六进制颜色转换为RGBA)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">hexToRgba('#ff0000',
+				0.5)=>{{hexToRgbaResult}}</t-text>
+		</introduction>
+		<introduction title="rgbaToHex(RGBA颜色转换为十六进制)">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">rgbaToHex('rgba(255,0,0,0.5)')=>{{rgbaToHexResult}}</t-text>
+		</introduction>
+		<introduction title="rgbToHex(RGB颜色转换为十六进制)">
+			<t-text type="info" size="small"
+				main-class="tdb slh-50 tdr plr-20 ptb-12">rgbToHex('rgb(255,0,0)')=>{{rgbToHexResult}}</t-text>
+		</introduction>
+		<introduction title="colorToRgba(十六进制颜色转换为RGBA)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">colorToRgba('#ff0000',
+				0.5)=>{{colorToRgbaResult}}</t-text>
+		</introduction>
+		<introduction title="colorGradient(颜色渐变)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">colorGradient('red', 'blue',
+				5)=>{{colorGradientResult}}</t-text>
+		</introduction>
+		<introduction title="rgb2hsv(RGB颜色转换为HSV)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">rgb2hsv(255, 0,
+				0)=>{{rgb2hsvResult}}</t-text>
+		</introduction>
+		<introduction title="hsv2rgb(HSV颜色转换为RGB)">
+			<t-text type="info" size="small" main-class="tdb slh-50 tdr plr-20 ptb-12">hsv2rgb(159, 1,
+				0.74)=>{{hsv2rgbResult}}</t-text>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+	import { parseColor, hexToRgba, rgbaToHex, rgbToHex, colorToRgba, colorGradient, rgb2hsv, hsv2rgb } from '@/uni_modules/tui-plus';
+	const parseColorResult = parseColor('red');
+	const hexToRgbaResult = hexToRgba('#ff0000', 0.5);
+	const rgbaToHexResult = rgbaToHex('rgba(255,0,0,0.5)');
+	const rgbToHexResult = rgbToHex('rgb(255,0,0)');
+	const colorToRgbaResult = colorToRgba('#ff0000', 0.5);
+	const colorGradientResult = colorGradient('red', 'blue', 5);
+	const rgb2hsvResult = rgb2hsv(255, 0, 0);
+	const hsv2rgbResult = hsv2rgb(159, 1, 0.74);
+</script>

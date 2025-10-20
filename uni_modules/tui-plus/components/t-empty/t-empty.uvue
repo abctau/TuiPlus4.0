@@ -1,0 +1,113 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fc-fv ${isFixed?'df dl-0 dt-50% atty-n50% z-99':''} ${mainClass}`"
+		@click="mainOnclick">
+		<t-image :src="imageUrl" :main-class="`w-576 ${imageClass}`" mode="widthFix" :placeholder="false"></t-image>
+		<t-text v-if="title!=''" :text="title" size="large"
+			:main-class="`sta-c sfw-700 pt-48 c-#333 ${titleClass}`"></t-text>
+		<t-text v-if="descr!=''" :text="descr" size="small" type="info"
+			:main-class="`sta-c sfw-700 pt-48-c-#333 ${descrClass}`"></t-text>
+	</t-view>
+</template>
+<script setup>
+	/**
+	 * Empty 空状态
+	 * @date 2025-05-31 12:03:13
+	 * @author TanYuan
+	 * @description 空白页占位组件用于在应用中显示一个空状态页面，通常在没有数据或内容可显示时使用。它的功能亮点包括：提供默认或自定义的占位图像，支持自定义标题和描述文本，以及可固定在页面中心的位置。使用场景包括：在列表为空、搜索无结果、网络请求失败等情况下，向用户传达当前状态并提供指引。
+	 * @example /pagesA/layout/empty/empty
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-empty.html
+	 * @example /pagesA/layout/empty/empty
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} mode=[order|news|address|network|search] 显示模式(默认：order)
+	 * @value order 暂无订单
+	 * @value news 暂无新消息
+	 * @value address 暂无地址信息
+	 * @value network 请检查网络设置
+	 * @value search 没有找到搜索的内容额
+	 * @property {String} src 替换默认图的图片地址
+	 * @property {String} imageClass 图片样式
+	 * @property {String} title 标题样式
+	 * @property {String} titleClass 标题的样式
+	 * @property {String} descr 描述文本
+	 * @property {String} descrClass 描述的文本的样式
+	 * @property {Boolean} isFixed 是否固定
+	 * @value true 是
+	 * @value false 否
+	 */
+	import { TuiEmptyImages } from './index.uts'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+
+	interface EmptyProps extends CommonProps {
+		mode : string;
+		src : string;
+		imageClass : string;
+		title : string;
+		titleClass : string;
+		descr : string;
+		descrClass : string;
+		isFixed : boolean;
+	}
+
+	const props = withDefaults(defineProps<EmptyProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		mode: 'order',
+		src: '',
+		imageClass: '',
+		title: '',
+		titleClass: '',
+		descr: '',
+		descrClass: '',
+		isFixed: false,
+	});
+
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+	const imageUrl = computed(() : string => {
+		return props.src == '' ? `${TuiEmptyImages[props.mode]}` : props.src
+	})
+</script>

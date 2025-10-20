@@ -1,0 +1,201 @@
+<template>
+	<t-drawable @initFinished="drawInitFinished" v-if="name=='circular' || name=='spinner'"
+		:main-class="`twh-${getFontSizeToValue}px ${getFontSizeToValue} ${mainClass}`"></t-drawable>
+	<t-icon v-else :id="iconguid" v-bind="extendsAttrs" :name="name" @transitionend="transitionend"></t-icon>
+</template>
+<script setup>
+	/**
+	 * Loading 加载动画
+	 * @date 2025-05-31 12:04:40
+	 * @author TanYuan
+	 * @description 显示加载状态,同时支持darw和CSS动画，通过mode设置切换
+	 * @example /pagesA/basics/loading-icon/loading-icon
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-loading.html
+	 * @example /pagesA/basics/loading-icon/loading-icon
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} name 动画图标名称(默认：spinner)
+	 */
+
+	import { TuiDrawableContext } from '../../common/model/drawable'
+	import { hexToRgba } from '../../common/model/color'
+	import { TuiRefToElement, TuiGuid } from '../../common/model/util'
+	import { setStyleProperty } from '../../common/model/style'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const uninstall = ref(false)
+	const timer = ref(0)
+	const timer1 = ref(0)
+	const iconguid = ref(`tui${TuiGuid(20)}`)
+	interface LoadingProps extends CommonProps {
+		name : string
+	}
+	const props = withDefaults(defineProps<LoadingProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		name: 'spinner'
+	});
+	const { extendsAttrs, getFontSizeToValue, getColorToValue } = useTuiThemes(props)
+	function spinner(ctx : TuiDrawableContext) {
+		const steps = 12;
+		let step = 0;
+		const width = getFontSizeToValue.value
+		const lineWidth = width / 10;
+		// 线长度和距离圆心距离
+		const length = width / 4 - lineWidth;
+		const offset = width / 4;
+		const fillColor : string = getColorToValue.value
+		let colors : string[] = []
+		for (let i = 1; i < steps; i++) {
+			colors.push(hexToRgba(fillColor, parseFloat((i / steps).toFixed(2))))
+		}
+		colors.push(hexToRgba(fillColor, 1))
+		let draw : () => void = () => { }
+		draw = () : void => {
+			ctx.reset();
+			for (let i = 0; i < steps; i++) {
+				const stepAngle = 360 / steps
+				const angle = stepAngle * i;
+				const index = (steps + i - (step % steps)) % steps
+				// 正余弦
+				const sin = Math.sin(angle / 180 * Math.PI);
+				const cos = Math.cos(angle / 180 * Math.PI);
+				// 开始绘制
+				ctx.lineWidth = lineWidth;
+				ctx.lineCap = 'round';
+				ctx.beginPath();
+				ctx.moveTo(width / 2 + offset * cos, width / 2 + offset * sin);
+				ctx.lineTo(width / 2 + (offset + length) * cos, width / 2 + (offset + length) * sin);
+				ctx.strokeStyle = colors[index]
+				ctx.stroke();
+			}
+			step += 1
+			ctx.update()
+			if (!uninstall.value) {
+				clearTimeout(timer.value)
+				timer.value = setTimeout(() => {
+					ctx.requestAnimationFrame(draw)
+				}, 100)
+			} else {
+				clearTimeout(timer.value)
+				ctx.cancelAnimationFrame()
+			}
+		}
+		draw()
+	}
+	function circular(ctx : TuiDrawableContext) {
+		let startAngle = 0;
+		let endAngle = 0;
+		let startSpeed = 0;
+		let endSpeed = 0;
+		let rotate = 0;
+		const fillColor : string = getColorToValue.value
+		const ARC_LENGTH = 345
+		const PI = Math.PI / 180
+		const SPEED = 0.010
+		const ROTATE_INTERVAL = 0.05
+		const center = getFontSizeToValue.value / 2
+		const lineWidth = getFontSizeToValue.value / 10;
+		const easeInOutCubic = (t : number) : number => {
+			return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+		}
+		let draw : () => void = () => { }
+		draw = () : void => {
+			ctx.reset();
+			ctx.beginPath();
+			ctx.arc(
+				center,
+				center,
+				center - lineWidth,
+				startAngle * PI + rotate,
+				endAngle * PI + rotate);
+			ctx.lineWidth = lineWidth;
+			ctx.strokeStyle = fillColor
+			ctx.stroke();
+			if (endAngle < ARC_LENGTH && startAngle == 0) {
+				endSpeed += SPEED
+				endAngle = Math.min(ARC_LENGTH, easeInOutCubic(endSpeed) * ARC_LENGTH)
+			} else if (endAngle == ARC_LENGTH && startAngle < ARC_LENGTH) {
+				startSpeed += SPEED
+				startAngle = Math.min(ARC_LENGTH, easeInOutCubic(startSpeed) * ARC_LENGTH);
+			} else if (endAngle >= ARC_LENGTH && startAngle >= ARC_LENGTH) {
+				endSpeed = 0
+				startSpeed = 0
+				startAngle = 0;
+				endAngle = 0;
+			}
+			rotate += ROTATE_INTERVAL;
+			ctx.update()
+			if (!uninstall.value) {
+				ctx.requestAnimationFrame(draw)
+			} else {
+				ctx.cancelAnimationFrame()
+			}
+		}
+		draw()
+	}
+	function drawInitFinished(ctx : TuiDrawableContext) {
+		switch (props.name) {
+			case 'circular':
+				circular(ctx)
+				break;
+			case 'spinner':
+				spinner(ctx)
+				break;
+			default:
+				break;
+		}
+	}
+	function play() {
+		const el = uni.getElementById(`${iconguid.value}`)!
+		el.style.setProperty('transition-property', 'transform')
+		el.style.setProperty('transition-duration', '300000ms')
+		el.style.setProperty('transition-timing-function', 'linear')
+		el.style.setProperty('transform', 'rotate(36000deg)')
+	}
+	function transitionend(e : UniEvent) {
+		const el = uni.getElementById(`${iconguid.value}`)!
+		el.style.setProperty('transition-property', 'none')
+		el.style.setProperty('transition-duration', '0ms')
+		el.style.setProperty('transform', 'rotate(0deg)')
+		clearTimeout(timer1.value)
+		timer1.value = setTimeout(() => {
+			play()
+		}, 500)
+	}
+	onMounted(() => {
+		if (props.name == 'circular' || props.name == 'spinner') return
+		nextTick(() => {
+			play()
+		})
+	})
+	onBeforeUnmount(() => {
+		uninstall.value = true
+	})
+</script>

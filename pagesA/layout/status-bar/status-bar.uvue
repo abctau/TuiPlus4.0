@@ -1,0 +1,20 @@
+<template>
+	<t-page title='状态栏占位' main-class="p-30">
+		<t-card main-class="mb-30" title='StatusBar 状态栏占位' sub-title="自动获取状态栏高度占位,H5端高度一般获取为0"></t-card>
+		<t-status-bar main-class="b"></t-status-bar>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+
+			};
+		}
+	}
+</script>
+
+<style lang="scss">
+
+</style>

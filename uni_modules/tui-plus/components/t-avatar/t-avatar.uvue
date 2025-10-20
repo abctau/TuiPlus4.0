@@ -1,0 +1,118 @@
+<template>
+	<t-image v-if="src!=''" v-bind="extendsAttrs" :main-class="`twhr-100 ${mainClass}`" :src="src" :placeholder="true"
+		:fadeShow="false"></t-image>
+	<t-icon v-if="icon!=''" v-bind="extendsAttrs"
+		:main-class="`twhr-100 fc ${randombackgroundColor?'c-#fff bg-' + getRandomHexColor:''} ${mainClass}`"
+		:name="icon"></t-icon>
+	<t-text v-if="text!=''" v-bind="extendsAttrs"
+		:main-class="`c-#fff ${extendsFontSize} twhr-100 faic sta-c ${randombackgroundColor?'bg-' + getRandomHexColor:''} ${mainClass}`"
+		:text="textSub"></t-text>
+</template>
+<script setup>
+	/**
+	 * Avatar 头像
+	 * @date 2025-05-31 13:22:41
+	 * @author TanYuan
+	 * @description 背景随机色文字头像,头像组,丰富主题样式
+	 * @example /pages/component/basics/avatar/avatar
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-avatar.html
+	 * @example /pages/component/basics/avatar/avatar
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} src 头像的图片地址
+	 * @property {String} mode=[scaleToFill|aspectFit|aspectFill|widthFix|heightFix|top|bottom|center|left|right|top left|top right|bottom left	|bottom right] 图片裁剪、缩放的模式(默认：scaleToFill)
+	 * @value scaleToFill 不保持纵横比缩放图片，使图片的宽高完全拉伸至填满 image 元素
+	 * @value aspectFit 保持纵横比缩放图片，使图片的长边能完全显示出来。也就是说，可以完整地将图片显示出来。
+	 * @value aspectFill 保持纵横比缩放图片，只保证图片的短边能完全显示出来。也就是说，图片通常只在水平或垂直方向是完整的，另一个方向将会发生截取
+	 * @value widthFix 宽度不变，高度自动变化，保持原图宽高比不变
+	 * @value heightFix 高度不变，宽度自动变化，保持原图宽高比不变
+	 * @value top 不缩放图片，只显示图片的顶部区域
+	 * @value bottom 不缩放图片，只显示图片的底部区域
+	 * @value center 不缩放图片，只显示图片的中间区域
+	 * @value left 不缩放图片，只显示图片的左边区域
+	 * @value right 不缩放图片，只显示图片的右边区域
+	 * @value top left 不缩放图片，只显示图片的左上边区域
+	 * @value top right 不缩放图片，只显示图片的右上边区域
+	 * @value bottom left	 不缩放图片，只显示图片的左下边区域
+	 * @value bottom right 不缩放图片，只显示图片的右下边区域
+	 * @property {String} icon 字体图标字体的名称
+	 * @property {String} text 文字头像，文字的内容
+	 * @property {Boolean} randombackgroundColor 是否随机背景色(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} click 点击时触发
+	 */
+
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { RandomHexColor } from '../../common/model/color.uts';
+	interface AvatarProps extends CommonProps {
+		src : string
+		mode : string
+		icon : string
+		text : string
+		randombackgroundColor : boolean
+	}
+	const props = withDefaults(defineProps<AvatarProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		src: '',
+		mode: 'scaleToFill',
+		icon: '',
+		text: '',
+		randombackgroundColor: true
+
+	});
+	const { extendsAttrs, extendsFontSize } = useTuiThemes(props)
+	const emit = defineEmits(['click'])
+
+	const textSub = computed(() : string => {
+		return `${props.text.substring(0, 1)}`
+	})
+
+	const getRandomHexColor = computed(() : string => {
+		return RandomHexColor()
+	})
+
+	function mainOnclick(e : UniPointerEvent) {
+		if (props.stop) e.stopPropagation()
+		if (props.path != '') {
+			uni.navigateTo({
+				url: props.path,
+				fail: (_) => {
+					uni.switchTab({
+						url: props.path
+					})
+				}
+			})
+		} else {
+			emit('click', e)
+		}
+	}
+</script>

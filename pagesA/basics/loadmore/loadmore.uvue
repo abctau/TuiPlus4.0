@@ -1,0 +1,31 @@
+<template>
+	<t-page title="加载更多">
+		<t-card main-class="mlrt-30" title="Loadmore 加载更多" sub-title="指示用户可以加载内容的状态，支持多种状态和装饰元素，并可配置尺寸和样式。"></t-card>
+		<introduction title="基础功能+主题展示">
+			<t-col main-class="tdr tdb tdp mb-30 fc">
+				<t-loadmore></t-loadmore>
+			</t-col>
+		</introduction>
+		<introduction title="线条类型">
+			<t-col main-class="tdr tdb tdp mb-30 fc">
+				<t-loadmore type="success" lineStyle='dashed' :line="true"></t-loadmore>
+			</t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc">
+				<t-loadmore type="primary" :line="true"></t-loadmore>
+			</t-col>
+		</introduction>
+		<introduction title="状态"><t-col main-class="tdr tdb tdp mb-30 fc">
+				<t-loadmore :line="true" :status="2"></t-loadmore></t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore type="success" :line="true"
+					:status="3"></t-loadmore></t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore type="primary" :line="true"
+					:status="1"></t-loadmore></t-col>
+		</introduction>
+		<introduction title="状态(无分割线)">
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore :status="2"></t-loadmore></t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore type="success" :status="3"></t-loadmore></t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore type="error" :status="2"></t-loadmore></t-col>
+			<t-col main-class="tdr tdb tdp mb-30 fc"><t-loadmore type="primary" :status="1"></t-loadmore></t-col>
+		</introduction>
+	</t-page>
+</template>

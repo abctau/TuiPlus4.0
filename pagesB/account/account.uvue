@@ -1,0 +1,214 @@
+<template>
+	<t-page>
+		<t-form-modal ref="showins" @confirm="onConfirm" type="p"></t-form-modal>
+		<t-col main-class="bir-#0356fa,#05abff p-50 tdb fc df h-460 w-100% z-1" @click="updateAvatar">
+			<t-avatar :src="userinfo.avatar ?? '/pagesA/static/image/65275c9ac3b1d.jpg'"
+				main-class="twh-120"></t-avatar>
+			<t-text main-class="mt-20 z-999 c-#fff">点击更换头像</t-text>
+			<t-image src="/static/my/qbg.png" main-class="da dlb-0 h-150 ope-n w-100%"></t-image>
+			<t-view main-class="da dlt-0 ptl-30 w-100" @click="autoBack" :stop="true" :hover="true">
+				<t-status-bar></t-status-bar>
+				<t-icon name="arrow-left" main-class="s-45 c-#fff sfwb"></t-icon>
+			</t-view>
+		</t-col>
+		<t-section main-class="mt-490 ptb-30" title="个人信息"></t-section>
+		<t-line></t-line>
+		<t-col main-class="tdb mb-30">
+			<t-cell :border="true" title="昵称" :desc="userinfo.nickname ?? '用户很懒什么也没留下'" @click="showNickName"></t-cell>
+			<t-cell title="性别" :desc="useGender" @click="showGender"></t-cell>
+			<t-cell :border="true" title="生日" :desc="userinfo.birthday ?? '未设置'" @click="showBirthday"></t-cell>
+			<t-cell :border="true" title="绑定手机" :desc="userinfo.phone ?? '未设置'" path="/pagesB/bound/bound"></t-cell>
+			<t-cell :border="true" title="绑定邮箱" :desc="userinfo.email ?? '未设置'" @click="showEmail"></t-cell>
+			<t-cell :border="false" title="个性签名" :desc="userinfo.signature ?? '未设置'" @click="showSignature"></t-cell>
+		</t-col>
+		<t-section main-class="ptb-30" title="账号安全"></t-section>
+		<t-line></t-line>
+		<t-col main-class="tdb mb-30">
+			<t-cell title="修改密码" :border="true"></t-cell>
+			<t-cell title="微信绑定" :border="false"></t-cell>
+		</t-col>
+		<t-section main-class="ptb-30" title="其它"></t-section>
+		<t-line></t-line>
+		<t-col main-class="tdb mb-30">
+			<t-cell title="清除缓存" desc="12.5MB" :border="true"></t-cell>
+			<t-cell title="语言" :border="false"></t-cell>
+		</t-col>
+		<t-button main-class="m-30 mt-60" type="p" size="large" @click="submit">保存</t-button>
+		<t-button main-class="m-30" type="e" size="large" @click="onlogout">退出登录</t-button>
+		<t-gap height="100"></t-gap>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiStore, TuiIf, sleep, TuiAutoBack } from '@/uni_modules/tui-plus'
+	import { updatePerson } from '@/api'
+	import { TuiUploadFileOptions, TuiUploadFile } from '@/utils'
+	const store = new TuiStore()
+	const userinfo = reactive<UTSJSONObject>({ ...store.get('userinfo') })
+	const showins = ref<TFormModalComponentPublicInstance | null>(null)
+	const uploadList = ref<UTSJSONObject[]>([])
+	const genderList = [
+		{
+			value: '0',
+			label: '保密'
+		},
+		{
+			value: '1',
+			label: '男'
+		},
+		{
+			value: '2',
+			label: '女'
+		}
+	] as UTSJSONObject[]
+	const options = [{
+		value: '0',
+		label: '所有人可见'
+	}, {
+		value: '1',
+		label: '仅校友可见',
+		disabled: true
+	}, {
+		value: '2',
+		label: '仅关注可见'
+	}]
+	const useGender = computed(() : string => {
+		const gen = parseInt(`${userinfo.gender}`)
+		return `${genderList[gen].label}`
+	})
+	const useSafetyRange = computed(() : string => {
+		const gen = parseInt(`${userinfo.safetyrange}`)
+		return `${options[gen].label}`
+	})
+	function autoBack() {
+		TuiAutoBack.value(null)
+	}
+	function onlogout() {
+		store.delete('userinfo', 'token', 'refreshToken')
+		uni.showToast({
+			title: '退出登录成功',
+			success: () => {
+				uni.navigateBack()
+			}
+		})
+	}
+	function updateAvatar() {
+		TuiUploadFileOptions().then((res : UTSJSONObject[]) => {
+			userinfo.avatar = res[0].path
+			uploadList.value = res
+		})
+	}
+	async function submit() {
+		uni.showLoading({
+			title: '更新中'
+		})
+		const user = { ...userinfo }
+		if (uploadList.value.length > 0) {
+			user.avatar = uploadList.value[0].cloudPath
+			await TuiUploadFile(uploadList.value[0], (e : UTSJSONObject) => {
+				userinfo.avatar = e.cloudPath
+			})
+		}
+		updatePerson(user).then(async (_ : UTSJSONObject) => {
+			store.set('userinfo', userinfo)
+			await sleep(1000)
+			uni.hideLoading()
+			uni.navigateBack()
+		})
+	}
+	function showRange() {
+		const ins = showins.value!
+		const val = userinfo.safetyrange ?? 0
+		ins.show({
+			"title": "个人资料可见范围",
+			"name": "safetyrange",
+			"type": "pickerSelect",
+			"value": `${val}`,
+			"contentClass": 'w-690',
+			"attrs": { embeddable: true, "list": options, contentClass: 'h-350', mainClass: "mt-n30 ov" },
+			"describe": ""
+		})
+	}
+	function showSignature() {
+		const ins = showins.value!
+		const val = userinfo.signature ?? ''
+		ins.show({
+			title: '修改签名',
+			type: 'textarea',
+			name: 'signature',
+			value: val,
+			attrs: {
+				inputType: 'string',
+				mode: 'string',
+				placeholder: "请输入您的签名"
+			}
+		})
+	}
+	function showEmail() {
+		const ins = showins.value!
+		const val = userinfo.email ?? ''
+		ins.show({
+			title: '邮箱',
+			type: 'input',
+			name: 'email',
+			value: val,
+			attrs: {
+				inputType: 'string',
+				mode: 'string',
+				placeholder: "请输入邮箱",
+			},
+			contentClass: "w-600"
+		})
+	}
+	function showBirthday() {
+		const ins = showins.value!
+		const v : string = userinfo.getString('birthday') ?? ''
+		ins.show({
+			title: "生日",
+			name: "birthday",
+			type: "date",
+			attrs: { format: "yyyy-mm-dd" },
+			value: v,
+			describe: "",
+			contentClass: "w-600"
+		})
+	}
+	function showGender() {
+		const ins = showins.value!
+		const gen : any = userinfo.gender ?? 0
+		ins.show({
+			title: '性别',
+			type: 'radio',
+			name: 'gender',
+			value: `${gen}`,
+			describe: '',
+			attrs: { childClass: "p-0 ml-15" },
+			list: genderList
+		})
+	}
+	function showNickName() {
+		const ins = showins.value!
+		const val = userinfo.nickname ?? ''
+		ins.show({
+			title: '昵称',
+			type: 'input',
+			name: 'nickname',
+			value: val,
+			attrs: {
+				mode: 'string',
+				maxlength: 20,
+				placeholder: "请输入昵称"
+			},
+			describe: ''
+		})
+	}
+	function show() {
+
+	}
+	function onConfirm(e : UTSJSONObject) {
+		userinfo.set(`${e.name}`, `${e.value}` == '' ? null : e.value)
+	}
+	function back() {
+		uni.navigateBack()
+	}
+</script>

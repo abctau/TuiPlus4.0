@@ -1,0 +1,12 @@
+<template>
+	<view :style="maskStyle">
+		<text>加载中</text>
+	</view>
+</template>
+
+<script setup>
+	import { useStyle } from '../../common/model/style.uts';
+	const maskStyle = computed(() : string => {
+		return useStyle('tpg df dlt-0 twh-100% fc z-999')
+	})
+</script>

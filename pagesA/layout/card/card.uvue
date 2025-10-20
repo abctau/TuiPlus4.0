@@ -1,0 +1,125 @@
+<template>
+	<t-page main-class="p-30">
+		<t-section title='展示封面图片' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30 p-0">
+			<t-col main-class="w-100% h-380 dr">
+				<t-image main-class="w-100% h-380 r-0" src='/pagesA/static/image/D1.jpg'></t-image>
+				<t-text main-class="da db-0 c-#ffffff sfwb fbsb p-20">这是一个展示封面和操作栏的卡片实例</t-text>
+			</t-col>
+			<t-text main-class="p-10 slh-50">此示例向您展示了如何使用封面插槽和操作栏插槽，以增强卡片的视觉效果和功能性。</t-text>
+		</t-card>
+		<t-section title='集成操作栏' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30">
+			<t-col main-class="w-100% h-380 dr">
+				<t-image main-class="w-100% h-380 r-0" src='/pagesA/static/image/D1.jpg'></t-image>
+				<t-text main-class="da db-0 c-#ffffff sfwb fbsb p-20">这是一个展示封面和操作栏的卡片实例</t-text>
+			</t-col>
+			<t-text main-class="p-10 slh-50">此示例向您展示了如何使用封面插槽和操作栏插槽，以增强卡片的视觉效果和功能性。</t-text>
+			<t-line main-class="mtb-15"></t-line>
+			<t-row main-class="tdp ats-1.1">
+				<t-row main-class="f fc" v-for="(item,index) in buttons" :key="index"
+					@click="item.selected=!item.selected">
+					<t-icon :type="item.selected?'e':''" main-class="mr-10"
+						:name="item.selected?item.selectedIcon:item.icon"></t-icon>
+					<t-text :type="item.selected?'e':''">{{item.lable}}</t-text>
+				</t-row>
+			</t-row>
+		</t-card>
+		<t-section title='卡片+cell组合' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30 p-0" title="欢迎使用Tui" title-class="sfwb p-20" sub-title-class="slh-60 sls-10 ato-l,t plr-20"
+			sub-title="Tui是一个强大的UI库，提供了丰富的组件和灵活的配置，助力开发者快速构建高质量的用户界面。">
+			<t-cell main-class="ptb-30" icon='/static/tabbar/ui1.png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/tabbar/ui1.png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/tabbar/ui1.png' :border="true" title="欢迎使用Tui"></t-cell>
+			<t-cell main-class="ptb-30" icon='/static/tabbar/ui1.png' :border="true" title="欢迎使用Tui"></t-cell>
+		</t-card>
+		<t-section title='主题-type' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='i' title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='w' title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='p' title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='e' title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-section title='主题-effect' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="normal" sub-title="次级标题"
+			tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="dark" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="disabled" sub-title="次级标题"
+			tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="light" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="plain" sub-title="次级标题" tag="标签详情"></t-card>
+		
+		<t-section title='主题-size' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" size="large" title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="medium" title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="small" title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="mini" title="主标题" sub-title="次级标题" tag="标签详情"></t-card>
+		
+		<t-section title='主题-type' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='i' title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='w' title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='p' title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='e' title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" tag="标签详情"></t-card>
+		<t-section title='主题-effect' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="normal" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="dark" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="disabled" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="light" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" type='s' title="主标题" effect="plain" tag="标签详情"></t-card>
+		
+		<t-section title='主题-size' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30" :icon="src" size="large" title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="medium" title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="small" title="主标题" tag="标签详情"></t-card>
+		<t-card main-class="mb-30" :icon="src" size="mini" title="主标题" tag="标签详情"></t-card>
+		
+		<t-section title='基本用法演示' main-class="mb-30"></t-section>
+		<t-card main-class="mb-30">
+			<t-text>这是一个简单的卡片示例，展示了没有附加属性且不包含阴影效果的卡片样式。</t-text>
+		</t-card>
+	</t-page>
+</template>
+
+<script>
+	type typebuttonlist = {
+		selectedIcon : string
+		icon : string
+		lable : string
+		selected : boolean
+	}
+	export default {
+		data() {
+			return {
+				resUrl: '',
+				src: '/pagesA/static/image/avatar.jpeg',
+				src2: '/pagesA/static/image/D1.jpg',
+				buttons: [{
+					selectedIcon: 'star-fill',
+					icon: 'star',
+					lable: '收藏',
+					selected: true
+				},
+				{
+					selectedIcon: 'thumb-up-fill',
+					icon: 'thumb-up',
+					lable: '点赞',
+					selected: false
+				}, {
+					selectedIcon: 'chat',
+					icon: 'chat',
+					lable: '评论',
+					selected: false,
+				}] as typebuttonlist[]
+			}
+		},
+		methods: {
+			socialClick(index : number, state : boolean) {
+				if (index != 2) {
+					this.buttons[index].set('selected', state)
+				}
+			}
+		}
+	}
+</script>

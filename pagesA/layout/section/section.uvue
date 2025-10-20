@@ -1,0 +1,41 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title='Section 标题' sub-title="创意标题栏，适用于展示创意作品、设计灵感的标题。"></t-card>
+		<t-section main-class="mb-30" title="主题-type" @click="test" :hover="true"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="p" @click="test"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="e" :disabled="true"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="w"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="s"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="i"></t-section>
+
+		<t-section main-class="mb-30" title="主题-effect" @click="test"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="p" effect="normal" @click="test"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="e" effect="dark"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="w" effect="disabled"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="s" effect="light"></t-section>
+		<t-section main-class="mb-30" title="装饰线条主题" type="i" effect="plain"></t-section>
+
+		<t-section main-class="mb-30" title="主题-size" type="p" line-class="twhr-15"></t-section>
+		<t-section main-class="mb-30" title="线条样式控制" type="e" size="large" line-class="twhr-15"></t-section>
+		<t-section main-class="mb-30" title="线条样式控制" type="w" size="medium" line-class="twhr-15"></t-section>
+		<t-section main-class="mb-30" title="线条样式控制" type="s" size="small" line-class="twhr-15"></t-section>
+		<t-section main-class="mb-30" title="线条样式控制" type="i" size="mini" line-class="twhr-15"></t-section>
+
+
+		<t-section title="更多" type="p" main-class="mb-30" line-class="twhr-15"></t-section>
+		<t-section title="主标题-副标题" main-class="mb-30" type="p"></t-section>
+		<t-section main-class="mb-30" title="主标题" type="p" sub-title="副标题测试" @click="test"></t-section>
+		<t-section main-class="mb-30" title="主标题" type="e" sub-title="副标题测试"></t-section>
+		<t-section main-class="mb-30" title="主标题" type="w" sub-title="副标题测试"></t-section>
+		<t-section main-class="mb-30" title="主标题" type="s" sub-title="副标题测试"></t-section>
+		<t-section main-class="mb-30" title="主标题" type="i" sub-title="副标题测试"></t-section>
+
+		<t-section title="线条渐变色" type="p" line-class="bib-#ffb703,#ff416c" main-class="mb-30"></t-section>
+		<t-section title="调整字体大小" main-class="s-50" sub-title="副标题测试"></t-section>
+	</t-page>
+</template>
+<script setup>
+	function test() {
+		console.log(123)
+	}
+</script>

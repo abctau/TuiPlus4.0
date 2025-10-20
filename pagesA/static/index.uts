@@ -1,0 +1,30 @@
+import InputMethodManager from "android.view.inputmethod.InputMethodManager";
+import Context from "android.content.Context";
+import { UTSAndroid } from "io.dcloud.uts";
+
+// 显示软键盘
+export function showKeyboard(view: android.view.View): void {
+	view.requestFocus(); // 	获取焦点
+    const context = UTSAndroid.getAppContext();
+    if (context != null) {
+        const imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+    }
+}
+
+// 隐藏软键盘
+export function hideKeyboard(view: android.view.View): void {
+    const context = UTSAndroid.getAppContext();
+    if (context != null) {
+        const imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+}
+// 获取键盘高度
+export function getKeyboardHeight(view: android.view.View): number {
+    const rootView = view.getRootView();
+    const r = new android.graphics.Rect();
+    rootView.getWindowVisibleDisplayFrame(r);
+    const heightDiff = rootView.getRootView().getHeight() - (r.bottom - r.top);
+    return heightDiff > 0 ? heightDiff : 0; // 返回键盘高度，若无则返回0
+}

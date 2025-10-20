@@ -1,0 +1,52 @@
+export class TuiArray extends Array<number> {
+	constructor(len : number = 0) {
+		super();
+		if (len > 0) this.setValue(len - 1, 0)
+	}
+	splices(startIndex : number, deleteCount : number) : TuiArray {
+		const arr = this.splice(startIndex, deleteCount)
+		const a = new TuiArray()
+		a.push(...arr)
+		return a
+	}
+	slices(start : number = 0, end : number = 0) : TuiArray {
+		let _end : number = end
+		if (end == 0) _end = this.length - start
+		const arr = this.slice(start, _end)
+		const a = new TuiArray()
+		a.push(...arr)
+		return a
+	}
+	getValue(index : number) : number {
+		let val : number = 0;
+		if (index >= 0 && index < this.length) {
+			val = this[index];
+		}
+		return val;
+	}
+	setValue(index : number, value : number) {
+		if (index >= this.length) {
+			let len = this.length
+			for (let i = len; i <= index; i++) {
+				this.push(0)
+			}
+		}
+		this[index] = value;
+	}
+	get adjustLength() : number {
+		return this.length
+	}
+	set adjustLength(len : number) {
+		let dif = this.length - len
+		if (dif > 0) {
+			this.splice(len, dif)
+		} else if (dif < 0) {
+			this.setValue(len - 1, 0)
+		}
+	}
+	copy() : TuiArray {
+		const newarray = new TuiArray()
+		newarray.push(...this)
+		return newarray
+	}
+}

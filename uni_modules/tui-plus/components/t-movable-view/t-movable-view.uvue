@@ -1,0 +1,185 @@
+<template>
+	<t-gesture v-bind="extendsAttrs" :main-class="movableStyles" :style="{
+		transform: `translate(${tranX}px,${tranY}px)`
+	}" @tuiTouchstart="ontuiTouchstart" ref="movableviewins" @initFinished="initFinished" @tuiTouchmove="ontuiTouchmove"
+		@tuiTouchend="ontouchend">
+		<text>{{Math.floor(tranX)}}</text>
+		<text>{{Math.floor(tranY)}}</text>
+		<slot></slot>
+	</t-gesture>
+</template>
+
+<script setup>
+	/**
+	 * MovableView 可移动的视图容器
+	 * @date 2025-05-31 12:04:53
+	 * @author TanYuan
+	 * @description 逻辑层和视图层分离，从视图层发送数据给逻辑层，处理后再传回视图层会产生损耗，导致拖动卡顿。通过一个框架实现好的组件，在视图层内部处理拖动，避免来回通信。
+	 * @example /pagesA/layout/movable-view/movable-view
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-movable-view.html
+	 * @example /pagesA/layout/movable-view/movable-view
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} direction undefined(默认：all)
+	 * @property {Boolean} inertia undefined
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} outOfBounds undefined
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} x undefined
+	 * @property {Number} y undefined
+	 * @property {Number} damping undefined(默认：20)
+	 * @property {Number} friction undefined(默认：2)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} scale undefined
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} scaleMin undefined(默认：0.5)
+	 * @property {Number} scaleMax undefined(默认：10)
+	 * @property {Number} scaleValue undefined(默认：1)
+	 * @property {Boolean} animation undefined(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} end 手指抬起时触发
+	 * @event {Function} change 拖动过程中触发的事件，event.detail = {x: x, y: y, source: source}。其中source表示产生移动的原因，值可为touch（拖动）、touch-out-of-bounds（超出移动范围）、out-of-bounds（超出移动范围后的回弹）、friction（惯性）和空字符串（setData）。
+	 */
+	import { TuiTouchEvent, TuiMovableTouchEvent } from '@/uni_modules/tui-plus'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface MovableViewProps extends CommonProps {
+		direction : string
+		inertia : boolean
+		outOfBounds : boolean
+		x : number
+		y : number
+		damping : number
+		friction : number
+		disabled : boolean
+		scale : boolean
+		scaleMin : number
+		scaleMax : number
+		scaleValue : number
+		animation : boolean
+	}
+
+	const props = withDefaults(defineProps<MovableViewProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		direction: 'all',
+		inertia: false,
+		outOfBounds: false,
+		x: 0,
+		y: 0,
+		damping: 20,
+		friction: 2,
+		scale: false,
+		scaleMin: 0.5,
+		scaleMax: 10,
+		scaleValue: 1,
+		animation: true
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'end'])
+	const startX = ref<number>(0);
+	const startY = ref<number>(0);
+	const tranX = ref<number>(0);
+	const tranY = ref<number>(0);
+	const moveX = ref<number>(0);
+	const moveY = ref<number>(0);
+	const moveW = ref<number>(0);
+	const moveH = ref<number>(0);
+	const moveL = ref<number>(0);
+	const moveT = ref<number>(0);
+	const minX = ref<number>(0);
+	const minY = ref<number>(0);
+	const maxX = ref<number>(0);
+	const maxY = ref<number>(0);
+	const isAni = ref<boolean>(false);
+	const movableAreaAttrs = inject<UTSJSONObject>('movableAreaAttrs')
+	const areaWidth = movableAreaAttrs?.get('areaW') as Ref<number>
+	const areaHeight = movableAreaAttrs?.get('areaH') as Ref<number>
+	const areaLeft = movableAreaAttrs?.get('areaL') as Ref<number>
+	const areaTop = movableAreaAttrs?.get('areaT') as Ref<number>
+	function initFinished(rect : NodeInfo) {
+		moveW.value = rect.width!
+		moveH.value = rect.height!
+		moveL.value = rect.left!
+		moveT.value = rect.top!
+	}
+	function ontuiTouchstart(e : TuiTouchEvent) {
+		startX.value = e.x
+		startY.value = e.y
+		minX.value = areaLeft.value - moveL.value
+		minY.value = areaTop.value - moveT.value
+		maxX.value = areaWidth.value - (moveL.value + moveW.value)
+		maxY.value = areaHeight.value - (moveT.value + moveH.value)
+		isAni.value = false
+	}
+	function setTranEl(x : number, y : number) {
+		tranX.value = x
+		tranY.value = y
+	}
+	function ontuiTouchmove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		let x = e.x - startX.value + moveX.value
+		let y = e.y - startY.value + moveY.value
+		if (x < minX.value) x = minX.value
+		if (y < minY.value) y = minY.value
+		if (x > maxX.value) x = maxX.value
+		if (y > maxY.value) y = maxY.value
+		setTranEl(x, y)
+		emit('change', { x: x, y: y, source: 'touch' } as TuiMovableTouchEvent)
+	}
+	const ontouchend = (_ : TuiTouchEvent) => {
+		moveX.value = tranX.value
+		moveY.value = tranY.value
+		emit('end', { x: tranX.value, y: tranY.value, source: 'touch' } as TuiMovableTouchEvent)
+	}
+	function tranDebounce(x : number, y : number) {
+		if (props.animation) {
+			isAni.value = true
+		}
+		setTranEl(x, y)
+		moveX.value = x
+		moveY.value = y
+	}
+
+	watch(() : number => props.x, (x : number) => {
+		tranDebounce(x, tranY.value)
+
+	})
+	watch(() : number => props.y, (y : number) => {
+		tranDebounce(tranX.value, y)
+	})
+	const movableStyles = computed(() : string => {
+		return `${props.mainClass} ${isAni.value ? 'atp-tr atd-500' : ''}`
+	})
+</script>

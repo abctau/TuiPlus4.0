@@ -1,0 +1,112 @@
+<template>
+	<t-page title='链接'>
+		<t-card title='超链接 Link' main-class="mtlr-30"
+			subTitle="
+T-LINK组件是一款功能强大的页面跳转解决方案，为开发者提供了一站式的跳转服务。该组件支持多种跳转场景，包括跳转小程序、WEB端打开小程序、WEB端跳转URL、打开指定APP以及打开地图坐标等。通过简单的配置，T-LINK组件能够帮助您快速实现页面间的无缝跳转，提升用户体验，降低开发成本。使用T-LINK组件，让您的项目跳转更加灵活、便捷！"></t-card>
+		<!-- #ifdef APP-ANDROID -->
+		<introduction title='打开小程序(通过支持宝云函数获取小程序跳转ID)'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link :url="mpUrl">《服务公社》</t-link>
+				<t-text>小程序</t-text>
+			</t-row>
+		</introduction>
+		<introduction title='打开指定APP'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link url="market://details?id=com.tencent.mm">《应用市场》</t-link>
+				<t-text>打开APP</t-text>
+			</t-row>
+		</introduction>
+		<introduction title='打开地图坐标'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link
+					url='androidamap://viewMap?sourceApplication=Hello%20uni-app&poiname=DCloud&lat=39.9631018208&lon=116.3406135236&dev=0'>《地图》</t-link>
+				<t-text>APP</t-text>
+			</t-row>
+		</introduction>
+		<!-- #endif -->
+		<!-- #ifdef APP-IOS -->
+		<introduction title='应用市场'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link type="p" :hover="true"
+					url="itms-apps://search.itunes.apple.com//WebObjects//MZSearch.woa/wa/search?media=software&lterm=">打开
+					AppStore 到搜索页</t-link>
+				<t-text>搜索</t-text>
+			</t-row>
+		</introduction>
+		<introduction title='打开地图坐标'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link url='http://maps.apple.com/?q=数字天堂公司&sll=39.9631018208,116.3406135236&z=10&t=s'>《地图》</t-link>
+				<t-text>坐标（需要后台配置对应才能跳转）</t-text>
+			</t-row>
+		</introduction>
+		<introduction title='跳转apple协议'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link
+					url='https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html '>apple协议</t-link>
+			</t-row>
+		</introduction>
+		<!-- #endif -->
+		<!-- #ifdef WEB -->
+		<introduction title='WEB端打开小程序'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link :url="mpUrl">《服务公社》</t-link>
+				<t-text>小程序</t-text>
+			</t-row>
+		</introduction>
+		<introduction title='启动 Hello uni-app x 应用(需要真机且安装Hello uni-app x APP)'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link :url="mpUrl">Hello uni-app x</t-link>
+				<t-text>APP</t-text>
+			</t-row>
+		</introduction>
+		<!-- #endif -->
+		<!-- #ifdef MP-WEIXIN -->
+		<introduction title='跳转小程序'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link :url="mpUrl">《服务公社》</t-link>
+				<t-text>小程序</t-text>
+			</t-row>
+		</introduction>
+		<!-- <introduction title='启动 Hello uni-app x 应用(需要真机且安装Hello uni-app x APP)'>
+			<t-row>
+				<t-text>点击进入</t-text>
+				<t-link :url="mpUrl">Hello uni-app x</t-link>
+				<t-text>APP</t-text>
+			</t-row>
+		</introduction> -->
+		<!-- #endif -->
+	    <!-- #ifndef MP-WEIXIN -->
+	    <introduction title='跳转URL'>
+	    	<t-link url='https://doc.dcloud.net.cn/uni-app-x/'>https://doc.dcloud.net.cn/uni-app-x/</t-link>
+	    </introduction>
+	    <!-- #endif -->
+	</t-page>
+</template>
+
+<script>
+	import { TuiApi } from '@/api'
+	export default {
+		data() {
+			return {
+				mpUrl: ''
+			};
+		},
+		created() {
+			TuiApi('getQueryscheme',{},true).then(res => {
+				this.mpUrl = res['data'] as string
+			})
+		},
+		methods: {
+
+		}
+	}
+</script>

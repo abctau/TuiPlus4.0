@@ -1,0 +1,997 @@
+{
+	"pages": [{
+		"path": "pages/index/index",
+		"style": {
+			"navigationBarTitleText": "TuiPlus",
+			"navigationStyle": "custom"
+		}
+	}, {
+		"path": "pages/my/my",
+		"style": {
+			"navigationBarTitleText": "我的",
+			"navigationStyle": "custom"
+		}
+	}, {
+		"path": "pages/template/template",
+		"style": {
+			"navigationBarTitleText": "模版"
+		}
+	}, {
+		"path": "pages/api/api",
+		"style": {
+			"navigationBarTitleText": "api"
+		}
+	}, {
+		"path": "pages/table/table",
+		"style": {
+			"navigationBarTitleText": "图表"
+		}
+	}],
+	"subPackages": [{
+		"root": "pagesA",
+		"pages": [{
+				"path": "basics/text/text",
+				"style": {
+					"navigationBarTitleText": "text"
+				}
+			},
+			{
+				"path": "layout/layout/layout",
+				"style": {
+					"navigationBarTitleText": "layout"
+				}
+			},
+			{
+				"path": "layout/section/section",
+				"style": {
+					"navigationBarTitleText": "section"
+				}
+			},
+			{
+				"path": "basics/image/image",
+				"style": {
+					"navigationBarTitleText": "image"
+				}
+			}, {
+				"path": "layout/card/card",
+				"style": {
+					"navigationBarTitleText": "card"
+				}
+			}, {
+				"path": "basics/icon/icon",
+				"style": {
+					"navigationBarTitleText": "图标"
+				}
+			},
+			{
+				"path": "layout/drag/drag",
+				"style": {
+					"navigationBarTitleText": "拖拽"
+				}
+			},
+			{
+				"path": "basics/canvas/canvas",
+				"style": {
+					"navigationBarTitleText": "canvas"
+				}
+			},
+			{
+				"path": "basics/draw/draw",
+				"style": {
+					"navigationBarTitleText": "draw"
+				}
+			},
+			{
+				"path": "basics/screenshot/screenshot",
+				"style": {
+					"navigationBarTitleText": "截图"
+				}
+			},
+			{
+				"path": "basics/drawBall/drawBall",
+				"style": {
+					"navigationBarTitleText": "drawBall"
+				}
+			},
+			{
+				"path": "basics/loading-icon/loading-icon",
+				"style": {
+					"navigationBarTitleText": "loading"
+				}
+			},
+			{
+				"path": "basics/line/line",
+				"style": {
+					"navigationBarTitleText": "line"
+				}
+			},
+			{
+				"path": "layout/cell/cell",
+				"style": {
+					"navigationBarTitleText": "cell"
+				}
+			},
+			{
+				"path": "form/button/button",
+				"style": {
+					"navigationBarTitleText": "button"
+				}
+			},
+			{
+				"path": "form/input/input",
+				"style": {
+					"navigationBarTitleText": "input"
+				}
+			},
+			{
+				"path": "layout/popup/popup",
+				"style": {
+					"navigationBarTitleText": "popup"
+				}
+			},
+			{
+				"path": "form/textarea/textarea",
+				"style": {
+					"navigationBarTitleText": "textarea"
+				}
+			},
+			{
+				"path": "form/checkbox/checkbox",
+				"style": {
+					"navigationBarTitleText": "checkbox"
+				}
+			},
+			{
+				"path": "form/radio/radio",
+				"style": {
+					"navigationBarTitleText": "radio"
+				}
+			},
+			{
+				"path": "form/radio-group/radio-group",
+				"style": {
+					"navigationBarTitleText": "radio-group"
+				}
+			},
+			{
+				"path": "form/checkbox-group/checkbox-group",
+				"style": {
+					"navigationBarTitleText": "checkbox-group"
+				}
+			},
+			{
+				"path": "form/select/select",
+				"style": {
+					"navigationBarTitleText": "select"
+				}
+			},
+			{
+				"path": "basics/popover/popover",
+				"style": {
+					"navigationBarTitleText": "popover"
+				}
+			},
+			{
+				"path": "basics/refresher/refresher",
+				"style": {
+					"navigationBarTitleText": "refresher"
+				}
+			},
+			{
+				"path": "basics/loadmore/loadmore",
+				"style": {
+					"navigationBarTitleText": "loadmore"
+				}
+			},
+			{
+				"path": "layout/list/list",
+				"style": {
+					"navigationBarTitleText": "list"
+				}
+			},
+			{
+				"path": "template/pool/pool",
+				"style": {
+					"navigationBarTitleText": "pool"
+				}
+			},
+			{
+				"path": "form/number-box/number-box",
+				"style": {
+					"navigationBarTitleText": "number-box"
+				}
+			},
+			{
+				"path": "form/rate/rate",
+				"style": {
+					"navigationBarTitleText": "rate"
+				}
+			},
+			{
+				"path": "layout/gesture/gesture",
+				"style": {
+					"navigationBarTitleText": "gesture"
+				}
+			},
+			{
+				"path": "form/switch/switch",
+				"style": {
+					"navigationBarTitleText": "switch`"
+				}
+			},
+			{
+				"path": "form/code-input/code-input",
+				"style": {
+					"navigationBarTitleText": "code-input"
+				}
+			},
+			{
+				"path": "form/upload/upload",
+				"style": {
+					"navigationBarTitleText": "upload"
+				}
+			},
+			{
+				"path": "basics/color-picker/color-picker",
+				"style": {
+					"navigationBarTitleText": "color-picker"
+				}
+			},
+			{
+				"path": "form/file-manager/file-manager",
+				"style": {
+					"navigationBarTitleText": "file-manager"
+				}
+			},
+			{
+				"path": "layout/scroll/scroll",
+				"style": {
+					"navigationBarTitleText": "scroll"
+				}
+			},
+			{
+				"path": "layout/status-bar/status-bar",
+				"style": {
+					"navigationBarTitleText": "status-bar"
+				}
+			},
+			{
+				"path": "layout/skeleton/skeleton",
+				"style": {
+					"navigationBarTitleText": "skeleton"
+				}
+			},
+			{
+				"path": "layout/gap/gap",
+				"style": {
+					"navigationBarTitleText": "gap"
+				}
+			},
+			{
+				"path": "layout/group/group",
+				"style": {
+					"navigationBarTitleText": "group"
+				}
+			},
+			{
+				"path": "basics/read-more/read-more",
+				"style": {
+					"navigationBarTitleText": "read-more"
+				}
+			},
+			{
+				"path": "layout/collapse/collapse",
+				"style": {
+					"navigationBarTitleText": "collapse"
+				}
+			},
+			{
+				"path": "layout/grid/grid",
+				"style": {
+					"navigationBarTitleText": "grid"
+				}
+			},
+			{
+				"path": "basics/badge/badge",
+				"style": {
+					"navigationBarTitleText": "badge"
+				}
+			},
+			{
+				"path": "template/autostyle/autostyle",
+				"style": {
+					"navigationBarTitleText": "autostyle"
+				}
+			},
+			{
+				"path": "layout/tabs/tabs",
+				"style": {
+					"navigationBarTitleText": "tabs"
+				}
+			},
+			{
+				"path": "layout/watermark/watermark",
+				"style": {
+					"navigationBarTitleText": "watermark"
+				}
+			},
+			{
+				"path": "layout/subsection/subsection",
+				"style": {
+					"navigationBarTitleText": "subsection"
+				}
+			},
+			{
+				"path": "layout/back-top/back-top",
+				"style": {
+					"navigationBarTitleText": "back-top"
+				}
+			},
+			{
+				"path": "layout/count-down/count-down",
+				"style": {
+					"navigationBarTitleText": "count-down"
+				}
+			},
+			{
+				"path": "basics/code/code",
+				"style": {
+					"navigationBarTitleText": "code"
+				}
+			},
+			{
+				"path": "basics/divider/divider",
+				"style": {
+					"navigationBarTitleText": "divider"
+				}
+			},
+			{
+				"path": "basics/sorting-button/sorting-button",
+				"style": {
+					"navigationBarTitleText": "sorting-button"
+				}
+			},
+			{
+				"path": "form/search/search",
+				"style": {
+					"navigationBarTitleText": "search"
+				}
+			},
+			{
+				"path": "basics/count-to/count-to",
+				"style": {
+					"navigationBarTitleText": "count-to"
+				}
+			},
+			{
+				"path": "layout/keyboard/keyboard",
+				"style": {
+					"navigationBarTitleText": "keyboard"
+				}
+			},
+			{
+				"path": "basics/drawable/drawable",
+				"style": {
+					"navigationBarTitleText": "drawable"
+				}
+			},
+			{
+				"path": "basics/tag/tag",
+				"style": {
+					"navigationBarTitleText": "tag"
+				}
+			},
+			{
+				"path": "basics/avatar/avatar",
+				"style": {
+					"navigationBarTitleText": "avatar"
+				}
+			},
+			{
+				"path": "layout/visibility-sensor/visibility-sensor",
+				"style": {
+					"navigationBarTitleText": "元素监听"
+				}
+			},
+			{
+				"path": "layout/sticky/sticky",
+				"style": {
+					"navigationBarTitleText": "吸顶"
+				}
+			},
+			{
+				"path": "basics/number/number",
+				"style": {
+					"navigationBarTitleText": "number"
+				}
+			},
+			{
+				"path": "other/crop/crop",
+				"style": {
+					"navigationBarTitleText": "crop"
+				}
+			},
+			{
+				"path": "native/camrea/camrea",
+				"style": {
+					"navigationBarTitleText": "camrea"
+				}
+			},
+			{
+				"path": "basics/animation/animation",
+				"style": {
+					"navigationBarTitleText": "animation"
+				}
+			},
+			{
+				"path": "basics/pagination/pagination",
+				"style": {
+					"navigationBarTitleText": "分页"
+				}
+			},
+			{
+				"path": "other/drop-card/drop-card",
+				"style": {
+					"navigationBarTitleText": "滑走式卡片"
+				}
+			},
+			{
+				"path": "basics/link/link",
+				"style": {
+					"navigationBarTitleText": "链接"
+				}
+			},
+			{
+				"path": "form/verify/verify",
+				"style": {
+					"navigationBarTitleText": "滑块验证"
+				}
+			},
+			{
+				"path": "other/barcode/barcode",
+				"style": {
+					"navigationBarTitleText": "条形码"
+				}
+			},
+			{
+				"path": "other/qr/qr",
+				"style": {
+					"navigationBarTitleText": "二维码"
+				}
+			},
+			{
+				"path": "template/signature/signature",
+				"style": {
+					"navigationBarTitleText": "签名"
+				}
+			},
+			{
+				"path": "basics/transition/transition",
+				"style": {
+					"navigationBarTitleText": "transition"
+				}
+			},
+			{
+				"path": "native/scan/scan",
+				"style": {
+					"navigationBarTitleText": "扫码"
+				}
+			},
+			{
+				"path": "basics/circleprogress/circleprogress",
+				"style": {
+					"navigationBarTitleText": "环形进度条"
+				}
+			},
+			{
+				"path": "basics/line-progress/line-progress",
+				"style": {
+					"navigationBarTitleText": "线型进度条"
+				}
+			},
+			{
+				"path": "basics/fab/fab",
+				"style": {
+					"navigationBarTitleText": "悬浮按钮"
+				}
+			},
+			{
+				"path": "layout/empty/empty",
+				"style": {
+					"navigationBarTitleText": "缺省页"
+				}
+			},
+			{
+				"path": "basics/mask/mask",
+				"style": {
+					"navigationBarTitleText": "遮罩层"
+				}
+			},
+			{
+				"path": "layout/barrage/barrage",
+				"style": {
+					"navigationBarTitleText": "弹幕"
+				}
+			},
+			{
+				"path": "form/action-sheet/action-sheet",
+				"style": {
+					"navigationBarTitleText": "选项菜单"
+				}
+			},
+			{
+				"path": "basics/notice-bar/notice-bar",
+				"style": {
+					"navigationBarTitleText": "通知栏-告示"
+				}
+			},
+			{
+				"path": "basics/dialog/dialog",
+				"style": {
+					"navigationBarTitleText": "对话框"
+				}
+			},
+			{
+				"path": "basics/notify/notify",
+				"style": {
+					"navigationBarTitleText": "通知"
+				}
+			},
+			{
+				"path": "layout/tabbar/tabbar",
+				"style": {
+					"navigationBarTitleText": "底部导航"
+				}
+			},
+			{
+				"path": "layout/swipe-action/swipe-action",
+				"style": {
+					"navigationBarTitleText": "左滑操作栏"
+				}
+			},
+			{
+				"path": "basics/footer/footer",
+				"style": {
+					"navigationBarTitleText": "页眉页脚"
+				}
+			},
+			{
+				"path": "layout/scroll-list/scroll-list",
+				"style": {
+					"navigationBarTitleText": "横向滚动列表"
+				}
+			},
+			{
+				"path": "layout/steps/steps",
+				"style": {
+					"navigationBarTitleText": "steps"
+				}
+			},
+			{
+				"path": "layout/table/table",
+				"style": {
+					"navigationBarTitleText": "表格"
+				}
+			},
+			{
+				"path": "layout/picker/picker",
+				"style": {
+					"navigationBarTitleText": "picker"
+				}
+			},
+			{
+				"path": "form/datetime-picker/datetime-picker",
+				"style": {
+					"navigationBarTitleText": "日期表单组件"
+				}
+			},
+			{
+				"path": "form/pca-picker/pca-picker",
+				"style": {
+					"navigationBarTitleText": "城市选择表单"
+				}
+			},
+			{
+				"path": "layout/swiper/swiper",
+				"style": {
+					"navigationBarTitleText": "轮播"
+				}
+			},
+			{
+				"path": "form/verify-rotate/verify-rotate",
+				"style": {
+					"navigationBarTitleText": "旋转验证"
+				}
+			},
+			{
+				"path": "form/cascader/cascader",
+				"style": {
+					"navigationBarTitleText": "级联选择器"
+				}
+			},
+			{
+				"path": "form/slider-plus/slider-plus",
+				"style": {
+					"navigationBarTitleText": "滑块升级版"
+				}
+			},
+			{
+				"path": "form/calendar/calendar",
+				"style": {
+					"navigationBarTitleText": "日历"
+				}
+			},
+			{
+				"path": "layout/navbar/navbar",
+				"style": {
+					"navigationBarTitleText": "自定义导航栏",
+					"navigationStyle": "custom"
+				}
+			},
+			{
+				"path": "layout/indexed/indexed",
+				"style": {
+					"navigationBarTitleText": "索引导航"
+				}
+			},
+			{
+				"path": "layout/slider-menu/slider-menu",
+				"style": {
+					"navigationBarTitleText": "侧边分类"
+				}
+			},
+			{
+				"path": "layout/virtual-scroll/virtual-scroll",
+				"style": {
+					"navigationBarTitleText": "虚拟滚动"
+				}
+			},
+			{
+				"path": "layout/tree/tree",
+				"style": {
+					"navigationBarTitleText": "树"
+				}
+			},
+			{
+				"path": "layout/tree/tree-lazy",
+				"style": {
+					"navigationBarTitleText": "tree-懒加载"
+				}
+			},
+			{
+				"path": "form/form/form",
+				"style": {
+					"navigationBarTitleText": "form"
+				}
+			},
+			{
+				"path": "form/dynamic/dynamic",
+				"style": {
+					"navigationBarTitleText": "动态表单-JSON配置版"
+				}
+			},
+			{
+				"path": "form/form-edit/form-edit",
+				"style": {
+					"navigationBarTitleText": "动态表单弹窗版"
+				}
+			},
+			{
+				"path": "native/svg/svg",
+				"style": {
+					"navigationBarTitleText": "svg"
+				}
+			},
+			{
+				"path": "form/picker-select/picker-select",
+				"style": {
+					"navigationBarTitleText": "picker-select"
+				}
+			},
+			{
+				"path": "layout/movable-view/movable-view",
+				"style": {
+					"navigationBarTitleText": "movable-view"
+				}
+			},
+			{
+				"path": "template/editskintheme/editskintheme",
+				"style": {
+					"navigationBarTitleText": "皮肤管理"
+				}
+			},
+			{
+				"path": "template/skintheme/skintheme",
+				"style": {
+					"navigationBarTitleText": "皮肤"
+				}
+			},
+			{
+				"path": "form/picker-custom/picker-custom",
+				"style": {
+					"navigationBarTitleText": "自定义数据Picker"
+				}
+			},
+			{
+				"path": "api/throttle/throttle",
+				"style": {
+					"navigationBarTitleText": "节流"
+				}
+			},
+			{
+				"path": "api/debounce/debounce",
+				"style": {
+					"navigationBarTitleText": "防抖"
+				}
+			},
+			{
+				"path": "api/axios/axios",
+				"style": {
+					"navigationBarTitleText": "axios"
+				}
+			},
+			{
+				"path": "api/date/date",
+				"style": {
+					"navigationBarTitleText": "日期工具"
+				}
+			},
+			{
+				"path": "api/color/color",
+				"style": {
+					"navigationBarTitleText": "颜色工具"
+				}
+			},
+			{
+				"path": "api/verify/verify",
+				"style": {
+					"navigationBarTitleText": "数据校验"
+				}
+			},
+			{
+				"path": "api/formart/formart",
+				"style": {
+					"navigationBarTitleText": "数据格式化"
+				}
+			},
+			{
+				"path": "api/ext/ext",
+				"style": {
+					"navigationBarTitleText": "ext api"
+				}
+			},
+			{
+				"path": "api/share/share",
+				"style": {
+					"navigationBarTitleText": "分享"
+				}
+			},
+			{
+				"path": "api/store/store",
+				"style": {
+					"navigationBarTitleText": "状态管理"
+				}
+			},
+			{
+				"path": "api/store/store-update",
+				"style": {
+					"navigationBarTitleText": "状态修改"
+				}
+			},
+			{
+				"path": "api/crypto/crypto",
+				"style": {
+					"navigationBarTitleText": "加密解密"
+				}
+			},
+			{
+				"path": "other/lazy/lazy",
+				"style": {
+					"navigationBarTitleText": "渲染队列"
+				}
+			},
+			{
+				"path": "layout/markdown/markdown",
+				"style": {
+					"navigationBarTitleText": "markdown"
+				}
+			},
+			{
+				"path": "layout/marked-table/marked-table",
+				"style": {
+					"navigationBarTitleText": "富文本表格"
+				}
+			},
+			{
+				"path": "layout/marked-code/marked-code",
+				"style": {
+					"navigationBarTitleText": "marked代码显示组件"
+				}
+			},
+			{
+				"path": "layout/waterflow/waterflow",
+				"style": {
+					"navigationBarTitleText": "瀑布流"
+				}
+			},
+			{
+				"path": "form/verify-puzzle/verify-puzzle",
+				"style": {
+					"navigationBarTitleText": "拼图验证"
+				}
+			},
+			{
+				"path": "layout/dropdown-menu/dropdown-menu",
+				"style": {
+					"navigationBarTitleText": "下拉菜单"
+				}
+			},
+			{
+				"path": "other/marquee/marquee",
+				"style": {
+					"navigationBarTitleText": "跑马灯"
+				}
+			},
+			{
+				"path": "other/lucky-wheel/lucky-wheel",
+				"style": {
+					"navigationBarTitleText": "幸运大转盘"
+				}
+			},
+			{
+				"path": "layout/async-height/async-height",
+				"style": {
+					"navigationBarTitleText": "async-height"
+				}
+			}
+		]
+	}, {
+		"root": "pagesB",
+		"pages": [{
+				"path": "login/login",
+				"style": {
+					"navigationBarTitleText": "登录",
+					"navigationStyle": "custom"
+				}
+			},
+			{
+				"path": "account/account",
+				"style": {
+					"navigationBarTitleText": "个人资料",
+					"navigationStyle": "custom"
+				}
+			},
+			{
+				"path": "bound/bound",
+				"style": {
+					"navigationBarTitleText": "手机号绑定"
+				}
+			},
+			{
+				"path": "integral/integral",
+				"style": {
+					"navigationBarTitleText": "我的积分",
+					"navigationStyle": "custom"
+				}
+			},
+			{
+				"path": "work/work",
+				"style": {
+					"navigationBarTitleText": "工作任务"
+				}
+			},
+			{
+				"path": "work/work-task",
+				"style": {
+					"navigationBarTitleText": "任务列表"
+				}
+			},
+			{
+				"path": "work/work-task-desc",
+				"style": {
+					"navigationBarTitleText": "任务列表"
+				}
+			},
+			{
+				"path": "xcharts/xcharts",
+				"style": {
+					"navigationBarTitleText": "图表配置"
+				}
+			},
+			{
+				"path": "upgradelog/upgradelog",
+				"style": {
+					"navigationBarTitleText": "升级日志（gitee提交日志）"
+				}
+			},
+			{
+				"path": "about/about",
+				"style": {
+					"navigationBarTitleText": "关于我们"
+				}
+			},
+			{
+				"path": "gestion/gestion",
+				"style": {
+					"navigationBarTitleText": "留言"
+				}
+			},
+			{
+				"path": "message/message",
+				"style": {
+					"navigationBarTitleText": "我的留言"
+				}
+			},
+			{
+				"path": "xchart/xchart",
+				"style": {
+					"navigationBarTitleText": "xchart图表UI"
+				}
+			},
+			{
+				"path": "service/service",
+				"style": {
+					"navigationBarTitleText": "客服"
+				}
+			},
+			{
+				"path": "im/im",
+				"style": {
+					"navigationBarTitleText": "im"
+				}
+			}
+		]
+	}, {
+		"root": "pagesC",
+		"pages": [{
+			"path": "sprite/sprite",
+			"style": {
+				"navigationBarTitleText": "序列帖动画"
+			}
+		}]
+	}],
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#F8F8F8",
+		"list": [{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/tabbar/ui.png",
+				"selectedIconPath": "static/tabbar/ui1.png",
+				"text": "TUI"
+			},
+			{
+				"pagePath": "pages/table/table",
+				"iconPath": "static/tabbar/table.png",
+				"selectedIconPath": "static/tabbar/table1.png",
+				"text": "图表"
+			},
+			{
+				"pagePath": "pages/api/api",
+				"iconPath": "static/tabbar/api.png",
+				"selectedIconPath": "static/tabbar/api1.png",
+				"text": "api"
+			},
+			{
+				"pagePath": "pages/template/template",
+				"iconPath": "static/tabbar/template.png",
+				"selectedIconPath": "static/tabbar/template1.png",
+				"text": "模版"
+			},
+			{
+				"pagePath": "pages/my/my",
+				"iconPath": "static/tabbar/my.png",
+				"selectedIconPath": "static/tabbar/my1.png",
+				"text": "我的"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app x",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColorContent": "#F8F8F8"
+	},
+	"uniIdRouter": {}
+}

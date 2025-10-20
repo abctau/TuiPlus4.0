@@ -1,0 +1,322 @@
+<template>
+	<t-row v-bind="extendsAttrs" :main-class="`ov ${extendsPrb} faic ${border?extendsBorder:''} ${mainClass}`">
+		<slot name="left">
+			<t-icon v-if="prefixIcon!=''" :name="prefixIcon" :main-class="`mr-15 ats-1.2 ${extendsSfc} ${prefixClass}`"
+				:hover="true"></t-icon>
+		</slot>
+		<input :name="name" :type="inputType" :password="password && showEye" :placeholder="placeholder"
+			:placeholder-style="inputPlaceholderStyle" :placeholder-class="placeholderClass" :maxlength="maxlength"
+			:cursor-spacing="cursorSpacing" :cursor-color="getForegColorToValue" :auto-focus="autoFocus" :focus="focus"
+			:confirm-type="confirmType" :always-embed="alwaysEmbed" :confirm-hold="confirmHold" :cursor="cursor"
+			:selection-start="selectionStart" :selection-end="selectionEnd" :adjust-position="adjustPosition"
+			:text-content-type="textContentType" :hold-keyboard="holdKeyboard"
+			:safe-password-cert-path="safePasswordCertPath" :safe-password-length="safePasswordLength"
+			:safe-password-time-stamp="safePasswordTimeStamp" :safe-password-nonce="safePasswordNonce"
+			:safe-password-salt="safePasswordSalt" :safe-password-custom-hash="safePasswordCustomHash"
+			:random-number="randomNumber" :controlled="controlled" :always-system="alwaysSystem" :inputmode="inputmode"
+			:value="inputValue" @input="input" @focus="onfocus" @blur="blur"
+			@keyboardheightchange="keyboardheightchange" @confirm="confirm"
+			:style="[themeForegroundColor,themeFontSize,extendsTextStyle,inputStyles]" />
+		<t-icon v-if="clearabled && clearAndEyeVisibility" :name="clearIcon"
+			:main-class="`ml-20 ats-1.2 mt-1px ${extendsSfc} ${clearClass}`" @click="clear" :hover="true"></t-icon>
+		<t-icon v-if="password && clearAndEyeVisibility" :name="showEye?eyeOffIcon:eyeIcon" @click="showEye=!showEye"
+			:main-class="`ml-20 ats-1.2 mt-1px ${extendsSfc} ${eyeClass}`"></t-icon>
+		<slot name="right">
+			<t-icon v-if="suffixIcon!=''" :name="suffixIcon" :hover="true"
+				:main-class="`ml-20 ats-1.2 ${extendsSfc} ${suffixClass}`"></t-icon>
+		</slot>
+	</t-row>
+</template>
+
+<script setup>
+	/**
+	 * Input 输入框
+	 * @date 2025-05-31 12:04:09
+	 * @author TanYuan
+	 * @description 支持多种配置，包括前置图标、后置图标、清空输入、密码显示等功能。组件提供了丰富的属性，如绑定值、图标类名、是否显示边框等，可以根据不同需求进行定制。适用于各种表单场景，方便用户进行文本输入。
+	 * @example /pagesA/form/input/input
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-input.html
+	 * @example /pagesA/form/input/input
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} modelValue 双向绑定的值
+	 * @property {String} prefixIcon 前置图标名称
+	 * @property {String} prefixClass 前置图标样式
+	 * @property {String} suffixIcon 后置图标名称
+	 * @property {String} suffixClass 后置图标样式
+	 * @property {String} clearIcon 清空图标按钮名称(默认：closes-circle-line)
+	 * @property {String} clearClass 清空图标样式
+	 * @property {String} eyeIcon 显示密码图标名称(默认：eye-line)
+	 * @property {String} eyeOffIcon 隐藏密码图标名称(默认：eye-off-line)
+	 * @property {String} eyeClass 密码图标的样式(默认：s.35)
+	 * @property {String} inputClass 输入框的样式
+	 * @property {Boolean} password 是否密码显示
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} clearabled 是否显示清空按钮(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} border 是否显示边框
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} name 组件的名称 如果用官方表单组件需要使用到它
+	 * @property {String} inputType=[text|number|idcard|digit|tel|safe-password|nickname] input的类型，对应官方input组件的type属性(默认：text)
+	 * @value text 文本输入键盘
+	 * @value number 数字输入键盘
+	 * @value idcard 身份证输入键盘
+	 * @value digit 带小数点数字输入键盘
+	 * @value tel 电话输入键盘
+	 * @value safe-password 密码安全输入键盘
+	 * @value nickname 昵称输入键盘
+	 * @property {String} placeholder 输入框为空时占位符
+	 * @property {String} placeholderStyle 指定 placeholder 的样式
+	 * @property {String} placeholderClass placeholder-class
+	 * @property {Number} maxlength 最大输入长度，0和正数为合法值，非法值的时候不限制最大长度(默认：1)
+	 * @property {Number} cursorSpacing 指定光标与键盘的距离，单位 px 。取 input 距离底部的距离和 cursor-spacing 指定的距离的最小值作为光标与键盘的距离(默认：1)
+	 * @property {String} cursorColor 指定光标颜色
+	 * @property {Boolean} autoFocus 自动获取焦点，与focus属性对比，此属性只会首次生效。
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} confirmType=[send|search|next|go|done] 设置键盘右下角按钮的文字，仅在 type为text 时生效。(默认：done)
+	 * @value send 发送
+	 * @value search 搜索
+	 * @value next 下一个
+	 * @value go 前往
+	 * @value done 完成
+	 * @property {Boolean} alwaysEmbed 强制 input 处于同层状态，默认 focus 时 input 会切到非同层状态 (仅在 iOS 下生效)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} confirmHold 点击键盘右下角按钮时是否保持键盘不收起
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} cursor 指定focus时的光标位置(默认：1)
+	 * @property {Number} selectionStart 光标起始位置，自动聚集时有效，需与selection-end搭配使用(默认：1)
+	 * @property {Number} selectionEnd 光标结束位置，自动聚集时有效，需与selection-satrt搭配使用(默认：1)
+	 * @property {Boolean} adjustPosition 键盘弹起时，是否自动上推页面(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} textContentType=[oneTimeCode] 文本区域的语义，根据类型自动填充
+	 * @value oneTimeCode 一次性验证码
+	 * @property {Boolean} holdKeyboard focus时，点击页面的时候不收起键盘
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} safePasswordCertPath 安全键盘加密公钥的路径，只支持包内路径
+	 * @property {Number} safePasswordLength 安全键盘输入密码长度(默认：1)
+	 * @property {Number} safePasswordTimeStamp 安全键盘加密时间戳(默认：1)
+	 * @property {String} safePasswordNonce 安全键盘加密盐值
+	 * @property {String} safePasswordSalt 安全键盘计算 hash 盐值，若指定custom-hash 则无效
+	 * @property {String} safePasswordCustomHash 安全键盘计算 hash 的算法表达式
+	 * @property {Boolean} randomNumber 当 type 为 number, digit, idcard 数字键盘是否随机排列
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} controlled 是否为受控组件。为 true 时，value 内容会完全受 setData 控制
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} alwaysSystem 是否强制使用系统键盘和 Web-view 创建的 input 元素。为 true 时，confirm-type、confirm-hold 可能失效
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} inputmode=[none|text|decimal|numeric|tel|search|email|url] 是一个枚举属性，它提供了用户在编辑元素或其内容时可能输入的数据类型的提示。在符合条件的高版本webview里，uni-app的 web 和 app-vue 平台中可使用本属性。(默认：text)
+	 * @value none 无虚拟键盘。在应用程序或者站点需要实现自己的键盘输入控件时很有用。
+	 * @value text 使用用户本地区域设置的标准文本输入键盘。
+	 * @value decimal 小数输入键盘，包含数字和分隔符（通常是“ . ”或者“ , ”），设备可能也可能不显示减号键。
+	 * @value numeric 数字输入键盘，所需要的就是 0 到 9 的数字，设备可能也可能不显示减号键。
+	 * @value tel 电话输入键盘，包含 0 到 9 的数字、星号（*）和井号（#）键。表单输入里面的电话输入通常应该使用 <input type="tel"> 。
+	 * @value search 为搜索输入优化的虚拟键盘，比如，返回键可能被重新标记为“搜索”，也可能还有其他的优化。
+	 * @value email 为邮件地址输入优化的虚拟键盘，通常包含""符号和其他优化。表单里面的邮件地址输入应该使用 <input type="email"> 。
+	 * @value url 为网址输入优化的虚拟键盘，比如，“/”键会更加明显、历史记录访问等。表单里面的网址输入通常应该使用 <input type="url"> 。
+
+	 * @property {Boolean} disableForm 是否禁用表单验证
+	 * @value true 是
+	 * @value false 否
+	 * @event {Function} clear 清空文本时触发
+	 * @event {Function} click 点击时触发
+	 * @event {Function} input 当键盘输入时，触发input事件，event.detail = {value, cursor}，处理函数可以直接 return 一个字符串，将替换输入框的内容。
+	 * @event {Function} blur 输入框失去焦点时触发，event.detail = {value: value}
+	 * @event {Function} focus 输入框聚焦时触发，event.detail = { value, height }，height 为键盘高度
+	 * @event {Function} keyboardheightchange 键盘高度发生变化的时候触发此事件，event.detail = {height: height, duration: duration}
+	 * @event {Function} confirm 点击完成按钮时触发，event.detail = {value: value}
+	 * @event {Function} prefixClick 点击前置图标时触发
+	 * @event {Function} suffixClick 点击后置图标时触发
+	 */
+
+	import { useStyle } from '../../common/model/style'
+	import { c } from '../../common/model/theme'
+	import { hexToRgba } from '../../common/model/color'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const instance = getCurrentInstance()?.proxy!
+	interface InputProps extends CommonProps {
+		modelValue : string;
+		prefixIcon : string;
+		prefixClass : string;
+		suffixIcon : string;
+		suffixClass : string;
+		clearIcon : string;
+		clearClass : string;
+		eyeIcon : string;
+		eyeOffIcon : string;
+		eyeClass : string;
+		inputClass : string;
+		password : boolean;
+		clearabled : boolean;
+		border : boolean;
+		name : string;
+		inputType : string;
+		placeholder : string;
+		placeholderStyle : string;
+		placeholderClass : string;
+		maxlength : number;
+		cursorSpacing : number;
+		cursorColor : string;
+		autoFocus : boolean;
+		focus : boolean;
+		confirmType : string;
+		alwaysEmbed : boolean;
+		confirmHold : boolean;
+		cursor : number;
+		selectionStart : number;
+		selectionEnd : number;
+		adjustPosition : boolean;
+		textContentType : string;
+		holdKeyboard : boolean;
+		safePasswordCertPath : string;
+		safePasswordLength : number;
+		safePasswordTimeStamp : number;
+		safePasswordNonce : string;
+		safePasswordSalt : string;
+		safePasswordCustomHash : string;
+		randomNumber : boolean;
+		controlled : boolean;
+		alwaysSystem : boolean;
+		inputmode : string;
+		disableForm : boolean;
+		path : string;
+		hover : boolean;
+		type : string;
+		disabled : boolean;
+		stop : boolean;
+		effect : string;
+		size : string;
+		mainClass : string;
+		nativeClass : string;
+	}
+
+	const props = withDefaults(defineProps<InputProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: "",
+		prefixIcon: '',
+		prefixClass: '',
+		suffixIcon: '',
+		suffixClass: '',
+		clearIcon: 'closes-circle-line',
+		clearClass: '',
+		eyeIcon: 'eye-line',
+		eyeOffIcon: 'eye-off-line',
+		eyeClass: 's.35',
+		inputClass: '',
+		password: false,
+		clearabled: true,
+		border: false,
+		name: '',
+		inputType: 'text',
+		placeholder: '',
+		placeholderStyle: '',
+		placeholderClass: '',
+		maxlength: -1,
+		cursorSpacing: 0,
+		cursorColor: '',
+		autoFocus: false,
+		focus: false,
+		confirmType: 'done',
+		alwaysEmbed: false,
+		confirmHold: false,
+		cursor: 0,
+		selectionStart: -1,
+		selectionEnd: -1,
+		adjustPosition: true,
+		textContentType: '',
+		holdKeyboard: false,
+		safePasswordCertPath: '',
+		safePasswordLength: 0,
+		safePasswordTimeStamp: 0,
+		safePasswordNonce: '',
+		safePasswordSalt: '',
+		safePasswordCustomHash: '',
+		randomNumber: false,
+		controlled: false,
+		alwaysSystem: false,
+		inputmode: 'text',
+		disableForm: false
+	});
+	const { extendsAttrs, extendsPrb, extendsBorder, extendsSfc, themeForegroundColor, getForegColorToValue, themeFontSize, extendsTextStyle } = useTuiThemes(props)
+	const emit = defineEmits(['update:modelValue', 'clear', 'click', 'input', 'blur', 'focus', 'keyboardheightchange', 'confirm', 'prefixClick', 'suffixClick'])
+	const inputValue = ref<string>('')
+	const showEye = ref<boolean>(true)
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	const clearAndEyeVisibility = computed(() : boolean => {
+		return inputValue.value.length > 0
+	})
+	const inputPlaceholderStyle = computed(() : string => {
+		return `${hexToRgba(themeForegroundColor.value, 0.5)}${useStyle(props.placeholderStyle)}`
+	})
+	const inputStyles = computed(() : string => {
+		return useStyle(`f ${props.inputClass}`)
+	})
+	function onfocus(e : UniInputFocusEvent) {
+		emit('focus', e)
+	}
+	function blur(e : UniInputBlurEvent) {
+		emit('blur', e)
+		itemValidate()
+	}
+	function keyboardheightchange(e : UniInputKeyboardHeightChangeEvent) {
+		emit('keyboardheightchange', e)
+	}
+	function confirm(e : UniInputConfirmEvent) {
+		emit('confirm', e)
+	}
+	function clear() {
+		showEye.value = true
+		inputValue.value = ''
+		emit('update:modelValue', '')
+		emit('clear')
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function input(e : UniInputEvent) {
+		inputValue.value = e.detail.value
+		emit('update:modelValue', e.detail.value)
+		emit('input', e)
+	}
+	watch(() : string => props.modelValue, (val : string) => {
+		if (inputValue.value != val) inputValue.value = val
+	}, { immediate: true })
+</script>

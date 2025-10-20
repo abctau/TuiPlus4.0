@@ -1,0 +1,77 @@
+<template>
+	<t-lazy><t-row v-bind="extendsAttrs">
+			<t-col main-class="f">
+				<t-row v-for="(item,index) in keybords" :key="index"
+					:main-class="`${index<keybords.length-1?'mb-15':''}`">
+					<t-button v-for="(k, i) in item" :key="i" @click="oninput(k)"
+						:main-class="`f h-80 tdr fc ${i<item.length-1?'mr-15':''}`">{{k}}</t-button>
+				</t-row>
+			</t-col>
+			<t-col main-class="ml-15">
+				<t-button :type="type" main-class="h-80 w-130 mb-15" text-class="m-0" effect="light"
+					right-icon-class="s-55" @click="onback" right-icon="backspace"></t-button>
+				<t-button :type="type" main-class="f w-130 p-0" @click="onconfirm">确认</t-button>
+			</t-col>
+		</t-row>
+	</t-lazy>
+</template>
+<script setup>
+	/**
+	 * KeybordIdcard 身份证键盘
+	 * @date 2025-05-31 12:04:19
+	 * @author TanYuan
+	 * @description 自定义身份证输入键盘
+	 * @example /pagesA/layout/keyboard/keyboard
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-keybord-idcard.html
+	 * @example /pagesA/layout/keyboard/keyboard
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：s)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @event {Function} confirm 点击确认时触发
+	 * @event {Function} input 输入时触发
+	 * @event {Function} back 后退时触发
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	const props = withDefaults(defineProps<CommonProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: ''
+	});
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits(['confirm', 'input', 'back'])
+	const keybords : string[][] = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['00', '0', 'X']]
+	function oninput(e : string) {
+		emit('input', e)
+	}
+	function onconfirm() {
+		emit('confirm')
+	}
+	function onback() {
+		emit('back')
+	}
+</script>

@@ -1,0 +1,61 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="RadioGroup 多选框组" main-class="mb-30"
+			sub-title="支持布局方向（横向或纵向）。不同的显示模式(radio、button、cell)丰富主题配置"></t-card>
+		<t-card title="亮点" main-class="mb-30" title-class="c-red"
+			sub-title="支持任意子组件参与布局,支持父组件统一设置子组件属性,让代码更简洁【父组件拥有子组件所有属性,子组件和父组件同时设置相同属性,子组件属性优先级高于父组件】"
+			sub-title-class="c-red"></t-card>
+		<t-checkbox-group :main-class="`${radio_mode=='cell'?'fv':'fl'} tdr tdb fww tdp mb-30`" :size="radio_size"
+			v-model="radio" :type="radio_type" icon="checkbox-blank-circle-fill" :mode="radio_mode" @change="checkboxchange" child-class="mrb-30"
+			:transition="false">
+			<t-checkbox value="1">苹果</t-checkbox>
+			<t-checkbox value="2">香蕉</t-checkbox>
+			<t-checkbox value="3">橙子</t-checkbox>
+			<t-checkbox value="4">石榴</t-checkbox>
+			<t-checkbox value="99" :border="false">梨子</t-checkbox>
+		</t-checkbox-group>
+		<t-button main-class="mb-30" @click="test">赋值{{radio_size}}</t-button>
+		<t-group title="显示类型：" main-class="mb-30">
+			<t-radio-group main-class="f fl fww tdr" v-model="radio_mode" icon="checkbox-blank-circle-fill" type="p">
+				<t-radio value="checkbox">checkbox</t-radio>
+				<t-radio value="button">button</t-radio>
+				<t-radio value="cell">cell</t-radio>
+			</t-radio-group>
+		</t-group>
+		<t-row main-class="faic tdb tdp mb-30">
+			<t-text main-class="mr-10">主题：</t-text>
+			<t-radio-group main-class="f fl fww tdr" v-model="radio_type" icon="checkbox-blank-circle-fill" type="p">
+				<t-radio value="">默认</t-radio>
+				<t-radio value="p">主要</t-radio>
+				<t-radio value="s">成功</t-radio>
+				<t-radio value="i">信息</t-radio>
+				<t-radio value="w">警告</t-radio>
+				<t-radio value="e">危险</t-radio>
+			</t-radio-group>
+		</t-row>
+		<t-row main-class="faic tdb tdp mb-30">
+			<t-text main-class="mr-10">尺寸：</t-text>
+			<t-radio-group main-class="f fl fww tdr" v-model="radio_size" icon="checkbox-blank-circle-fill" type="p">
+				<t-radio value="large">large</t-radio>
+				<t-radio value="medium">medium</t-radio>
+				<t-radio value="small">small</t-radio>
+				<t-radio value="mini">mini</t-radio>
+			</t-radio-group>
+		</t-row>
+	</t-page>
+</template>
+
+<script setup>
+	const radio = ref<string[]>(['1', '99'])
+	const radio_type = ref<string>('s')
+	const radio_mode = ref<string>('checkbox')
+	const radio_size = ref<string>('medium')
+
+	const type = ref<string>('s')
+	function test() {
+		radio.value.push('2') 
+	}
+	function checkboxchange(values : string[]) {
+		console.log(values)
+	}
+</script>

@@ -1,0 +1,96 @@
+<template>
+	<t-select v-if="`${item['type']}`=='select'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']">
+		<t-select-option v-for="(k,i) in (item['list'] as UTSJSONObject[])" :key="i" v-bind="k">
+		</t-select-option>
+	</t-select>
+
+	<t-picker-select v-if="`${item['type']}`=='pickerSelect'" v-model="(forms[`${item['name']}`] as any)"
+		v-bind="item['attrs']">
+	</t-picker-select>
+
+	<t-input v-if="`${item['type']}`=='input'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']"></t-input>
+
+	<t-radio-group v-if="`${item['type']}`=='radio'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']">
+		<t-radio v-for="(k,i) in (item['list'] as UTSJSONObject[])" :key="i" v-bind="k"></t-radio>
+	</t-radio-group>
+
+	<t-checkbox-group v-if="`${item['type']}`=='checkbox'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']">
+		<t-checkbox v-for="(k,i) in (item['list'] as UTSJSONObject[])" :key="i" v-bind="k"></t-checkbox>
+	</t-checkbox-group>
+
+	<t-code-input v-if="`${item['type']}`=='code'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']"></t-code-input>
+
+	<t-rate v-if="`${item['type']}`=='rate'" v-model="(forms[`${item['name']}`] as number)"
+		v-bind="item['attrs']"></t-rate>
+
+	<t-switch v-if="`${item['type']}`=='switch'" v-model="(forms[`${item['name']}`] as boolean)"
+		v-bind="item['attrs']"></t-switch>
+
+	<t-upload v-if="`${item['type']}`=='upload'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']"></t-upload>
+
+	<t-stepper v-if="`${item['type']}`=='stepper'" v-model="(forms[`${item['name']}`] as number)"
+		v-bind="item['attrs']"></t-stepper>
+
+	<t-slider v-if="`${item['type']}`=='slider'" v-model="(forms[`${item['name']}`] as number[])"
+		v-bind="item['attrs']"></t-slider>
+
+	<t-textarea v-if="`${item['type']}`=='textarea'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']"></t-textarea>
+
+	<t-picker-color v-if="`${item['type']}`=='color'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']">
+	</t-picker-color>
+
+	<t-picker-date v-if="`${item['type']}`=='date'" v-model="(forms[`${item['name']}`] as string)"
+		v-bind="item['attrs']">
+	</t-picker-date>
+
+	<t-picker-city v-if="`${item['type']}`=='city'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']">
+	</t-picker-city>
+
+	<t-picker-custom v-if="`${item['type']}`=='picker-custom'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']">
+	</t-picker-custom>
+
+
+	<t-calendar v-if="`${item['type']}`=='calendar'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']"></t-calendar>
+
+	<t-picker-calendar v-if="`${item['type']}`=='pickercalendar'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']">
+	</t-picker-calendar>
+
+	<t-cascader v-if="`${item['type']}`=='cascader'" v-model="(forms[`${item['name']}`] as string[])"
+		v-bind="item['attrs']"></t-cascader>
+
+	<t-file-manager v-if="`${item['type']}`=='cascader'" v-model="(forms[`${item['name']}`] as UTSJSONObject[])"
+		v-bind="item['attrs']"></t-file-manager>
+</template>
+
+<script setup>
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface FormDynameicProps extends CommonProps {
+		forms : UTSJSONObject
+		item : UTSJSONObject
+	}
+	const props = withDefaults(defineProps<FormDynameicProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		forms: {} as UTSJSONObject,
+		item: {} as UTSJSONObject
+	});
+</script>

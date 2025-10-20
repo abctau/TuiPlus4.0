@@ -1,0 +1,227 @@
+<template>
+	<t-page>
+		<t-row main-class="dr">
+			<t-image main-class="h-350 w-100% r-0" src='/pagesA/static/image/D2.jpg'></t-image>
+			<template v-if="calendarDate!=null">
+				<t-text main-class='s-40 ffwb c-#fff da dlt-30'>星期{{weeks[calendarDate?.week as number]}}</t-text>
+				<t-text main-class='ffwb c-#fff da dl-30 dt-85'>{{calendarDate?.fullDate}}</t-text>
+				<t-text
+					main-class='ffwb c-#fff da dl-30 dt-130'>{{calendarDate?.IMonthCn}}{{calendarDate?.IDayCn}}{{calendarDate?.astro}}</t-text>
+				<t-text main-class='ffwb c-#fff da dl-30 dt-175'>{{calendarDate?.gzYear}}年 {{calendarDate?.gzDay}}月
+					{{calendarDate?.gzDay}}日</t-text>
+			</template>
+		</t-row>
+		<t-text main-class="mtb-30 tdb tdp">选中的值：{{dataValue.join('-')}}</t-text>
+		<t-calendar v-if="showCalender" :selected="selected" :viewMode="viewMode" :mode="selectMode"
+			:showMonthBg="monthBg" :festival="festival" :vertical="vertical" :lunar="lunar" :startDate="startDate"
+			:endDate="endDate" :monthShowCurrentMonth="monthShowCurrentMonth" :disabled="disabled"
+			:disableTouch="disableTouch" v-model="dataValue" @click="calenderClick" @change="cleanderChange"
+			@reset="reset" main-class="mb-30"></t-calendar>
+		<t-picker-calendar :vertical="false" main-class="mb-30">
+			<t-button type="s" main-class="r-0">弹窗测试</t-button>
+		</t-picker-calendar>
+		<t-group title='组件配置' main-class="tdr-tdb">
+			<t-section title="日历类型"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="modeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);" :checked="true">月日历
+				</radio>
+				<radio value="2" style="transform: scale(0.7);">周日历</radio>
+			</radio-group>
+			<t-section title="日历选择模式"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="selectModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);" :checked="true">单选</radio>
+				<radio value="2" style="transform: scale(0.7);">多选</radio>
+				<radio value="3" style="transform: scale(0.7);">范围选择</radio>
+			</radio-group>
+			<t-section title="是否可选择"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="disabledModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);">禁用</radio>
+				<radio value="2" style="transform: scale(0.7);" :checked="true">不禁用</radio>
+			</radio-group>
+			<t-section title="日历滑动模式"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="verticalModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);">横向</radio>
+				<radio value="2" style="transform: scale(0.7);" :checked="true">纵向</radio>
+				<radio value="3" style="transform: scale(0.7);" :checked="true">不滑动</radio>
+			</radio-group>
+			<t-section title="是否显示农历"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="lunarModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);" :checked="true">是</radio>
+				<radio value="2" style="transform: scale(0.7);">否</radio>
+			</radio-group>
+			<t-section title="是否显示节日"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="festivalModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);" :checked="true">是</radio>
+				<radio value="2" style="transform: scale(0.7);">否</radio>
+			</radio-group>
+
+			<t-section title="是否月份背景"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="monthBgModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);" :checked="true">是</radio>
+				<radio value="2" style="transform: scale(0.7);">否</radio>
+			</radio-group>
+			<t-section title="不显示禁用日期"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="showCurrentMonthChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);">是</radio>
+				<radio value="2" style="transform: scale(0.7);" :checked="true">否</radio>
+			</radio-group>
+			<t-section title="限制日期选择范围"></t-section>
+			<radio-group main-class="uni-flex uni-row radio-group" @change="rangeModeChange"
+				style="display: flex;flex-direction: row;align-items: center;">
+				<radio value="1" style="margin-right: 15px;transform: scale(0.7);">是</radio>
+				<radio value="2" style="transform: scale(0.7);" :checked="true">否</radio>
+			</radio-group>
+		</t-group>
+	</t-page>
+</template>
+<script>
+	import { CalendarDateType } from "@/uni_modules/tui-plus"
+	export default {
+		data() {
+			return {
+				weeks: ['', '一', '二', '三', '四', '五', '六', '日'],
+				calendarDate: null as CalendarDateType | null,
+				dataValue: ['2025-3-17'] as Array<string>,
+				isOpen: true,
+				lunar: true,
+				festival: true,
+				viewMode: 'month',
+				selectMode: 'single',
+				vertical: true,
+				showCalender: true,
+				monthShowCurrentMonth: false,
+				monthBg: true,
+				startDate: "",
+				endDate: "",
+				disabled: false,
+				disableTouch: false,
+				selected: [
+					{
+						date: '2025-3-17',
+						info: '打折',
+						infoColor: '#00cc81',
+						// topInfo: '一折',
+						// topInfoColor: '#ff5500',
+						badge: true,
+						badgeInfo: '休',
+						badgeColor: '#ff0000',
+						disabled: true
+					},
+					{
+						date: '2025-3-18',
+						info: '爆满',
+						// infoColor: '#ff0000',
+						badge: true,
+						badgeInfo: '',
+						badgeColor: '#00cc81',
+						disabled: true
+					},
+					{
+						date: '2025-3-19',
+						info: '已签到',
+						infoColor: '#ff5500',
+						badge: true,
+						badgeInfo: '16',
+						badgeColor: '#ff0000',
+						disabled: false
+					}
+				]
+			};
+		},
+		methods: {
+			reset() {
+				console.log('重置成功')
+			},
+			cleanderChange(date : string[]) {
+				// console.log(date)
+			},
+			calenderClick(date : CalendarDateType) {
+				this.calendarDate = date
+			},
+			show() {
+				this.showCalender = false
+				this.$nextTick(() => {
+					this.showCalender = true
+				})
+			},
+			modeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.viewMode = val == '1' ? 'month' : 'week'
+				this.show()
+			},
+			lunarModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.lunar = val == '1' ? true : false
+				this.show()
+			},
+			festivalModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.festival = val == '1' ? true : false
+				this.show()
+			},
+			monthBgModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.monthBg = val == '1' ? true : false
+				this.show()
+			},
+			rangeModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				if (val == '1') {
+					this.startDate = '2024-5-15'
+					this.endDate = '2024-5-28'
+				} else {
+					this.startDate = ''
+					this.endDate = ''
+				}
+				this.show()
+			},
+
+			showCurrentMonthChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.monthShowCurrentMonth = val == '1' ? true : false
+				this.show()
+			},
+			verticalModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.vertical = val == '1' ? false : true
+				if (val == '3') {
+					this.disableTouch = true
+				} else {
+					this.disableTouch = false
+				}
+				this.show()
+			},
+			disabledModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				this.disabled = val == '1' ? true : false
+				this.show()
+			},
+			selectModeChange(e : UniRadioGroupChangeEvent) {
+				const val = e.detail.value
+				switch (val) {
+					case '1':
+						this.selectMode = 'single'
+						break;
+					case '2':
+						this.selectMode = 'multiple'
+						break;
+					case '3':
+						this.selectMode = 'range'
+						break;
+					default:
+						this.selectMode = 'single'
+						break;
+				}
+				this.show()
+			}
+		}
+	}
+</script>

@@ -1,0 +1,149 @@
+<template>
+	<t-animation v-bind="extendsAttrs" main-class="h-0 da tvg w-100% tdr-m,,34" ref="dropdowitemins">
+		<t-scroll :main-class="mh">
+			<view class="dropdownitemheight">
+				<slot>
+					<t-row v-for="(item,index) in options" :main-class="`tdp fjcb ${borderState(index).value}`"
+						:disabled="disabledState(item).value" @click="select(item)" :key="index">
+						<t-text :type="typeMerge(item).value">{{item[labelKey]}}</t-text>
+						<t-icon v-if="isactive(item).value" name="checkbox-mark" :type="typeMerge(item).value"></t-icon>
+					</t-row>
+				</slot>
+			</view>
+		</t-scroll>
+	</t-animation>
+</template>
+
+<script setup>
+	/**
+	 * DropdownItem 下拉菜单子组件
+	 * @date 2025-08-14 18:31:33
+	 * @author TanYuan
+	 * @description 
+	 * @example /pagesA/layout/dropdown-menu/dropdown-menu.uvue
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-dropdown-item.html
+	 * @example /pagesA/layout/dropdown-menu/dropdown-menu.uvue
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} prop 表单数据对应的字段名(默认：-)
+	 * @property {String} label 标签
+	 * @property {String} labelKey 标签对应的数据的字段名(默认：label)
+	 * @property {String} valueKey 值对应的字段名(默认：value)
+	 * @property {UTSJSONObject[]} options [](默认：选项数据)
+	 */
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	import { getDomRect } from '../../common/model/util.uts';
+	import { ComputedRef } from 'vue'
+	interface DropDownMenuPropsItem extends CommonProps {
+		prop : string
+		label : string
+		labelKey : string
+		valueKey : string
+		options : UTSJSONObject[]
+	}
+	const props = withDefaults(defineProps<DropDownMenuPropsItem>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		prop: '',
+		label: '',
+		labelKey: 'label',
+		valueKey: 'value',
+		options: [] as UTSJSONObject[]
+	});
+	const instance = getCurrentInstance()?.proxy!
+	const { extendsAttrs } = useTuiThemes(props)
+	const emit = defineEmits()
+	const childs = inject<Ref<string[]>>('childs', ref<string[]>([]))
+	const total = inject<Ref<number>>('total', ref<number>(0))
+	const partenType = inject<Ref<string>>('partenType', ref<string>('p'))
+	const maxHeight = inject<Ref<number>>('maxHeight', ref<number>(-1))
+	const formdata = inject<Ref<UTSJSONObject>>('formdata', ref({}))
+	const onchange = inject<() => void>('onchange', () => { })
+	const sortIndex = ref<number>(total.value)
+	const dropdowitemins = ref<TAnimationComponentPublicInstance | null>(null)
+	const val : any = formdata.value.get(props.prop) ?? ''
+	const activeValue = ref<any>(val)
+	total.value++
+	if (props.label != '') {
+		childs.value.push(props.label)
+	} else {
+		let f = props.options.find((item : UTSJSONObject) => item.get(props.valueKey) == val)
+		childs.value.push(f?.getString(props.labelKey) ?? '请选择')
+	}
+	const activeIndex = inject<Ref<number>>('activeIndex', ref<number>(-1))
+	const mh = computed(() : string => {
+		return maxHeight.value > -1 ? `hl-${maxHeight.value}px` : ''
+	})
+	function disabledState(item : UTSJSONObject) : ComputedRef<boolean> {
+		return computed(() : boolean => {
+			return item.getBoolean('disabled') ?? false
+		})
+	}
+	function isactive(item : UTSJSONObject) : ComputedRef<boolean> {
+		return computed(() : boolean => {
+			return activeValue.value == item.get(props.valueKey)
+		})
+	}
+	function borderState(index : number) : ComputedRef<string> {
+		return computed(() : string => {
+			return index < props.options.length - 1 ? 'bb-1px,s,#f8f8f8' : ''
+		})
+	}
+	function typeMerge(item : UTSJSONObject) : ComputedRef<string> {
+		return computed(() : string => {
+			let t : string = ''
+			const tp = props.type != '' ? props.type : partenType.value
+			if (isactive(item).value) t = tp
+			return t
+		})
+	}
+	function select(item : UTSJSONObject) {
+		const val : any = item.get(props.valueKey) ?? ''
+		formdata.value.set(props.prop, val)
+		activeValue.value = val
+		activeIndex.value = -1
+		childs.value[sortIndex.value] = item.getString(props.labelKey) ?? '请选择'
+		onchange()
+	}
+	watch(() : number => activeIndex.value, (e : number) => {
+		const ins = dropdowitemins.value!
+		const ani = ins.createAnimation({ duration: 100 })
+		getDomRect('.dropdownitemheight', instance).then((rect : NodeInfo) => {
+			let h = Math.floor(rect.height!)
+			if (maxHeight.value > -1 && h > maxHeight.value) h = maxHeight.value
+			if (e == sortIndex.value) {
+				ani.height(h + 'px').step()
+			} else {
+				ani.height('0px').step({ duration: 0 })
+			}
+			ins.exports()
+		})
+	})
+</script>

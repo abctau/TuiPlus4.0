@@ -1,0 +1,296 @@
+<template>
+	<t-view v-bind="extendsAttrs">
+		<scroll-view class="tuiscroll" :style="listStyles" :direction="direction"
+			:associative-container="associativeContainer" :bounces="bounces" :upper-threshold="upperThreshold"
+			:lower-threshold="lowerThreshold" :scroll-top="_scrollTop" :scroll-left="_scrollLeft"
+			:scroll-into-view="scrollIntoView" :scroll-with-animation="scrollWithAnimation"
+			:refresher-enabled="refresherEnabled" :refresher-threshold="refresherThreshold"
+			refresher-default-style="none" :refresher-background="refresherBackground"
+			:refresher-triggered="refresherTriggered" :show-scrollbar="showScrollbar"
+			:custom-nested-scroll="customNestedScroll" @refresherpulling="refresherpulling"
+			@refresherrefresh="refresherrefresh" @refresherrestore="refresherrestore" @refresherabort="refresherabort"
+			@scrolltoupper="scrolltoupper" @scrolltolower="scrolltolower" @scroll="scroll" @scrollend="scrollend"
+			@touchend="touchend" @touchstart="touchstart">
+			<slot></slot>
+			<view :style="loadmoreStyle" v-if="loadmore">
+				<slot name="loadmore">
+					<t-loadmore v-bind="extendsAttrs" main-class="" :status="loadmoreStatus" :line="false"></t-loadmore>
+				</slot>
+			</view>
+			<view slot="refresher" v-if="refresherEnabled" :style="refresherStyle">
+				<slot name="refresher">
+					<t-refresher v-bind="extendsAttrs" :state="refresherState" main-class="h-100%"></t-refresher>
+				</slot>
+			</view>
+		</scroll-view>
+		<t-view :main-class="`da di-0 fc tdb ${maskClass}`" v-if="mask">
+			<slot name="mask">
+				<!-- <image src="/pagesA/static/image/refresher.gif" style="width:100rpx;height:100rpx;"></image> -->
+				<t-text v-bind="extendsAttrs" main-class="">TuiPlus</t-text>
+			</slot>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Scroll 滚动组件
+	 * @date 2025-05-31 12:06:32
+	 * @author TanYuan
+	 * @description scroll组件的增强，增加自定义下拉刷新和上拉加载，WEB端支持【scrollend】事件
+	 * @example /pagesA/layout/scroll/scroll
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-scroll.html
+	 * @example /pagesA/layout/scroll/scroll
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：l)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} maskClass 遮罩层样式
+	 * @property {Boolean} loadmore 是否显示加载更多
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} refresherEnabled 是否禁用下拉刷新 
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} loadmoreBoxClass 加载更多盒子的样式
+	 * @property {String} refresherBoxClass 下拉刷新盒子的样式
+	 * @property {String} direction 滚动方向紧支持纵向(默认：vertical)
+	 * @property {String} associativeContainer=[nested-scroll-view] 关联的滚动容器
+	 * @value nested-scroll-view 嵌套滚动
+	 * @property {Boolean} bounces 控制是否回弹效果 优先级高于rebound
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} upperThreshold 距顶部/左边多远时（单位px），触发 scrolltoupper 事件(默认：50)
+	 * @property {Number} lowerThreshold 距底部/右边多远时（单位px），触发 scrolltolower 事件(默认：50)
+	 * @property {Number} scrollTop 设置竖向滚动条位置
+	 * @property {Number} scrollLeft 设置横向滚动条位置
+	 * @property {String} scrollIntoView 值应为某子元素id（id不能以数字开头）。设置哪个方向可滚动，则在哪个方向滚动到该元素起始位置
+	 * @property {Boolean} scrollWithAnimation 是否在设置滚动条位置时使用滚动动画，设置false没有滚动动画(默认：true)
+	 * @value true 是
+	 * @value false 否
+	 * @property {Number} refresherThreshold 设置下拉刷新阈值, 仅 refresher-default-style = 'none' 自定义样式下生效(默认：100)
+	 * @property {Boolean} showScrollbar 控制是否出现滚动条
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} customNestedScroll 子元素是否开启嵌套滚动 将滚动事件与父元素协商处理
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} backtop 是否显示返回顶部
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} refresherBackground 设置下拉刷新区域背景颜色，默认透明(默认：transparent)
+	 * @event {Function} refresherpulling undefined
+	 * @event {Function} refresherrefresh undefined
+	 * @event {Function} refresherrestore undefined
+	 * @event {Function} refresherabort undefined
+	 * @event {Function} scrolltoupper undefined
+	 * @event {Function} scrolltolower undefined
+	 * @event {Function} scroll undefined
+	 * @event {Function} scrollend undefined
+	 */
+
+	import { useStyle } from '../../common/model/style'
+	import { getDomRect } from '../../common/model/util';
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ScrollProps extends CommonProps {
+		maskClass : string;
+		loadmore : boolean;
+		refresherEnabled : boolean;
+		loadmoreBoxClass : string;
+		refresherBoxClass : string;
+		direction : string;
+		associativeContainer : string;
+		bounces : boolean;
+		upperThreshold : number;
+		lowerThreshold : number;
+		scrollTop : number;
+		scrollLeft : number;
+		scrollIntoView : string;
+		scrollWithAnimation : boolean;
+		refresherThreshold : number;
+		showScrollbar : boolean;
+		customNestedScroll : boolean;
+		backtop : boolean;
+		refresherBackground : string;
+	}
+	const instance = getCurrentInstance()?.proxy!
+	const props = withDefaults(defineProps<ScrollProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		maskClass: '',
+		loadmore: false,
+		refresherEnabled: false,
+		loadmoreBoxClass: '',
+		refresherBoxClass: '',
+		direction: 'vertical',
+		associativeContainer: '',
+		bounces: false,
+		upperThreshold: 50,
+		lowerThreshold: 50,
+		scrollTop: 0,
+		scrollLeft: 0,
+		scrollIntoView: '',
+		scrollWithAnimation: true,
+		refresherThreshold: 100,
+		showScrollbar: false,
+		customNestedScroll: false,
+		backtop: false,
+		refresherBackground: 'transparent'
+	});
+	const _scrollTop = ref(0);
+	const _scrollLeft = ref(0);
+	const mask = ref(false);
+	const loadmoreStatus = ref(0);
+	const refresherState = ref(0);
+	const refresherTriggered = ref(false);
+	const timer = ref(0);
+	const st = ref(0);
+	const ost = ref(-1);
+	const { extendsAttrs, extendsViewFilterPmStyle } = useTuiThemes(props)
+	const emit = defineEmits(['refresherpulling', 'refresherrefresh', 'refresherrestore', 'refresherabort', 'scrolltoupper', 'scrolltolower', 'scroll', 'scrollend', 'initFinished'])
+	const listStyles = computed(() : string => `${useStyle(`twh-100%`)}${extendsViewFilterPmStyle.value}`);
+	const loadmoreStyle = computed(() : string => useStyle(`h-40px faic ${props.loadmoreBoxClass}`));
+	const refresherStyle = computed(() : string => useStyle(`h-100px w-100% ${props.refresherBoxClass}`));
+
+	const touchstart = (e : UniTouchEvent) => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		// #endif
+	};
+
+	const touchend = (e : UniTouchEvent) => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		timer.value = setInterval(() => {
+			if (ost.value == st.value) {
+				emit('scrollend', { detail: { scrollTop: st.value } });
+				clearInterval(timer.value);
+			}
+			ost.value = st.value;
+		}, 200);
+		// #endif
+	};
+
+	const getInfo = (callback : (e : NodeInfo) => void) => {
+		getDomRect('.tuiscroll', instance).then((rect : NodeInfo) => {
+			callback(rect)
+		})
+	};
+
+	const setLoadmore = (status : number) => {
+		loadmoreStatus.value = status;
+	};
+
+	const showMask = () => {
+		mask.value = true;
+	};
+
+	const hideMask = () => {
+		mask.value = false;
+	};
+
+	const closerefresher = () => {
+		refresherTriggered.value = false;
+	};
+
+	const refresherpulling = (e : RefresherEvent) => {
+		refresherState.value = 1;
+		emit('refresherpulling', e);
+	};
+
+	const refresherrefresh = (e : RefresherEvent) => {
+		refresherState.value = 2;
+		refresherTriggered.value = true;
+		emit('refresherrefresh', e);
+	};
+
+	const refresherrestore = (e : RefresherEvent) => {
+		refresherState.value = 1;
+		emit('refresherrestore', e);
+	};
+
+	const refresherabort = (e : RefresherEvent) => {
+		emit('refresherabort', e);
+	};
+
+	const scrolltoupper = (e : ScrollToUpperEvent) => {
+		emit('scrolltoupper', e);
+	};
+
+	const scrolltolower = (e : ScrollToLowerEvent) => {
+		if (loadmoreStatus.value != 3) {
+			loadmoreStatus.value = 2;
+			emit('scrolltolower', e);
+		}
+	};
+
+	const scroll = (e : ScrollEvent) => {
+		st.value = e.detail.scrollTop;
+		emit('scroll', e);
+	};
+
+	const scrollend = (e : ScrollEvent) => {
+		emit('scrollend', e);
+	};
+
+	// Watch
+	watch(
+		() : number => props.scrollLeft,
+		(val : number) => {
+			_scrollLeft.value = val;
+		},
+		{ immediate: true }
+	);
+
+	watch(
+		() : number => props.scrollTop,
+		(val : number) => {
+			_scrollTop.value = val;
+		},
+		{ immediate: true }
+	);
+	onMounted(() => {
+		nextTick(() => {
+			getInfo((rect : NodeInfo) => {
+				emit('initFinished', rect)
+			})
+		})
+	})
+	onUnmounted(() => {
+		// #ifdef WEB
+		clearInterval(timer.value);
+		// #endif
+	});
+	defineExpose({
+		getInfo,
+		setLoadmore,
+		hideMask,
+		showMask,
+		closerefresher
+	})
+</script>

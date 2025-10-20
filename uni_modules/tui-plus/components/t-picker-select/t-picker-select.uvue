@@ -1,0 +1,171 @@
+<template>
+	<t-view :main-class="mainClass">
+		<pickerSelect v-if="embeddable" v-bind="extendsAttrs" :modelValue="modelValue" @change="onChange">
+		</pickerSelect>
+		<t-popup v-else direction="bottom" ref='popupbottom' :show-footer="true" :closeable="false" @cancel="oncancel"
+			@confirm="onconfirm">
+			<t-view main-class="tdr-l,,12 oh tvg">
+				<t-text v-bind="extendsAttrs" :main-class="`tdp-${size} sta-c`">{{placeholder}}</t-text>
+				<pickerSelect v-if="!embeddable" v-bind="extendsAttrs" :modelValue="modelValue" @initValue="initValue"
+					@change="onChange">
+				</pickerSelect>
+			</t-view>
+		</t-popup>
+		<t-view main-class="f w-100%" @click="show" v-if="!embeddable">
+			<slot>
+				<t-cell :size="size" :title="title"
+					:desc="`${confirmValue.length==0?placeholder:confirmValue.join('-')}`" :border="false"></t-cell>
+			</slot>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * PickerSelect 选择列表
+	 * @date 2025-05-31 12:05:41
+	 * @author TanYuan
+	 * @description t-select的另一个版本，适用于移动端，t-select一般适用于PC端
+	 * @example /pagesA/form/picker-select/picker-select
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-picker-select.html
+	 * @example /pagesA/form/picker-select/picker-select
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {any} modelValue 双向绑定的值
+	 * @property {String} valueKey value字段的key(默认：value)
+	 * @property {String} labelKey 标签字段的key(默认：label)
+	 * @property {Boolean} embeddable 是否嵌入页面
+	 * @value true 是
+	 * @value false 否
+	 * @property {UTSJSONObject[]} list 数据源(默认：[])
+	 * @property {Boolean} remote 是否远程搜索
+	 * @property {placeholder} placeholder 默认占位内容
+	 * @value true 是
+	 * @value false 否
+	 * @property {String} contentClass 内容样式
+	 * @property {any} remoteMethod 远程搜索自定义函数(默认：(_ : string) : Promise<UTSJSONObject[]> => {
+					return Promise.resolve([] as UTSJSONObject[])
+				})
+	 * @event {Function} change 值发生变化时触发
+	 * @event {Function} confirm 点确认时触发
+	 * @event {Function} cancel 点击取消时候触发
+	 */
+
+	import pickerSelect from './picker-select.uvue'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+
+	interface PickerSelectProps extends CommonProps {
+		modelValue : any;
+		type : string;
+		size : string;
+		valueKey : string;
+		labelKey : string;
+		embeddable : boolean;
+		list : UTSJSONObject[];
+		remote : boolean;
+		remoteMethod ?: (id : string) => Promise<UTSJSONObject[]>;
+		contentClass : string;
+		placeholder : string;
+		title : string;
+	}
+
+	const props = withDefaults(defineProps<PickerSelectProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: '',
+		valueKey: 'value',
+		labelKey: 'label',
+		embeddable: false,
+		list: [] as UTSJSONObject[],
+		remote: false,
+		remoteMethod: null,
+		contentClass: '',
+		placeholder: '请选择',
+		title: ''
+	});
+	const emit = defineEmits(['update:modelValue', 'change', 'confirm', 'cancel'])
+	const instance = getCurrentInstance()?.proxy!
+	const cacheValue = ref<UTSJSONObject>({})
+	const confirmValue = ref<string[]>([])
+	const confirmCacheValue = ref<UTSJSONObject>({})
+	const popupbottom = ref<ComponentPublicInstance | null>(null)
+	const extendsAttrs = computed(() : UTSJSONObject => ({
+		hover: props.hover,
+		type: props.type,
+		disabled: props.disabled,
+		stop: props.stop,
+		effect: props.effect,
+		size: props.size,
+		mainClass: props.mainClass,
+		nativeClass: props.nativeClass,
+		valueKey: props.valueKey,
+		labelKey: props.labelKey,
+		embeddable: props.embeddable,
+		list: props.list,
+		remote: props.remote,
+		contentClass: props.contentClass,
+		remoteMethod: props.remoteMethod
+	}));
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	function oncancel() {
+		emit('cancel')
+	}
+
+	function onconfirm() {
+		const cval : UTSJSONObject = { ...cacheValue.value }
+		const val = cval.getArray<string>('values')!
+		const lab = cval.getArray<string>('labels')!
+		confirmValue.value = lab
+		confirmCacheValue.value = cval
+		emit('confirm', cval)
+		if (typeof (props.modelValue) == 'string') {
+			emit('update:modelValue', `${val.length > 0 ? val[0] : ''}`)
+		} else {
+			emit('update:modelValue', val.slice())
+		}
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function onChange(e : UTSJSONObject) {
+		cacheValue.value = e
+		if (props.embeddable) {
+			emit('change', cacheValue.value)
+			if (typeof (props.modelValue) == 'string') emit('update:modelValue', e.getArray<string>('values')![0]);
+		}
+	}
+	function show() {
+		popupbottom.value?.$callMethod('show')
+	}
+	function initValue(e : string[]) {
+		confirmValue.value = e
+	}
+	defineExpose({ show })
+</script>

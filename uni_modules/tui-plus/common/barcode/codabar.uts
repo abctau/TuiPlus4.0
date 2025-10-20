@@ -1,0 +1,56 @@
+
+class codabar {
+	//编码数据
+	data=""
+	
+	constructor(text:string) {
+		let data = text;
+		let rn = data.search(/^[0-9\-\$\:\.\+\/]+$/)
+		if (rn == 0  as number) {
+			data = "A" + data + "A";
+		}
+		this.data = data.toUpperCase();
+	}
+
+	valid():boolean {
+		let rn = this.data.search(/^[A-D][0-9\-\$\:\.\+\/]+[A-D]$/)
+		return  rn != -1 as number;
+	}
+
+	encode():string {
+		var result = [] as string[];
+		for (var i = 0; i < this.data.length; i++) {
+			result.push(this.getEncodings(this.data.charAt(i)));
+			if (i != (this.data.length - 1) as number) {
+				result.push("0");
+			}
+		}
+		return result.join('')
+	}
+
+	getEncodings(key:string):string {
+		if(key == "0") return "101010011"
+		if(key == "1") return "101011001"
+		if(key == "2") return "101001011"
+		if(key == "3") return "110010101"
+		if(key == "4") return "101101001"
+		if(key == "5") return "110101001"
+		if(key == "6") return "100101011"
+		if(key == "7") return "100101101"
+		if(key == "8") return "100110101"
+		if(key == "9") return "110100101"
+		if(key == "-") return "101001101"
+		if(key == "$") return "101100101"
+		if(key == ":") return "1101011011"
+		if(key == "/") return "1101101011"
+		if(key == ".") return "1101101101"
+		if(key == "+") return "1011011011"
+		if(key == "A") return "1011001001"
+		if(key == "B") return "1001001011"
+		if(key == "C") return "1010010011"
+		if(key == "D") return "1010011001"
+		return ""
+	}
+}
+
+export { codabar };

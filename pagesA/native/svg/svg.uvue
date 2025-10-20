@@ -1,0 +1,27 @@
+<template>
+	<t-page main-class='p-30'>
+		<t-card title="Svg" sub-title="支持安卓,IOS,web-支持网络路径和字符串格式" main-class="mb-30"></t-card>
+		<t-section title="网络" main-class="mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30 p-30">
+			<t-image src="https://life.yundie.xyz/tuiplus/pagesA/static/svg/adafruit.svg" main-class="twh-50" />
+		</t-col>
+		<t-section title="路径" main-class="mb-30"></t-section>
+		<t-col main-class="tdr tdb mb-30 p-30">
+			<t-image src="/pagesA/static/svg/adafruit.svg" main-class="twh-50" />
+		</t-col>
+	</t-page>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				// XML资源
+				src: '<?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="24" r="3" fill="#333"/><circle cx="24" cy="24" r="3" fill="#333"/><circle cx="36" cy="24" r="3" fill="#333"/></svg>'
+			}
+		},
+		onLoad() {
+
+		}
+	}
+</script>

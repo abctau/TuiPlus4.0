@@ -1,0 +1,40 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card main-class="mb-30" title="TuiStore 状态管理" subTitle="支持持久化存储，支持全局响应数据响应，演示子页修改状态全局响应)"></t-card>
+		<t-section main-class="tdr mb-30" title="存储对象形式的响应式数据" subTitle="存储登录用户信息示例"></t-section>
+		<t-col main-class="tdr tdb mb-30 tdp">
+			<t-text main-class="mb-10">token：{{tokes.tokenTest ?? '未登录'}}</t-text>
+			<t-text main-class="mb-10">refreshToken：{{tokes.refreshTokenTest ?? '未登录'}}</t-text>
+			<t-text main-class="mb-10">用户名：{{usetinfo.username ?? '未登录'}}</t-text>
+			<t-text main-class="mb-10">年龄：{{usetinfo.age ?? '未设置'}}</t-text>
+			<t-text main-class="mb-10">性别：{{usetinfo.gentter ?? '未设置'}}</t-text>
+			<t-button type="p" effect="l" main-class="mtb-30" @click="setUserinfo">修改状态用户信息</t-button>
+			<!-- <t-button type="p" effect="l" @click="TuiAutoBack">回到上一页</t-button> -->
+		</t-col>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiAutoBack, TuiStore } from '@/uni_modules/tui-plus';
+	const store = new TuiStore()
+	const tokes : UTSJSONObject = store.value
+	const usetinfo : UTSJSONObject = store.get('userinfoTest') //如果希望usetinfo不全局响应，可以在这里做克隆，具体参考、/pagesB/account/account资料修改页 修改后保存控制是否全局响应
+	function setUserinfo() {
+		//对象形式这样修改
+		usetinfo.username = '幸福白切鸡'
+		usetinfo.age = 26
+		usetinfo.gentter = '女生'
+		//统一一次性修改方法
+		// store.set('userinfoTest', { username: '幸福白切鸡', age: 26, gentter: '女生' })
+
+		// 字符串形式的响应数据通过store修改实现响应
+		// store.set('tokenTest', 'storesetupdateresh')
+		// store.set('refreshTokenTest', 'storesetupdateresh')
+		//或者直接在TuiStore对像上修改
+		tokes.tokenTest = "TuiStoresettokenTest"
+		tokes.refreshTokenTest = "TuiStoreset"
+		uni.showToast({
+			title: '修改成功'
+		})
+	}
+</script>

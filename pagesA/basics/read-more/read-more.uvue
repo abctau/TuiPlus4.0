@@ -1,0 +1,46 @@
+<template>
+	<t-page main-class="p-30" title="展开阅读更多组件，用于内容区折叠与展开">
+		<t-card title="ReadMore" main-class="mb-30"
+			sub-title=""></t-card>
+		<t-section title="基础使用" type='p' main-class="tdb-tdr-mb-30"></t-section>
+		<t-col main-class="tdb tdr mb-30 p-20">
+			<t-read-more>
+				<rich-text :nodes="content"></rich-text>
+			</t-read-more>
+		</t-col>
+		<t-section title="锁定" type='p' main-class="tdb tdr mb-30"></t-section>
+		<t-col main-class="tdb td mb-30 p-30">
+			<t-read-more type="p" closeText='开通会员解锁' :disabled="true">
+				<rich-text :nodes="content"></rich-text>
+			</t-read-more>
+		</t-col>
+		<t-section title="设置高度" type='p' main-class="tdb tdr mb-30"></t-section>
+		<t-col main-class="tdb tdr mb-30 p-30">
+			<t-read-more main-class="h-500" type="s">
+				<rich-text :nodes="content2"></rich-text>
+			</t-read-more>
+		</t-col>
+	</t-page>
+</template>
+<script>
+	export default {
+		data() {
+			return {
+				content: `<p style="line-height:40px;">在一个遥远的神秘国度，传说中有一把神奇的剑，能够赋予持有者无尽的力量。这把剑被藏在了一个隐秘的山洞中，只有最勇敢的冒险者才能找到它。</p>
+<img style="width:100%;height:300px;" src="https://life.yundie.xyz/static/image/3.png" />
+	<p style="line-height:40px;">图1: 隐秘山洞的入口</p>
+`,
+				content1: `
+<p style="line-height:40px;">一位年轻的勇士，怀揣着对神秘剑的渴望，踏上了寻找的旅程。他穿过了茂密的森林，越过了险峻的山峰，最终来到了山洞的入口。</p>
+<img style="width:100%;height:300px;" src="https://life.yundie.xyz/static/image/2.png" />
+	<p style="line-height:40px;">图2: 勇士穿越森林和山峰</p>
+`,
+				content2: `<p style="line-height:40px;">在山洞的深处，勇士终于发现了那把传说中的神奇剑。他握住剑柄，感受到了一股强大的力量流入体内。从此以后，他成为了神秘国度的守护者，用这把剑保护着人民免受邪恶的侵害。</p>
+<img style="width:100%;height:300px;" src="https://life.yundie.xyz/static/image/1.png" />
+	<p style="line-height:40px;">图3: 勇士找到神奇剑</p>
+
+`
+			};
+		}
+	}
+</script>

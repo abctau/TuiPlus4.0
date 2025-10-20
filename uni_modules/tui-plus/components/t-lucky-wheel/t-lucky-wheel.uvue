@@ -1,0 +1,226 @@
+<template>
+	<t-canvas v-bind="extendsAttrs" @initFinished="canvasInit" :main-class="`twh-750 b ${mainClass}`"></t-canvas>
+</template>
+<script setup>
+	/**
+	 * LuckyWheel 幸运大转盘
+	 * @date 2025-08-14 19:12:01
+	 * @author TanYuan
+	 * @description canvas绘制，未完成
+	 * @example /pagesA/other/lucky-wheel/lucky-wheel.uvue
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-lucky-wheel.html
+	 * @example /pagesA/other/lucky-wheel/lucky-wheel.uvue
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸 (默认:medium)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型 (默认: "")
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果（点击组件透明度0.7）(默认: false)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {UTSJSONObject[]} options 绘制数据配置(默认：[])
+	 */
+	import { QRCode } from '../../common/qr/QRCode'
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface QrProps extends CommonProps {
+		options : UTSJSONObject[]
+	}
+	const props = withDefaults(defineProps<QrProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		options: [] as UTSJSONObject[]
+	});
+	const { extendsAttrs, getColorToValue } = useTuiThemes(props)
+	const canvasCtx = ref<CanvasRenderingContext2D | null>(null)
+	const canvasContextIns = ref<CanvasContext | null>(null)
+	// 转盘状态
+	let spinning = false;
+	let rotation = 0;
+	let spinVelocity = 0;
+	let spinDeceleration = 0.99;
+	let minVelocity = 0.0005;
+	// let selectedPrize : string = '';
+	// 初始化转盘
+	function drawWheel() {
+		const ctx = canvasCtx.value!
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		const centerX = w / 2;
+		const centerY = h / 2;
+		const radius = Math.min(centerX, centerY) - 20;
+		// 清除画布
+		ctx.clearRect(0, 0, w, h);
+		// 绘制外圈装饰（红白相间的圆点）
+		const dotCount = 72;
+		const dotRadius = 6;
+		const dotSpacing = (Math.PI * 2) / dotCount;
+
+		for (let i = 0; i < dotCount; i++) {
+			const angle = i * dotSpacing;
+			const x = centerX + Math.cos(angle) * (radius + 10);
+			const y = centerY + Math.sin(angle) * (radius + 10);
+			ctx.beginPath();
+			ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+			ctx.fillStyle = i % 2 == 0 ? '#FF0000' : '#FFFFFF';
+			ctx.fill();
+			ctx.strokeStyle = '#333';
+			ctx.lineWidth = 1;
+			ctx.stroke();
+		}
+
+		// 绘制外圈
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+		ctx.fillStyle = '#FFD700';
+		ctx.fill();
+		ctx.strokeStyle = '#FFF';
+		ctx.lineWidth = 8;
+		ctx.stroke();
+
+		// 绘制内部转盘
+		const sliceAngle = (Math.PI * 2) / props.options.length;
+
+		for (let i = 0; i < props.options.length; i++) {
+			const item : UTSJSONObject = props.options[i]
+			const startAngle = i * sliceAngle + rotation;
+			const endAngle = startAngle + sliceAngle;
+
+			// 绘制扇形
+			ctx.beginPath();
+			ctx.moveTo(centerX, centerY);
+			ctx.arc(centerX, centerY, radius - 15, startAngle, endAngle);
+			ctx.closePath();
+
+			// 填充颜色
+			ctx.fillStyle = item.getString('color') ?? 'red';
+			ctx.fill();
+
+			// 绘制分隔线
+			ctx.beginPath();
+			ctx.moveTo(centerX, centerY);
+			ctx.lineTo(
+				centerX + Math.cos(startAngle) * (radius - 15),
+				centerY + Math.sin(startAngle) * (radius - 15)
+			);
+			ctx.strokeStyle = '#FFF';
+			ctx.lineWidth = 2;
+			ctx.stroke();
+
+			// 绘制奖品文字
+			ctx.save();
+			ctx.translate(centerX, centerY);
+			ctx.rotate(startAngle + sliceAngle / 2);
+			ctx.textAlign = 'right';
+			ctx.fillStyle = 'white';
+			ctx.font = 'bold 14px Arial';
+			// #ifdef WEB
+			ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+			ctx.shadowBlur = 4;
+			ctx.shadowOffsetX = 2;
+			ctx.shadowOffsetY = 2;
+			// #endif
+			// 绘制文字
+			ctx.fillText(item.getString('text') ?? '', radius - 80, 5);
+
+			// 绘制奖品图标
+			ctx.font = '20px Arial';
+			ctx.fillText(item.getString('icon') ?? '', radius - 40, 5);
+
+			ctx.restore();
+		}
+
+		// 绘制中心点
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+		const centerGradient = ctx.createRadialGradient(
+			centerX, centerY, 5,
+			centerX, centerY, 25
+		);
+		centerGradient.addColorStop(0, '#FFF');
+		centerGradient.addColorStop(1, '#FFD700');
+		ctx.fillStyle = centerGradient;
+		ctx.fill();
+
+		ctx.strokeStyle = '#FF0000';
+		ctx.lineWidth = 4;
+		ctx.stroke();
+
+		// 绘制中心文字
+		ctx.font = 'bold 18px Arial';
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillStyle = '#FF0000';
+		// #ifdef WEB
+		ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+		ctx.shadowBlur = 2;
+		// #endif
+		ctx.fillText('抽奖', centerX, centerY);
+	}
+	// 旋转动画
+	function spin() {
+		if (!spinning) return;
+
+		// 更新旋转角度
+		rotation += spinVelocity;
+
+		// 应用减速
+		spinVelocity *= spinDeceleration;
+
+		// 绘制更新
+		drawWheel();
+
+		// 检测是否停止
+		if (spinVelocity < minVelocity) {
+			spinning = false;
+
+			// 计算中奖项
+			const len = props.options.length
+			const normalizedRotation = ((rotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+			const sliceAngle = (Math.PI * 2) / len;
+			const prizeIndex = Math.floor(len - normalizedRotation / sliceAngle) % len;
+			// selectedPrize = props.options[prizeIndex].getString('text') ?? '';
+
+		} else {
+			requestAnimationFrame(() => {
+				spin()
+			});
+		}
+	}
+	function startSpin() {
+		if (spinning) return;
+		spinning = true;
+		// 随机初始速度
+		spinVelocity = Math.random() * 0.1 + 0.05;
+		spin();
+	}
+
+	function canvasInit(ctx : CanvasContext) {
+		canvasContextIns.value = ctx
+		canvasCtx.value = ctx.getContext('2d')
+		drawWheel()
+		setTimeout(() => {
+			startSpin()
+		}, 5000)
+	}
+</script>

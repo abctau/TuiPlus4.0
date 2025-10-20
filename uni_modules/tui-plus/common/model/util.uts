@@ -1,0 +1,378 @@
+import defaultTheme from '../config/theme.json'
+import { isNumber } from './test'
+import { IconFontList } from '../config/icons'
+// 查找父DOM
+export function getParentElement(element : UniElement | null, nodeName : string) : UniElement | null {
+	// 向上遍历parentElement，直到找到符合条件的父元素
+	while (element != null && element.parentElement != null) {
+		// 在这里添加你的条件判断逻辑，比如检查父元素的类名、标签名等
+		if (element.parentElement?.nodeName == nodeName) {
+			// 如果找到符合条件的父元素，则返回该父元素
+			return element.parentElement;
+		}
+		// 继续向上查找父元素
+		element = element.parentElement;
+	}
+	// 如果没有找到符合条件的父元素，则返回null
+	return null;
+}
+// 查找父组件实例
+export function $dispatch(
+	context : ComponentPublicInstance,
+	componentName : string,
+	eventName : string = '',
+	...params : any[]
+) : ComponentPublicInstance | null {
+	let parent = context.$parent
+	let name = parent?.$options?.name
+	while (parent != null && (name == null || componentName != name)) {
+		parent = parent.$parent
+		if (parent != null) {
+			name = parent.$options.name
+		}
+	}
+	if (parent != null) {
+		if (eventName != '') parent.$callMethod(eventName, ...params)
+		return parent
+	}
+	return null
+}
+export function getJSONString(jo : UTSJSONObject, field : string, def : string = '') : string {
+	if (field in jo) {
+		return `${jo[field]}`
+	} else {
+		return def
+	}
+}
+/**
+ * @description 简单生成随机数
+ * @param {number} 生成随机数的长度
+ */
+export function TuiGuid(len : number) : string {
+	var result = '';
+	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var charactersLength = characters.length;
+	for (var i = 0; i < len; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+}
+//负数处理
+export function replaceNWithNegative(str : string) : string {
+	if (str.charAt(0) == 'n') {
+		return '-' + str.slice(1);
+	}
+	return str;
+}
+export function removeSpacesRGB(colorString : string) {
+	const regex = new RegExp('rgba\\(([^)]+)\\)', 'g');
+	const regex1 = new RegExp('rgb\\(([^)]+)\\)', 'g');
+	return colorString.replace(regex, (match : string, offset : number, string : string) : string => {
+		return match.replace(/ /g, '');
+	}).replace(regex1, (match : string, offset : number, string : string) : string => {
+		return match.replace(/ /g, '');
+	});
+}
+
+export function replaceCommasInRGBValues(styleString : string) : string {
+	const regex = new RegExp('rgba\\(([^)]+)\\)', 'g');
+	const regex1 = new RegExp('rgb\\(([^)]+)\\)', 'g');
+	return styleString.replace(regex, (match : string, offset : number, string : string) : string => {
+		return match.replace(/,/g, ' ');
+	}).replace(regex1, (match : string, offset : number, string : string) : string => {
+		return match.replace(/,/g, ' ');
+	});
+}
+
+export function addUnit(value : string | null, unit : string = '') : string {
+	let _unit = unit == '' ? defaultTheme.unit : unit
+	let _value = value == null ? '' : replaceNWithNegative((`${value}`).toLowerCase())
+	if (isNumber(_value)) _value = `${_value}${_unit}`
+	return _value
+}
+export function TuiMeasureText(text : string, fontSize : number) : number {
+	let width : number = 0;
+	let textArr : string[] = text.split('');
+	for (let i = 0; i < textArr.length; i++) {
+		let item = textArr[i];
+		if (/[a-zA-Z]/.test(item)) {
+			width += 7;
+		} else if (/[0-9]/.test(item)) {
+			width += 5.5;
+		} else if (/\./.test(item)) {
+			width += 2.7;
+		} else if (/-/.test(item)) {
+			width += 3.25;
+		} else if (/:/.test(item)) {
+			width += 2.5;
+		} else if (/[\u4e00-\u9fa5]/.test(item)) {
+			width += 10;
+		} else if (/\(|\)/.test(item)) {
+			width += 3.73;
+		} else if (/\s/.test(item)) {
+			width += 2.5;
+		} else if (/%/.test(item)) {
+			width += 8;
+		} else {
+			width += 10;
+		}
+	}
+	return width * fontSize / 10;
+}
+
+export function getPx(value : string) : number {
+	if (value == '') return 0
+	if (isNumber(value)) {
+		return parseFloat(value)
+	}
+	// 如果带有rpx，先取出其数值部分，再转为px值
+	if (/(rpx|upx)$/.test(value)) {
+		const ix : number = parseFloat(value.replace('rpx', '').replace('upx', ''))
+		return uni.rpx2px(ix)
+	}
+	return parseFloat(value)
+}
+export function DOMRectToMap(rect : DOMRect) : Map<string, number> {
+	const MapRect = new Map<string, number>()
+	MapRect.set('b', rect.bottom)
+	MapRect.set('t', rect.top)
+	MapRect.set('l', rect.left)
+	MapRect.set('r', rect.right)
+	MapRect.set('w', rect.width)
+	MapRect.set('h', rect.height)
+	MapRect.set('x', rect.x)
+	MapRect.set('y', rect.y)
+	return MapRect
+}
+export function TuiRefToElement(ref : string, e : ComponentPublicInstance) : UniElement {
+	return (e.$refs[ref] as ComponentPublicInstance).$el as UniElement
+}
+
+export function TuiRegisterFontFamily(config : UTSJSONObject) {
+	const family : string = `${config.getString('fontName')}`
+	const path : string = `${config.getString('url')}`
+	const option : UTSJSONObject = config.getJSON('options') ?? {}
+	uni.loadFontFace({
+		global: true,
+		family: family,
+		source: `url('${path}')`,
+		success() {
+			IconFontList.set(family, option)
+		},
+		fail(error) {
+			console.log('字体加载失败', error.errMsg)
+		}
+	})
+}
+export function getAllDomRect(e : string, that : ComponentPublicInstance) : Promise<NodeInfo[][]> {
+	return new Promise((
+		resolve : (res : NodeInfo[][]) => void,
+		reject : (err : any) => void
+	) => {
+		try {
+			uni.createSelectorQuery().in(that).selectAll(e).boundingClientRect().exec((rects) => {
+				resolve(rects as NodeInfo[][])
+			})
+		} catch (error) {
+			reject(error)
+		}
+	})
+}
+export function getDomRect(e : string, that : ComponentPublicInstance) : Promise<NodeInfo> {
+	return new Promise((
+		resolve : (res : NodeInfo) => void,
+		reject : (err : any) => void
+	) => {
+		try {
+			uni.createSelectorQuery().in(that).select(e).boundingClientRect().exec((rects) => {
+				resolve((rects as NodeInfo[])[0])
+			})
+		} catch (error) {
+			reject(error)
+		}
+	})
+}
+
+/**
+ * @description 生成随机数
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+export function getRandomInt(min : number, max : number) : number {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * @description 随机生成N位的数字
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+export function generateRandomNumber(n : number) : number {
+	if (n == 0) return 0
+	const min = Math.pow(10, n - 1)
+	const max = Math.pow(10, n)
+	return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+export function drawRoundedRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number) {
+	if (width < 2 * radius) radius = width / 2;
+	if (height < 2 * radius) radius = height / 2;
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.arcTo(x + width, y, x + width, y + height, radius);
+	ctx.arcTo(x + width, y + height, x, y + height, radius);
+	ctx.arcTo(x, y + height, x, y, radius);
+	ctx.arcTo(x, y, x + width, y, radius);
+	ctx.closePath();
+}
+
+export function TuiGetMeasureText(text : string, fontSize : number) : number {
+	let width : number = 0;
+	let textArr : string[] = text.split('');
+	for (let i = 0; i < textArr.length; i++) {
+		let item = textArr[i];
+		if (/[a-zA-Z]/.test(item)) {
+			width += 7;
+		} else if (/[0-9]/.test(item)) {
+			width += 5.5;
+		} else if (/\./.test(item)) {
+			width += 2.7;
+		} else if (/-/.test(item)) {
+			width += 3.25;
+		} else if (/:/.test(item)) {
+			width += 2.5;
+		} else if (/[\u4e00-\u9fa5]/.test(item)) {
+			width += 10;
+		} else if (/\(|\)/.test(item)) {
+			width += 3.73;
+		} else if (/\s/.test(item)) {
+			width += 2.5;
+		} else if (/%/.test(item)) {
+			width += 8;
+		} else {
+			width += 10;
+		}
+	}
+	return width * fontSize / 10;
+}
+/**
+ * 打乱数组
+ * 
+ * @param {Array} array 需要打乱的数组
+ * @returns {Array} 打乱后的数组
+ */
+export function randomArray(array : any) : any[] {
+	// 原理是sort排序,Math.random()产生0<= x < 1之间的数,会导致x-0.05大于或者小于0
+	// #ifdef APP-ANDROID
+	return (array as any[]).sort((_ : any, _ : any) : number => Math.random() - 0.5)
+	// #endif
+	// #ifndef APP-ANDROID
+	return (array as any[]).sort((a : any, b : any) : number => Math.random() - 0.5)
+	// #endif
+}
+
+/**
+ * 去除空格
+ * 
+ * @param {String} str 需要去除空格的字符串
+ * @param {String} pos both(左右)|left|right|all
+ */
+export function TuiTrim(str : string, pos : string = 'all') : string {
+	switch (pos) {
+		case 'both':
+			return str.replace(/^\s+|\s+$/g, '')
+		case 'left':
+			return str.replace(/^\s*/, '')
+		case 'right':
+			return str.replace(/(\s*$)/g, '')
+		case 'all':
+			return str.replace(/\s+/g, '')
+	}
+
+	return str.replace(/\s+/g, '')
+}
+
+export function TuiRequestAnimationFrame(e : () => void) : number {
+	// #ifdef MP-WEIXIN
+	return setTimeout(() => {
+		e()
+	}, 16);
+	// #endif
+	// #ifndef MP-WEIXIN
+	return requestAnimationFrame((_ : number) => {
+		e()
+	})
+	// #endif
+}
+export function TuiCancelAnimationFrame(id : number) {
+	// #ifdef MP-WEIXIN
+	clearTimeout(id)
+	// #endif
+	// #ifndef MP-WEIXIN
+	cancelAnimationFrame(id);
+	// #endif
+}
+
+export function TuiIf(e : any | null) : boolean {
+	let state : boolean = true
+	if (e == null) {
+		state = false
+	} else if (typeof (e) == 'string') {
+		let s : string = `${e}`
+		if (s == '') state = false
+		if (isNumber(s)) if (parseFloat(s) <= 0) state = false
+	} else if (typeof (e) == 'number') {
+		if ((e as number) <= 0) state = false
+	} else if (typeof (e) == 'object') {
+		if (Array.isArray(e)) {
+			if ((e as any[]).length == 0) state = false
+		} else {
+			if (JSON.stringify(e) == "{}") state = false
+		}
+	}
+	return state
+}
+
+export function sleep(ms : number) : Promise<number> {
+	let timer = 0
+	return new Promise((
+		resolve : (res : number) => void
+	) => {
+		timer = setTimeout(() => {
+			clearTimeout(timer)
+			resolve(timer)
+		}, ms)
+	})
+}
+export const TuiAutoBack = ref<(e : any | null) => void>((path : any | null) => {
+	const pages = getCurrentPages()
+	if (pages.length > 1) {
+		uni.navigateBack()
+	} else {
+		let url = '/pages/index/index'
+		if ((typeof path) == 'string') url = `${path}`
+		uni.switchTab({
+			url,
+			fail: (er) => {
+				uni.navigateTo({
+					url,
+					fail: (er) => {
+						console.log(er)
+					}
+				})
+			}
+		})
+	}
+})
+
+export function TuiDeepClone(e : any | null) : any | null {
+	if (e == null) return e
+	if (typeof (e) == 'string') return e
+	if ((typeof (e) == 'object') && (Array.isArray(e))) return JSON.parseArray(JSON.stringify(e))
+	if (typeof (e) == 'object') return JSON.parseObject(JSON.stringify(e))
+	return e
+}

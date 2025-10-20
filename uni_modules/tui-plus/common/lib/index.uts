@@ -1,0 +1,15 @@
+// #ifdef APP-ANDROID
+export * from './app-android/index.uts';
+// #endif
+
+// #ifdef APP-IOS
+export * from './app-ios/index.uts';
+// #endif
+
+// #ifdef WEB
+export * from './web/index.uts';
+// #endif
+
+// #ifdef MP-WEIXIN
+export * from './mp-weixin/index.uts';
+// #endif

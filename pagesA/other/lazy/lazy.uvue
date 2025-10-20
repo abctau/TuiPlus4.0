@@ -1,0 +1,13 @@
+<template>
+	<t-page main-class="p-30">
+		<t-card title="Lazy 渲染队列" sub-title="升级版懒加载组件，引入渲染队列机制，控制内容帧逐渲染，从而优化性能，防止页面因内容量过大而卡顿。"></t-card>
+		<t-card title="亮点" sub-title="一边渲染，一边进行页面滚动操作"></t-card>
+		<t-lazy v-for="i in 500" :key="i">
+			<t-text>{{i}}</t-text>
+		</t-lazy>
+	</t-page>
+</template>
+
+<script setup>
+
+</script>

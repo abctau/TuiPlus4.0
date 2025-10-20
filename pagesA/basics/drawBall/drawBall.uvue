@@ -1,0 +1,110 @@
+<template>
+	<t-page main-class="p-30">
+		<t-drawable @initFinished="drawInitFinished" class="h-600 tdr tdb mb-30"></t-drawable>
+		<button @click="clearDraw">清空画布</button>
+		<button @click="drawBall">drawBall</button>
+	</t-page>
+</template>
+
+<script setup>
+	import { TuiDrawableContext } from '@/uni_modules/tui-plus'
+	let drawCcontext : TuiDrawableContext | null = null
+	function drawInitFinished(ctx : TuiDrawableContext) {
+		drawCcontext = ctx
+	}
+	let interval = 0
+	class Ball {
+		canvasWidth : number;
+		canvasHeight : number;
+		ctx : TuiDrawableContext;
+		x : number;
+		y : number;
+		vx : number;
+		vy : number;
+		radius : number;
+
+		constructor(x : number, y : number, vx : number, vy : number, canvasWidth : number, canvasHeight : number, ctx : TuiDrawableContext) {
+			this.canvasWidth = canvasWidth;
+			this.canvasHeight = canvasHeight;
+			this.ctx = ctx;
+			this.x = x;
+			this.y = y;
+			this.vx = vx;
+			this.vy = vy;
+			this.radius = 5;
+		}
+
+		draw() : void {
+			this.ctx.fillStyle = '#007AFF';
+			this.ctx.beginPath();
+			this.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+			this.ctx.closePath();
+			this.ctx.fill();
+		}
+
+		move() : void {
+			this.x += this.vx;
+			this.y += this.vy;
+
+			// 边框反弹
+			if (this.x < this.radius) {
+				this.vx = Math.abs(this.vx);
+			} else if (this.x > this.canvasWidth - this.radius) {
+				this.vx = -Math.abs(this.vx);
+			}
+
+			if (this.y < this.radius) {
+				this.vy = Math.abs(this.vy);
+			} else if (this.y > this.canvasHeight - this.radius) {
+				this.vy = -Math.abs(this.vy);
+			}
+		}
+	}
+	function getDistance(x : number, y : number) : number {
+		return Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 0.5)
+	}
+	function drawBall() {
+		let ctx = drawCcontext!
+		let canvasWidth = ctx.width,
+			canvasHeight = ctx.height,
+			speed = 3,
+			ballList = [] as Ball[],
+			layer = 3,
+			ballInlayer = 20
+		for (let i = 0; i < layer; i++) {
+			let radius = getDistance(canvasWidth / 2, canvasHeight / 2) / layer * i
+			for (let j = 0; j < ballInlayer; j++) {
+				let deg = j * 2 * Math.PI / ballInlayer,
+					sin = Math.sin(deg),
+					cos = Math.cos(deg),
+					x = radius * cos + canvasWidth / 2,
+					y = radius * sin + canvasHeight / 2,
+					vx = speed * cos,
+					vy = speed * sin
+				ballList.push(new Ball(x, y, vx, vy, canvasWidth, canvasHeight, ctx))
+			}
+		}
+
+		function animate(ballList : Ball[]) {
+			ctx.reset()
+			ballList.forEach((item : Ball) => {
+				item.move()
+				item.draw()
+			})
+			ctx.update()
+		}
+
+		interval = setInterval(() => {
+			animate(ballList)
+		}, 17)
+	}
+
+	function clearDraw() {
+		let ctx = drawCcontext!
+		ctx.reset()
+		ctx.update()
+	}
+	onUnmounted(() => {
+		clearInterval(interval)
+	})
+</script>

@@ -1,0 +1,498 @@
+<template>
+	<t-view v-bind="extendsAttrs" :main-class="`fv oh tvg ${mainClass}`">
+		<t-gesture :main-class="colorAreaBoxStyles" @tuiTouchstart="onTouchMove" @tuiTouchmove="onTouchMove"
+			@tuiTouchend="onTouchEnd" @initFinished="areaInitFinished">
+			<t-view :main-class="colorAreaWhileStyles"></t-view>
+			<t-view :main-class="colorAreaBalckStyles"></t-view>
+			<t-view :main-class="colorAreaBarStyles"></t-view>
+		</t-gesture>
+		<t-view main-class="plr-30 ov">
+			<t-row main-class="faic ptb-30 ov">
+				<t-view main-class="twhr-60px mr-30 fv fc dr ov">
+					<t-canvas main-class="twh-100% r-60px oh" @initFinished="canvasInit"></t-canvas>
+					<t-view :main-class="`da r-60px di-n6 bg bg-${colorValue}`"></t-view>
+				</t-view>
+				<t-view main-class="f ov">
+					<t-gesture main-class="h-16px r-16px dr ocr-g ov" @tuiTouchstart="onBarTouchMove"
+						@tuiTouchend="onBarTouchEnd" @tuiTouchmove="onBarTouchMove" @initFinished="barInitFinished">
+						<t-canvas main-class="h-16px" @initFinished="barCanvasInit"></t-canvas>
+						<t-view :main-class="colorBarStyles"></t-view>
+					</t-gesture>
+					<t-gesture main-class="h-16px mt-30 dr ocr-g ov" @tuiTouchstart="onBgTouchMove"
+						@tuiTouchend="onBgTouchEnd" @tuiTouchmove="onBgTouchMove" @initFinished="bgInitFinished">
+						<t-canvas main-class="h-16px" @initFinished="bgCanvasInit"></t-canvas>
+						<t-view :main-class="`da di-0 ${gradBgStyle}`"></t-view>
+						<t-view :main-class="colorBarOpacityStyles"></t-view>
+					</t-gesture>
+				</t-view>
+			</t-row>
+			<t-row main-class="faic h-200 ba">
+				<t-row main-class="f fjcb">
+					<template v-if="showModeColor">
+						<t-view main-class="fc f mr-10" v-for="(item,index) in bgObjColor" :key="index">
+							<t-button size="mini" main-class="s-30rpx sfwb w-100% b-1px,s,#ebebeb plr-0"
+								text-class="m-0">{{item}}</t-button>
+							<t-text main-class="mt-10">{{index.toUpperCase()}}</t-text>
+						</t-view>
+					</template>
+					<template v-else>
+						<t-view main-class="fc f mr-20">
+							<t-button :hover="false" size="mini"
+								main-class="s-35rpx sfwb w-100% b-1px,s,#ebebeb">{{hexColor}}</t-button>
+							<t-text main-class="mt-10">HEX</t-text>
+						</t-view>
+					</template>
+				</t-row>
+				<t-view :main-class="`twh-100 ${extendsBackgroundColor} tdr fc`" :hover="true"
+					@click="showModeColor=!showModeColor">
+					<t-text size="small" :main-class="extendsForegroundColor">切换</t-text>
+					<t-text size="small" :main-class="extendsForegroundColor">模式</t-text>
+				</t-view>
+			</t-row>
+			<t-row main-class="fww mt-20">
+				<t-view v-for="(item,index) in colorList" :key="index" @click="selectColor(item)">
+					<t-view :main-class="`twh-26px mrb-8px oh r-4px bg-rgba(${item.r},${item.g},${item.b},${item.a})`"
+						v-if="index<colorList.length-2">
+					</t-view>
+					<t-canvas v-else main-class="twh-26px r-10 oh mrb-8px r-4px" @initFinished="listColorInit">
+						<t-view :main-class="`twh-26px bg-rgba(${item.r},${item.g},${item.b},${item.a})`"></t-view>
+					</t-canvas>
+				</t-view>
+			</t-row>
+		</t-view>
+	</t-view>
+</template>
+
+<script setup>
+	/**
+	 * Color 颜色面版
+	 * @date 2025-05-31 12:02:44
+	 * @author TanYuan
+	 * @description 非webview，采用Draw绘制,流畅丝滑不卡顿,支持透明通道显示
+	 * @example /pagesA/basics/color-picker/color-picker
+	 * @tutorial https://life.yundie.xyz/tui3.0/docs/component/t-color.html
+	 * @example /pagesA/basics/color-picker/color-picker
+	 * @property {String} size=[large|medium|small|mini] 组件尺寸(默认：mini)
+	 * @value large 大尺寸，按钮的尺寸较大，适用于需要强调操作或易于点击的区域。
+	 * @value medium 中尺寸，按钮的尺寸适中，可能是默认尺寸，适用于大多数场景。
+	 * @value small 小尺寸，按钮的尺寸较小，适用于空间有限或操作不是特别重要的区域。
+	 * @value mini 迷你，按钮的尺寸最小，适用于紧凑布局或辅助操作。
+	 * @property {String} type=[info|primary|error|warning|success] 组件类型(默认：p)
+	 * @value info 信息提示场景，通常用于提供一般的通知信息，不涉及特别的重要性或紧急性。
+	 * @value primary 正常使用场景，可能用于强调某些主要的操作或信息，比如主要的按钮或导航链接。
+	 * @value error 错误提示场景，用于指示出现了错误或问题，需要用户的注意。
+	 * @value warning 警告提示场景，用于提示用户关于潜在的问题或需要注意的事项。
+	 * @value success 成功提示场景，用于指示一个操作或过程已经成功完成。
+	 * @property {Boolean} disabled=[false|true] 组件是否禁用(默认: false) 
+	 * @property {Boolean} stop=[false|true] 是否阻止事件冒泡（Tui统一写法处理事件冒泡）(默认: false)
+	 * @property {Boolean} hover=[false|true] 是否有点击效果(默认：true)
+	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
+	 * @property {String} mainClass 组件根节点的样式。(默认: "")
+	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
+	 * @value normal 正常
+	 * @value dark 深色
+	 * @value light 浅色
+	 * @value plain 镂空
+	 * @property {String} modelValue 面版默认颜色值(默认：#FFFFFF)
+	 * @event {Function} change 颜色值发生变时触发
+	 */
+
+	import { TuiTouchEvent } from '@/uni_modules/tui-plus'
+	import { useStyle } from '../../common/model/style'
+	import { rgbaToHex, rgb2hsv, hsv2rgb, } from '../../common/model/color.uts'
+	type colorListType = {
+		r : number
+		g : number
+		b : number
+		a : number
+	}
+	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
+	interface ColorProps extends CommonProps {
+		modelValue : string
+	}
+	const props = withDefaults(defineProps<ColorProps>(), {
+		path: '',
+		hover: false,
+		type: 'p',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		modelValue: '#FFFFFF'
+	});
+	const { extendsAttrs, extendsBackgroundColor, extendsForegroundColor } = useTuiThemes(props)
+	const emit = defineEmits(['change', 'update:modelValue'])
+	const showModeColor = ref<boolean>(true)
+	const areaBarX = ref<number>(0)
+	const areaBarY = ref<number>(0)
+	const areaBoxW = ref<number>(0)
+	const areaBoxH = ref<number>(0)
+	const areaBoxMaxW = ref<number>(0)
+	const areaBoxMaxH = ref<number>(0)
+	const barW = ref<number>(0)
+	const barMaxW = ref<number>(0)
+	const bgW = ref<number>(0)
+	const bgMaxW = ref<number>(0)
+	const tranBarX = ref<number>(0)
+	const tranBgX = ref<number>(0)
+	const colorValue = ref<string>('')
+	const areaColorRgb = ref<string>('')
+	const hsv = ref<number[]>([0, 0, 0])
+	const itemValidate = inject<() => void>('itemValidate', () => { })
+	let isTouch = false
+	const colorList : colorListType[] = [{
+		r: 244,
+		g: 67,
+		b: 54,
+		a: 1
+	}, {
+		r: 233,
+		g: 30,
+		b: 99,
+		a: 1
+	}, {
+		r: 156,
+		g: 39,
+		b: 176,
+		a: 1
+	}, {
+		r: 103,
+		g: 58,
+		b: 183,
+		a: 1
+	}, {
+		r: 63,
+		g: 81,
+		b: 181,
+		a: 1
+	}, {
+		r: 33,
+		g: 150,
+		b: 243,
+		a: 1
+	}, {
+		r: 3,
+		g: 169,
+		b: 244,
+		a: 1
+	}, {
+		r: 0,
+		g: 188,
+		b: 212,
+		a: 1
+	}, {
+		r: 0,
+		g: 150,
+		b: 136,
+		a: 1
+	}, {
+		r: 76,
+		g: 175,
+		b: 80,
+		a: 1
+	}, {
+		r: 139,
+		g: 195,
+		b: 74,
+		a: 1
+	}, {
+		r: 205,
+		g: 220,
+		b: 57,
+		a: 1
+	}, {
+		r: 255,
+		g: 235,
+		b: 59,
+		a: 1
+	}, {
+		r: 255,
+		g: 193,
+		b: 7,
+		a: 1
+	}, {
+		r: 255,
+		g: 152,
+		b: 0,
+		a: 1
+	}, {
+		r: 255,
+		g: 87,
+		b: 34,
+		a: 1
+	}, {
+		r: 121,
+		g: 85,
+		b: 72,
+		a: 1
+	}, {
+		r: 158,
+		g: 158,
+		b: 158,
+		a: 1
+	}, {
+		r: 0,
+		g: 0,
+		b: 0,
+		a: 0.5
+	}, {
+		r: 0,
+		g: 0,
+		b: 0,
+		a: 0
+	}] as colorListType[]
+	function rgbaToRgb(rgbaString : string) : string {
+		// 正则表达式用于匹配rgba颜色格式
+		const rgbaRegex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d*(?:\.\d+)?)\)$/;
+
+		// 使用正则表达式替换颜色字符串中的rgba为rgb
+		const rgbString = rgbaString.replace(rgbaRegex, 'rgb($1,$2, $3)');
+
+		return rgbString;
+	}
+	function rgbaToObj(rgbaString : string) : colorListType {
+		let r = 0
+		let g = 0
+		let b = 0
+		let a = 0
+		// 正则表达式用于匹配rgba颜色格式
+		const rgbaRegex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d*(?:\.\d+)?)\)$/;
+
+		// 使用正则表达式匹配颜色字符串
+		const match = rgbaString.match(rgbaRegex);
+		// 如果匹配成功，解析结果并返回数组
+		if (match?.length == 5) {
+			r = parseInt(`${match[1]}`)
+			g = parseInt(`${match[2]}`)
+			b = parseInt(`${match[3]}`)
+			a = parseFloat(`${match[4]}`)
+		}
+		return { r, g, b, a } as colorListType
+	}
+	const hexColor = computed(() => rgbaToHex(colorValue.value));
+	const bgObjColor = computed(() => rgbaToObj(colorValue.value));
+	const colorBarOpacityStyles = computed(() =>
+		`da dt-n3px dl-n10px twhr-24px b-3px,s,#fff ${extendsBackgroundColor.value} attx-${tranBgX.value}px`
+	);
+	const colorBarStyles = computed(() =>
+		`b da dt-n3px dl-n10px twhr-24px b-3px,s,#fff ${extendsBackgroundColor.value} attx-${tranBarX.value}px`
+	);
+	const colorRgb = computed(() => rgbaToRgb(colorValue.value));
+	const gradBgStyle = computed(() => `bir-transparent,${colorRgb.value}`);
+	const colorAreaBoxStyles = computed(() =>
+		`ocr-g w-100% h-210px dr fv bg-${areaColorRgb.value}`
+	);
+	const colorAreaWhileStyles = computed(() =>
+		`w-100% h-100% bir-#fff,transparent`
+	);
+	const colorAreaBalckStyles = computed(() =>
+		`da bit-#000,transparent di-0`
+	);
+	const colorAreaBarStyles = computed(() =>
+		`w-20px h-20px r-20px da z-3 b-2px,s,#fff att-${areaBarX.value}px,${areaBarY.value}px`
+	);
+	function hsbToHPosition(h : number, width : number) : number {
+		return ((h / 360) * width);
+	}
+	function initTran() {
+		const s = hsv.value[1]
+		const b = hsv.value[2]
+		let x = s * areaBoxW.value
+		let y = ((1 - b) * areaBoxH.value)
+		if (x > areaBoxW.value - 20) x -= 20
+		if (y > areaBoxH.value - 20) y -= 20
+		tranBgX.value = Math.floor(bgMaxW.value * bgObjColor.value.a)
+		tranBarX.value = Math.floor(hsbToHPosition(hsv.value[0], barMaxW.value))
+		if (!isTouch) {
+			areaBarX.value = x
+			areaBarY.value = y
+		}
+		isTouch = false
+	}
+	function drawBackgroung(ctx : CanvasRenderingContext2D, size : number) {
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		const col = Math.floor(h / size) + 1
+		const row = Math.floor(w / size) + 1
+		for (let i = 0; i < col; i++) {
+			for (let j = 0; j < row; j++) {
+				if ((i + j) % 2 == 0) {
+					ctx.fillStyle = `#CECECE`;
+				} else {
+					ctx.fillStyle = `#FFFFFF`;
+				}
+				ctx.fillRect(0 + j * size, i * size, size, size);
+			}
+		}
+	}
+	function init() {
+		hsv.value = rgb2hsv(bgObjColor.value.r, bgObjColor.value.g, bgObjColor.value.b)
+		const elrgb = hsv2rgb(hsv.value[0], 1, 1)
+		areaColorRgb.value = `rgb(${elrgb[0]},${elrgb[1]},${elrgb[2]})`
+		initTran()
+	}
+	function selectColor(e : colorListType) {
+		colorValue.value = `rgba(${e.r},${e.g},${e.b},${e.a})`
+		emit('update:modelValue', colorValue.value)
+		init()
+	}
+	function bgInitFinished(rect : NodeInfo) {
+		bgW.value = rect.width!
+		bgMaxW.value = bgW.value - 10
+		init()
+	}
+	function barInitFinished(rect : NodeInfo) {
+		barW.value = rect.width!
+		barMaxW.value = barW.value - 10
+		initTran()
+	}
+	function areaInitFinished(rect : NodeInfo) {
+		areaBoxW.value = rect.width!
+		areaBoxH.value = rect.height!
+		areaBoxMaxW.value = areaBoxW.value - 20
+		areaBoxMaxH.value = areaBoxH.value - 20
+	}
+	function listColorInit(ctx : CanvasContext) {
+		drawBackgroung(ctx.getContext('2d')!, 9)
+	}
+	function canvasInit(ctx : CanvasContext) {
+		drawBackgroung(ctx.getContext('2d')!, 9)
+	}
+	function drawGradient(ctx : CanvasRenderingContext2D) {
+		const w = ctx.canvas.offsetWidth
+		const h = ctx.canvas.offsetHeight
+		var gradient = ctx.createLinearGradient(0, 0, w, 0); // 从左到右
+		gradient.addColorStop(0, '#f00');   // 0% 红色
+		gradient.addColorStop(0.17, '#ff0'); // 17% 黄色
+		gradient.addColorStop(0.33, '#0f0'); // 33% 绿色
+		gradient.addColorStop(0.5, '#0ff');  // 50% 青色
+		gradient.addColorStop(0.67, '#00f'); // 67% 蓝色
+		gradient.addColorStop(0.83, '#f0f'); // 83% 品红
+		gradient.addColorStop(1, '#f00');    // 100% 红色
+		ctx.fillStyle = gradient;
+		ctx.fillRect(0, 0, w, h);
+	}
+	function barCanvasInit(ctx : CanvasContext) {
+		drawGradient(ctx.getContext('2d')!)
+	}
+	function bgCanvasInit(ctx : CanvasContext) {
+		drawBackgroung(ctx.getContext('2d')!, 9)
+	}
+
+	function onBgTouchMove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		tranBgX.value = e.offsetX
+		if (tranBgX.value < 0) tranBgX.value = 0
+		if (tranBgX.value > bgMaxW.value) tranBgX.value = bgMaxW.value
+		const a = parseFloat((tranBgX.value / bgMaxW.value).toFixed(1))
+		const rgba = `rgba(${bgObjColor.value.r},${bgObjColor.value.g},${bgObjColor.value.b},${a})`
+		colorValue.value = rgba
+	}
+	const onBgTouchEnd = (_ : TuiTouchEvent) => {
+		emit('update:modelValue', colorValue.value)
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function onBarTouchMove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		tranBarX.value = e.offsetX
+		if (tranBarX.value < 0) tranBarX.value = 0
+		if (tranBarX.value > barMaxW.value) tranBarX.value = barMaxW.value
+		let h = Math.floor(360 / barMaxW.value * tranBarX.value)
+		if (h == 360) h--
+		if (h == 0) h++
+		hsv.value[0] = h
+		const s = hsv.value[1]
+		const b = hsv.value[2]
+		const rgb = hsv2rgb(h, s, b)
+		const rgba = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${bgObjColor.value.a})`
+		colorValue.value = rgba
+		const elrgb = hsv2rgb(hsv.value[0], 1, 1)
+		areaColorRgb.value = `rgb(${elrgb[0]},${elrgb[1]},${elrgb[2]})`
+	}
+	const onBarTouchEnd = (_ : TuiTouchEvent) => {
+		emit('update:modelValue', colorValue.value)
+		nextTick(() => {
+			itemValidate()
+		})
+	}
+	function onTouchMove(e : TuiTouchEvent) {
+		e.event.preventDefault()
+		let x = e.offsetX - 10
+		let y = e.offsetY - 10
+		if (x < 0) x = 0
+		if (y < 0) y = 0
+		if (x > areaBoxMaxW.value) x = areaBoxMaxW.value
+		if (y > areaBoxMaxH.value) y = areaBoxMaxH.value
+		areaBarX.value = x
+		areaBarY.value = y
+		let hx = e.x - e.rect.x - 10
+		let hy = e.y - e.rect.y - 10
+		hx = Math.min(Math.max(hx, 0), areaBoxMaxW.value);
+		hy = Math.min(Math.max(hy, 0), areaBoxMaxH.value);
+		const s = hx / areaBoxMaxW.value
+		const v = 1 - (hy / areaBoxMaxH.value)
+		hsv.value[1] = s
+		hsv.value[2] = v
+		const rgb = hsv2rgb(hsv.value[0], s, v)
+		const rgba = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${bgObjColor.value.a})`
+		colorValue.value = rgba
+	}
+	const onTouchEnd = (_ : TuiTouchEvent) => {
+		isTouch = true
+		emit('update:modelValue', colorValue.value)
+
+		nextTick(() => {
+			itemValidate()
+		})
+
+	}
+	function toRGBA(color : string) : string {
+		// 正则表达式用于匹配不同的颜色格式
+		const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+		const rgbRegex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+		const rgbaRegex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d*(?:\.\d+)?)\)$/;
+
+		// 检查是否为十六进制颜色码
+		if (hexRegex.test(color)) {
+			// 处理3位十六进制颜色码
+			if (color.length == 4) {
+				color = color.replace(/#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])/i, '#$1$1$2$2$3$3');
+			}
+			const hex = color.substring(1); // 去掉#
+			const r = parseInt(hex.substring(0, 2), 16);
+			const g = parseInt(hex.substring(2, 4), 16);
+			const b = parseInt(hex.substring(4, 6), 16);
+			return `rgba(${r},${g}, ${b}, 1)`;
+		}
+
+		// 检查是否为rgb颜色格式
+		if (rgbRegex.test(color)) {
+			const parts = color.substring(4, color.length - 1).split(',').map((s : string) : string => s.trim());
+			return `rgba(${parts[0]},${parts[1]}, ${parts[2]}, 1)`;
+		}
+
+		// 检查是否为rgba颜色格式
+		if (rgbaRegex.test(color)) {
+			return color;
+		}
+
+		// 如果不是有效的颜色值，返回false
+		return 'rgba(0,0,0,1)';
+	}
+
+
+
+	watch(colorValue, (val : string) => {
+		emit('change', val)
+	})
+
+	watch(() : string => props.modelValue, (val : string) => {
+		colorValue.value = toRGBA(val)
+		init()
+	}, { immediate: true })
+</script>

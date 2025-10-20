@@ -1,0 +1,119 @@
+<template>
+	<t-page>
+		<introduction title="主题+type">
+			<t-button main-class="mb-30">默认按钮</t-button>
+			<t-button main-class="mb-30" type="primary" :disabled="disabled">主要按钮</t-button>
+			<t-button main-class="mb-30" type="success" @click="disabled=!disabled">成功按钮</t-button>
+			<t-button main-class="mb-30" type="info">信息按钮</t-button>
+			<t-button main-class="mb-30" type="warning" @click="test1">警告按钮</t-button>
+			<t-button main-class="mb-30" type="error">危险按钮</t-button>
+		</introduction>
+		<introduction title="主题+effect">
+			<t-button main-class="mb-30" type="primary" effect="normal">主要按钮</t-button>
+			<t-button main-class="mb-30" type="primary" effect="dark">成功按钮</t-button>
+			<t-button main-class="mb-30" type="primary" effect="disabled">信息按钮</t-button>
+			<t-button main-class="mb-30" type="primary" effect="light">警告按钮</t-button>
+			<t-button main-class="mb-30" type="primary" effect="plain">危险按钮</t-button>
+		</introduction>
+		<introduction title="主题+size">
+			<t-button main-class="mb-30" left-icon="/pagesA/static/grid/grid (1).png" type="primary"
+				size="large">主要按钮</t-button>
+			<t-button main-class="mb-30" left-icon="/pagesA/static/grid/grid (2).png" type="primary"
+				size="medium">成功按钮</t-button>
+			<t-button main-class="mb-30" left-icon="/pagesA/static/grid/grid (3).png" type="primary"
+				size="small">信息按钮</t-button>
+			<t-button main-class="mb-30" left-icon="/pagesA/static/grid/grid (4).png" type="primary"
+				size="mini">警告按钮</t-button>
+		</introduction>
+		<introduction title="主题+size">
+			<t-row main-class="fww">
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (1).png" :loading="loading"
+					size="large">主要按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (2).png" size="medium"
+					@click="test">成功按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (3).png"
+					size="small">信息按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (4).png"
+					size="mini">警告按钮</t-button>
+			</t-row>
+		</introduction>
+		<introduction title="主题+size">
+			<t-col>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (1).png" :loading="loading"
+					:iconHolder="true" size="large">主要按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (2).png" size="medium"
+					@click="test">成功按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (3).png"
+					size="small">信息按钮</t-button>
+				<t-button main-class="mrb-30" type="primary" left-icon="/pagesA/static/grid/grid (4).png"
+					size="mini">警告按钮</t-button>
+			</t-col>
+		</introduction>
+		<introduction title="loading">
+			<t-button main-class="mb-30" :loading="true" loading-icon="spinner">默认按钮</t-button>
+			<t-button main-class="mb-30" type="primary" :loading="true" loading-icon="circular">主要按钮</t-button>
+			<t-button main-class="mb-30" type="success" :loading="true" loading-icon="setting">成功按钮</t-button>
+			<t-button main-class="mb-30" type="info" :loading="true"
+				loading-icon="/static/grid/grid (4).png">信息按钮</t-button>
+		</introduction>
+		<introduction title="loading-size=large">
+			<t-button main-class="mb-30" size="large" :loading="true" loading-icon="spinner">默认按钮</t-button>
+			<t-button main-class="mb-30" size="large" type="primary" :loading="true"
+				loading-icon="circular">主要按钮</t-button>
+			<t-button main-class="mb-30" size="large" type="success" :loading="true"
+				loading-icon="setting">成功按钮</t-button>
+			<t-button main-class="mb-30" size="large" type="info" :loading="true"
+				loading-icon="static/grid/grid (4).png">信息按钮</t-button>
+		</introduction>
+		<introduction title="镂空">
+			<t-button main-class="mb-30" effect="plain">默认按钮</t-button>
+			<t-button main-class="mb-30" effect="plain" type="primary">主要按钮</t-button>
+			<t-button main-class="mb-30" effect="plain" type="success">成功按钮</t-button>
+			<t-button main-class="mb-30" effect="plain" type="info">信息按钮</t-button>
+			<t-button main-class="mb-30" effect="plain" type="warning">警告按钮</t-button>
+			<t-button main-class="mb-30" effect="plain" type="error">危险按钮</t-button>
+		</introduction>
+		<introduction title="浅色背景">
+			<t-button main-class="mb-30" effect="light">默认按钮</t-button>
+			<t-button main-class="mb-30" effect="light" type="primary">主要按钮</t-button>
+			<t-button main-class="mb-30" effect="light" type="success">成功按钮</t-button>
+			<t-button main-class="mb-30" effect="light" type="info">信息按钮</t-button>
+			<t-button main-class="mb-30" effect="light" type="warning">警告按钮</t-button>
+			<t-button main-class="mb-30" effect="light" type="error">危险按钮</t-button>
+		</introduction>
+		<introduction title="定制">
+			<t-button main-class="mb-30 twhr-80" text-class="m-0" right-icon-class="s-45" right-icon="server-fill"
+				type="primary"></t-button>
+			<t-button main-class="mb-30 twhr-180" text-class="m-0" right-icon-class="s-85" right-icon="checkbox-mark"
+				type="success"></t-button>
+			<t-button main-class="mb-30 twhr-80" text-class="m-0" right-icon-class="s-45" right-icon="star"
+				type="warning"></t-button>
+			<t-button main-class="mb-30 twhr-80" text-class="m-0" right-icon-class="s-45" right-icon="trash"
+				type="error"></t-button>
+		</introduction>
+		<introduction title="自定义样式覆盖主题">
+			<t-button main-class="mb-30 bg-#0AB99C" text-class="c-#fff">覆盖背景</t-button>
+			<t-button main-class="mb-30 r-180 ptb-30 bil-#ff667f,#fdb247" text-class="c-#fff">镂空覆盖测试</t-button>
+			<t-button main-class="mb-30 r-180 ptb-30 bil-#a531dc,#4300b1" text-class="c-#fff">镂空覆盖测试</t-button>
+		</introduction>
+		<introduction title="简易跳转功能">
+			<t-button type="p" path="/pagesA/form/input/input">跳转</t-button>
+		</introduction>
+		<introduction title="防抖-节流">
+			<t-button type="p" main-class="mb-30" @click="test1" :tdTime="1000"
+				:debounce="true">防抖(在1000ms内，只有最后一次操作)</t-button>
+			<t-button type="p" @click="test1" :tdTime="1000" :throttle="true">节流(在1000ms内，只能触发一次)</t-button>
+		</introduction>
+	</t-page>
+</template>
+
+<script setup>
+	const loading = ref(true)
+	const disabled = ref(true)
+	function test1() {
+		console.log('test')
+	}
+	function test() {
+		loading.value = !loading.value
+	}
+</script>

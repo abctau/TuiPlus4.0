@@ -1,0 +1,46 @@
+<template>
+	<t-page>
+		<t-card title="ProgressCircle 环形进度条" main-class="mlrt-30"
+			sub-title="环形进度条组件是一个可定制的UI组件，用于显示圆形进度指示，支持自定义线条宽度、颜色，并可显示进度百分比。"></t-card>
+		<introduction title="操作">
+			<t-button type="p" main-class="mb-15" @click="add">增加</t-button>
+			<t-button type="e" @click="reduce">减少</t-button>
+		</introduction>
+		<introduction title="基础使用+主题展示" v-if="area==1">
+			<t-row>
+				<t-progress-circle main-class="mb-30 twh-150 mr-20" v-model="progress" type="e"></t-progress-circle>
+				<t-progress-circle main-class="mb-30 twh-150 mr-20" v-model="progress" type="p"></t-progress-circle>
+				<t-progress-circle main-class="mb-30 twh-150 mr-20" v-model="progress" type="s"></t-progress-circle>
+				<t-progress-circle main-class="mb-30 twh-150 mr-20" v-model="progress" type="w"></t-progress-circle>
+			</t-row>
+		</introduction>
+		<introduction title="设置大小背景颜色" v-if="area==2">
+			<t-progress-circle v-model="progress" main-class="twh-200" type="p" inactiveColor="#00aaff"
+				activeColor="#ffaa00" lineWidth="20rpx"></t-progress-circle>
+		</introduction>
+		<introduction title="显示百分比" v-if="area==3">
+			<t-progress-circle :showLabel="true" v-model="progress" type="p" inactiveColor="#ff5500"
+				activeColor="#ff007f" lineWidth="10rpx"></t-progress-circle>
+		</introduction>
+		<t-row main-class='fww tdb tdr tdp mltr-30'>
+			<t-button type="p" main-class="mrb-30" size="small" @click="area=1">基础使用+主题展示</t-button>
+			<t-button type="e" main-class="mrb-30" size="small" @click="area=2">设置大小背景颜色</t-button>
+			<t-button type="s" main-class="mrb-30" size="small" @click="area=3">显示百分比</t-button>
+		</t-row>
+	</t-page>
+</template>
+<script setup>
+	const area = ref(1)
+	const progress = ref(55)
+	function add() {
+		let p = progress.value + 10
+		if (p > 100) p = 100
+		progress.value = p
+
+	}
+	function reduce() {
+		let p = progress.value - 10
+		if (p < 0) p = 0
+		progress.value = p
+	}
+</script>
