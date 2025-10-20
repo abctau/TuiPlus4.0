@@ -1,7 +1,7 @@
 {
 	"id": "tui-plus",
 	"displayName": "TuiPlus 4.0 焕新发布 轻如鸿毛 快如闪电",
-	"version": "4.1.6",
+	"version": "4.1.7",
 	"description": "专注前端UI，打造 简洁 高效 轻量级 uni-app x UI组件库",
 	"keywords": [
         "uvue",
@@ -10,7 +10,7 @@
         "原生",
         "charts"
     ],
-	"repository": "",
+	"repository": "https://github.com/abctau/TuiPlus4.0",
 	"engines": {
 		"HBuilderX": "^4.35",
 		"uni-app": "",
