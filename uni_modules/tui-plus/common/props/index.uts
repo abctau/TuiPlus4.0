@@ -355,6 +355,7 @@ export type TromGroupAttrsType = {
 	rulesClass : Ref<string>
 	headerClass : Ref<string>
 	showLabel : Ref<boolean>
+	showMessage : Ref<boolean>
 }
 export type CheckBoxGroupAttrsType = {
 	path : Ref<string>

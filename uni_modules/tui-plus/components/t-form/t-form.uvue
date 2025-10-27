@@ -119,6 +119,7 @@
 		rulesClass: toRef<string>(() : string => props.rulesClass),
 		headerClass: toRef<string>(() : string => props.headerClass),
 		showLabel: toRef<boolean>(() : boolean => props.showLabel),
+		showMessage: toRef<boolean>(() : boolean => props.showMessage)
 	} as TromGroupAttrsType)
 	provide('chaildValidate', chaildValidate)
 	function validate() : boolean {

@@ -5,9 +5,9 @@
 			<t-card title="亮点-功能强大-逐帧渲染原理不卡页面" main-class="mb-30"
 				sub-title="表单验证规则可后端控制, 支持form-item点击映射到input获取到焦点提升用户体验 支持表单下任意组件参与布局,支持自定义函数表单验证"></t-card>
 		</t-lazy>
-		<t-form main-class="tdr tdb tdp ov" :disabled="disabled" ref="ruleForm" :rules="rules" child-class="ptb-20"
+		<t-form main-class="tdr tdb tdp ov" :disabled="disabled" ref="ruleForm" :rules="rules" child-class="ptb-20" 
 			:model="formData" direction="row">
-			<t-form-item label="活动名称" prop="name">
+			<t-form-item label="活动名称" prop="name" :show-message="false">
 				<t-input v-model="(formData.name as string)" main-class="f sta-r pr-0" placeholder="请输入活动名称" effect=""
 					:border="false"></t-input>
 			</t-form-item>
