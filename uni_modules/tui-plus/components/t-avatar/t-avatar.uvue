@@ -1,10 +1,10 @@
 <template>
 	<t-image v-if="src!=''" v-bind="extendsAttrs" :main-class="`twhr-100 ${mainClass}`" :src="src" :placeholder="true"
 		:fadeShow="false"></t-image>
-	<t-icon v-if="icon!=''" v-bind="extendsAttrs"
+	<t-icon v-else-if="icon!=''" v-bind="extendsAttrs"
 		:main-class="`twhr-100 fc ${randombackgroundColor?'c-#fff bg-' + getRandomHexColor:''} ${mainClass}`"
 		:name="icon"></t-icon>
-	<t-text v-if="text!=''" v-bind="extendsAttrs"
+	<t-text v-else="text!=''" v-bind="extendsAttrs"
 		:main-class="`c-#fff ${extendsFontSize} twhr-100 faic sta-c ${randombackgroundColor?'bg-' + getRandomHexColor:''} ${mainClass}`"
 		:text="textSub"></t-text>
 </template>
