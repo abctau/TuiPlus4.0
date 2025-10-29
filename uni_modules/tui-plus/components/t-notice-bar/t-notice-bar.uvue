@@ -5,7 +5,7 @@
 		</t-view>
 		<template v-if="step">
 			<swiper :autoplay="true" :interval="interval" :duration="duration" :disable-touch="true" :circular="true"
-				:vertical="vertical" :style="[`width:100%;height:100%;`]">
+				:vertical="vertical" :style="[`width:100%;height:100%;margin:12px 0;`]">
 				<swiper-item v-for="(item,index) in barList" :key="index"
 					style="align-items: center;display: flex;flex-direction: row;">
 					<t-text :main-class="`${extendsSfc} tdp-${size},,tb`" :text="item" :lines="1"></t-text>
@@ -152,7 +152,7 @@
 						const len = props.barList.length - 1
 						const w = (totalW.value + (contentW.value * len))
 						tranEl(Math.floor(w / props.speed), -w)
-					}, 300)
+					}, 1000)
 				}
 			})
 		}
