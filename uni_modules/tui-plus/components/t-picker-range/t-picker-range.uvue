@@ -1,6 +1,6 @@
 <template>
 	<t-gesture v-bind="extendsAttrs" :main-class="`f tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
-		@tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
+		@tuiTouchmove="touchmove" :touch-stop="true" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
 		<t-text v-if='showUnit' :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
 		<t-view main-class="dr f">
 			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
