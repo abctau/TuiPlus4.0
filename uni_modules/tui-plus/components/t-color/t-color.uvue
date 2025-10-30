@@ -1,7 +1,7 @@
 <template>
 	<t-view v-bind="extendsAttrs" :main-class="`fv oh tvg ${mainClass}`">
 		<t-gesture :main-class="colorAreaBoxStyles" @tuiTouchstart="onTouchMove" @tuiTouchmove="onTouchMove"
-			@tuiTouchend="onTouchEnd" @initFinished="areaInitFinished">
+			:touch-stop="true" @tuiTouchend="onTouchEnd" @initFinished="areaInitFinished">
 			<t-view :main-class="colorAreaWhileStyles"></t-view>
 			<t-view :main-class="colorAreaBalckStyles"></t-view>
 			<t-view :main-class="colorAreaBarStyles"></t-view>
