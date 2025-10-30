@@ -58,7 +58,10 @@
 	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
 	const viewrect = ref<UniElement | null>(null)
 	const instance = getCurrentInstance()?.proxy!
-	const props = withDefaults(defineProps<CommonProps>(), {
+	interface ViewProps extends CommonProps {
+		touchStop : boolean
+	}
+	const props = withDefaults(defineProps<ViewProps>(), {
 		path: '',
 		hover: false,
 		type: '',
@@ -167,6 +170,7 @@
 	}
 
 	const onTouchmove = async (e : UniTouchEvent) => {
+		if (props.touchStop) e.preventDefault()
 		if (!isgetRect.value) {
 			const result = await getRect(e)
 			emit('tuiTouchmove', result)
@@ -174,6 +178,7 @@
 	}
 
 	const onTouchstart = async (e : UniTouchEvent) => {
+		if (props.touchStop) e.preventDefault()
 		if (!isgetRect.value) {
 			const result = await getRect(e)
 			emit('tuiTouchstart', result)

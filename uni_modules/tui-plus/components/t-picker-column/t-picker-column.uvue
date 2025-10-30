@@ -1,6 +1,6 @@
 <template>
 	<t-gesture v-bind="extendsAttrs" :main-class="`f dr tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
-		@tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
+		:touch-stop="true" @tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
 		<t-text v-if="showUnit" :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
 		<t-view main-class="dr f">
 			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
@@ -78,7 +78,7 @@
 	const pickerGroupAttrs = inject<PickerGroupAttrsType>('pickerGroupAttrs')
 	const childChange = inject<(e : UTSJSONObject) => void>('childChange')
 	const childIndex = inject<Ref<number>>('childIndex')
-
+	const touchStop = ref<boolean>(false)
 	const { extendsAttrs } = useTuiThemes(props)
 	const emit = defineEmits(['change'])
 	const canvasCtx = ref<CanvasRenderingContext2D | null>(null);
@@ -175,7 +175,6 @@
 		drawIndex(x)
 	}
 	function touchstart(e : TuiTouchEvent) {
-		e.event.preventDefault()
 		isPressed.value = true
 		startTime.value = new Date().getTime()
 		startY.value = e.y
@@ -186,7 +185,6 @@
 		tranY.value = e.y - startY.value + moveY.value
 		if (tranY.value > 0) tranY.value = 0
 		if (tranY.value < maxW.value) tranY.value = maxW.value
-		if (tranY.value != 0 && tranY.value != maxW.value) e.event.preventDefault()
 		moveIndex.value = Math.floor(Math.abs(tranY.value) / rowHeight.value) + 1
 		draw()
 	}
