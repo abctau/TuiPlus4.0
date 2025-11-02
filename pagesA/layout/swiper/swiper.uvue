@@ -5,19 +5,18 @@
 			sub-title="主要解决swiper组件APP端不支持previousMargin,nextMargin,无法实现卡片布局 画廊布局的痛点"></t-card>
 		<t-section title='横向卡片' main-class="tdr tdb mb-30"></t-section>
 		<t-col main-class="tdr tdb mb-30">
-			<t-swiper-card :list="list1" main-class="mt-30" class="swipercard" previousMargin="60" nextMargin="60"
-				:autoplay="true">
+			<t-swiper-card :list="list1" class="swipercard" previousMargin="60" nextMargin="60" :autoplay="true">
 				<template #default={item}>
-					<t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" /> 
+					<t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" />
 				</template>
 			</t-swiper-card>
 		</t-col>
 		<t-section title='纵向卡片' main-class="tdr tdb mb-30"></t-section>
 		<t-col main-class="tdr tdb mb-30">
-			<t-swiper-card :list="list" main-class="mt-30 w-300 h-600" class="swipercard" previousMargin="60"
-				nextMargin="60" :vertical="true" :autoplay="true">
+			<t-swiper-card :list="list" main-class="w-300 h-600" class="swipercard" previousMargin="60" nextMargin="60"
+				:vertical="true" :autoplay="true">
 				<template #default={item}>
-					 <t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" /> 
+					<t-image main-class="twh-100% tdr" :src="`${(item as UTSJSONObject).getString('url')}`" />
 				</template>
 			</t-swiper-card>
 		</t-col>

@@ -9,10 +9,13 @@
 		<t-image src="/pagesA/static/image/D1.jpg" main-class="h-350 w-100% tdr mb-30"
 			:loadingAttrs="{name:'setting',type:'p',size:'l','mainClass':'s-200'}" :fade-show="true"></t-image>
 		<t-section main-class="mb-30" title="加载错误占位图"></t-section>
-		<t-image main-class="twh-350 tdr" src="https://ll-yundie-xyz/pagesA/static/loginbg1.jpeg" :placeholder="true"></t-image>
+		<t-image main-class="twh-350 tdr" src="https://ll-yundie-xyz/pagesA/static/loginbg1.jpeg"
+			:placeholder="true"></t-image>
 		<t-section main-class="mb-30" title="自定义加载错误占位图"></t-section>
 		<t-image main-class="twh-350 tdr" src="https://ll-yundie-xyz/pagesA/static/loginbg1.jpeg" :placeholder="true"
 			placeholder-image="/pagesA/static/image/D2.jpg"></t-image>
+		<t-image src="/pagesA/static/image/D1.jpg" main-class="w-200" mode="widthFix" :fade-show="true"></t-image>
+		<t-image src="/pagesA/static/image/D1.jpg" main-class="h-200" mode="heightFix" :fade-show="true"></t-image>
 	</t-page>
 </template>
 <script setup>

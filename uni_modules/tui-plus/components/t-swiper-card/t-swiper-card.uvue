@@ -1,11 +1,16 @@
 <template>
-	<t-gesture v-bind="extendsAttrs" :main-class="`ocr-g h-320 ${mainClass}`" @tuiTouchstart="touchStart"
+	<t-gesture v-bind="extendsAttrs" :main-class="`ocr-g h-320 dr ${mainClass}`" @tuiTouchstart="touchStart"
 		@initFinished="initFinished" @tuiTouchmove="touchMove" @tuiTouchend="touchEnd" @tuiTouchcancel="touchEnd">
 		<t-view :main-class="swiperItemBoxStyles" :style="tranPos">
 			<view class="swiperbox" :style="swiperItemStyles(index).value" v-for="(item,index) in cloneList"
 				:key="index">
 				<slot :item="item" :index="index"></slot>
 			</view>
+		</t-view>
+		<t-view :main-class="dotStyles" v-if="indicatorDots">
+			<t-view v-for="(_,index) in props.list" :key="index" :main-class="dotItemStyles(index)">
+
+			</t-view>
 		</t-view>
 	</t-gesture>
 </template>
@@ -73,8 +78,6 @@
 	interface SwiperProps extends CommonProps {
 		list : UTSJSONObject[];
 		indicatorDots : boolean;
-		indicatorDotsClass : string;
-		indicatorActiveColor : string;
 		autoplay : boolean;
 		current : number;
 		interval : number;
@@ -84,12 +87,16 @@
 		nextMargin : string;
 		disableTouch : boolean;
 		vertical : boolean;
+		dotBoxClass : string;
+		dotItemClass : string;
+		dotItemActiveClass : string;
+		dotItemInActiveClass : string;
 	}
 
 	const props = withDefaults(defineProps<SwiperProps>(), {
 		path: '',
 		hover: false,
-		type: '',
+		type: 'p',
 		disabled: false,
 		stop: false,
 		effect: '',
@@ -97,9 +104,7 @@
 		mainClass: '',
 		nativeClass: '',
 		list: [] as UTSJSONObject[],
-		indicatorDots: false,
-		indicatorDotsClass: '',
-		indicatorActiveColor: 'rgba(0,0,0,0.2)',
+		indicatorDots: true,
 		autoplay: false,
 		current: 0,
 		interval: 3000,
@@ -108,10 +113,14 @@
 		previousMargin: '0',
 		nextMargin: '0',
 		disableTouch: false,
-		vertical: false
+		vertical: false,
+		dotBoxClass: '',
+		dotItemClass: '',
+		dotItemActiveClass: '',
+		dotItemInActiveClass: ''
 	});
 
-	const { extendsAttrs } = useTuiThemes(props)
+	const { extendsAttrs, extendsBackgroundColor } = useTuiThemes(props)
 	const emit = defineEmits(['animationfinish', 'change'])
 	const boxSize = ref<number>(0)
 	const itemSize = ref<number>(0)
@@ -126,6 +135,11 @@
 	let source : string = 'autoplay'
 	let timer : number = 0
 	let animationInstance : TuiEasing | null = null
+	const dotStyles = computed(() => {
+		let sty = `fc da `
+		sty += props.vertical ? `dtr-0 h-100% w-80` : `dlb-0 w-100% h-80 fl`
+		return sty + ' ' + props.dotBoxClass
+	})
 	const cloneList = computed(() : UTSJSONObject[] => {
 		const arr : UTSJSONObject[] = []
 		if (props.circular && props.list.length > 0) arr.push(props.list[props.list.length - 1])
@@ -155,6 +169,12 @@
 		} else {
 			tranPos.value = `transform: translateX(${e}px)`
 		}
+	}
+	function dotItemStyles(index : nubmer) : ComputedRef<string> {
+		let sty = `twhr-25 `
+		sty += props.vertical ? 'mtb-8 ' : 'mlr-8 '
+		sty += index == current.value ? ` ${extendsBackgroundColor.value} ${props.dotItemInActiveClass}` : `bg-rgba(0,0,0,0.3) ${props.dotItemInActiveClass}`
+		return `${sty} ${props.dotItemClass}`
 	}
 	function tranCuurentMove(e : number) {
 		const a = props.circular ? e + 1 : e

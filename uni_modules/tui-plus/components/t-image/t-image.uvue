@@ -1,5 +1,5 @@
 <template>
-	<t-view v-bind="extendsAttrs" :main-class="`h-320 oh dr ${mainClass}`" @click="onclick">
+	<t-view v-bind="extendsAttrs" :main-class="`h-320 oh dr ${mainClass} ${autosize}`" @click="onclick" ref="imageins">
 		<image v-if="!iserror" class="image-class" :class="{'image-tran':fadeShow}" :style="{opacity:opacity}"
 			:src="splicingUrl" :mode="mode" @error="error" @load="load"></image>
 		<image v-if="opacity==0&&placeholder" class="image-class" :src="defaultImage" mode="scaleToFill"></image>
@@ -90,7 +90,8 @@
 	const opacity = ref(0)
 	const timer = ref(0)
 	const iserror = ref(false)
-
+	const autosize = ref('')
+	const imageins = ref<ComponentPublicInstance | null>(null)
 	const props = withDefaults(defineProps<ViewProps>(), {
 		path: '',
 		hover: false,
@@ -142,15 +143,31 @@
 		emit('error', event)
 	}
 	function load(event : UniImageLoadEvent) {
-		if (props.loading) {
-			clearTimeout(timer.value)
-			timer.value = setTimeout(() => {
-				opacity.value = 1
-			}, 500)
-		} else {
-			opacity.value = 1
-		}
-		emit('load', event)
+		imageins.value?.$callMethod('getInfo', (e : NodeInfo) => {
+			const h = e.height!
+			const w = e.width!
+			const imgW = event.detail.width
+			const imgH = event.detail.height
+			const ratio = imgH / imgW
+			const ratiow = imgW / imgH
+			if (props.mode == "widthFix") {
+				autosize.value = `h-${w * ratio}px`
+			}
+			if (props.mode == "heightFix") {
+				autosize.value = `w-${h * ratiow}px`
+			}
+			nextTick(() => {
+				if (props.loading) {
+					clearTimeout(timer.value)
+					timer.value = setTimeout(() => {
+						opacity.value = 1
+					}, 500)
+				} else {
+					opacity.value = 1
+				}
+				emit('load', event)
+			})
+		})
 	}
 </script>
 <style>
