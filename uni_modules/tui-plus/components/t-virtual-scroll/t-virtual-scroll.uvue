@@ -78,7 +78,7 @@
 
 	// 数据
 	const min = ref(0);
-	const max = ref(5);
+	const max = ref(10);
 	const timer = ref(0);
 	const st = ref(0);
 	const ost = ref(-1);

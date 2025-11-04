@@ -51,7 +51,7 @@
 	 * @property {Boolean} showValuePosition 是否显示单位(默认：true)
 	 * @value true 是
 	 * @value false 否
-	 * @property {Number} decimalPlaces 保留的小数位数(默认：1)
+	 * @property {Number} decimalPlaces 保留的小数位数(默认：0)
 	 * @property {String} trackSize 滑块轨道的尺寸	(默认：5)
 	 * @property {String} showMode=[after|before] 滑块数值的显示模式(默认：before)
 	 * @value after 在滑块后面显示值
@@ -64,19 +64,19 @@
 	import { getPx, addUnit, TuiGetMeasureText } from '../../common/model/util'
 	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
 	interface SliderProps extends CommonProps {
-		direction ?: string
-		min ?: number
-		max ?: number
-		modelValue ?: number[]
-		activeColor ?: string
-		inactiveColor ?: string
-		blockSize ?: string
-		fontSize ?: string
-		showValue ?: boolean
-		showValuePosition ?: boolean
-		decimalPlaces ?: number
-		trackSize ?: string
-		showMode ?: string
+		direction : string
+		min : number
+		max : number
+		modelValue : number[]
+		activeColor : string
+		inactiveColor : string
+		blockSize : string
+		fontSize : string
+		showValue : boolean
+		showValuePosition : boolean
+		decimalPlaces : number
+		trackSize : string
+		showMode : string
 	}
 	const instance = getCurrentInstance()?.proxy!
 	const props = withDefaults(defineProps<SliderProps>(), {
@@ -131,7 +131,7 @@
 			values.value.forEach((item : number, index : number) => {
 				let val = ''
 				if (props.showValue) {
-					val = `${item}`
+					val = item.toFixed(props.decimalPlaces)
 				} else if (props.showValuePosition) {
 					val = `${(((item - props.min) / (props.max - props.min)) * 100).toFixed(props.decimalPlaces)}%`
 				}
@@ -279,15 +279,7 @@
 		} catch (error) { }
 	}
 	function setValue() {
-		let arr : number[] = []
-		coordinates.value.forEach((item, index) => {
-			let val = Math.floor(item / progressLen.value * props.max)
-			if (val < props.min) val = props.min
-			if (val > props.max) val = props.max
-			values.value[index] = val
-			arr.push(val)
-		})
-		arr.sort((a : number, b : number) : number => a - b)
+		values.value[activeIndex.value] = (coordinates.value[activeIndex.value] / progressLen.value * (props.max - props.min)) + props.min
 	}
 	function getActiveIndex(target : number) : number {
 		let dif = Math.abs(coordinates.value[0] - target)
