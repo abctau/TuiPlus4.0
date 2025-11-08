@@ -1,5 +1,5 @@
 <template>
-	<t-view v-bind="extendsAttrs" :main-class="`ov ${mainClass}`" v-if="opts.toMap().size>0">
+	<t-view v-bind="extendsAttrs" :main-class="`ov ${mainClass}`">
 		<t-popup direction="center" main-class="ov b" content-class="ov" ref='formmodalpopup' :show-footer="false"
 			:closeable="false" @close="close" @transitionend="transitionend">
 			<t-col :main-class="`ov fais dr faic w-550 p-45 plr-60 ${formContentStyle}`">
@@ -14,8 +14,8 @@
 						main-class="w-100%" v-bind="formAttrs">
 					</t-picker-date>
 
-					<t-picker-city v-if="formType=='city'" v-model="(opts['value'] as string[])"
-						main-class="w-100%" :embeddable="true" v-bind="formAttrs">
+					<t-picker-city v-if="formType=='city'" v-model="(opts['value'] as string[])" main-class="w-100%"
+						:embeddable="true" v-bind="formAttrs">
 					</t-picker-city>
 
 					<t-picker-custom v-if="formType=='picker-custom'" v-model="(opts['value'] as string[])"
@@ -81,7 +81,8 @@
 				</t-view>
 				<t-button v-bind="extendsAttrs" main-class="r-100 w-100%" type="p"
 					@click="onConfirm">{{confirmText}}</t-button>
-				<t-view :main-class="`fc twhr-60 da db-n100 ${extendsBackgroundColor}`" :hover="true" @click="close">
+				<t-view :main-class="`fc twhr-60 da db-n100 ${extendsBackgroundColor}`" :hover="true"
+					@click="formClose">
 					<t-icon v-bind="extendsAttrs" name="close" :main-class="`sfwb ${extendsForegroundColor}`"></t-icon>
 				</t-view>
 			</t-col>
@@ -154,10 +155,13 @@
 	}
 	function close() {
 		emit('cancel')
+	}
+	function formClose() {
+		close()
 		formmodalpopup.value?.$callMethod('show')
 	}
 	function show(option : UTSJSONObject) {
-		opts.value = option  
+		opts.value = option
 		nextTick(() => {
 			formmodalpopup.value?.$callMethod('show')
 		})
