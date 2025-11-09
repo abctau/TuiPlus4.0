@@ -15,10 +15,10 @@
 					<t-button v-bind="extendsAttrs" :hover="true" @click="cancel" :main-class="`mr-20 f`"
 						effect="l">{{cancelText}}</t-button>
 					<t-button v-bind="extendsAttrs" main-class="f" :hover="true"
-						@click="confirm">{{confirmText}}</t-button>
+						@click="confirm">{{confirmText}}{{direction}}</t-button>
 				</slot>
 			</t-row>
-			<t-safe-bottom main-class="b"></t-safe-bottom>
+			<t-safe-bottom v-if="direction!='center' && direction!='top'"></t-safe-bottom>
 			<t-icon v-if="closeable" name="closes-circle-fill" v-bind="extendsAttrs" :hover="true" @click="close"
 				:main-class="`da ats-1.5 dr-30 dt-20 ${closeableClass}`"></t-icon>
 		</t-view>
