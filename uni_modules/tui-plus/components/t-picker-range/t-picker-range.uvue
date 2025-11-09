@@ -1,12 +1,12 @@
 <template>
-	<t-gesture v-bind="extendsAttrs" :main-class="`f tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
+	<t-gesture v-bind="extendsAttrs" :main-class="`f mr-10px ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
 		@tuiTouchmove="touchmove" :touch-stop="true" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
 		<t-text v-if='showUnit' :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
 		<t-view main-class="dr f">
 			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
 			</t-canvas>
 			<slot></slot>
-			<t-view :main-class="`da di-0 fc ope-n pr-10px ${sorderIndex==0?'pl-10px':''}`">
+			<t-view :main-class="`da di-0 fc ope-n`">
 				<t-view :main-class="`h-${rowHeight}px w-100% bg-rgba(0,0,0,0.05) tdr`"></t-view>
 			</t-view>
 		</t-view>
@@ -105,14 +105,12 @@
 				for (let i = sx + props.range[0]; i <= ex + props.range[0]; i++) {
 					const y = (drawX * rowHeight.value) + tranY.value + centenX.value;
 					// #ifdef APP
-					const dif = 0
 					const ydif = 0
 					// #endif
 					// #ifndef APP
-					const dif = i < 999 ? 5 : 0
 					const ydif = 2
 					// #endif
-					ctx.fillText(i.toString().padStart(2, '0'), w / 2 - dif, y + rowHeight.value / 2 + ydif);
+					ctx.fillText(i.toString().padStart(2, '0'), w / 2, y + rowHeight.value / 2 + ydif);
 					drawX++
 				}
 			}

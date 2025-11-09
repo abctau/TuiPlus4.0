@@ -1,5 +1,5 @@
 <template>
-	<t-view v-bind="extendsAttrs" :main-class="`fl oh dr h-500 ${mainClass}`">
+	<t-view v-bind="extendsAttrs" :main-class="`fl oh dr h-500 ${mainClass} pl-10px tdb`">
 		 <slot></slot>
 		<t-view main-class="fv da di-0 ope-n z-1">
 			<t-view v-if="showUnit" :main-class="`h-${rowHeight}px`">

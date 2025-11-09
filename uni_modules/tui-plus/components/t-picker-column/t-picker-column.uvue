@@ -1,12 +1,13 @@
 <template>
-	<t-gesture v-bind="extendsAttrs" :main-class="`f dr tdb ocr-g h-100%${mainClass}`" @tuiTouchstart="touchstart"
-		:touch-stop="true" @tuiTouchmove="touchmove" @tuiTouchend="touchend" @tuiTouchcancel="touchend">
+	<t-gesture v-bind="extendsAttrs" :main-class="`f dr mr-10px tdb ocr-g h-100%${mainClass}`"
+		@tuiTouchstart="touchstart" :touch-stop="true" @tuiTouchmove="touchmove" @tuiTouchend="touchend"
+		@tuiTouchcancel="touchend">
 		<t-text v-if="showUnit" :main-class="`h-${rowHeight}px fc sta-c w-100% sfwb`" :text="unit"></t-text>
 		<t-view main-class="dr f">
 			<t-canvas main-class="twh-100%" @initFinished="canvasInit">
 			</t-canvas>
 			<slot></slot>
-			<t-view :main-class="`da di-0 fc ope-n pr-10px ${sorderIndex==0?'pl-10px':''}`">
+			<t-view :main-class="`da di-0 fc ope-n`">
 				<t-view :main-class="`h-${rowHeight}px w-100% bg-rgba(0,0,0,0.05) tdr`"></t-view>
 			</t-view>
 		</t-view>
@@ -117,9 +118,6 @@
 		return pickerGroupAttrs?.rowHeight?.value ?? 50
 	})
 	function draw() {
-		// if (drawLoading.value) return
-		// drawLoading.value = true
-		// drawLoading.value = false
 		try {
 			if (props.list.length > 0) {
 				const ctx = canvasCtx.value!
@@ -137,7 +135,13 @@
 				for (let i = sx; i < ex; i++) {
 					const item = props.list[i]
 					const y = (i * rowHeight.value) + tranY.value + centenX.value;
-					ctx.fillText(`${item[props.titleKey]}`, w / 2 - 5, y + rowHeight.value / 2);
+					// #ifdef APP
+					const ydif = 0
+					// #endif
+					// #ifndef APP
+					const ydif = 2
+					// #endif
+					ctx.fillText(`${item[props.titleKey]}`, w / 2, y + rowHeight.value / 2 + ydif);
 				}
 			}
 		} catch (error) {
