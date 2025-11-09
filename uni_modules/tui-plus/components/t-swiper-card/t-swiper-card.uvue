@@ -170,7 +170,7 @@
 			tranPos.value = `transform: translateX(${e}px)`
 		}
 	}
-	function dotItemStyles(index : nubmer) : ComputedRef<string> {
+	function dotItemStyles(index : number) : string {
 		let sty = `twhr-25 `
 		sty += props.vertical ? 'mtb-8 ' : 'mlr-8 '
 		sty += index == current.value ? ` ${extendsBackgroundColor.value} ${props.dotItemInActiveClass}` : `bg-rgba(0,0,0,0.3) ${props.dotItemInActiveClass}`

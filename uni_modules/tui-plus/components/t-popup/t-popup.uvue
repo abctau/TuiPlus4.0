@@ -18,6 +18,7 @@
 						@click="confirm">{{confirmText}}</t-button>
 				</slot>
 			</t-row>
+			<t-safe-bottom main-class="b"></t-safe-bottom>
 			<t-icon v-if="closeable" name="closes-circle-fill" v-bind="extendsAttrs" :hover="true" @click="close"
 				:main-class="`da ats-1.5 dr-30 dt-20 ${closeableClass}`"></t-icon>
 		</t-view>

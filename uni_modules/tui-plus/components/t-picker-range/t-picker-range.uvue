@@ -104,7 +104,15 @@
 				let drawX = sx
 				for (let i = sx + props.range[0]; i <= ex + props.range[0]; i++) {
 					const y = (drawX * rowHeight.value) + tranY.value + centenX.value;
-					ctx.fillText(i.toString().padStart(2, '0'), w / 2 - 5, y + rowHeight.value / 2);
+					// #ifdef APP
+					const dif = 0
+					const ydif = 0
+					// #endif
+					// #ifndef APP
+					const dif = i < 999 ? 5 : 0
+					const ydif = 2
+					// #endif
+					ctx.fillText(i.toString().padStart(2, '0'), w / 2 - dif, y + rowHeight.value / 2 + ydif);
 					drawX++
 				}
 			}

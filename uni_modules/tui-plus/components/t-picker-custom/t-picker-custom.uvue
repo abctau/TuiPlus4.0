@@ -15,7 +15,7 @@
 		<view v-if="!embeddable" @click="show">
 			<slot :value="vals" name="button">
 				<t-cell :desc="vals.length==0?placeholder:vals.join('-')" :title="label" :border="false"
-					:main-class="labelClass"></t-cell>
+					:desc-class="descClass" :main-class="labelClass"></t-cell>
 			</slot>
 		</view>
 	</t-view>
@@ -60,6 +60,7 @@
 	 * @property {String} titleClass 标题文本样式
 	 * @property {String} label 字段标题
 	 * @property {String} labelClass 标签样式
+	 * @property {String} descClass 标签样式
 	 * @property {String} placeholder 占位文本
 	 * @property {UTSJSONObject} popupAttrs 支持t-popup的所有属性 
 	 * @event {Function} confirm 点确认后触发
@@ -74,6 +75,7 @@
 		list : UTSJSONObject[][];
 		title : string;
 		titleClass : string;
+		descClass : string;
 		label : string;
 		labelClass : string;
 		titleKey : string;
@@ -100,6 +102,7 @@
 		titleClass: '',
 		label: '',
 		labelClass: '',
+		descClass: '',
 		titleKey: 'title',
 		indexKey: 'id',
 		unit: '',
