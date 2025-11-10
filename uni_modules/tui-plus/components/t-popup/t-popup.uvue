@@ -15,7 +15,7 @@
 					<t-button v-bind="extendsAttrs" :hover="true" @click="cancel" :main-class="`mr-20 f`"
 						effect="l">{{cancelText}}</t-button>
 					<t-button v-bind="extendsAttrs" main-class="f" :hover="true"
-						@click="confirm">{{confirmText}}{{direction}}</t-button>
+						@click="confirm">{{confirmText}}</t-button>
 				</slot>
 			</t-row>
 			<t-safe-bottom v-if="direction!='center' && direction!='top'"></t-safe-bottom>
