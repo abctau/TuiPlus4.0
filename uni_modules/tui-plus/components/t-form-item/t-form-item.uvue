@@ -10,8 +10,8 @@
 				<slot></slot>
 			</t-view>
 		</t-view>
-		<t-text v-if="rulesMessage!='' && showMessageMerge" :text="rulesMessage" :main-class="`tdb-e,l tdr mt-20 p-20 ${rulesClassMerge}`"
-			type="e"></t-text>
+		<t-text v-if="rulesMessage!='' && showMessageMerge" :text="rulesMessage"
+			:main-class="`tdb-e,l tdr mt-20 p-20 ${rulesClassMerge}`" type="e"></t-text>
 		<t-line main-class="da dlbr-0" v-if="bottomLineMerge"></t-line>
 	</t-view>
 </template>
@@ -132,11 +132,11 @@
 		const v : formValidationType = formValidation(key, val, rules.getArray<UTSJSONObject>(key) ?? ([] as UTSJSONObject[]))
 		rulesMessage.value = v.message
 	})
-	
-	const showMessageMerge = computed(() : string => {
+
+	const showMessageMerge = computed(() : boolean => {
 		return props.showMessage ? fromGroupAttrs?.showMessage?.value ?? '' : props.showMessage
 	})
-	
+
 	const mainClassMerge = computed(() : string => {
 		return `${fromGroupAttrs?.childClass?.value ?? ''} ${props.mainClass}`
 	})
