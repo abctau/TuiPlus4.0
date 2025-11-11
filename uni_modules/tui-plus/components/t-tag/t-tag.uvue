@@ -1,7 +1,7 @@
 <template>
 	<t-view v-if="trans" :main-class="`${mainClass} fww atp-o atd-500  ${hidden?'o-1':'o-0'}`" @click="mainOnclick"
 		@transitionend="transitionend">
-		<t-button v-bind="extendsAttrs" main-class="mr-15 h-100%" :right-icon="closable?'close':''" @rightClick="close">
+		<t-button v-bind="extendsAttrs" main-class="h-100%" :right-icon="closable?'close':''" @rightClick="close">
 			<slot></slot>
 		</t-button>
 	</t-view>
