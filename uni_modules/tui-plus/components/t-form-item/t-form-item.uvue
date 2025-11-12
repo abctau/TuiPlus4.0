@@ -134,7 +134,7 @@
 	})
 
 	const showMessageMerge = computed(() : boolean => {
-		return props.showMessage ? fromGroupAttrs?.showMessage?.value ?? '' : props.showMessage
+		return props.showMessage ? fromGroupAttrs?.showMessage?.value ?? false : props.showMessage
 	})
 
 	const mainClassMerge = computed(() : string => {
