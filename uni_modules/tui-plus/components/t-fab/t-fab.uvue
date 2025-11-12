@@ -5,7 +5,7 @@
 		<slot name="menu">
 			<t-view @click="menuevent"
 				:main-class="`twh-100% r-1000 bg-red fc ${extendsBackgroundColor} ${menuBoxClass}`">
-				<t-icon :name="expand?'close':'plus'"
+				<t-icon :name="expand?menuCloseIcon:menuOpenIcon"
 					:main-class="`${extendsForegroundColor} s-40 sfwb ${menuIconClass}`"></t-icon>
 			</t-view>
 		</slot>
@@ -42,6 +42,8 @@
 	 * @value dark 深色
 	 * @value light 浅色
 	 * @value plain 镂空
+	 * @property {String} menuCloseIcon 关闭时显示的图标
+	 * @property {String} menuOpenIcon 展开时显示的图标
 	 * @property {String} menuBoxClass 菜单按钮盒子的样式
 	 * @property {String} menuIconClass 图标样式
 	 * @property {Boolean} state 按钮的展开折叠的状态
@@ -61,6 +63,8 @@
 	import { CommonProps, useTuiThemes, FabGroupAttrsType } from '../../common/props/index.uts';
 	interface FabProps extends CommonProps {
 		menuBoxClass : string;
+		menuCloseIcon : string;
+		menuOpenIcon : string;
 		menuIconClass : string;
 		state : boolean;
 		direction : string;
@@ -79,6 +83,8 @@
 		mainClass: '',
 		nativeClass: '',
 		menuBoxClass: '',
+		menuCloseIcon: 'close',
+		menuOpenIcon: 'plus',
 		menuIconClass: '',
 		state: false,
 		direction: 'row-left',
