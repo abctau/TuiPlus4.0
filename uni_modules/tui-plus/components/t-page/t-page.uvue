@@ -2,7 +2,7 @@
 	<template v-if="scrollDisabled">
 		<view :style="['height:100%;',extendsPageColor,extendsViewStyle]">
 			<slot v-if="showLoading"></slot>
-			<t-loading-page v-if="showMask"></t-loading-page>
+			<t-loading-page v-if="showMask" :lodingText="lodingText"></t-loading-page>
 		</view>
 	</template>
 	<template v-else>
@@ -11,7 +11,7 @@
 		<!-- #endif -->
 			<view :style="contentStyle">
 				<slot v-if="showLoading"></slot>
-				<t-loading-page v-if="showMask"></t-loading-page>
+				<t-loading-page v-if="showMask" :lodingText="lodingText"></t-loading-page>
 			</view>
 		<!-- #ifdef APP -->
 		</scroll-view>
@@ -60,6 +60,7 @@
 		scrollDisabled : boolean
 		loading : boolean
 		waiting : number
+		lodingText : string
 	}
 	const props = withDefaults(defineProps<PageProps>(), {
 		path: '',
@@ -73,7 +74,8 @@
 		nativeClass: '',
 		scrollDisabled: false,
 		loading: false,
-		waiting: 500
+		waiting: 500,
+		lodingText:'加载中'
 	});
 	const { extendsPageColor, extendsViewStyle } = useTuiThemes(props)
 	const emit = defineEmits(['initFinished'])
