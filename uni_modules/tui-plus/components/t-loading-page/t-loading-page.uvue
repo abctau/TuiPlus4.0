@@ -1,6 +1,6 @@
 <template>
 	<view :style="maskStyle">
-		<text>加载中</text>
+		<text>{{lodingText}}</text>
 	</view>
 </template>
 
@@ -9,4 +9,20 @@
 	const maskStyle = computed(() : string => {
 		return useStyle('tpg df dlt-0 twh-100% fc z-999')
 	})
+	import { CommonProps } from '../../common/props/index.uts';
+	interface LoadingPageProps extends CommonProps {
+		lodingText : string
+	}
+	const props = withDefaults(defineProps<LoadingPageProps>(), {
+		path: '',
+		hover: false,
+		type: '',
+		disabled: false,
+		stop: false,
+		effect: '',
+		size: '',
+		mainClass: '',
+		nativeClass: '',
+		lodingText:'加载中'
+	});
 </script>

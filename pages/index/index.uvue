@@ -1,5 +1,5 @@
 <template>
-	<t-page :scrollDisabled="true">
+	<t-page :scrollDisabled="true" lodingText="lodingText" :loading="true">
 		<tui-header @select="selectchange" @blur="onBlur"></tui-header>
 		<t-swiper-card :list="list1" main-class="mt-30" previousMargin="60" nextMargin="60" :autoplay="true"
 			@change="swiperChange">
