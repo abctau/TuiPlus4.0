@@ -43,14 +43,8 @@ export class TuiAxios {
 				header: this.reqConfig.get('header') as UTSJSONObject,
 				timeout: this.reqConfig.get('timeout') as number,
 				success: (res : RequestSuccess<any>) => {
-					if (res.statusCode == 200) {
-						const responseInterceptorFun = this.responseInterceptor as (res : UTSJSONObject, resolve : (res : UTSJSONObject) => void, reject : (err : UniError) => void) => void
-						responseInterceptorFun({ data: res.data, statusCode: res.statusCode, header: res.header, cookies: res.cookies, config: { method, path, data } }, resolve, reject)
-					} else {
-						let error = new UniError("http", res.statusCode, `${(res.data as UTSJSONObject)['message']}`);
-						error.data = data
-						reject(error)
-					}
+					const responseInterceptorFun = this.responseInterceptor as (res : UTSJSONObject, resolve : (res : UTSJSONObject) => void, reject : (err : UniError) => void) => void
+					responseInterceptorFun({ data: res.data, statusCode: res.statusCode, header: res.header, cookies: res.cookies, config: { method, path, data } }, resolve, reject)
 				},
 				fail(er : RequestFail) {
 					let error = new UniError("responseInterceptor", er.errCode, er.errMsg);
