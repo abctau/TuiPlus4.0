@@ -2,15 +2,15 @@
 	<t-view v-bind="extendsAttrs" :hover="true"
 		:main-class="`fl ${extendsPrb} ${border?extendsBorder:''} fc ${mainClass}`" @click="mainOnclick">
 		<t-row :main-class="holderStyle">
-			<t-icon v-if="leftIcon!=''" :name="leftIcon" :main-class="`${extendsSfc} ${leftIconClass}`" :stop="false"
-				@click="onLeftClick"></t-icon>
+			<t-icon v-if="leftIcon!=''" :name="leftIcon" :main-class="`${extendsSfc} ${leftIconClass}`"
+				:stop="leftIconStop" @click="onLeftClick"></t-icon>
 		</t-row>
 		<t-text v-bind="textAttrs" :main-class="`mlr-15 ${extendsSfc} ${textClass}`">
 			<slot></slot>
 		</t-text>
 		<t-row :main-class="holderStyle">
 			<t-loading v-if="loading" :name="loadingIcon" :main-class="`ov ${extendsSfc} ${loadingClass}`"></t-loading>
-			<t-icon v-if="!loading && rightIcon!=''" :name="rightIcon" :stop="false"
+			<t-icon v-if="!loading && rightIcon!=''" :name="rightIcon" :stop="rightIconStop"
 				:main-class="`ov ${extendsSfc} ${rightIconClass}`" @click="onRightClick"></t-icon>
 		</t-row>
 	</t-view>
@@ -73,6 +73,12 @@
 	 * @property {Boolean} iconHolder 是图在不设置图标的时候占住位置
 	 * @value true 是
 	 * @value false 否
+	 * @property {Boolean} leftIconStop 左图标事件是否阻止冒泡
+	 * @value true 是
+	 * @value false 否
+	 * @property {Boolean} rightIconStop 左图标事件是否阻止冒泡
+	 * @value true 是
+	 * @value false 否
 	 * @event {Function} click 点击时触发
 	 * @event {Function} leftClick 左侧图标单击时触发
 	 * @event {Function} rightClick 右侧图标单击时触发
@@ -96,6 +102,8 @@
 		border : boolean
 		hover : boolean
 		iconHolder : boolean
+		leftIconStop : boolean
+		rightIconStop : boolean
 	}
 	const props = withDefaults(defineProps<ButtonProps>(), {
 		path: '',
@@ -121,6 +129,8 @@
 		tdTime: 500,
 		border: false,
 		iconHolder: false,
+		leftIconStop: false,
+		rightIconStop: false
 	});
 	const { extendsAttrs, extendsPrb, extendsBorder, extendsSfc, getFontSizeToValue } = useTuiThemes(props)
 	const deb = new TuiDebounce()
