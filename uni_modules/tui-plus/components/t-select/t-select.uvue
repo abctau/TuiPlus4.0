@@ -106,13 +106,14 @@
 	const selectOptions = ref<selectListItem[]>([])
 	const values = ref<UTSJSONObject>({ modelValue: '' })
 	const popverState = ref<boolean>(false)
-
+	const itemValidate = inject<() => void>('itemValidate', () => { })
 	function popoverChange(e : boolean) {
 		popverState.value = e
 		nextTick(() => {
 			if (e) {
 				emit('open', props.modelValue)
 			} else {
+				itemValidate()
 				emit('close', props.modelValue)
 			}
 		})
@@ -132,6 +133,9 @@
 				emit('change', val)
 			}
 		}
+		nextTick(() => {
+			itemValidate()
+		})
 	}
 	function onSelectItem(e : selectListItem) {
 		deleteValues(e.value)
