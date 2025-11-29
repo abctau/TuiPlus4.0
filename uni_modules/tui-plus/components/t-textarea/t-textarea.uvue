@@ -209,7 +209,7 @@
 		return inputValue.value.length > 0 ? 'ovy' : 'ovy-h'
 	})
 	const inputPlaceholderStyle = computed(() : string => {
-		return `opacity:0.8;${themeForegroundColor.value}${useStyle(props.placeholderStyle)}`
+		return `opacity:0.5;${themeForegroundColor.value}${useStyle(props.placeholderStyle)}`
 	})
 	const inputStyles = computed(() : string => {
 		return useStyle(`${props.inputClass}`)
