@@ -1,7 +1,7 @@
 <template>
 	<t-view v-bind="extendsAttrs" :main-class="`fl faic ${mainClass} p-0`">
 		<t-text v-if="mode==3  && activeText!=''" :main-class="switchModeThreeActiveTextStyles"
-			:text="activeText"></t-text>
+			@click="switchState(false)" :text="inactiveText"></t-text>
 		<t-view :main-class="switchStyles" @click="setSwitchState">
 			<t-view :main-class="switchBarStyles">
 				<t-loading v-if="loading" v-bind="extendsAttrs" :main-class="loadingClass"></t-loading>
@@ -18,7 +18,7 @@
 			</t-row>
 		</t-view>
 		<t-text v-if="mode==3 && inactiveText!=''" :main-class="switchModeThreeInActiveTextStyles"
-			:text="inactiveText"></t-text>
+			@click="switchState(true)" :text="activeText"></t-text>
 	</t-view>
 </template>
 
@@ -153,6 +153,14 @@
 	const instance = getCurrentInstance()?.proxy!
 	const state = ref<boolean>(false)
 	const itemValidate = inject<() => void>('itemValidate', () => { })
+	function switchState(e : boolean) {
+		state.value = e
+		nextTick(() => {
+			emit('change', state.value)
+			emit('update:modelValue', state.value)
+			itemValidate()
+		})
+	}
 	function setSwitchState() {
 		state.value = !state.value
 		nextTick(() => {
