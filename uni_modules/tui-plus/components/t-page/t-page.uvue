@@ -47,7 +47,9 @@
 	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
 	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
 	 * @property {Boolean} loading 是否显示loading
+	 * @property {Boolean} scrollDisabled 是否禁止页面滚动
 	 * @property {Number} waiting 等待时间
+	 * @property {String} lodingText 等待加载文字
 	 * @value normal 正常
 	 * @value dark 深色
 	 * @value light 浅色
@@ -75,7 +77,7 @@
 		scrollDisabled: false,
 		loading: false,
 		waiting: 500,
-		lodingText:'加载中'
+		lodingText: '加载中'
 	});
 	const { extendsPageColor, extendsViewStyle } = useTuiThemes(props)
 	const emit = defineEmits(['initFinished'])
