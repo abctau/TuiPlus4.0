@@ -150,7 +150,7 @@ export function useTuiThemes(props : CommonProps) : TypeUseThemes {
 
 	const getBorderToValue = computed(() => bc(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), '', false))
 
-	const themeDisabled = computed(() => props.disabled ? 'opacity:0.5;pointer-events: none;' : '')
+	const themeDisabled = computed(() => props.disabled ? 'opacity:0.5;pointer-events: none;' : 'pointer-events: auto;')
 
 	const themeColor = computed(() => ttc(props.type, props.effect))
 
