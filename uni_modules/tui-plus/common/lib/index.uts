@@ -6,6 +6,10 @@ export * from './app-android/index.uts';
 export * from './app-ios/index.uts';
 // #endif
 
+// #ifdef APP-HARMONY
+export * from './app-harmony/index.uts';
+// #endif
+
 // #ifdef WEB
 export * from './web/index.uts';
 // #endif

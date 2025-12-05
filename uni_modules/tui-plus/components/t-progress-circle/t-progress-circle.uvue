@@ -38,7 +38,8 @@
 	 * @value dark 深色
 	 * @value light 浅色
 	 * @value plain 镂空
-	 * @property {String} lineWidth 进度条线条宽度(默认：20rpx)
+	 * @property {String} backgroundLineWidth 背景圈线条宽度(默认：20rpx)
+	 * @property {String} activeLineWidth 进度圈线条宽度(默认：20rpx)
 	 * @property {String} inactiveColor 进度条未激活时的颜色(默认：#ececec)
 	 * @property {String} activeColor 进度条激活时的颜色
 	 * @property {Number} modelValue 双向绑定的值(默认：1)
@@ -62,7 +63,8 @@
 	}
 	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
 	interface ProgressCircleProps extends CommonProps {
-		lineWidth : string
+		backgroundLineWidth : string
+		activeLineWidth : string
 		inactiveColor : string
 		activeColor : string
 		modelValue : number
@@ -81,7 +83,8 @@
 		size: '',
 		mainClass: '',
 		nativeClass: '',
-		lineWidth: "20rpx",
+		backgroundLineWidth: "20rpx",
+		activeLineWidth: "20rpx",
 		inactiveColor: "#ececec",
 		activeColor: "",
 		modelValue: 0,
@@ -99,25 +102,53 @@
 	});
 	const drawSize = ref<number>(0);
 	const circlepCanvas = ref<ComponentPublicInstance | null>(null)
-	const _lineWidth = computed(() : number => {
-		let w = getPx(addUnit(props.lineWidth))
+	
+	const _backgroundLineWidth = computed(() : number => {
+		let w = getPx(addUnit(props.backgroundLineWidth))
 		return w
 	})
+	
+	const _activeLineWidth = computed(() : number => {
+		let w = getPx(addUnit(props.activeLineWidth))
+		return w
+	})
+	
+	// 计算两个圆的最大线宽，用于确定画布内可用的最大半径
+	const _maxLineWidth = computed(() : number => {
+		return Math.max(_backgroundLineWidth.value, _activeLineWidth.value)
+	})
+	
+	// 计算背景圈的半径（基于最大线宽）
+	const _backgroundRadius = computed(() : number => {
+		return (drawSize.value - _maxLineWidth.value) / 2
+	})
+	
+	// 计算进度圈的半径（基于最大线宽，让进度圈在背景圈中间）
+	const _activeRadius = computed(() : number => {
+		// 如果背景圈比进度圈宽，进度圈要在背景圈中间
+		if (_backgroundLineWidth.value > _activeLineWidth.value) {
+			return (drawSize.value - _backgroundLineWidth.value) / 2
+		}
+		// 如果进度圈比背景圈宽或相等，直接使用最大线宽计算
+		return (drawSize.value - _maxLineWidth.value) / 2
+	})
+	
 	function animate(options : OPTIONS) : ANIMATECALLBACK {
-		const start = options.start; // 初始值，默认为0
-		const end = options.end; // 目标值，默认为100
-		const duration = options.duration; // 动画时长，默认为1000毫秒
-		let current : number; // 当前值
-		let startTime = 0; // 动画开始时间
-		let isRunning = true; // 动画运行状态
+		const start = options.start;
+		const end = options.end;
+		const duration = options.duration;
+		let current : number;
+		let startTime = 0;
+		let isRunning = true;
+		
 		function run() {
 			if (startTime <= 0) {
-				startTime = Date.now(); // 记录动画开始时间
+				startTime = Date.now();
 			}
-			const progress = Math.min((Date.now() - startTime) / duration, 1); // 计算当前进度
-			current = start + (end - start) * progress; // 根据进度计算当前值
+			const progress = Math.min((Date.now() - startTime) / duration, 1);
+			current = start + (end - start) * progress;
 			if (isRunning) {
-				options.run(current); // 执行传入的运行中状态回调函数
+				options.run(current);
 			}
 			if (progress < 1 && isRunning) {
 				if (animationTaskId.value != 0) {
@@ -128,13 +159,12 @@
 					run()
 				})
 			} else {
-				options.complete(); // 动画结束时执行回调函数
+				options.complete();
 			}
 		}
-		run(); // 开始执行动画
+		run();
 		return {
 			stop: () => {
-				// 设置动画运行状态为false
 				isRunning = false;
 			}
 		} as ANIMATECALLBACK;
@@ -143,31 +173,40 @@
 	function dreawer(start : number, end : number) {
 		let ctx = canvasCtx.value!
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-		let cx = (drawSize.value) / 2
+		
+		let cx = drawSize.value / 2
 		let cy = cx
-		let cr = (drawSize.value - _lineWidth.value) / 2
+		
+		// 绘制背景圈
 		ctx.beginPath()
 		ctx.strokeStyle = props.inactiveColor
-		ctx.lineWidth = _lineWidth.value
+		ctx.lineWidth = _backgroundLineWidth.value
 		ctx.lineCap = "round"
-		ctx.arc(cx, cy, cr, 0, Math.PI * 2, false)
-		ctx.closePath()
+		ctx.arc(cx, cy, _backgroundRadius.value, 0, Math.PI * 2, false)
 		ctx.stroke()
+		
+		// 绘制进度圈
 		if (end > 0) {
-			// 绘制起始的角度。
+			// 绘制从0到起始角度的进度圈部分
+			if (start > 0) {
+				ctx.beginPath()
+				ctx.strokeStyle = props.activeColor != '' ? props.activeColor : getColorToValue.value
+				ctx.lineWidth = _activeLineWidth.value
+				ctx.lineCap = "round"
+				ctx.arc(cx, cy, _activeRadius.value, 0, start, false)
+				ctx.stroke()
+			}
+			
+			// 绘制从起始角度到结束角度的进度圈部分
 			ctx.beginPath()
-			ctx.strokeStyle = getColorToValue.value
-			ctx.lineWidth = _lineWidth.value
-			ctx.arc(cx, cy, cr, 0, start, false)
-			ctx.stroke()
-
-			ctx.beginPath()
-			ctx.strokeStyle = getColorToValue.value
-			ctx.lineWidth = _lineWidth.value
-			ctx.arc(cx, cy, cr, start, end, false)
+			ctx.strokeStyle = props.activeColor != '' ? props.activeColor : getColorToValue.value
+			ctx.lineWidth = _activeLineWidth.value
+			ctx.lineCap = "round"
+			ctx.arc(cx, cy, _activeRadius.value, start, end, false)
 			ctx.stroke()
 		}
 	}
+	
 	function play() {
 		let ctx = canvasCtx.value!
 		nowback.value.stop()
@@ -181,7 +220,7 @@
 			end: 100,
 			duration: props.duration,
 			complete() {
-
+				// 动画完成
 			},
 			run(cureent : number) {
 				let angle = Math.PI * 2;
@@ -200,6 +239,7 @@
 			}
 		} as OPTIONS)
 	}
+	
 	function canvasInit(ctx : CanvasContext) {
 		circlepCanvas.value?.$callMethod('getInfo', (rect : NodeInfo) => {
 			canvasCtx.value = ctx.getContext('2d')

@@ -436,12 +436,6 @@
 				}
 			},
 			{
-				"path": "basics/link/link",
-				"style": {
-					"navigationBarTitleText": "链接"
-				}
-			},
-			{
 				"path": "form/verify/verify",
 				"style": {
 					"navigationBarTitleText": "滑块验证"
@@ -469,12 +463,6 @@
 				"path": "basics/transition/transition",
 				"style": {
 					"navigationBarTitleText": "transition"
-				}
-			},
-			{
-				"path": "native/scan/scan",
-				"style": {
-					"navigationBarTitleText": "扫码"
 				}
 			},
 			{

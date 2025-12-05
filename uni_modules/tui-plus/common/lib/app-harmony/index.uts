@@ -1,0 +1,18 @@
+export function getFileDigest(file : string) : Promise<string> {
+	return new Promise((
+		resolve : (res : string) => void,
+		reject : (_ : FileSystemManagerFail) => void
+	) => {
+		const fileManager = uni.getFileSystemManager()
+		fileManager.getFileInfo({
+			filePath: file,
+			digestAlgorithm: 'md5',
+			success: (res : GetFileInfoSuccessResult) => {
+				resolve(res.digest)
+			},
+			fail: (err : FileSystemManagerFail) => {
+				reject(err)
+			},
+		} as GetFileInfoOptions)
+	})
+}

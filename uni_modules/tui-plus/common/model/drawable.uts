@@ -10,7 +10,9 @@ export class TuiDrawableContext {
 	private fontSize = 10
 	private component : ComponentPublicInstance | null
 	private taskId : number = 0
+	// #ifndef APP
 	private canvas : any
+	// #endif
 	constructor(draw : ComponentPublicInstance, ctx : any, canvasEl : any | null = null) {
 		this.component = draw
 		// #ifdef APP
@@ -18,9 +20,9 @@ export class TuiDrawableContext {
 		// #endif
 		// #ifndef APP
 		this.ctx = ctx as CanvasRenderingContext2D
-		// #endif
-		this.canvas = canvasEl!
+		this.canvas = canvasEl
 		this.el = draw.$el as UniElement | null
+		// #endif
 	}
 	get font() : string {
 		return this.ctx.font as string
