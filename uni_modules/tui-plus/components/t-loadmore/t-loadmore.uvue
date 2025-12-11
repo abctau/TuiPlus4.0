@@ -1,12 +1,12 @@
 <template>
 	<t-view v-bind="extendsAttrs" :main-class="`fl o-0.7 faic ${mainClass}`" @click="mainOnclick">
 		<template v-if="status>0">
-			<t-line v-if="line" v-bind="extendsAttrs" main-class="mr-10 atsy-0.5" :line-style="lineStyle"
-				:hairline="true" length="100"></t-line>
+			<t-line v-if="line" v-bind="extendsAttrs" :main-class="`mr-10 atsy-0.5 ${lineClass}`"
+				:line-style="lineStyle" :hairline="true" length="100"></t-line>
 			<t-loading v-bind="extendsAttrs" v-if="status==2" main-class="mr-10" :name="loadingIcon"></t-loading>
 			<t-text v-bind="extendsAttrs" :text="showText"></t-text>
-			<t-line v-if="line" v-bind="extendsAttrs" main-class="ml-10 atsy-0.5" :line-style="lineStyle"
-				:hairline="true" length="100"></t-line>
+			<t-line v-if="line" v-bind="extendsAttrs" :main-class="`ml-10 atsy-0.5 ${lineClass}`"
+				:line-style="lineStyle" :hairline="true" length="100"></t-line>
 		</template>
 	</t-view>
 </template>
