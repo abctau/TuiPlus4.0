@@ -1,3 +1,8 @@
+## 4.3.9（2025-12-12）
+- 修复 `t-dialog` show方法
+- 修复 `t-picker` 无法滚动
+- 修复 `t-picker-select` 无法异步渲染
+- 修复 `t-picker-select` valueKey,lableKey属性无效的bug
 ## 4.3.8（2025-12-06）
 - 修复IOS端 disabled 兼容问题
 ## 4.3.6（2025-11-28）
