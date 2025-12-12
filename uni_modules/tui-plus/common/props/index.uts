@@ -149,8 +149,13 @@ export function useTuiThemes(props : CommonProps) : TypeUseThemes {
 	const getForegColorToValue = computed(() => c(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), false))
 
 	const getBorderToValue = computed(() => bc(props.type, props.effect, getStyleProperty(props.mainClass, 'color'), '', false))
-
+	
+	// #ifdef APP-IOS
 	const themeDisabled = computed(() => props.disabled ? 'opacity:0.5;pointer-events: none;' : 'pointer-events: auto;')
+	// #endif
+	// #ifndef APP-IOS
+	const themeDisabled = computed(() => props.disabled ? 'opacity:0.5;pointer-events: none;' : '')
+	// #endif
 
 	const themeColor = computed(() => ttc(props.type, props.effect))
 

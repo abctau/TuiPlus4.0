@@ -33,7 +33,7 @@
 					</t-list>
 				</t-checkbox-group>
 			</template>
-			<t-empty v-else title="暂无数据" main-class="w-100% h-100%" image-class="w-288 h-189 mt-n100"
+			<t-empty v-else title="暂无数据" main-class="w-100% h-600" image-class="w-288 h-189 mt-n100"
 				title-class="s-32"></t-empty>
 		</t-view>
 	</t-view>
@@ -77,9 +77,7 @@
 	const searchQuery = ref<string>('')
 	const searchList = ref<UTSJSONObject[]>([])
 	const isSearch = ref<boolean>(false)
-	const viewList = computed(() : UTSJSONObject[] => {
-		return isSearch.value ? searchList.value : props.list;
-	})
+	const viewList = ref<UTSJSONObject[]>([])
 	const singled = computed(() : boolean => {
 		return typeof (props.modelValue) == 'string'
 	})
@@ -91,13 +89,14 @@
 	}
 	function initValue() {
 		if (!props.embeddable) {
+			const cacheList = props.remote ? viewList.value : props.list
 			if (typeof (props.modelValue) == 'string') {
 				const mval = props.modelValue as string
-				const v = searchList.value.filter((food : UTSJSONObject) => `${food.value}` == mval).map((fod : UTSJSONObject) => `${fod.label}`);
+				const v = cacheList.filter((food : UTSJSONObject) => `${food[props.valueKey]}` == mval).map((fod : UTSJSONObject) => `${fod[props.labelKey]}`);
 				emit('initValue', v)
 			} else {
 				const mval = props.modelValue as string[]
-				const v = searchList.value.filter((food : UTSJSONObject) => mval.includes(`${food.value}`)).map((fod : UTSJSONObject) => `${fod.label}`);
+				const v = cacheList.filter((food : UTSJSONObject) => mval.includes(`${food[props.valueKey]}`)).map((fod : UTSJSONObject) => `${fod[props.labelKey]}`);
 				emit('initValue', v)
 			}
 			if (typeof (props.modelValue) == 'object') cloneValues.value = TuiDeepClone(props.modelValue) as string[]
@@ -105,29 +104,33 @@
 			cloneValues.value = props.modelValue
 		}
 	}
-	function fuzzySearch() {
-		if (props.remote) {
-			props.remoteMethod!(searchQuery.value).then((res : UTSJSONObject[]) => {
-				searchList.value = res
+	function fuzzySearch() : Promise<boolean> {
+		return new Promise((
+			resolve : (res : boolean) => void
+		) => {
+			if (props.remote) {
+				props.remoteMethod!(searchQuery.value).then((res : UTSJSONObject[]) => {
+					viewList.value = res
+					isSearch.value = true
+					resolve(true)
+				})
+			} else {
+				const f = props.list.filter((item : UTSJSONObject) : boolean => {
+					return (`${item[props.labelKey]}`).toLocaleLowerCase().includes(searchQuery.value.toLocaleLowerCase())
+				})
+				viewList.value = f
 				isSearch.value = true
-				initValue()
-			})
-		} else {
-			const f = viewList.value.filter((item : UTSJSONObject) : boolean => {
-				return (`${item[props.labelKey]}`).toLocaleLowerCase().includes(searchQuery.value.toLocaleLowerCase())
-			})
-			searchList.value = f
-			isSearch.value = true
-			initValue()
-		}
+				resolve(true)
+			}
+		})
 	}
 	function clear() {
 		if (props.remote) {
 			searchQuery.value = ''
-			fuzzySearch()
 		} else {
 			isSearch.value = false
 		}
+		fuzzySearch()
 	}
 	function oninput(e : UniInputEvent) {
 		if (e.detail.value == '') {
@@ -139,6 +142,12 @@
 			}
 		}
 	}
+	watch(() : UTSJSONObject[] => props.list, (e : UTSJSONObject[]) => {
+		fuzzySearch().then((_ : boolean) => {
+			initValue()
+		})
+	}, { deep: true })
+
 	watch(() : any => props.modelValue, (e : any) => {
 		initValue()
 	}, { deep: true })
@@ -165,5 +174,7 @@
 		}
 		emit('change', { values, labels })
 	}
-	fuzzySearch()
+	fuzzySearch().then((_ : boolean) => {
+		initValue()
+	})
 </script>

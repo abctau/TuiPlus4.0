@@ -75,4 +75,5 @@
 	function show() {
 		dialogpopup.value?.$callMethod('show')
 	}
+	defineExpose({show})
 </script>
