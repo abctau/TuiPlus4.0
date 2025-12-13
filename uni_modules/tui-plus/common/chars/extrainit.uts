@@ -1,6 +1,36 @@
-import { ChartOptionsExtraGaugeSplitLine, ChartOptionsExtra, ChartOptionsExtraArcbar, ChartOptionsExtraArea, ChartOptionsExtraBar, ChartOptionsExtraBubble, ChartOptionsExtraColumn, ChartOptionsExtraGauge, ChartOptionsExtraLine, ChartOptionsExtraMarkLine, ChartOptionsExtraMarkLineData, ChartOptionsExtraMix, ChartOptionsExtraMount, ChartOptionsExtraPie, ChartOptionsExtraRadar, ChartOptionsExtraRing, ChartOptionsExtraRose, ChartOptionsExtraScatter, ChartOptionsExtraTooltip, ChartOptionsExtraGaugePointer, ChartOptionsExtraFunnel, ChartOptionsExtraWord, ChartOptionsExtraCandle, ChartOptionsExtraCandleColor, ChartOptionsExtraCandleAverage, ChartOptionsExtraMap, ChartOptionsExtraMixColumn, ChartOptionsExtraMixArea, ChartOptionsExtraMixLine } from "./type"
-
-export function extraColumnInit(e : UTSJSONObject) : ChartOptionsExtraColumn {
+import { ChartOptionsExtraGaugeSplitLine, ChartOptionsExtra, ChartOptionsExtraArcbar, ChartOptionsExtraArea, ChartOptionsExtraBar, ChartOptionsExtraBubble, ChartOptionsExtraColumn, ChartOptionsExtraGauge, ChartOptionsExtraLine, ChartOptionsExtraMarkLine, ChartOptionsExtraMarkLineData, ChartOptionsExtraMix, ChartOptionsExtraMount, ChartOptionsExtraPie, ChartOptionsExtraRadar, ChartOptionsExtraRing, ChartOptionsExtraRose, ChartOptionsExtraScatter, ChartOptionsExtraTooltip, ChartOptionsExtraGaugePointer, ChartOptionsExtraFunnel, ChartOptionsExtraWord, ChartOptionsExtraCandle, ChartOptionsExtraCandleColor, ChartOptionsExtraCandleAverage, ChartOptionsExtraMap, ChartOptionsExtraMixColumn, ChartOptionsExtraMixArea, ChartOptionsExtraMixLine } from "./libs.uts"
+import {
+	IChartOptionsExtraColumn,
+	IChartOptionsExtraMarkLineData,
+	IChartOptionsExtraMarkLine,
+	IChartOptionsExtraTooltip,
+	IChartOptionsExtraMount,
+	IChartOptionsExtraBar,
+	IChartOptionsExtraLine,
+	IChartOptionsExtraArea,
+	IChartOptionsExtraPie,
+	IChartOptionsExtraRing,
+	IChartOptionsExtraRose,
+	IChartOptionsExtraScatter,
+	IChartOptionsExtraBubble,
+	IChartOptionsExtraMixColumn,
+	IChartOptionsExtraMixArea,
+	IChartOptionsExtraMixLine,
+	IChartOptionsExtraMix,
+	IChartOptionsExtraRadar,
+	IChartOptionsExtraArcbar,
+	IChartOptionsExtraGaugePointer,
+	IChartOptionsExtraGaugeSplitLine,
+	IChartOptionsExtraGauge,
+	IChartOptionsExtraFunnel,
+	IChartOptionsExtraWord,
+	IChartOptionsExtraCandleColor,
+	IChartOptionsExtraCandleAverage,
+	IChartOptionsExtraCandle,
+	IChartOptionsExtraMap,
+	IChartOptionsExtra
+} from './Interface.uts'
+export function extraColumnInit(e : UTSJSONObject) : IChartOptionsExtraColumn {
 	const extra_column = new ChartOptionsExtraColumn();
 	if (e['type'] != null) extra_column.type = e.getString('type') as 'group' | 'stack' | 'meter';
 	if (e['width'] != null) extra_column.width = e.getNumber('width')!;
@@ -19,7 +49,7 @@ export function extraColumnInit(e : UTSJSONObject) : ChartOptionsExtraColumn {
 	if (e['labelPosition'] != null) extra_column.labelPosition = e.getString('labelPosition') as 'outside' | 'insideTop' | 'center' | 'bottom';
 	return extra_column;
 }
-export function extraMarkLineDataInit(e : UTSJSONObject) : ChartOptionsExtraMarkLineData {
+export function extraMarkLineDataInit(e : UTSJSONObject) : IChartOptionsExtraMarkLineData {
 	const extra_marklinedata = new ChartOptionsExtraMarkLineData();
 	if (e['value'] != null) extra_marklinedata.value = e.getNumber('value');
 	if (e['labelText'] != null) extra_marklinedata.labelText = e.getString('labelText');
@@ -38,12 +68,12 @@ export function extraMarkLineDataInit(e : UTSJSONObject) : ChartOptionsExtraMark
 	return extra_marklinedata;
 }
 
-export function extraMarkLineInit(e : UTSJSONObject) : ChartOptionsExtraMarkLine {
+export function extraMarkLineInit(e : UTSJSONObject) : IChartOptionsExtraMarkLine {
 	const extra_markline = new ChartOptionsExtraMarkLine();
 	if (e['type'] != null) extra_markline.type = e.getString('type') as 'solid' | 'dash';
 	if (e['dashLength'] != null) extra_markline.dashLength = e.getNumber('dashLength')!;
 	if (e['data'] != null) {
-		const markline_data : ChartOptionsExtraMarkLineData[] = []
+		const markline_data : IChartOptionsExtraMarkLineData[] = []
 		const data = e.getArray('data') as UTSJSONObject[]
 		data.forEach((item : UTSJSONObject) => {
 			markline_data.push(extraMarkLineDataInit(item))
@@ -53,7 +83,7 @@ export function extraMarkLineInit(e : UTSJSONObject) : ChartOptionsExtraMarkLine
 	return extra_markline;
 }
 
-export function extraTooltipInit(e : UTSJSONObject) : ChartOptionsExtraTooltip {
+export function extraTooltipInit(e : UTSJSONObject) : IChartOptionsExtraTooltip {
 	const extra_tooltip = new ChartOptionsExtraTooltip();
 	if (e['showBox'] != null) extra_tooltip.showBox = e.getBoolean('showBox')!;
 	if (e['showArrow'] != null) extra_tooltip.showArrow = e.getBoolean('showArrow')!;
@@ -83,7 +113,7 @@ export function extraTooltipInit(e : UTSJSONObject) : ChartOptionsExtraTooltip {
 	return extra_tooltip;
 }
 
-export function extraMountInit(e : UTSJSONObject) : ChartOptionsExtraMount {
+export function extraMountInit(e : UTSJSONObject) : IChartOptionsExtraMount {
 	const extra_mount = new ChartOptionsExtraMount();
 	if (e['type'] != null) extra_mount.type = e.getString('type') as 'mount' | 'sharp' | 'triangle' | 'bar';
 	if (e['widthRatio'] != null) extra_mount.widthRatio = e.getNumber('widthRatio')!;
@@ -97,7 +127,7 @@ export function extraMountInit(e : UTSJSONObject) : ChartOptionsExtraMount {
 	return extra_mount;
 }
 
-export function extraBarInit(e : UTSJSONObject) : ChartOptionsExtraBar {
+export function extraBarInit(e : UTSJSONObject) : IChartOptionsExtraBar {
 	const extraBar = new ChartOptionsExtraBar();
 	if (e['type'] != null) extraBar.type = e.getString('type') as 'group' | 'stack';
 	if (e['width'] != null) extraBar.width = e.getNumber('width')!;
@@ -113,7 +143,7 @@ export function extraBarInit(e : UTSJSONObject) : ChartOptionsExtraBar {
 	if (e['activeBgOpacity'] != null) extraBar.activeBgOpacity = e.getNumber('activeBgOpacity')!;
 	return extraBar;
 }
-export function extraLineInit(e : UTSJSONObject) : ChartOptionsExtraLine {
+export function extraLineInit(e : UTSJSONObject) : IChartOptionsExtraLine {
 	const extraLine = new ChartOptionsExtraLine();
 	if (e['type'] != null) extraLine.type = e.getString('type') as 'straight' | 'curve' | 'step';
 	if (e['width'] != null) extraLine.width = e.getNumber('width')!;
@@ -123,7 +153,7 @@ export function extraLineInit(e : UTSJSONObject) : ChartOptionsExtraLine {
 	if (e['animation'] != null) extraLine.animation = e.getString('animation') as 'vertical' | 'horizontal';
 	return extraLine;
 }
-export function extraAreaInit(e : UTSJSONObject) : ChartOptionsExtraArea {
+export function extraAreaInit(e : UTSJSONObject) : IChartOptionsExtraArea {
 	const extraArea = new ChartOptionsExtraArea();
 	if (e['type'] != null) extraArea.type = e.getString('type') as 'straight' | 'curve' | 'step';
 	if (e['opacity'] != null) extraArea.opacity = e.getNumber('opacity')!;
@@ -134,7 +164,7 @@ export function extraAreaInit(e : UTSJSONObject) : ChartOptionsExtraArea {
 	return extraArea;
 }
 
-export function extraPieInit(e : UTSJSONObject) : ChartOptionsExtraPie {
+export function extraPieInit(e : UTSJSONObject) : IChartOptionsExtraPie {
 	const extraPie = new ChartOptionsExtraPie();
 	if (e['activeOpacity'] != null) extraPie.activeOpacity = e.getNumber('activeOpacity')!;
 	if (e['activeRadius'] != null) extraPie.activeRadius = e.getNumber('activeRadius')!;
@@ -149,7 +179,7 @@ export function extraPieInit(e : UTSJSONObject) : ChartOptionsExtraPie {
 	return extraPie;
 }
 
-export function extraRingInit(e : UTSJSONObject) : ChartOptionsExtraRing {
+export function extraRingInit(e : UTSJSONObject) : IChartOptionsExtraRing {
 	const extraRing = new ChartOptionsExtraRing();
 	if (e['ringWidth'] != null) extraRing.ringWidth = e.getNumber('ringWidth')!;
 	if (e['centerColor'] != null) extraRing.centerColor = e.getString('centerColor')!;
@@ -165,7 +195,7 @@ export function extraRingInit(e : UTSJSONObject) : ChartOptionsExtraRing {
 	if (e['customColor'] != null) extraRing.customColor = e.getArray('customColor') as string[];
 	return extraRing;
 }
-export function extraRoseInit(e : UTSJSONObject) : ChartOptionsExtraRose {
+export function extraRoseInit(e : UTSJSONObject) : IChartOptionsExtraRose {
 	const extraRose = new ChartOptionsExtraRose();
 	if (e['type'] != null) extraRose.type = e.getString('type') as 'area' | 'radius';
 	if (e['minRadius'] != null) extraRose.minRadius = e.getNumber('minRadius');
@@ -180,18 +210,18 @@ export function extraRoseInit(e : UTSJSONObject) : ChartOptionsExtraRose {
 	if (e['customColor'] != null) extraRose.customColor = e.getArray('customColor') as string[];
 	return extraRose;
 }
-export function extraScatterInit(e : UTSJSONObject) : ChartOptionsExtraScatter {
+export function extraScatterInit(e : UTSJSONObject) : IChartOptionsExtraScatter {
 	const extraScatter = new ChartOptionsExtraScatter();
 	if (e['id'] != null) extraScatter.id = e.getString('id');
 	return extraScatter;
 }
-export function extraBubbleInit(e : UTSJSONObject) : ChartOptionsExtraBubble {
+export function extraBubbleInit(e : UTSJSONObject) : IChartOptionsExtraBubble {
 	const extraBubble = new ChartOptionsExtraBubble();
 	if (e['border'] != null) extraBubble.border = e.getNumber('border')!;
 	if (e['opacity'] != null) extraBubble.opacity = e.getNumber('opacity')!;
 	return extraBubble;
 }
-export function extraMixColumnInit(e : UTSJSONObject) : ChartOptionsExtraMixColumn {
+export function extraMixColumnInit(e : UTSJSONObject) : IChartOptionsExtraMixColumn {
 	const extraMixColumn = new ChartOptionsExtraMixColumn();
 	if (e['width'] != null) extraMixColumn.width = e.getNumber('width')!;
 	if (e['seriesGap'] != null) extraMixColumn.seriesGap = e.getNumber('seriesGap')!;
@@ -205,20 +235,20 @@ export function extraMixColumnInit(e : UTSJSONObject) : ChartOptionsExtraMixColu
 	return extraMixColumn;
 }
 
-export function extraMixAreaInit(e : UTSJSONObject) : ChartOptionsExtraMixArea {
+export function extraMixAreaInit(e : UTSJSONObject) : IChartOptionsExtraMixArea {
 	const extraMixArea = new ChartOptionsExtraMixArea();
 	if (e['gradient'] != null) extraMixArea.gradient = e.getBoolean('gradient')!;
 	if (e['opacity'] != null) extraMixArea.opacity = e.getNumber('opacity')!;
 	return extraMixArea;
 }
 
-export function extraMixLineInit(e : UTSJSONObject) : ChartOptionsExtraMixLine {
+export function extraMixLineInit(e : UTSJSONObject) : IChartOptionsExtraMixLine {
 	const extraMixLine = new ChartOptionsExtraMixLine();
 	if (e['width'] != null) extraMixLine.width = e.getNumber('width')!;
 	return extraMixLine;
 }
 
-export function extraMixInit(e : UTSJSONObject) : ChartOptionsExtraMix {
+export function extraMixInit(e : UTSJSONObject) : IChartOptionsExtraMix {
 	const extraMix = new ChartOptionsExtraMix()
 	if (e['column'] != null) {
 		extraMix.column = extraMixColumnInit(e.getJSON('column')!)
@@ -231,7 +261,7 @@ export function extraMixInit(e : UTSJSONObject) : ChartOptionsExtraMix {
 	}
 	return extraMix
 }
-export function extraRadarInit(e : UTSJSONObject) : ChartOptionsExtraRadar {
+export function extraRadarInit(e : UTSJSONObject) : IChartOptionsExtraRadar {
 	const extraRadar = new ChartOptionsExtraRadar();
 	if (e['gridType'] != null) extraRadar.gridType = e.getString('gridType') as 'radar' | 'circle';
 	if (e['gridColor'] != null) extraRadar.gridColor = e.getString('gridColor')!;
@@ -253,7 +283,7 @@ export function extraRadarInit(e : UTSJSONObject) : ChartOptionsExtraRadar {
 	if (e['customColor'] != null) extraRadar.customColor = e.getArray('customColor') as string[];
 	return extraRadar;
 }
-export function extraArcbarInit(e : UTSJSONObject) : ChartOptionsExtraArcbar {
+export function extraArcbarInit(e : UTSJSONObject) : IChartOptionsExtraArcbar {
 	const extraArcbar = new ChartOptionsExtraArcbar();
 	if (e['type'] != null) extraArcbar.type = e.getString('type') as 'default' | 'circle';
 	if (e['direction'] != null) extraArcbar.direction = e.getString('direction') as 'cw' | 'ccw';
@@ -270,14 +300,14 @@ export function extraArcbarInit(e : UTSJSONObject) : ChartOptionsExtraArcbar {
 	if (e['customColor'] != null) extraArcbar.customColor = e.getArray('customColor') as string[];
 	return extraArcbar;
 }
-export function extraGaugePointerInit(e : UTSJSONObject) : ChartOptionsExtraGaugePointer {
+export function extraGaugePointerInit(e : UTSJSONObject) : IChartOptionsExtraGaugePointer {
 	const extraGaugePointer = new ChartOptionsExtraGaugePointer();
 	if (e['width'] != null) extraGaugePointer.width = e.getNumber('width')!;
 	if (e['color'] != null) extraGaugePointer.color = e.getString('color')!;
 	return extraGaugePointer;
 }
 
-export function extraGaugeSplitLineInit(e : UTSJSONObject) : ChartOptionsExtraGaugeSplitLine {
+export function extraGaugeSplitLineInit(e : UTSJSONObject) : IChartOptionsExtraGaugeSplitLine {
 	const extraGaugeSplitLine = new ChartOptionsExtraGaugeSplitLine();
 	if (e['fixRadius'] != null) extraGaugeSplitLine.fixRadius = e.getNumber('fixRadius')!;
 	if (e['splitNumber'] != null) extraGaugeSplitLine.splitNumber = e.getNumber('splitNumber')!;
@@ -288,7 +318,7 @@ export function extraGaugeSplitLineInit(e : UTSJSONObject) : ChartOptionsExtraGa
 	return extraGaugeSplitLine;
 }
 
-export function extraGaugeInit(e : UTSJSONObject) : ChartOptionsExtraGauge {
+export function extraGaugeInit(e : UTSJSONObject) : IChartOptionsExtraGauge {
 	const extraGauge = new ChartOptionsExtraGauge();
 	if (e['type'] != null) extraGauge.type = e.getString('type')!;
 	if (e['width'] != null) extraGauge.width = e.getNumber('width')!;
@@ -309,7 +339,7 @@ export function extraGaugeInit(e : UTSJSONObject) : ChartOptionsExtraGauge {
 	return extraGauge;
 }
 
-export function extraFunnelInit(e : UTSJSONObject) : ChartOptionsExtraFunnel {
+export function extraFunnelInit(e : UTSJSONObject) : IChartOptionsExtraFunnel {
 	const extraFunnel = new ChartOptionsExtraFunnel();
 	if (e['type'] != null) extraFunnel.type = e.getString('type') as 'funnel' | 'triangle' | 'pyramid';
 	if (e['activeOpacity'] != null) extraFunnel.activeOpacity = e.getNumber('activeOpacity')!;
@@ -325,13 +355,13 @@ export function extraFunnelInit(e : UTSJSONObject) : ChartOptionsExtraFunnel {
 	return extraFunnel;
 }
 
-export function extraWordInit(e : UTSJSONObject) : ChartOptionsExtraWord {
+export function extraWordInit(e : UTSJSONObject) : IChartOptionsExtraWord {
 	const extraWord = new ChartOptionsExtraWord();
 	if (e['type'] != null) extraWord.type = e.getString('type') as 'normal' | 'vertical';
 	if (e['autoColors'] != null) extraWord.autoColors = e.getBoolean('autoColors')!;
 	return extraWord;
 }
-export function extraCandleColorInit(e : UTSJSONObject) : ChartOptionsExtraCandleColor {
+export function extraCandleColorInit(e : UTSJSONObject) : IChartOptionsExtraCandleColor {
 	const extraCandleColor = new ChartOptionsExtraCandleColor();
 	if (e['upLine'] != null) extraCandleColor.upLine = e.getString('upLine')!;
 	if (e['upFill'] != null) extraCandleColor.upFill = e.getString('upFill')!;
@@ -340,7 +370,7 @@ export function extraCandleColorInit(e : UTSJSONObject) : ChartOptionsExtraCandl
 	return extraCandleColor;
 }
 
-export function extraCandleAverageInit(e : UTSJSONObject) : ChartOptionsExtraCandleAverage {
+export function extraCandleAverageInit(e : UTSJSONObject) : IChartOptionsExtraCandleAverage {
 	const extraCandleAverage = new ChartOptionsExtraCandleAverage();
 	if (e['show'] != null) extraCandleAverage.show = e.getBoolean('show')!;
 	if (e['name'] != null) extraCandleAverage.name = e.getArray('name') as string[];
@@ -349,7 +379,7 @@ export function extraCandleAverageInit(e : UTSJSONObject) : ChartOptionsExtraCan
 	return extraCandleAverage;
 }
 
-export function extraCandlelInit(e : UTSJSONObject) : ChartOptionsExtraCandle {
+export function extraCandlelInit(e : UTSJSONObject) : IChartOptionsExtraCandle {
 	const extraCandle = new ChartOptionsExtraCandle()
 	if (e['color'] != null) {
 		extraCandle.color = extraCandleColorInit(e.getJSON('color')!)
@@ -360,7 +390,7 @@ export function extraCandlelInit(e : UTSJSONObject) : ChartOptionsExtraCandle {
 	return extraCandle
 }
 
-export function extraMapInit(e : UTSJSONObject) : ChartOptionsExtraMap {
+export function extraMapInit(e : UTSJSONObject) : IChartOptionsExtraMap {
 	const extraMap = new ChartOptionsExtraMap();
 	if (e['border'] != null) extraMap.border = e.getBoolean('border')!;
 	if (e['mercator'] != null) extraMap.mercator = e.getBoolean('mercator')!;
@@ -376,7 +406,7 @@ export function extraMapInit(e : UTSJSONObject) : ChartOptionsExtraMap {
 }
 
 
-export function extraInit(e : UTSJSONObject) : ChartOptionsExtra {
+export function extraInit(e : UTSJSONObject) : IChartOptionsExtra {
 	const extra = new ChartOptionsExtra()
 	if (e['column'] != null) {
 		extra.column = extraColumnInit(e.getJSON('column')!)

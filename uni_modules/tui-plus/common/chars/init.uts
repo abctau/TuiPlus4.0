@@ -1,7 +1,21 @@
-import { ChartOptions, ChartOptionsLegend, ChartOptionsSeries, ChartOptionsSeriesData, ChartOptionsSubTitle, ChartOptionsTitle, ChartOptionsXAxis, ChartOptionsYAxis, ChartOptionsYAxisData, ChartOptionsMapSeriesProperties, ChartOptionsMapSeriesPropertiesParent, ChartOptionsMapSeriesGeometry } from "./type";
+import { ChartOptions, ChartOptionsLegend, ChartOptionsSeries, ChartOptionsSeriesData, ChartOptionsSubTitle, ChartOptionsTitle, ChartOptionsXAxis, ChartOptionsYAxis, ChartOptionsYAxisData, ChartOptionsMapSeriesProperties, ChartOptionsMapSeriesPropertiesParent, ChartOptionsMapSeriesGeometry } from "./libs.uts";
 import { extraInit } from './extrainit.uts'
-export function seriesDataInit(e : UTSJSONObject) : ChartOptionsSeriesData {
-	const series_data = new ChartOptionsSeriesData()
+import {
+	IChartOptions,
+	IChartOptionsSeriesData,
+	IChartOptionsSeries,
+	IChartOptionsLegend,
+	IChartOptionsXAxis,
+	IChartOptionsYAxisData,
+	IChartOptionsYAxis,
+	IChartOptionsTitle,
+	IChartOptionsSubTitle,
+	IChartOptionsMapSeriesPropertiesParent,
+	IChartOptionsMapSeriesProperties,
+	IChartOptionsMapSeriesGeometry
+} from './Interface.uts'
+export function seriesDataInit(e : UTSJSONObject) : IChartOptionsSeriesData {
+	const series_data : IChartOptionsSeriesData = new ChartOptionsSeriesData()
 	if (e['name'] != null) series_data.name = e.getString('name')!
 	if (e['value'] != null) series_data.value = e.getNumber('value')!
 	if (e['color'] != null) series_data.color = e.getString('color')!
@@ -12,8 +26,8 @@ export function seriesDataInit(e : UTSJSONObject) : ChartOptionsSeriesData {
 	if (e['centerTextColor'] != null) series_data.centerTextColor = e.getString('centerTextColor')!
 	return series_data
 }
-export function seriesInit(e : UTSJSONObject, type : string = '') : ChartOptionsSeries {
-	const series = new ChartOptionsSeries()
+export function seriesInit(e : UTSJSONObject, type : string = '') : IChartOptionsSeries {
+	const series : IChartOptionsSeries = new ChartOptionsSeries()
 	if (e['index'] != null) series.index = e.getNumber('index')!
 	if (e['name'] != null) series.name = e.getString('name')!
 	if (e['legendText'] != null) series.legendText = e.getString('legendText')!
@@ -39,7 +53,7 @@ export function seriesInit(e : UTSJSONObject, type : string = '') : ChartOptions
 	if (e['format'] != null) series.format = e.getString('format')!
 	if (e['rotate'] != null) series.rotate = e.getBoolean('rotate')!
 	if (e['seriesMA'] != null) {
-		const seriesmas : ChartOptionsSeries[] = []
+		const seriesmas : IChartOptionsSeries[] = []
 		const data = e.getArray('seriesMA') as UTSJSONObject[]
 		data.forEach((item : UTSJSONObject) => {
 			seriesmas.push(seriesInit(item))
@@ -50,7 +64,7 @@ export function seriesInit(e : UTSJSONObject, type : string = '') : ChartOptions
 		if (type == 'scatter' || type == 'bubble' || type == 'candle') {
 			series.dataArr = e.getArray('data') as number[][]
 		} else {
-			const seriesdata : ChartOptionsSeriesData[] = []
+			const seriesdata : IChartOptionsSeriesData[] = []
 			const data = e.getArray('data') as UTSJSONObject[]
 			data.forEach((item : UTSJSONObject) => {
 				seriesdata.push(seriesDataInit(item))
@@ -69,8 +83,8 @@ export function seriesInit(e : UTSJSONObject, type : string = '') : ChartOptions
 	return series
 }
 //x轴数据解析
-export function xAxisInit(e : UTSJSONObject) : ChartOptionsXAxis {
-	const xAxis : ChartOptionsXAxis = new ChartOptionsXAxis();
+export function xAxisInit(e : UTSJSONObject) : IChartOptionsXAxis {
+	const xAxis : IChartOptionsXAxis = new ChartOptionsXAxis();
 	if (e['disabled'] != null) xAxis.disabled = e.getBoolean('disabled')!;
 	if (e['axisLine'] != null) xAxis.axisLine = e.getBoolean('axisLine')!;
 	if (e['axisLineColor'] != null) xAxis.axisLineColor = e.getString('axisLineColor')!;
@@ -104,7 +118,7 @@ export function xAxisInit(e : UTSJSONObject) : ChartOptionsXAxis {
 	if (e['formatter'] != null) xAxis.formatter = e.getAny('formatter')!;
 	if (e['format'] != null) xAxis.format = e.getString('format')!;
 	if (e['data'] != null) {
-		const xAxis_data : ChartOptionsYAxisData[] = []
+		const xAxis_data : IChartOptionsYAxisData[] = []
 		const data = e.getArray('data') as UTSJSONObject[]
 		data.forEach((item : UTSJSONObject) => {
 			xAxis_data.push(yAxisDataInit(item))
@@ -114,8 +128,8 @@ export function xAxisInit(e : UTSJSONObject) : ChartOptionsXAxis {
 	return xAxis;
 }
 
-export function yAxisDataInit(e : UTSJSONObject) : ChartOptionsYAxisData {
-	const yAxis_data : ChartOptionsYAxisData = new ChartOptionsYAxisData();
+export function yAxisDataInit(e : UTSJSONObject) : IChartOptionsYAxisData {
+	const yAxis_data : IChartOptionsYAxisData = new ChartOptionsYAxisData();
 	if (e['type'] != null) yAxis_data.type = e.getString('type')!;
 	if (e['position'] != null) yAxis_data.position = e.getString('position') as 'left' | 'right' | 'center';
 	if (e['disabled'] != null) yAxis_data.disabled = e.getBoolean('disabled')!;
@@ -140,8 +154,8 @@ export function yAxisDataInit(e : UTSJSONObject) : ChartOptionsYAxisData {
 }
 
 
-export function yAxisInit(e : UTSJSONObject) : ChartOptionsYAxis {
-	const yAxis : ChartOptionsYAxis = new ChartOptionsYAxis();
+export function yAxisInit(e : UTSJSONObject) : IChartOptionsYAxis {
+	const yAxis : IChartOptionsYAxis = new ChartOptionsYAxis();
 	if (e['disabled'] != null) yAxis.disabled = e.getBoolean('disabled')!;
 	if (e['disableGrid'] != null) yAxis.disableGrid = e.getBoolean('disableGrid')!;
 	if (e['splitNumber'] != null) yAxis.splitNumber = e.getNumber('splitNumber')!;
@@ -153,7 +167,7 @@ export function yAxisInit(e : UTSJSONObject) : ChartOptionsYAxis {
 	if (e['gridSet'] != null) yAxis.gridSet = e.getString('gridSet')!;
 	if (e['fontColor'] != null) yAxis.fontColor = e.getString('fontColor')!;
 	if (e['data'] != null) {
-		const yAxis_data : ChartOptionsYAxisData[] = []
+		const yAxis_data : IChartOptionsYAxisData[] = []
 		const data = e.getArray('data') as UTSJSONObject[]
 		data.forEach((item : UTSJSONObject) => {
 			yAxis_data.push(yAxisDataInit(item))
@@ -163,8 +177,8 @@ export function yAxisInit(e : UTSJSONObject) : ChartOptionsYAxis {
 	return yAxis;
 }
 
-export function legendInit(e : UTSJSONObject) : ChartOptionsLegend {
-	const legend = new ChartOptionsLegend();
+export function legendInit(e : UTSJSONObject) : IChartOptionsLegend {
+	const legend : IChartOptionsLegend = new ChartOptionsLegend();
 	if (e['show'] != null) legend.show = e.getBoolean('show')!;
 	if (e['position'] != null) legend.position = e.getString('position') as 'bottom' | 'top' | 'left' | 'right';
 	if (e['float'] != null) legend.float = e.getString('float') as 'center' | 'left' | 'right' | 'top' | 'bottom';
@@ -180,8 +194,8 @@ export function legendInit(e : UTSJSONObject) : ChartOptionsLegend {
 	if (e['itemGap'] != null) legend.itemGap = e.getNumber('itemGap')!;
 	return legend;
 }
-export function titleInit(e : UTSJSONObject) : ChartOptionsTitle {
-	const title = new ChartOptionsTitle();
+export function titleInit(e : UTSJSONObject) : IChartOptionsTitle {
+	const title : IChartOptionsTitle = new ChartOptionsTitle();
 	if (e['name'] != null) title.name = e.getString('name')!;
 	if (e['fontSize'] != null) title.fontSize = e.getNumber('fontSize')!;
 	if (e['color'] != null) title.color = e.getString('color')!;
@@ -190,8 +204,8 @@ export function titleInit(e : UTSJSONObject) : ChartOptionsTitle {
 	return title;
 }
 
-export function subtitleInit(e : UTSJSONObject) : ChartOptionsSubTitle {
-	const subtitle = new ChartOptionsSubTitle();
+export function subtitleInit(e : UTSJSONObject) : IChartOptionsSubTitle {
+	const subtitle : IChartOptionsSubTitle = new ChartOptionsSubTitle();
 	if (e['name'] != null) subtitle.name = e.getString('name')!;
 	if (e['fontSize'] != null) subtitle.fontSize = e.getNumber('fontSize')!;
 	if (e['color'] != null) subtitle.color = e.getString('color')!;
@@ -199,13 +213,13 @@ export function subtitleInit(e : UTSJSONObject) : ChartOptionsSubTitle {
 	if (e['offsetY'] != null) subtitle.offsetY = e.getNumber('offsetY')!;
 	return subtitle;
 }
-export function mapSeriesPropertiesParentInit(e : UTSJSONObject) : ChartOptionsMapSeriesPropertiesParent {
-	const parent = new ChartOptionsMapSeriesPropertiesParent()
+export function mapSeriesPropertiesParentInit(e : UTSJSONObject) : IChartOptionsMapSeriesPropertiesParent {
+	const parent : IChartOptionsMapSeriesPropertiesParent = new ChartOptionsMapSeriesPropertiesParent()
 	if (e['adcode'] != null) parent.adcode = e.getNumber('adcode')!
 	return parent
 }
-export function mapSeriesPropertiesInit(e : UTSJSONObject) : ChartOptionsMapSeriesProperties {
-	const mapSeriesProperties = new ChartOptionsMapSeriesProperties()
+export function mapSeriesPropertiesInit(e : UTSJSONObject) : IChartOptionsMapSeriesProperties {
+	const mapSeriesProperties : IChartOptionsMapSeriesProperties = new ChartOptionsMapSeriesProperties()
 	if (e['adcode'] != null) mapSeriesProperties.adcode = e.getNumber('adcode')!
 	if (e['name'] != null) mapSeriesProperties.name = e.getString('name')!
 	if (e['center'] != null) mapSeriesProperties.center = e.getArray('center') as number[]
@@ -219,20 +233,20 @@ export function mapSeriesPropertiesInit(e : UTSJSONObject) : ChartOptionsMapSeri
 	}
 	return mapSeriesProperties
 }
-export function mapSeriesGeometryInit(e : UTSJSONObject) : ChartOptionsMapSeriesGeometry {
-	const geometry = new ChartOptionsMapSeriesGeometry()
+export function mapSeriesGeometryInit(e : UTSJSONObject) : IChartOptionsMapSeriesGeometry {
+	const geometry : IChartOptionsMapSeriesGeometry = new ChartOptionsMapSeriesGeometry()
 	if (e['type'] != null) geometry.type = e.getString('type')!;
 	if (e['coordinates'] != null) geometry.coordinates = e.getArray('coordinates') as number[][][][];
 	return geometry
 }
-export function optionsInit(e : UTSJSONObject) : ChartOptions {
-	const opts = new ChartOptions()
+export function optionsInit(e : UTSJSONObject) : IChartOptions {
+	const opts : IChartOptions = new ChartOptions()
 	opts.canvasContext = e['canvasContext'] as CanvasContext
 	opts.context = e['context'] as CanvasRenderingContext2D
 	if (e['type'] != null) opts.type = e.getString('type')!
 	if (opts.type == 'gauge') {
 		if (e['categories'] != null) {
-			const categoriesObj : ChartOptionsSeriesData[] = []
+			const categoriesObj : IChartOptionsSeriesData[] = []
 			const cate : UTSJSONObject[] = e.getArray('categories') as UTSJSONObject[]
 			cate.forEach((item : UTSJSONObject) => {
 				const child = seriesDataInit(item)
@@ -273,7 +287,7 @@ export function optionsInit(e : UTSJSONObject) : ChartOptions {
 	opts.legend.fontColor = opts.fontColor
 	opts.yAxis.dashLength = 4 * opts.pixelRatio
 	if (e['series'] != null) {
-		const series : ChartOptionsSeries[] = []
+		const series : IChartOptionsSeries[] = []
 		const series_data = e.getArray('series') as UTSJSONObject[]
 		series_data.forEach((item : UTSJSONObject) => {
 			series.push(seriesInit(item, opts.type))
@@ -300,12 +314,12 @@ export function optionsInit(e : UTSJSONObject) : ChartOptions {
 	}
 	return opts
 }
-export function updateOptions(_opts : ChartOptions, e : UTSJSONObject) {
+export function updateOptions(_opts : IChartOptions, e : UTSJSONObject) {
 	const opts = _opts
 	if (e['type'] != null) opts.type = e.getString('type')!
 	if (opts.type == 'gauge') {
 		if (e['categories'] != null) {
-			const categoriesObj : ChartOptionsSeriesData[] = []
+			const categoriesObj : IChartOptionsSeriesData[] = []
 			const cate : UTSJSONObject[] = e.getArray('categories') as UTSJSONObject[]
 			cate.forEach((item : UTSJSONObject) => {
 				const child = seriesDataInit(item)
@@ -346,7 +360,7 @@ export function updateOptions(_opts : ChartOptions, e : UTSJSONObject) {
 	opts.legend.fontColor = opts.fontColor
 	opts.yAxis.dashLength = 4 * opts.pixelRatio
 	if (e['series'] != null) {
-		const series : ChartOptionsSeries[] = []
+		const series : IChartOptionsSeries[] = []
 		const series_data = e.getArray('series') as UTSJSONObject[]
 		series_data.forEach((item : UTSJSONObject) => {
 			series.push(seriesInit(item, opts.type))

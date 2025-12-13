@@ -1,7 +1,9 @@
 <template>
-	<t-checkbox v-bind="extendsAttrs" :checked="checkedState" :stop="true" :main-class="`p-0 ${mainClass}`"
-		icon-box-class="mr-0" :icon-class="checked==2?'atsx-0.7 slh-100%':''" @change="checkChange"
-		@select="checkSelect" :icon="stateIcon"></t-checkbox>
+	<t-checkbox v-bind="extendsAttrs" :checked="checkedState" :stop="true" :main-class="`${mainClass}`"
+		:icon-box-class="iconBoxClass" :icon-class="checked==2?'atsx-0.7 slh-100%':''" @change="checkChange"
+		@select="checkSelect" :icon="stateIcon">
+		<slot></slot>
+	</t-checkbox>
 </template>
 
 <script setup>
@@ -30,6 +32,11 @@
 	 * @property {String} path 点击组件后跳转的页面路径，如果为空则响应点击事件，如果不为空则跳转页面不会响应单击事件。(默认: "")
 	 * @property {String} mainClass 组件根节点的样式。(默认: "")
 	 * @property {String} nativeClass 组件根节点原生样式。(默认: "")
+	 * @property {Number} state 组件状态
+	 * @value 0 未选中
+	 * @value 1 先中
+	 * @value 2 半选
+	 * @property {String} iconBoxClass 选择框盒子样式
 	 * @property {String} effect=[normal|dark|light|plain] 组件显示主题(默认 "normal")
 	 * @value normal 正常
 	 * @value dark 深色
@@ -42,6 +49,7 @@
 	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
 	interface CheckboxState extends CommonProps {
 		state : number
+		iconBoxClass : string
 	}
 	const props = withDefaults(defineProps<CheckboxState>(), {
 		path: '',
@@ -53,7 +61,8 @@
 		size: '',
 		mainClass: '',
 		nativeClass: '',
-		state: 0
+		state: 0,
+		iconBoxClass: ''
 	});
 	const checked = ref<number>(props.state)
 	const { extendsAttrs } = useTuiThemes(props)

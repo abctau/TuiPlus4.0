@@ -1,6 +1,8 @@
 import { TuiDrawCharts } from './xcharts'
-export class TuiCharts {
-	chartsMap = new Map<number, TuiDrawCharts>()
+import { TuiChartsInterface } from './Interface'
+import { ITuiCharts } from './public'
+export class TuiCharts implements ITuiCharts {
+	chartsMap = new Map<number, TuiChartsInterface>()
 	option : UTSJSONObject = {}
 	canvasContext : CanvasContext | null = null
 	context : CanvasRenderingContext2D | null = null
@@ -28,7 +30,7 @@ export class TuiCharts {
 			y = (e as UniTouchEvent).changedTouches[0].clientY - this.baseY + (this.baseY - top)
 		}
 
-		this.chartsMap.forEach((item : TuiDrawCharts, key : number) => {
+		this.chartsMap.forEach((item : TuiChartsInterface, key : number) => {
 			if (x > item.opts.xOffset && y > item.opts.yOffset && x < item.opts.xOffset + item.opts.width && y < item.opts.yOffset + item.opts.height) {
 				curArea = key
 			}
@@ -95,10 +97,10 @@ export class TuiCharts {
 		this.offsetWidth = canvas.offsetWidth
 		this.offsetHeight = canvas.offsetHeight
 	}
-	getDrawCharts(name : number) : TuiDrawCharts | null {
+	getDrawCharts(name : number) : TuiChartsInterface | null {
 		return this.chartsMap.get(name)
 	}
-	add(name : number, option : UTSJSONObject) : TuiDrawCharts {
+	add(name : number, option : UTSJSONObject) : TuiChartsInterface {
 		const ctx = this.context!
 		option.set('context', ctx)
 		if (option.getNumber('width') == null) option.set('width', ctx.canvas.offsetWidth)
@@ -109,8 +111,8 @@ export class TuiCharts {
 		if (option.getArray('padding') == null) option.set('padding', [0, 0, 0, 0])
 		if (option.getArray('series') == null) option.set('series', [] as UTSJSONObject[])
 		const charts = new TuiDrawCharts(option)
-		this.chartsMap.set(name, charts)
+		this.chartsMap.set(name, charts as TuiChartsInterface)
 		this.option = option
-		return charts
+		return charts as TuiChartsInterface
 	}
 }

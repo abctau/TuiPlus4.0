@@ -87,13 +87,13 @@
 	});
 	const { extendsAttrs } = useTuiThemes(props)
 	const emit = defineEmits(['initFinished'])
+	// #ifndef APP
 	function onInitFinished(e : CanvasContext) {
-		// #ifndef APP
 		ctx.value = e.getContext('2d')
 		canvasEl.value = e
 		emit('initFinished', new TuiDrawableContext(instance, ctx.value, e))
-		// #endif
 	}
+	// #endif
 	function drawImage(url : string, dx : number, dy : number, dWidth : number, dHeight : number) {
 		// #ifdef APP
 		drawImageList.value.push({

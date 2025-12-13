@@ -5,7 +5,7 @@
 				<t-icon v-if="isChild" v-bind="extendsAttrs" main-class="" type="info" name="arrow-right"></t-icon>
 			</t-animation>
 			<t-checkbox-state v-if="showCheckbox" v-bind="extendsAttrs" :state="checkState" main-class="mr-20"
-				:stop="true" @select="checkChange"></t-checkbox-state>
+				iconBoxClass="mr-0" :stop="true" @select="checkChange"></t-checkbox-state>
 			<t-loading v-if="lazyLoading" v-bind="extendsAttrs" main-class="mr-10"></t-loading>
 			<t-text>{{itemData[labelKey]}}</t-text>
 		</t-row>

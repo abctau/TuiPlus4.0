@@ -1,5 +1,5 @@
-import { ChartsEvent } from './Interface.uts'
-export class TuiChartsEvent {
+import { ChartsEvent, ITuiChartsEvent } from './Interface.uts'
+export class TuiChartsEvent implements ITuiChartsEvent {
 	private events = new Map<string, ChartsEvent[] | null>()
 	constructor() { }
 	trigger(type : string) {

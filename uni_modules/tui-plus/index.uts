@@ -17,5 +17,4 @@ export * from './common/model/formart';
 export * from './common/model/debounce';
 export * from './common/model/interface';
 export * from './common/encrypt/index';
-export * from './common/chars/xcharts';
-export * from './common/chars/charts';
+export * from './common/chars/public';

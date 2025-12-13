@@ -11,9 +11,9 @@
 <script setup>
 	import { TuiApi } from '@/api'
 	const tuixcharsins = ref<ComponentPublicInstance | null>(null)
-	import { TuiCharts, TuiDrawCharts } from '@/uni_modules/tui-plus'
+	import { ITuiCharts } from '@/uni_modules/tui-plus'
 	const itemH : number = 287
-	let charts : TuiCharts | null = null
+	let charts : ITuiCharts | null = null
 	const select_data = ref<UTSJSONObject>({})
 	let opts : UTSJSONObject[] = []
 	const canvasInsHeight = ref<number>(0)
@@ -25,7 +25,7 @@
 			canvasInsHeight.value = opts.length * itemH
 		})
 	})
-	function initFinished(e : TuiCharts) {
+	function initFinished(e : ITuiCharts) {
 		charts = e
 		opts.forEach((item : UTSJSONObject, index : number) => {
 			const bar = e.add(index, item.getJSON('option')!)

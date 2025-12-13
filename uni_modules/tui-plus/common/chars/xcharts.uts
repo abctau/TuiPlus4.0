@@ -1,17 +1,31 @@
 import { optionsInit, updateOptions } from './init.uts'
-import { TouchPosition, ChartScrollOption } from './Interface.uts'
 import { TuiChartConfig } from './config.uts'
 import { TuiChartsEvent } from './chartsEvent.uts'
-import { ChartOptionsTooltipOption, ChartOptions, ChartOptionsSeries, ChartOptionsTooltip, TextList, Offset, ChartOptionsXAxis, TuiChartsInterface } from './type.uts'
-import { drawCharts, getTouches, Animation, findCandleChartCurrentIndex, getMixToolTipData, findMapChartCurrentIndex, getCandleToolTipData, findWordChartCurrentIndex, findFunnelChartCurrentIndex, findRadarChartCurrentIndex, findRoseChartCurrentIndex, findPieChartCurrentIndex, findCurrentIndex, getSeriesDataItem, getToolTipData, calYAxisData, getXAxisPoints, calValidDistance, findLegendIndex, findBarChartCurrentIndex } from './util.uts'
+import { ChartOptionsTooltipOption, ChartScrollOption, ChartOptionsTooltip, TextList, Offset } from './libs.uts'
+import { drawCharts, getTouches, findCandleChartCurrentIndex, getMixToolTipData, findMapChartCurrentIndex, getCandleToolTipData, findWordChartCurrentIndex, findFunnelChartCurrentIndex, findRadarChartCurrentIndex, findRoseChartCurrentIndex, findPieChartCurrentIndex, findCurrentIndex, getSeriesDataItem, getToolTipData, calYAxisData, getXAxisPoints, calValidDistance, findLegendIndex, findBarChartCurrentIndex } from './util.uts'
 // ChartOptionsYAxis, ChartOptionsLegend, ChartOptionsExtra,
+import {
+	ITuiChartsEvent,
+	IAnimation,
+	TuiChartsInterface,
+	TouchPosition,
+	IChartOptions,
+	ITuiChartConfig,
+	IChartScrollOption,
+	IOffset,
+	IChartOptionsSeries,
+	ITextList,
+	IChartOptionsTooltipOption,
+	IChartOptionsTooltip,
+	IChartOptionsXAxis
+} from './Interface.uts'
 export class TuiDrawCharts implements TuiChartsInterface {
-	opts : ChartOptions
+	opts : IChartOptions
 	context : CanvasRenderingContext2D
-	uevent : TuiChartsEvent = new TuiChartsEvent()
-	config : TuiChartConfig
-	scrollOption = new ChartScrollOption()
-	animationInstance ?: Animation = null
+	uevent : ITuiChartsEvent = new TuiChartsEvent()
+	config : ITuiChartConfig
+	scrollOption : IChartScrollOption = new ChartScrollOption()
+	animationInstance ?: IAnimation = null
 	offsetWidth : number
 	offsetHeight : number
 	constructor(option : UTSJSONObject) {
@@ -59,7 +73,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 		if (e.getNumber('xOffset') != null) this.opts.xOffset = e.getNumber('xOffset')!
 	}
 	draw() {
-		drawCharts(this, this.opts.type, this.opts, this.config, this.context);
+		drawCharts(this as TuiChartsInterface, this.opts.type, this.opts, this.config, this.context);
 	}
 	clearTooltip() {
 		if (this.opts.tooltip != null) {
@@ -107,10 +121,10 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				this.opts._scrollDistance_ = offsetLeft;
 				break;
 		}
-		drawCharts(this, this.opts.type, this.opts, this.config, this.context);
+		drawCharts(this as TuiChartsInterface, this.opts.type, this.opts, this.config, this.context);
 	}
-	zoom(e : ChartOptionsXAxis | null) {
-		let val : ChartOptionsXAxis = e ?? this.opts.xAxis
+	zoom(e : IChartOptionsXAxis | null) {
+		let val : IChartOptionsXAxis = e ?? this.opts.xAxis
 		if (this.opts.enableScroll != true) {
 			console.log('[uCharts] 请启用滚动条后使用')
 			return;
@@ -143,9 +157,9 @@ export class TuiDrawCharts implements TuiChartsInterface {
 		this.scrollOption.startTouchX = 0
 		this.scrollOption.distance = 0
 		this.scrollOption.lastMoveTime = 0
-		calValidDistance(this, offsetLeft, this.opts.chartData, this.opts);
+		calValidDistance(this as TuiChartsInterface, offsetLeft, this.opts.chartData, this.opts);
 		this.opts._scrollDistance_ = offsetLeft;
-		drawCharts(this, this.opts.type, this.opts, this.config, this.context);
+		drawCharts(this as TuiChartsInterface, this.opts.type, this.opts, this.config, this.context);
 	}
 	dobuleZoom(e : UniTouchEvent) {
 		//问题有点多暂时不翻译
@@ -236,7 +250,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 			}
 			this.opts.animation = true
 			this.opts._scrollDistance_ = this.scrollOption.currentOffset;
-			drawCharts(this, this.opts.type, this.opts, this.config, this.context);
+			drawCharts(this as TuiChartsInterface, this.opts.type, this.opts, this.config, this.context);
 		}
 		return index
 	}
@@ -274,13 +288,13 @@ export class TuiDrawCharts implements TuiChartsInterface {
 			let touches = getTouches(this.opts, e);
 			let _distance = touches.x - this.scrollOption.startTouchX;
 			let currentOffset = this.scrollOption.currentOffset;
-			let validDistance = calValidDistance(this, currentOffset + _distance, this.opts.chartData, this.opts);
+			let validDistance = calValidDistance(this as TuiChartsInterface, currentOffset + _distance, this.opts.chartData, this.opts);
 			_distance = validDistance - currentOffset;
 			// 将计算出的滚动距离赋值给this.scrollOption.distance
 			this.scrollOption.distance = _distance;
 			this.opts._scrollDistance_ = currentOffset + _distance
 			this.opts.animation = false
-			drawCharts(this, this.opts.type, this.opts, this.config, this.context);
+			drawCharts(this as TuiChartsInterface, this.opts.type, this.opts, this.config, this.context);
 			// return currentOffset + _distance;
 		}
 	}
@@ -296,25 +310,25 @@ export class TuiDrawCharts implements TuiChartsInterface {
 	}
 	showToolTip(...params : any[]) : number {
 		let tipsIndex : number = -1
-		const opts : ChartOptions = this.opts
+		const opts : IChartOptions = this.opts
 		if (opts.extra.tooltip != null) {
 			this.opts.showTooltip = true
 			const e = params[0] as UniEvent
-			const option : ChartOptionsTooltipOption = params.length > 1 && params.length > 0 ? params[1] as ChartOptionsTooltipOption : new ChartOptionsTooltipOption();
+			const option : IChartOptionsTooltipOption = params.length > 1 && params.length > 0 ? params[1] as ChartOptionsTooltipOption : new ChartOptionsTooltipOption();
 			const _touches$ : TouchPosition = getTouches(this.opts, e);
 			const currentOffset : number = this.scrollOption.currentOffset;
 			opts._scrollDistance_ = currentOffset
 			opts.animation = false
 			if (this.opts.type == 'line' || this.opts.type == 'area' || this.opts.type == 'column' || this.opts.type == 'scatter' || this.opts.type == 'bubble') {
-				let current : ChartOptionsTooltip = this.getCurrentDataIndex(e);
+				let current : IChartOptionsTooltip = this.getCurrentDataIndex(e);
 				let index : any | null = option.index == null ? current.index : option.index;
 				if (index != null && (index as number) > -1) {
 					tipsIndex = index as number
 					let seriesData = getSeriesDataItem(this.opts.series!, index, current.group);
 					if (seriesData.length != 0) {
-						const _getToolTipData : ChartOptionsTooltipOption = getToolTipData(seriesData, this.opts, index, current.group, this.opts.categories!, option)
-						const textList : TextList[] = _getToolTipData.textList!
-						const offset : Offset = _getToolTipData.offset!
+						const _getToolTipData : IChartOptionsTooltipOption = getToolTipData(seriesData, this.opts, index, current.group, this.opts.categories!, option)
+						const textList : ITextList[] = _getToolTipData.textList!
+						const offset : IOffset = _getToolTipData.offset!
 						offset.y = _touches$.y;
 						opts.tooltip = new ChartOptionsTooltip()
 						opts.tooltip!.textList = option.textList != null ? option.textList! : textList
@@ -326,7 +340,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				} else {
 					this.clearTooltip()
 				}
-				drawCharts(this, opts.type, opts, this.config, this.context);
+				drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 			}
 			if (this.opts.type == 'mount') {
 				let index : any | null = option.index == null ? this.getCurrentDataIndex(e).index : option.index;
@@ -336,16 +350,16 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						this.opts.animation = false
 						let opts = this.opts
 						let seriesData = opts._series_![index as number];
-						const textlist : TextList = new TextList()
+						const textlist : ITextList = new TextList()
 						if (option.formatter != null) {
-							const fun = option.formatter as (seriesData : ChartOptionsSeries, index : number, opts : ChartOptions) => string
+							const fun = option.formatter as (seriesData : IChartOptionsSeries, index : number, opts : IChartOptions) => string
 							textlist.text = fun(seriesData, index, opts)
 						} else {
 							textlist.text = seriesData.name + ': ' + seriesData.data![0].value
 						}
 						textlist.color = seriesData.color!
 						textlist.legendShape = this.opts.extra.tooltip!.legendShape == 'auto' ? seriesData.legendShape! : this.opts.extra.tooltip!.legendShape
-						const textList : TextList[] = [textlist]
+						const textList : ITextList[] = [textlist]
 						const offset = new Offset()
 						offset.x = opts.chartData.calPoints![0][index].x
 						offset.y = _touches$.y
@@ -358,7 +372,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				} else {
 					this.clearTooltip()
 				}
-				drawCharts(this, opts.type, opts, this.config, this.context);
+				drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 			}
 			if (this.opts.type == 'bar') {
 				let current = this.getCurrentDataIndex(e);
@@ -383,7 +397,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				} else {
 					this.clearTooltip()
 				}
-				drawCharts(this, opts.type, opts, this.config, this.context);
+				drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 			}
 			if (this.opts.type == 'mix') {
 				let current = this.getCurrentDataIndex(e);
@@ -411,7 +425,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				} else {
 					this.clearTooltip()
 				}
-				drawCharts(this, opts.type, opts, this.config, this.context);
+				drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 			}
 			if (this.opts.type == 'candle') {
 				let current = this.getCurrentDataIndex(e);
@@ -439,7 +453,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 				} else {
 					this.clearTooltip()
 				}
-				drawCharts(this, opts.type, opts, this.config, this.context);
+				drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 			}
 			if (this.opts.type == 'pie' || this.opts.type == 'ring' || this.opts.type == 'rose' || this.opts.type == 'funnel') {
 				let index : any | null = option.index == null ? this.getCurrentDataIndex(e).index! : option.index;
@@ -448,17 +462,17 @@ export class TuiDrawCharts implements TuiChartsInterface {
 					if (index as number > -1) {
 						let opts = this.opts
 						opts.animation = false
-						let seriesData : ChartOptionsSeries = opts._series_![index as number];
-						const textlist : TextList = new TextList()
+						let seriesData : IChartOptionsSeries = opts._series_![index as number];
+						const textlist : ITextList = new TextList()
 						if (option.formatter != null) {
-							const fun = option.formatter as (seriesData : ChartOptionsSeries, index : any, opts : ChartOptions) => string
+							const fun = option.formatter as (seriesData : IChartOptionsSeries, index : any, opts : IChartOptions) => string
 							textlist.text = fun(seriesData, index, opts)
 						} else {
 							textlist.text = seriesData.name + ': ' + seriesData.data![0].value
 						}
 						textlist.color = seriesData.color!
 						textlist.legendShape = this.opts.extra.tooltip!.legendShape == 'auto' ? seriesData.legendShape! : this.opts.extra.tooltip!.legendShape
-						const textList : TextList[] = [textlist]
+						const textList : ITextList[] = [textlist]
 
 						let offset = new Offset()
 						offset.x = _touches$.x
@@ -471,7 +485,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 					} else {
 						this.clearTooltip()
 					}
-					drawCharts(this, opts.type, opts, this.config, this.context);
+					drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 				}
 			}
 			if (this.opts.type == 'map') {
@@ -483,10 +497,10 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						opts.animation = false
 						let seriesData = this.opts.series![index];
 						seriesData.name = seriesData.properties.name
-						const textList : TextList[] = []
+						const textList : ITextList[] = []
 						const text = new TextList()
 						if (option.formatter != null) {
-							const fun = option.formatter as (item : ChartOptionsSeries, index : number, opts : ChartOptions) => string
+							const fun = option.formatter as (item : IChartOptionsSeries, index : number, opts : IChartOptions) => string
 							text.text = fun(seriesData, index, this.opts)
 						} else {
 							text.text = seriesData.name!
@@ -507,7 +521,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						this.clearTooltip()
 					}
 					opts.updateData = false;
-					drawCharts(this, opts.type, opts, this.config, this.context);
+					drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 				}
 			}
 			if (this.opts.type == 'word') {
@@ -518,16 +532,16 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						let opts = this.opts
 						opts.animation = false
 						let seriesData = this.opts.series![index as number];
-						const textlist : TextList = new TextList()
+						const textlist : ITextList = new TextList()
 						if (option.formatter != null) {
-							const fun = option.formatter as (seriesData : ChartOptionsSeries, index : any, opts : ChartOptions) => string
+							const fun = option.formatter as (seriesData : IChartOptionsSeries, index : any, opts : IChartOptions) => string
 							textlist.text = fun(seriesData, index, opts)
 						} else {
 							textlist.text = seriesData.name!
 						}
 						textlist.color = seriesData.color!
 						textlist.legendShape = this.opts.extra.tooltip!.legendShape == 'auto' ? seriesData.legendShape! : this.opts.extra.tooltip!.legendShape
-						const textList : TextList[] = [textlist]
+						const textList : ITextList[] = [textlist]
 
 						let offset = new Offset()
 						offset.x = _touches$.x
@@ -541,7 +555,7 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						this.clearTooltip()
 					}
 					opts.updateData = false;
-					drawCharts(this, opts.type, opts, this.config, this.context);
+					drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 				}
 			}
 			if (this.opts.type == 'radar') {
@@ -554,10 +568,10 @@ export class TuiDrawCharts implements TuiChartsInterface {
 						opts.animation = false
 						let seriesData = getSeriesDataItem(this.opts.series!, index, current.group);
 						if (seriesData.length != 0) {
-							let textList : TextList[] = seriesData.map((item : ChartOptionsSeries) : TextList => {
+							let textList : ITextList[] = seriesData.map((item : IChartOptionsSeries) : ITextList => {
 								const list = new TextList()
 								if (option.formatter != null) {
-									const fun = option.formatter as (item : ChartOptionsSeries, categories : string, index : number, opts : ChartOptions) => string
+									const fun = option.formatter as (item : IChartOptionsSeries, categories : string, index : number, opts : IChartOptions) => string
 									list.text = fun(item, this.opts.categories![index], index, this.opts)
 								} else {
 									list.text = item.name + ': ' + item.data![0].value!
@@ -578,14 +592,14 @@ export class TuiDrawCharts implements TuiChartsInterface {
 					} else {
 						this.clearTooltip()
 					}
-					drawCharts(this, opts.type, opts, this.config, this.context);
+					drawCharts(this as TuiChartsInterface, opts.type, opts, this.config, this.context);
 				}
 			}
 		}
 		return tipsIndex
 	}
-	getCurrentDataIndex(e : UniEvent) : ChartOptionsTooltip {
-		let tooltip : ChartOptionsTooltip
+	getCurrentDataIndex(e : UniEvent) : IChartOptionsTooltip {
+		let tooltip : IChartOptionsTooltip
 		let _touches$ : TouchPosition = getTouches(this.opts, e);
 		_touches$.x = _touches$.x - this.opts.xOffset
 		_touches$.y = _touches$.y - this.opts.yOffset

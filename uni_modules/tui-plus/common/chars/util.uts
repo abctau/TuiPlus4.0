@@ -1,21 +1,58 @@
 import {
 	ChartOptionsTooltipOption,
-	ChartOptionsTooltip, ChartOptionsExtraMarkLineData, ChartOptionsExtraTooltip,
-	ChartOptionsSeriesData, ChartOptionsChartDataYAxisDataYAxisWidth, ChartColumnDataPoints, ChartOptionsChartDataCalPoints, ChartOptionsChartDataCategoriesData,
-	ChartOptionsChartDataXAxisData, ChartRange, ChartOptionsChartDataYAxisData, ChartOptions, ChartOptionsChartData, ChartOptionsChartDataLegendData,
+	ChartOptionsTooltip, ChartOptionsExtraTooltip,
+	ChartOptionsSeriesData, ChartOptionsChartDataYAxisDataYAxisWidth, ChartOptionsChartDataCalPoints, ChartOptionsChartDataCategoriesData,
+	ChartOptionsChartDataXAxisData, ChartOptionsChartDataYAxisData, ChartOptionsChartDataLegendData,
 	ChartOptionsSeries, ChartOptionsYAxisData, TextList, Offset,
-	ChartOptionsChartDataLegendDataArea, ChartOptionsExtraMount, ChartOptionsChartDataToolTiPData,
-	ChartOptionsExtraLine, ChartOptionsExtraRadar, ChartOptionsExtraFunnel, ChartCurveControlPoints, ChartOptionsChartDataLegendDataAreaXY,
-	ChartOptionsExtraArcbar, ChartOptionsExtraArea, ChartOptionsExtraMixLine, ChartOptionsExtraMixArea, ChartOptionsExtraMixColumn,
-	ChartOptionsExtraCandle, ChartOptionsExtraGauge, ChartsCandleDataPoints, ChartMapBounds, ChartOptionsChartDataMapData, TuiChartsInterface
-} from './type'
-import { TuiChartConfig } from './config.uts'
-import { ChartAnimationOption, TouchPosition } from './Interface.uts'
-export function getToolTipData(seriesData : ChartOptionsSeries[], opts : ChartOptions, index : any, group : number[], categories : string[], option : ChartOptionsTooltipOption) : ChartOptionsTooltipOption {
-	let calPoints : ChartOptionsChartDataCalPoints[][] = opts.chartData.calPoints != null ? opts.chartData.calPoints! : [];
-	let points : ChartOptionsChartDataCalPoints = new ChartOptionsChartDataCalPoints()
+	ChartOptionsChartDataLegendDataArea, ChartOptionsChartDataToolTiPData,
+	ChartOptionsExtraRadar, ChartCurveControlPoints, ChartOptionsChartDataLegendDataAreaXY,
+	ChartOptionsExtraMixLine, ChartOptionsExtraMixArea, ChartOptionsExtraMixColumn,
+	ChartMapBounds, ChartOptionsChartDataMapData,
+} from './libs'
+import {
+	ChartsCandleDataPoints,
+	IAnimation,
+	ChartAnimationOption,
+	ChartColumnDataPoints,
+	ChartRange,
+	TuiChartsInterface,
+	TouchPosition,
+	IChartOptions,
+	ITuiChartConfig
+	IChartScrollOption,
+	IOffset,
+	IChartCurveControlPoints,
+	IChartMapBounds,
+	IChartOptionsExtraMarkLineData,
+	IChartOptionsExtraMount,
+	IChartOptionsExtraLine,
+	IChartOptionsExtraArea,
+	IChartOptionsExtraRadar,
+	IChartOptionsExtraArcbar,
+	IChartOptionsExtraGauge,
+	IChartOptionsExtraFunnel,
+	IChartOptionsExtraCandle,
+	IChartOptionsYAxisData,
+	IChartOptionsSeriesData,
+	IChartOptionsSeries,
+	IChartOptionsChartDataLegendDataArea,
+	IChartOptionsChartDataLegendData,
+	IChartOptionsChartDataYAxisDataYAxisWidth,
+	IChartOptionsChartDataYAxisData,
+	IChartOptionsChartDataXAxisData,
+	IChartOptionsChartDataCategoriesData,
+	IChartOptionsChartDataCalPoints,
+	IChartOptionsChartDataToolTiPData,
+	IChartOptionsChartData,
+	ITextList,
+	IChartOptionsTooltipOption,
+	IChartOptionsTooltip,
+} from './Interface.uts'
+export function getToolTipData(seriesData : IChartOptionsSeries[], opts : IChartOptions, index : any, group : number[], categories : string[], option : IChartOptionsTooltipOption) : IChartOptionsTooltipOption {
+	let calPoints : IChartOptionsChartDataCalPoints[][] = opts.chartData.calPoints != null ? opts.chartData.calPoints! : [];
+	let points : IChartOptionsChartDataCalPoints = new ChartOptionsChartDataCalPoints()
 	if (group.length > 0) {
-		let filterPoints : ChartOptionsChartDataCalPoints[][] = [];
+		let filterPoints : IChartOptionsChartDataCalPoints[][] = [];
 		for (let i = 0; i < group.length; i++) {
 			filterPoints.push(calPoints[group[i]])
 		}
@@ -23,14 +60,14 @@ export function getToolTipData(seriesData : ChartOptionsSeries[], opts : ChartOp
 	} else {
 		for (let i = 0; i < calPoints.length; i++) {
 			const ix = index as number
-			const posArr : ChartOptionsChartDataCalPoints[] = calPoints[i]
+			const posArr : IChartOptionsChartDataCalPoints[] = calPoints[i]
 			if (posArr.length > ix) {
 				points = posArr[ix];
 				break;
 			}
 		}
 	};
-	let textList : TextList[] = seriesData.map((item : ChartOptionsSeries) : TextList => {
+	let textList : ITextList[] = seriesData.map((item : IChartOptionsSeries) : ITextList => {
 		let titleText = '';
 		if (opts.categories != null && opts.categories!.length > 0) {
 			titleText = categories[index as number];
@@ -38,7 +75,7 @@ export function getToolTipData(seriesData : ChartOptionsSeries[], opts : ChartOp
 		const textitem = new TextList()
 		// textitem.text = option.formatter != null ? option.formatter(item, titleText, index, opts) : titleText + ' ' + item.name + ': ' + (`${item.data.value}`)
 		if (option.formatter != null) {
-			const fun = option.formatter as (item : ChartOptionsSeries, titleText : string, index : any, opts : ChartOptions) => string
+			const fun = option.formatter as (item : IChartOptionsSeries, titleText : string, index : any, opts : IChartOptions) => string
 			textitem.text = fun(item, titleText, index, opts)
 		} else {
 			textitem.text = titleText + ' ' + item.name + ': ' + (`${item.data![0].value}`)
@@ -55,12 +92,12 @@ export function getToolTipData(seriesData : ChartOptionsSeries[], opts : ChartOp
 	tooltipOption.offset = offset
 	return tooltipOption
 	// return {
-	// 	textList: textList,
-	// 	offset: offset
+	// 	textList: ITextList,
+	// 	offset: IOffset
 	// };
 }
-function filterSeries(series : ChartOptionsSeries[]) : ChartOptionsSeries[] {
-	let tempSeries : ChartOptionsSeries[] = [];
+function filterSeries(series : IChartOptionsSeries[]) : IChartOptionsSeries[] {
+	let tempSeries : IChartOptionsSeries[] = [];
 	for (let i = 0; i < series.length; i++) {
 		if (series[i].show == true) {
 			tempSeries.push(series[i])
@@ -68,9 +105,9 @@ function filterSeries(series : ChartOptionsSeries[]) : ChartOptionsSeries[] {
 	}
 	return tempSeries;
 }
-export function getSeriesDataItem(series : ChartOptionsSeries[], index : any, group : number[]) : ChartOptionsSeries[] {
-	let data : ChartOptionsSeries[] = [];
-	let newSeries : ChartOptionsSeries[] = [];
+export function getSeriesDataItem(series : IChartOptionsSeries[], index : any, group : number[]) : IChartOptionsSeries[] {
+	let data : IChartOptionsSeries[] = [];
+	let newSeries : IChartOptionsSeries[] = [];
 	let indexIsArr = Array.isArray(index);
 	if (indexIsArr) {
 		let tempSeries = filterSeries(series);
@@ -81,7 +118,7 @@ export function getSeriesDataItem(series : ChartOptionsSeries[], index : any, gr
 		newSeries = series;
 	};
 	for (let i = 0; i < newSeries.length; i++) {
-		let item : ChartOptionsSeries = newSeries[i];
+		let item : IChartOptionsSeries = newSeries[i];
 		let tmpindex : number;
 		if (indexIsArr) {
 			tmpindex = (index as number[])[i];
@@ -90,7 +127,7 @@ export function getSeriesDataItem(series : ChartOptionsSeries[], index : any, gr
 		}
 
 		if (item.data != null && item.data!.length > 0 && item.show) {
-			let seriesItem = new ChartOptionsSeries()
+			let seriesItem : IChartOptionsSeries = new ChartOptionsSeries()
 			seriesItem.color = item.color;
 			seriesItem.type = item.type;
 			seriesItem.style = item.style;
@@ -101,7 +138,7 @@ export function getSeriesDataItem(series : ChartOptionsSeries[], index : any, gr
 			seriesItem.show = item.show;
 			// seriesItem.data = item.formatter ? item.formatter(item.data![tmpindex]) : item.data![tmpindex];
 			if (item.formatter != null) {
-				const fun = item.formatter as (e : ChartOptionsSeriesData) => ChartOptionsSeriesData[]
+				const fun = item.formatter as (e : IChartOptionsSeriesData) => IChartOptionsSeriesData[]
 				seriesItem.data = fun(item.data![tmpindex])
 			} else {
 				seriesItem.data = [item.data![tmpindex]]
@@ -130,12 +167,12 @@ export function getSeriesDataItem(series : ChartOptionsSeries[], index : any, gr
 	}
 	return data;
 }
-function isInExactChartArea(currentPoints : TouchPosition, opts : ChartOptions) : boolean {
+function isInExactChartArea(currentPoints : TouchPosition, opts : IChartOptions) : boolean {
 	return currentPoints.x <= opts.width - opts.area[1] + 10 && currentPoints.x >= opts.area[3] - 10 && currentPoints.y >= opts.area[0] && currentPoints.y <= opts.height - opts.area[2];
 }
-export function findCandleChartCurrentIndex(currentPoints : TouchPosition, calPoints : ChartOptionsChartDataCalPoints[][][], opts : ChartOptions, offset : number = 0) : ChartOptionsTooltip {
+export function findCandleChartCurrentIndex(currentPoints : TouchPosition, calPoints : IChartOptionsChartDataCalPoints[][][], opts : IChartOptions, offset : number = 0) : IChartOptionsTooltip {
 	// let current = { index: -1, group: [] };
-	let current : ChartOptionsTooltip = new ChartOptionsTooltip()
+	let current : IChartOptionsTooltip = new ChartOptionsTooltip()
 	let spacing : number = opts.chartData.eachSpacing / 2;
 	let xAxisPoints : number[] = [];
 	if (calPoints.length > 0) {
@@ -186,9 +223,9 @@ export function findCandleChartCurrentIndex(currentPoints : TouchPosition, calPo
 	}
 	return current;
 }
-export function findCurrentIndex(currentPoints : TouchPosition, calPoints : ChartOptionsChartDataCalPoints[][], opts : ChartOptions, offset : number = 0) : ChartOptionsTooltip {
+export function findCurrentIndex(currentPoints : TouchPosition, calPoints : IChartOptionsChartDataCalPoints[][], opts : IChartOptions, offset : number = 0) : IChartOptionsTooltip {
 	// let current = { index: -1, group: [] };
-	let current : ChartOptionsTooltip = new ChartOptionsTooltip()
+	let current : IChartOptionsTooltip = new ChartOptionsTooltip()
 	let spacing : number = opts.chartData.eachSpacing / 2;
 	let xAxisPoints : number[] = [];
 	if (calPoints.length > 0) {
@@ -242,11 +279,11 @@ export function findCurrentIndex(currentPoints : TouchPosition, calPoints : Char
 	}
 	return current;
 }
-// function isInExactChartArea(currentPoints : TouchPosition, opts : ChartOptions, config : TuiChartConfig) : boolean {
+// function isInExactChartArea(currentPoints : TouchPosition, opts : IChartOptions, config : ITuiChartConfig) : boolean {
 // 	return currentPoints.x <= opts.width - opts.area[1] + 10 && currentPoints.x >= opts.area[3] - 10 && currentPoints.y >= opts.area[0] && currentPoints.y <= opts.height - opts.area[2];
 // }
-export function findBarChartCurrentIndex(currentPoints : TouchPosition, calPoints : ChartOptionsChartDataCalPoints[][] | null, opts : ChartOptions, offset : number = 0) : ChartOptionsTooltip {
-	let current : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findBarChartCurrentIndex(currentPoints : TouchPosition, calPoints : IChartOptionsChartDataCalPoints[][] | null, opts : IChartOptions, offset : number = 0) : IChartOptionsTooltip {
+	let current : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let spacing = opts.chartData.eachSpacing / 2;
 	let yAxisPoints = opts.chartData.yAxisPoints!;
 	if (calPoints != null && calPoints.length > 0) {
@@ -260,14 +297,14 @@ export function findBarChartCurrentIndex(currentPoints : TouchPosition, calPoint
 	}
 	return current;
 }
-function isInExactLegendArea(currentPoints : TouchPosition, area : ChartOptionsChartDataLegendDataArea) : boolean {
+function isInExactLegendArea(currentPoints : TouchPosition, area : IChartOptionsChartDataLegendDataArea) : boolean {
 	return currentPoints.x > area.start.x && currentPoints.x < area.end.x && currentPoints.y > area.start.y && currentPoints.y < area.end.y;
 }
-export function findLegendIndex(currentPoints : TouchPosition, legendData : ChartOptionsChartDataLegendData) : number {
+export function findLegendIndex(currentPoints : TouchPosition, legendData : IChartOptionsChartDataLegendData) : number {
 	let currentIndex = -1;
 	let gap = 0;
 	if (isInExactLegendArea(currentPoints, legendData.area)) {
-		let points : ChartOptionsSeries[][] = legendData.points;
+		let points : IChartOptionsSeries[][] = legendData.points;
 		let index = -1;
 		for (let i = 0, len = points.length; i < len; i++) {
 			let item = points[i];
@@ -285,7 +322,7 @@ export function findLegendIndex(currentPoints : TouchPosition, legendData : Char
 	return currentIndex;
 }
 
-export function calValidDistance(self : TuiChartsInterface, distance : number, chartData : ChartOptionsChartData, opts : ChartOptions) : number {
+export function calValidDistance(self : TuiChartsInterface, distance : number, chartData : IChartOptionsChartData, opts : IChartOptions) : number {
 	let dataChartAreaWidth = opts.width - opts.area[1] - opts.area[3];
 	let dataChartWidth = chartData.eachSpacing * (opts.chartData.xAxisData.xAxisPoints.length - 1);
 	if (opts.type == 'mount' && opts.extra.mount != null && opts.extra.mount!.widthRatio > 1) {
@@ -310,7 +347,7 @@ export function calValidDistance(self : TuiChartsInterface, distance : number, c
 	return validDistance;
 }
 
-function drawToolTipSplitLine(offsetX : number, opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawToolTipSplitLine(offsetX : number, opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let toolTipOption = opts.extra.tooltip ?? new ChartOptionsExtraTooltip();
 	let startY = opts.area[0] + opts.yOffset;
 	let endY = (opts.height - opts.area[2]) + opts.yOffset;
@@ -362,7 +399,7 @@ function drawToolTipSplitLine(offsetX : number, opts : ChartOptions, config : Tu
 }
 
 
-function drawToolTip(textList : TextList[], offset : Offset, opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawToolTip(textList : ITextList[], offset : IOffset, opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let toolTipOption = opts.extra.tooltip!;
 	const xOffset = opts.xOffset;
 	const yOffset = opts.yOffset;
@@ -389,7 +426,7 @@ function drawToolTip(textList : TextList[], offset : Offset, opts : ChartOptions
 		}
 	}
 	offset.y -= 8 * opts.pixelRatio;
-	let textWidth = textList.map(function (item : TextList) : number {
+	let textWidth = textList.map(function (item : ITextList) : number {
 		return measureText(item.text, fontSize);
 	});
 	let toolTipWidth = legendWidth + legendMarginRight + 4 * boxPadding + Math.max(...textWidth);
@@ -513,7 +550,7 @@ function drawToolTip(textList : TextList[], offset : Offset, opts : ChartOptions
 		});
 	}
 	// 绘制文本列表
-	textList.forEach((item : TextList, index : number) => {
+	textList.forEach((item : ITextList, index : number) => {
 		let startX = offset.x + arrowWidth + 2 * boxPadding + legendWidth + legendMarginRight;
 		if (isOverRightBorder) {
 			startX = offset.x - toolTipWidth - arrowWidth + 2 * boxPadding + legendWidth + legendMarginRight;
@@ -529,7 +566,7 @@ function drawToolTip(textList : TextList[], offset : Offset, opts : ChartOptions
 	});
 }
 
-export function getTouches(opts : ChartOptions, e : UniEvent, index : number = 0) : TouchPosition {
+export function getTouches(opts : IChartOptions, e : UniEvent, index : number = 0) : TouchPosition {
 	let x : number
 	let y : number
 	let top : number = opts.DOMRect!.top
@@ -595,7 +632,7 @@ export function hexToRgb(hex : string, opacity : number = 1) : string {
 		return toRgba(`${hexArr[0]} `)
 	}
 }
-function fillSeries(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig) : ChartOptionsSeries[] {
+function fillSeries(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig) : IChartOptionsSeries[] {
 	let index = 0;
 	for (let i = 0; i < series.length; i++) {
 		let item = series[i];
@@ -641,8 +678,8 @@ function fillSeries(series : ChartOptionsSeries[], opts : ChartOptions, config :
 	}
 	return series;
 }
-// function filterSeries(series : ChartOptionsSeries[]) : ChartOptionsSeries[] {
-// 	let tempSeries : ChartOptionsSeries[] = [];
+// function filterSeries(series : IChartOptionsSeries[]) : IChartOptionsSeries[] {
+// 	let tempSeries : IChartOptionsSeries[] = [];
 // 	for (let i = 0; i < series.length; i++) {
 // 		if (series[i].show == true) {
 // 			tempSeries.push(series[i])
@@ -650,8 +687,8 @@ function fillSeries(series : ChartOptionsSeries[], opts : ChartOptions, config :
 // 	}
 // 	return tempSeries;
 // }
-function calLegendData(series : ChartOptionsSeries[], opts : ChartOptions, chartData : ChartOptionsChartData) : ChartOptionsChartDataLegendData {
-	const legendData : ChartOptionsChartDataLegendData = new ChartOptionsChartDataLegendData()
+function calLegendData(series : IChartOptionsSeries[], opts : IChartOptions, chartData : IChartOptionsChartData) : IChartOptionsChartDataLegendData {
+	const legendData : IChartOptionsChartDataLegendData = new ChartOptionsChartDataLegendData()
 	if (opts.legend.show == false) {
 		chartData.legendData = legendData;
 		return legendData;
@@ -663,10 +700,10 @@ function calLegendData(series : ChartOptionsSeries[], opts : ChartOptions, chart
 	let shapeRight = 5 * opts.pixelRatio;
 	let lineHeight = Math.max(opts.legend.lineHeight * opts.pixelRatio, fontSize);
 	if (opts.legend.position == 'top' || opts.legend.position == 'bottom') {
-		let legendList : ChartOptionsSeries[][] = [];
+		let legendList : IChartOptionsSeries[][] = [];
 		let widthCount = 0;
 		let widthCountArr : number[] = [];
-		let currentRow : ChartOptionsSeries[] = [];
+		let currentRow : IChartOptionsSeries[] = [];
 		for (let i = 0; i < series.length; i++) {
 			let item = series[i];
 			const legendText = item.legendText != null ? item.legendText : item.name;
@@ -725,7 +762,7 @@ function calLegendData(series : ChartOptionsSeries[], opts : ChartOptions, chart
 				legendData.area.end.y = (opts.height + legendData.area.height) / 2;
 		}
 		let lineNum = len % maxLength == 0 ? len / maxLength : Math.floor((len / maxLength) + 1);
-		let currentRow : ChartOptionsSeries[][] = [];
+		let currentRow : IChartOptionsSeries[][] = [];
 		for (let i = 0; i < lineNum; i++) {
 			let temp = series.slice(i * maxLength, i * maxLength + maxLength);
 			currentRow.push(temp);
@@ -774,19 +811,19 @@ function calLegendData(series : ChartOptionsSeries[], opts : ChartOptions, chart
 	chartData.legendData = legendData;
 	return legendData;
 }
-export function calYAxisData(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig) : ChartOptionsChartDataYAxisData {
+export function calYAxisData(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig) : IChartOptionsChartDataYAxisData {
 	const rangesArr : string[][] = [];
 	const rangesFormatArr : string[][] = [];
-	const yAxisWidthArr : ChartOptionsChartDataYAxisDataYAxisWidth[] = [];
+	const yAxisWidthArr : IChartOptionsChartDataYAxisDataYAxisWidth[] = [];
 	//堆叠图重算Y轴
 	let columnstyle : string = opts.extra.column != null ? opts.extra.column!.type : ''
 
 	//如果是多Y轴，重新计算
 	let YLength = opts.yAxis.data.length;
-	let newSeries : ChartOptionsSeries[][] = [];
+	let newSeries : IChartOptionsSeries[][] = [];
 	if (YLength > 0) {
 		for (let i = 0; i < YLength; i++) {
-			const newSeriesChild : ChartOptionsSeries[] = []
+			const newSeriesChild : IChartOptionsSeries[] = []
 			for (let j = 0; j < series.length; j++) {
 				if (series[j].index == i) {
 					newSeriesChild.push(series[j]);
@@ -835,11 +872,11 @@ export function calYAxisData(series : ChartOptionsSeries[], opts : ChartOptions,
 		if (opts.type == 'bar') {
 			rangesArr.push(opts.categories!)
 			if (opts.yAxis.formatter == null) {
-				opts.yAxis.formatter = (val : string, opts : ChartOptions) : string => { return val + (opts.yAxis.unit) }
+				opts.yAxis.formatter = (val : string, opts : IChartOptions) : string => { return val + (opts.yAxis.unit) }
 			}
 		} else {
 			if (opts.yAxis.formatter == null) {
-				opts.yAxis.formatter = (val : string, opts : ChartOptions) : string => { return (parseFloat(val)).toFixed(opts.yAxis.tofix) + opts.yAxis.unit }
+				opts.yAxis.formatter = (val : string, opts : IChartOptions) : string => { return (parseFloat(val)).toFixed(opts.yAxis.tofix) + opts.yAxis.unit }
 			}
 			rangesArr.push(getYAxisTextList(series, opts, columnstyle, new ChartOptionsYAxisData()))
 		}
@@ -854,7 +891,7 @@ export function calYAxisData(series : ChartOptionsSeries[], opts : ChartOptions,
 			yAxisFontSize = opts.yAxis.fontSize! * opts.pixelRatio
 		}
 		const handlranges = rangesArr[0].map(function (item, index) : string {
-			const fun = opts.yAxis.formatter as (val : string, opts : ChartOptions) => string
+			const fun = opts.yAxis.formatter as (val : string, opts : IChartOptions) => string
 			item = fun(item, opts)
 			cocdyw.width = Math.max(cocdyw.width, measureText(item, yAxisFontSize) + 5);
 			return item;
@@ -877,15 +914,15 @@ export function calYAxisData(series : ChartOptionsSeries[], opts : ChartOptions,
 			opts.yAxis.data.push(yAxisData)
 		}
 	}
-	const cdyd : ChartOptionsChartDataYAxisData = new ChartOptionsChartDataYAxisData()
+	const cdyd : IChartOptionsChartDataYAxisData = new ChartOptionsChartDataYAxisData()
 	cdyd.rangesFormat = rangesFormatArr
 	cdyd.ranges = rangesArr
 	cdyd.yAxisWidth = yAxisWidthArr
 	return cdyd
 }
-function dataCombine(series : ChartOptionsSeries[]) : ChartOptionsSeriesData[] {
-	const newSeries : ChartOptionsSeriesData[] = []
-	series.forEach((item : ChartOptionsSeries) => {
+function dataCombine(series : IChartOptionsSeries[]) : IChartOptionsSeriesData[] {
+	const newSeries : IChartOptionsSeriesData[] = []
+	series.forEach((item : IChartOptionsSeries) => {
 		if (item.data != null) newSeries.push(...item.data!)
 	})
 	return newSeries
@@ -950,9 +987,9 @@ function getDataRange(minData : number, maxData : number) : ChartRange {
 	} as ChartRange
 }
 
-function fixColumeStackData(points : ChartOptionsChartDataCalPoints[], eachSpacing : number, opts : ChartOptions) : ChartOptionsChartDataCalPoints[] {
+function fixColumeStackData(points : IChartOptionsChartDataCalPoints[], eachSpacing : number, opts : IChartOptions) : IChartOptionsChartDataCalPoints[] {
 	let categoryGap = opts.extra.column!.categoryGap * opts.pixelRatio;
-	return points.map((item : ChartOptionsChartDataCalPoints) : ChartOptionsChartDataCalPoints => {
+	return points.map((item : IChartOptionsChartDataCalPoints) : IChartOptionsChartDataCalPoints => {
 		// if (item == null) {
 		// 	return null;
 		// }
@@ -967,17 +1004,17 @@ function fixColumeStackData(points : ChartOptionsChartDataCalPoints[], eachSpaci
 	});
 }
 
-function dataCombineStack(series : ChartOptionsSeries[], len : number) : ChartOptionsSeriesData[] {
+function dataCombineStack(series : IChartOptionsSeries[], len : number) : IChartOptionsSeriesData[] {
 	let sum : Map<number, number> = new Map<number, number>()
-	let newseries : ChartOptionsSeriesData[] = []
-	series.forEach((item : ChartOptionsSeries,) => {
+	let newseries : IChartOptionsSeriesData[] = []
+	series.forEach((item : IChartOptionsSeries,) => {
 		for (let j = 0; j < len; j++) {
 			const val = item.data![j].value!
 			const old_number = sum.get(j) ?? 0
 			sum.set(j, val + old_number)
 		}
 	})
-	series.forEach((item : ChartOptionsSeries) => {
+	series.forEach((item : IChartOptionsSeries) => {
 		newseries.push(...item.data!)
 		sum.forEach((k : number) => {
 			const sumseries = new ChartOptionsSeriesData()
@@ -987,10 +1024,10 @@ function dataCombineStack(series : ChartOptionsSeries[], len : number) : ChartOp
 	})
 	return newseries
 }
-function getArrYAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, yData : ChartOptionsYAxisData) : string[] {
+function getArrYAxisTextList(series : IChartOptionsSeries[], opts : IChartOptions, yData : IChartOptionsYAxisData) : string[] {
 	// let index = arguments.length > 5 && arguments[5] != undefined ? arguments[5] : -1;
 	let data : number[][] = [];
-	series.forEach((item : ChartOptionsSeries) => {
+	series.forEach((item : IChartOptionsSeries) => {
 		data.push(...(item.dataArr))
 	})
 	let sorted : number[] = [];
@@ -1022,9 +1059,9 @@ function getArrYAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions,
 	}
 	return range.reverse();
 }
-function getYAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, stack : string, yData : ChartOptionsYAxisData) : string[] {
+function getYAxisTextList(series : IChartOptionsSeries[], opts : IChartOptions, stack : string, yData : IChartOptionsYAxisData) : string[] {
 	if (opts.type == 'candle') return getArrYAxisTextList(series, opts, yData)
-	let data : ChartOptionsSeriesData[];
+	let data : IChartOptionsSeriesData[];
 	if (stack == 'stack') {
 		data = dataCombineStack(series, opts.categories!.length);
 	} else {
@@ -1035,7 +1072,7 @@ function getYAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, st
 	data = data.filter((item) : boolean => {
 		return item.value != null
 	});
-	data.map((item : ChartOptionsSeriesData) => {
+	data.map((item : IChartOptionsSeriesData) => {
 		sorted.push(item.value!)
 		// if (typeof item == 'object') {
 		// 	if (item.constructor.toString().indexOf('Array') > -1) {
@@ -1076,7 +1113,7 @@ function getYAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, st
 	}
 	return range.reverse();
 }
-export function getXAxisPoints(categories : string[], opts : ChartOptions) : ChartOptionsChartDataXAxisData {
+export function getXAxisPoints(categories : string[], opts : IChartOptions) : IChartOptionsChartDataXAxisData {
 	let spacingValid = opts.width - opts.area[1] - opts.area[3];
 	let dataCount = opts.enableScroll ? Math.min(opts.xAxis.itemCount, categories.length) : categories.length;
 	if ((opts.type == 'line' || opts.type == 'area' || opts.type == 'scatter' || opts.type == 'bubble' || opts.type == 'bar') && dataCount > 1 && opts.xAxis.boundaryGap == 'justify') {
@@ -1109,8 +1146,8 @@ export function getXAxisPoints(categories : string[], opts : ChartOptions) : Cha
 	optscdxd.eachSpacing = eachSpacing
 	return optscdxd
 }
-function calCategoriesData(categories : string[], opts : ChartOptions) : ChartOptionsChartDataCategoriesData {
-	const result : ChartOptionsChartDataCategoriesData = new ChartOptionsChartDataCategoriesData()
+function calCategoriesData(categories : string[], opts : IChartOptions) : IChartOptionsChartDataCategoriesData {
+	const result : IChartOptionsChartDataCategoriesData = new ChartOptionsChartDataCategoriesData()
 	result.xAxisHeight = opts.xAxis.lineHeight * opts.pixelRatio + opts.xAxis.marginTop * opts.pixelRatio
 	let fontSize = opts.xAxis.fontSize * opts.pixelRatio;
 	let categoriesTextLenth = categories.map(function (item, index) : number {
@@ -1119,7 +1156,7 @@ function calCategoriesData(categories : string[], opts : ChartOptions) : ChartOp
 		if (opts.xAxis.formatter == null) {
 			xitem = item
 		} else {
-			const fun = opts.xAxis.formatter as (val : string, index : number, opts : ChartOptions) => string
+			const fun = opts.xAxis.formatter as (val : string, index : number, opts : IChartOptions) => string
 			xitem = fun(item, index, opts)
 		}
 		return measureText(`${xitem}`, fontSize);
@@ -1159,7 +1196,7 @@ class ChartsTiming {
 }
 
 const Timing = new ChartsTiming()
-function drawYAxis(opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawYAxis(opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	if (opts.yAxis.disabled == true) {
 		return;
 	}
@@ -1325,7 +1362,7 @@ function drawYAxis(opts : ChartOptions, config : TuiChartConfig, context : Canva
 		}
 	}
 }
-function drawYAxisGrid(opts : ChartOptions, context : CanvasRenderingContext2D) {
+function drawYAxisGrid(opts : IChartOptions, context : CanvasRenderingContext2D) {
 	if (opts.yAxis.disableGrid == true) {
 		return;
 	}
@@ -1366,7 +1403,7 @@ function drawYAxisGrid(opts : ChartOptions, context : CanvasRenderingContext2D) 
 	context.setLineDash([]);
 	context.restore();
 }
-function fillCustomColor(linearType : string, customColor : string[] | null, series : ChartOptionsSeries[], config : TuiChartConfig) : string[] {
+function fillCustomColor(linearType : string, customColor : string[] | null, series : IChartOptionsSeries[], config : ITuiChartConfig) : string[] {
 	let newcolor = customColor ?? [];
 	if (linearType == 'custom' && newcolor.length == 0) {
 		newcolor = config.linearColor;
@@ -1379,7 +1416,7 @@ function fillCustomColor(linearType : string, customColor : string[] | null, ser
 	}
 	return newcolor;
 }
-function drawXAxis(categories : string[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawXAxis(categories : string[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let xAxisData = opts.chartData.xAxisData,
 		xAxisPoints = xAxisData.xAxisPoints!,
 		startX = xAxisData.startX!,
@@ -1496,7 +1533,7 @@ function drawXAxis(categories : string[], opts : ChartOptions, config : TuiChart
 			newCategories.forEach(function (item, index) {
 				let xitem : string = item
 				if (opts.xAxis.formatter != null) {
-					const fun = opts.xAxis.formatter as (val : string, index : number, opts : ChartOptions) => string
+					const fun = opts.xAxis.formatter as (val : string, index : number, opts : IChartOptions) => string
 					xitem = fun(item, index, opts)
 				}
 				let offset = -measureText(`${xitem}`, xAxisFontSize) / 2;
@@ -1584,9 +1621,9 @@ function drawXAxis(categories : string[], opts : ChartOptions, config : TuiChart
 		context.stroke();
 	}
 }
-function getColumnDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getColumnDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	// let process = arguments.length > 8 && arguments[8] != undefined ? arguments[8] : 1;
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	// let validWidth = opts.width - opts.area[1] - opts.area[3];
 	data.forEach(function (item, index) {
@@ -1613,11 +1650,11 @@ function getColumnDataPoints(data : ChartOptionsSeriesData[], minRange : number,
 	return points;
 }
 
-function getStackDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, seriesIndex : number, stackSeries : ChartOptionsSeries[], process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getStackDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, seriesIndex : number, stackSeries : IChartOptionsSeries[], process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	// let process = arguments.length > 9 && arguments[9] != undefined ? arguments[9] : 1;
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
-	data.forEach(function (item : ChartOptionsSeriesData, index : number) {
+	data.forEach(function (item : IChartOptionsSeriesData, index : number) {
 
 		let point = new ChartOptionsChartDataCalPoints()
 		point.color = item.color;
@@ -1648,8 +1685,8 @@ function getStackDataPoints(data : ChartOptionsSeriesData[], minRange : number, 
 	});
 	return points;
 }
-function fixColumeData(points : ChartOptionsChartDataCalPoints[], eachSpacing : number, columnLen : number, index : number, opts : ChartOptions) : ChartOptionsChartDataCalPoints[] {
-	return points.map(function (item : ChartOptionsChartDataCalPoints) : ChartOptionsChartDataCalPoints {
+function fixColumeData(points : IChartOptionsChartDataCalPoints[], eachSpacing : number, columnLen : number, index : number, opts : IChartOptions) : IChartOptionsChartDataCalPoints[] {
+	return points.map(function (item : IChartOptionsChartDataCalPoints) : IChartOptionsChartDataCalPoints {
 		// if (item == null) {
 		// 	return null;
 		// }
@@ -1678,9 +1715,9 @@ function fixColumeData(points : ChartOptionsChartDataCalPoints[], eachSpacing : 
 		return item;
 	});
 }
-function drawColumePointText(points : ChartOptionsChartDataCalPoints[], series : ChartOptionsSeries, config : TuiChartConfig, context : CanvasRenderingContext2D, opts : ChartOptions) {
+function drawColumePointText(points : IChartOptionsChartDataCalPoints[], series : IChartOptionsSeries, config : ITuiChartConfig, context : CanvasRenderingContext2D, opts : IChartOptions) {
 	// 绘制数据文案
-	let data : ChartOptionsSeriesData[] = series.data!;
+	let data : IChartOptionsSeriesData[] = series.data!;
 	let textOffset = series.textOffset != null ? series.textOffset! : 0;
 	let Position = opts.extra.column!.labelPosition;
 	points.forEach(function (item, index) {
@@ -1745,7 +1782,7 @@ function drawColumePointText(points : ChartOptionsChartDataCalPoints[], series :
 		context.textAlign = ('left');
 	});
 }
-function drawToolTipSplitArea(offsetX : number, opts : ChartOptions, context : CanvasRenderingContext2D, eachSpacing : number) {
+function drawToolTipSplitArea(offsetX : number, opts : IChartOptions, context : CanvasRenderingContext2D, eachSpacing : number) {
 	const xOffset = opts.xOffset;
 	const yOffset = opts.yOffset;
 	let toolTipOption = opts.extra.column!
@@ -1760,9 +1797,9 @@ function drawToolTipSplitArea(offsetX : number, opts : ChartOptions, context : C
 	context.fill();
 	context.fillStyle = "#FFFFFF";
 }
-function fixColumeMeterData(points : ChartOptionsChartDataCalPoints[], eachSpacing : number, index : number, opts : ChartOptions, border : number) : ChartOptionsChartDataCalPoints[] {
+function fixColumeMeterData(points : IChartOptionsChartDataCalPoints[], eachSpacing : number, index : number, opts : IChartOptions, border : number) : IChartOptionsChartDataCalPoints[] {
 	let categoryGap : number = opts.extra.column!.categoryGap * opts.pixelRatio;
-	return points.map((item : ChartOptionsChartDataCalPoints) : ChartOptionsChartDataCalPoints => {
+	return points.map((item : IChartOptionsChartDataCalPoints) : IChartOptionsChartDataCalPoints => {
 		// if (item == null) {
 		// 	return null;
 		// }
@@ -1776,9 +1813,9 @@ function fixColumeMeterData(points : ChartOptionsChartDataCalPoints[], eachSpaci
 		return item;
 	});
 }
-function getArrDataPoints(data : number[][], minRange : number, maxRange : number, eachSpacing : number, opts : ChartOptions, process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getArrDataPoints(data : number[][], minRange : number, maxRange : number, eachSpacing : number, opts : IChartOptions, process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	let boundaryGap = opts.xAxis.boundaryGap;
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	let validWidth = opts.width - opts.area[1] - opts.area[3];
 	data.forEach((item) => {
@@ -1802,12 +1839,12 @@ function getArrDataPoints(data : number[][], minRange : number, maxRange : numbe
 	});
 	return points;
 }
-function getDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	let boundaryGap = 'center';
 	if (opts.type == 'line' || opts.type == 'area' || opts.type == 'bubble') {
 		boundaryGap = opts.xAxis.boundaryGap;
 	}
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	// let validWidth = opts.width - opts.area[1] - opts.area[3];
 	data.forEach((item, index) => {
@@ -1847,12 +1884,12 @@ function getDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRa
 	});
 	return points;
 }
-function drawColumnDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawColumnDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let xAxisData = opts.chartData.xAxisData,
 		xAxisPoints = xAxisData.xAxisPoints!,
 		eachSpacing = xAxisData.eachSpacing!;
 	let columnOption = opts.extra.column!
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	context.save();
 	let leftNum = -2;
 	let rightNum = xAxisPoints.length + 2;
@@ -1876,7 +1913,7 @@ function drawColumnDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 		let zeroPoints = opts.height - Math.round(zeroHeight) - opts.area[2];
 		eachSeries.zeroPoints = zeroPoints;
 		let data = eachSeries.data!;
-		let points : ChartOptionsChartDataCalPoints[]
+		let points : IChartOptionsChartDataCalPoints[]
 		switch (columnOption.type) {
 			case 'group':
 				points = getColumnDataPoints(data, minRange, maxRange, xAxisPoints, eachSpacing, opts, process);
@@ -2044,7 +2081,7 @@ function drawColumnDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 			let minRange : number = parseFloat(ranges.pop()!);
 			let maxRange : number = parseFloat(ranges.shift()!);
 			let data = eachSeries.data!;
-			let points : ChartOptionsChartDataCalPoints[]
+			let points : IChartOptionsChartDataCalPoints[]
 			switch (columnOption.type) {
 				case 'group':
 					points = getColumnDataPoints(data, minRange, maxRange, xAxisPoints, eachSpacing, opts, process);
@@ -2070,7 +2107,7 @@ function drawColumnDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 		eachSpacing: eachSpacing
 	} as ChartColumnDataPoints
 }
-function drawLegend(opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, chartData : ChartOptionsChartData) {
+function drawLegend(opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, chartData : IChartOptionsChartData) {
 	if (opts.legend.show == false) {
 		return;
 	}
@@ -2191,7 +2228,7 @@ function drawLegend(opts : ChartOptions, config : TuiChartConfig, context : Canv
 		}
 	});
 }
-function calTooltipYAxisData(point : number, opts : ChartOptions,) : string[] {
+function calTooltipYAxisData(point : number, opts : IChartOptions,) : string[] {
 	let ranges = [...opts.chartData.yAxisData.ranges!];
 	let spacingValid = opts.height - opts.area[0] - opts.area[2];
 	let minAxis = opts.area[0];
@@ -2203,7 +2240,7 @@ function calTooltipYAxisData(point : number, opts : ChartOptions,) : string[] {
 		let item = maxVal - (maxVal - minVal) * (point - minAxis) / spacingValid;
 		let val : string
 		if (opts.yAxis.data[i].formatter != null) {
-			const fun = opts.yAxis.data[i].formatter as (item : number, i : number, opts : ChartOptions) => string
+			const fun = opts.yAxis.data[i].formatter as (item : number, i : number, opts : IChartOptions) => string
 			val = fun(item, i, opts)
 		} else {
 			val = item.toFixed(0)
@@ -2212,7 +2249,7 @@ function calTooltipYAxisData(point : number, opts : ChartOptions,) : string[] {
 	}
 	return items;
 }
-function drawToolTipHorizentalLine(opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawToolTipHorizentalLine(opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let toolTipOption = opts.extra.tooltip!
 	let startX = opts.area[3];
 	let endX = opts.width - opts.area[1];
@@ -2271,7 +2308,7 @@ function drawToolTipHorizentalLine(opts : ChartOptions, config : TuiChartConfig,
 		}
 	}
 }
-function drawToolTipBridge(opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number) {
+function drawToolTipBridge(opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number) {
 	//以下代码后续需要翻译
 	let toolTipOption = opts.extra.tooltip ?? new ChartOptionsExtraTooltip();
 	if (toolTipOption.horizentalLine && opts.tooltip != null && process == 1 && (opts.type == 'line' || opts.type == 'area' || opts.type == 'column' || opts.type == 'mount' || opts.type == 'candle' || opts.type == 'mix')) {
@@ -2292,7 +2329,7 @@ function drawCanvas(context : CanvasRenderingContext2D) {
 	context.restore();
 	// context.draw();
 }
-function calMarkLineData(points : ChartOptionsExtraMarkLineData[], opts : ChartOptions) : ChartOptionsExtraMarkLineData[] {
+function calMarkLineData(points : IChartOptionsExtraMarkLineData[], opts : IChartOptions) : IChartOptionsExtraMarkLineData[] {
 	let minRange : number, maxRange : number;
 	let spacingValid = opts.height - opts.area[0] - opts.area[2];
 	for (let i = 0; i < points.length; i++) {
@@ -2305,7 +2342,7 @@ function calMarkLineData(points : ChartOptionsExtraMarkLineData[], opts : ChartO
 	}
 	return points;
 }
-function drawMarkLine(opts : ChartOptions, context : CanvasRenderingContext2D) {
+function drawMarkLine(opts : IChartOptions, context : CanvasRenderingContext2D) {
 	const markLineOption = opts.extra.markLine!
 	let startX = opts.area[3];
 	let endX = opts.width - opts.area[1];
@@ -2351,7 +2388,7 @@ function drawMarkLine(opts : ChartOptions, context : CanvasRenderingContext2D) {
 		}
 	}
 }
-function contextRotate(context : CanvasRenderingContext2D, opts : ChartOptions) {
+function contextRotate(context : CanvasRenderingContext2D, opts : IChartOptions) {
 	if (opts.rotateLock != true) {
 		context.translate(opts.height, 0);
 		context.rotate(90 * Math.PI / 180);
@@ -2361,7 +2398,8 @@ function contextRotate(context : CanvasRenderingContext2D, opts : ChartOptions) 
 		opts._rotate_ = true;
 	}
 }
-export class Animation {
+
+export class Animation implements IAnimation {
 	animationFrameId : number = 0
 	isStop : boolean = false
 	duration : number
@@ -2421,11 +2459,11 @@ export class Animation {
 		this.isStop = true;
 	}
 }
-// function fixPieSeries(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig) : ChartOptionsSeries[] {
-// 	let pieSeriesArr : ChartOptionsSeries[] = [];
+// function fixPieSeries(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig) : IChartOptionsSeries[] {
+// 	let pieSeriesArr : IChartOptionsSeries[] = [];
 // 	if (series.length > 0 && Array.isArray(series[0].data)) {
 // 		opts._pieSeries_ = series;
-// 		let oldseries : ChartOptionsSeriesData[] = series[0].data;
+// 		let oldseries : IChartOptionsSeriesData[] = series[0].data;
 // 		for (let i = 0; i < oldseries.length; i++) {
 // 			const newseries = new ChartOptionsSeriesData()
 // 			oldseries[i].formatter = series[0].formatter;
@@ -2438,9 +2476,9 @@ export class Animation {
 // 	}
 // 	return pieSeriesArr;
 // }
-function getMountDataPoints(series : ChartOptionsSeries[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, mountOption : ChartOptionsExtraMount, process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getMountDataPoints(series : IChartOptionsSeries[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, mountOption : IChartOptionsExtraMount, process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	// let process = arguments.length > 8 && arguments[8] != undefined ? arguments[8] : 1;
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	// let validWidth = opts.width - opts.area[1] - opts.area[3];
 	let mountWidth = eachSpacing * mountOption.widthRatio;
@@ -2459,12 +2497,12 @@ function getMountDataPoints(series : ChartOptionsSeries[], minRange : number, ma
 	});
 	return points;
 }
-function drawMountPointText(points : ChartOptionsChartDataCalPoints[], series : ChartOptionsSeries[], config : TuiChartConfig, context : CanvasRenderingContext2D, opts : ChartOptions, zeroPoints : number) {
+function drawMountPointText(points : IChartOptionsChartDataCalPoints[], series : IChartOptionsSeries[], config : ITuiChartConfig, context : CanvasRenderingContext2D, opts : IChartOptions, zeroPoints : number) {
 	// 绘制数据文案
 	// let data = series.data!;发现是无用代码，如果后续代码不出问题删除这行代码
 	// let Position = opts.extra.mount!.labelPosition;发现是无用代码，如果后续代码不出问题删除这行代码
 	points.forEach(function (item, index) {
-		let itemseries : ChartOptionsSeries = series[index]
+		let itemseries : IChartOptionsSeries = series[index]
 		let textOffset = itemseries.textOffset ?? 0;
 		context.beginPath();
 		let fontSize = itemseries.textSize != null ? itemseries.textSize! * opts.pixelRatio : config.fontSize;
@@ -2474,7 +2512,7 @@ function drawMountPointText(points : ChartOptionsChartDataCalPoints[], series : 
 		// let formatVal = series[index].formatter ? series[index].formatter(value, index, series, opts) : value;
 		let formatVal : string = `${value}`
 		if (itemseries.formatter != null) {
-			const fun = itemseries.formatter as (value : number, index : number, series : ChartOptionsSeries[], opts : ChartOptions) => string
+			const fun = itemseries.formatter as (value : number, index : number, series : IChartOptionsSeries[], opts : IChartOptions) => string
 			formatVal = fun(value, index, series, opts)
 		}
 		context.textAlign = 'center'
@@ -2488,7 +2526,7 @@ function drawMountPointText(points : ChartOptionsChartDataCalPoints[], series : 
 		context.textAlign = 'left';
 	});
 }
-function drawMountDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawMountDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!
@@ -2723,7 +2761,7 @@ function drawMountDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 		eachSpacing: eachSpacing
 	} as ChartColumnDataPoints
 }
-function getArrXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, index : number = -1) : number[] {
+function getArrXAxisTextList(series : IChartOptionsSeries[], opts : IChartOptions, index : number = -1) : number[] {
 	let data : number[][] = []
 	series.forEach((item) => {
 		data.push(...(item.dataArr))
@@ -2768,9 +2806,9 @@ function getArrXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions,
 	}
 	return range;
 }
-function getXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, stack : string, index : number = -1) : number[] {
+function getXAxisTextList(series : IChartOptionsSeries[], opts : IChartOptions, stack : string, index : number = -1) : number[] {
 	// let index = arguments.length > 4 && arguments[4] != undefined ? arguments[4] : -1;
-	let data : ChartOptionsSeriesData[];
+	let data : IChartOptionsSeriesData[];
 	if (stack == 'stack') {
 		data = dataCombineStack(series, opts.categories!.length);
 	} else {
@@ -2778,7 +2816,7 @@ function getXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, st
 	}
 	let sorted : number[] = [];
 	// remove null from data
-	data = data.filter((item : ChartOptionsSeriesData) : boolean => {
+	data = data.filter((item : IChartOptionsSeriesData) : boolean => {
 		//return item != null;
 		if (typeof item == 'object') {
 			if (Array.isArray(item)) {
@@ -2790,7 +2828,7 @@ function getXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, st
 			return true;
 		}
 	});
-	data.forEach((item : ChartOptionsSeriesData) => {
+	data.forEach((item : IChartOptionsSeriesData) => {
 		sorted.push(item.value!)
 		// console.log(item)
 		// if (typeof item == 'object') {
@@ -2847,12 +2885,12 @@ function getXAxisTextList(series : ChartOptionsSeries[], opts : ChartOptions, st
 	return range;
 }
 
-function calXAxisData(series : ChartOptionsSeries[], opts : ChartOptions) : ChartOptionsChartDataXAxisData {
+function calXAxisData(series : IChartOptionsSeries[], opts : IChartOptions) : IChartOptionsChartDataXAxisData {
 	//堆叠图重算Y轴
 	// let columnstyle = assign({}, {
 	// 	type: ""
 	// }, opts.extra.bar);
-	// let columnstyle : ChartOptionsExtraBar = opts.extra.bar!
+	// let columnstyle : IChartOptionsExtraBar = opts.extra.bar!
 	const type = opts.extra.bar?.type ?? ''
 	const result = new ChartOptionsChartDataXAxisData()
 	result.angle = 0
@@ -2895,7 +2933,7 @@ function calXAxisData(series : ChartOptionsSeries[], opts : ChartOptions) : Char
 	return result;
 }
 
-function drawBarToolTipSplitArea(offsetX : number, opts : ChartOptions, context : CanvasRenderingContext2D, eachSpacing : number) {
+function drawBarToolTipSplitArea(offsetX : number, opts : IChartOptions, context : CanvasRenderingContext2D, eachSpacing : number) {
 	let toolTipOption = opts.extra.bar!
 	let startX = opts.area[3];
 	let endX = opts.width - opts.area[1];
@@ -2906,8 +2944,8 @@ function drawBarToolTipSplitArea(offsetX : number, opts : ChartOptions, context 
 	context.fill();
 	context.fillStyle = "#FFFFFF";
 }
-function getBarDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, yAxisPoints : number[], opts : ChartOptions, process : number = 1) : ChartOptionsChartDataCalPoints[] {
-	let points : ChartOptionsChartDataCalPoints[] = [];
+function getBarDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, yAxisPoints : number[], opts : IChartOptions, process : number = 1) : IChartOptionsChartDataCalPoints[] {
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	// let validHeight = opts.height - opts.area[0] - opts.area[2];
 	let validWidth = opts.width - opts.area[1] - opts.area[3];
 	data.forEach(function (item, index) {
@@ -2924,10 +2962,10 @@ function getBarDataPoints(data : ChartOptionsSeriesData[], minRange : number, ma
 	});
 	return points;
 }
-function getBarStackDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, yAxisPoints : number[], opts : ChartOptions, seriesIndex : number, stackSeries : ChartOptionsSeries[], process : number = 1) : ChartOptionsChartDataCalPoints[] {
-	let points : ChartOptionsChartDataCalPoints[] = [];
+function getBarStackDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, yAxisPoints : number[], opts : IChartOptions, seriesIndex : number, stackSeries : IChartOptionsSeries[], process : number = 1) : IChartOptionsChartDataCalPoints[] {
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.width - opts.area[1] - opts.area[3];
-	data.forEach(function (item : ChartOptionsSeriesData, index : number) {
+	data.forEach(function (item : IChartOptionsSeriesData, index : number) {
 		let point = new ChartOptionsChartDataCalPoints();;
 		point.color = item.color;
 		point.y = yAxisPoints[index];
@@ -2957,8 +2995,8 @@ function getBarStackDataPoints(data : ChartOptionsSeriesData[], minRange : numbe
 	});
 	return points;
 }
-function fixBarData(points : ChartOptionsChartDataCalPoints[], eachSpacing : number, columnLen : number, index : number, opts : ChartOptions) : ChartOptionsChartDataCalPoints[] {
-	return points.map((item) : ChartOptionsChartDataCalPoints => {
+function fixBarData(points : IChartOptionsChartDataCalPoints[], eachSpacing : number, columnLen : number, index : number, opts : IChartOptions) : IChartOptionsChartDataCalPoints[] {
+	return points.map((item) : IChartOptionsChartDataCalPoints => {
 		let seriesGap = opts.extra.bar!.seriesGap * opts.pixelRatio;
 		let categoryGap = opts.extra.bar!.categoryGap * opts.pixelRatio;
 		seriesGap = Math.min(seriesGap, eachSpacing / columnLen)
@@ -2974,9 +3012,9 @@ function fixBarData(points : ChartOptionsChartDataCalPoints[], eachSpacing : num
 		return item;
 	});
 }
-function fixBarStackData(points : ChartOptionsChartDataCalPoints[], eachSpacing : number, opts : ChartOptions) : ChartOptionsChartDataCalPoints[] {
+function fixBarStackData(points : IChartOptionsChartDataCalPoints[], eachSpacing : number, opts : IChartOptions) : IChartOptionsChartDataCalPoints[] {
 	let categoryGap = opts.extra.bar!.categoryGap * opts.pixelRatio;
-	return points.map(function (item) : ChartOptionsChartDataCalPoints {
+	return points.map(function (item) : IChartOptionsChartDataCalPoints {
 		item.width = Math.ceil(eachSpacing - 2 * categoryGap);
 		if (opts.extra.bar != null && opts.extra.bar!.width != null && +opts.extra.bar!.width! > 0) {
 			item.width = Math.min(item.width!, +opts.extra.bar!.width! * opts.pixelRatio);
@@ -2987,7 +3025,7 @@ function fixBarStackData(points : ChartOptionsChartDataCalPoints[], eachSpacing 
 		return item;
 	});
 }
-function drawBarPointText(points : ChartOptionsChartDataCalPoints[], series : ChartOptionsSeries, config : TuiChartConfig, context : CanvasRenderingContext2D, opts : ChartOptions) {
+function drawBarPointText(points : IChartOptionsChartDataCalPoints[], series : IChartOptionsSeries, config : ITuiChartConfig, context : CanvasRenderingContext2D, opts : IChartOptions) {
 	// 绘制数据文案
 	let data = series.data!;
 	// let textOffset = series.textOffset ?? 0;
@@ -3002,7 +3040,7 @@ function drawBarPointText(points : ChartOptionsChartDataCalPoints[], series : Ch
 		// }
 		let formatVal : string
 		if (series.formatter != null) {
-			const fun = series.formatter as (value : number, index : number, series : ChartOptionsSeries, opts : ChartOptions) => string
+			const fun = series.formatter as (value : number, index : number, series : IChartOptionsSeries, opts : IChartOptions) => string
 			formatVal = fun(value, index, series, opts)
 		} else {
 			formatVal = `${value}`
@@ -3013,14 +3051,14 @@ function drawBarPointText(points : ChartOptionsChartDataCalPoints[], series : Ch
 		context.stroke();
 	});
 }
-function drawBarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawBarDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let yAxisPoints : number[] = [];
 	let eachSpacing = (opts.height - opts.area[0] - opts.area[2]) / opts.categories!.length;
 	for (let i = 0; i < opts.categories!.length; i++) {
 		yAxisPoints.push(opts.area[0] + eachSpacing / 2 + eachSpacing * i);
 	}
 	let columnOption = opts.extra.bar!
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	context.save();
 	let leftNum = -2;
 	let rightNum = yAxisPoints.length + 2;
@@ -3030,12 +3068,12 @@ function drawBarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 		drawBarToolTipSplitArea(opts.tooltip!.offset.y, opts, context, eachSpacing);
 	}
 	columnOption.customColor = fillCustomColor(columnOption.linearType, columnOption.customColor, series, config);
-	series.forEach((eachSeries : ChartOptionsSeries, seriesIndex : number) => {
+	series.forEach((eachSeries : IChartOptionsSeries, seriesIndex : number) => {
 		let ranges : number[] = [...opts.chartData.xAxisData.ranges!];
 		let maxRange = ranges.pop()!;
 		let minRange = ranges.shift()!;
 		let data = eachSeries.data!;
-		let points : ChartOptionsChartDataCalPoints[];
+		let points : IChartOptionsChartDataCalPoints[];
 		switch (columnOption.type) {
 			case 'group':
 				points = getBarDataPoints(data, minRange, maxRange, yAxisPoints, opts, process);
@@ -3137,7 +3175,7 @@ function drawBarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 			let maxRange = ranges.pop()!;
 			let minRange = ranges.shift()!;
 			let data = eachSeries.data!;
-			let points : ChartOptionsChartDataCalPoints[];
+			let points : IChartOptionsChartDataCalPoints[];
 			switch (columnOption.type) {
 				case 'group':
 					points = getBarDataPoints(data, minRange, maxRange, yAxisPoints, opts, process);
@@ -3158,16 +3196,16 @@ function drawBarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 		eachSpacing: eachSpacing
 	} as ChartColumnDataPoints
 }
-function createCurveControlPoints(points : ChartOptionsChartDataCalPoints[], i : number) : ChartCurveControlPoints {
+function createCurveControlPoints(points : IChartOptionsChartDataCalPoints[], i : number) : IChartCurveControlPoints {
 	const curvepoints = new ChartCurveControlPoints()
-	function isNotMiddlePoint(points : ChartOptionsChartDataCalPoints[], i : number) : boolean {
+	function isNotMiddlePoint(points : IChartOptionsChartDataCalPoints[], i : number) : boolean {
 		if (i > 0 && i < points.length - 2) {
 			return points[i].y >= Math.max(points[i - 1].y, points[i + 1].y) || points[i].y <= Math.min(points[i - 1].y, points[i + 1].y);
 		} else {
 			return false;
 		}
 	}
-	function isNotMiddlePointX(points : ChartOptionsChartDataCalPoints[], i : number) : boolean {
+	function isNotMiddlePointX(points : IChartOptionsChartDataCalPoints[], i : number) : boolean {
 		if (i > 0 && i < points.length - 2) {
 			return points[i].x >= Math.max(points[i - 1].x, points[i + 1].x) || points[i].x <= Math.min(points[i - 1].x, points[i + 1].x);
 		} else {
@@ -3230,11 +3268,11 @@ function createCurveControlPoints(points : ChartOptionsChartDataCalPoints[], i :
 	curvepoints.ctrB = ctrBOffset
 	return curvepoints
 }
-function drawArrPointText(points : ChartOptionsChartDataCalPoints[], series : ChartOptionsSeries, config : TuiChartConfig, context : CanvasRenderingContext2D, opts : ChartOptions) {
+function drawArrPointText(points : IChartOptionsChartDataCalPoints[], series : IChartOptionsSeries, config : ITuiChartConfig, context : CanvasRenderingContext2D, opts : IChartOptions) {
 	// 绘制数据文案
 	let data = series.dataArr;
 	let textOffset = series.textOffset ?? 0;
-	points.forEach((item : ChartOptionsChartDataCalPoints, index : number) => {
+	points.forEach((item : IChartOptionsChartDataCalPoints, index : number) => {
 		context.beginPath();
 		let fontSize = (series.textSize ?? config.fontSize) * opts.pixelRatio;
 		context.font = `${fontSize}px sans-serif`
@@ -3242,7 +3280,7 @@ function drawArrPointText(points : ChartOptionsChartDataCalPoints[], series : Ch
 		let value = data[index][1]
 		let formatVal : string
 		if (series.formatter != null) {
-			const fun = series.formatter as (value : number, index : number, series : ChartOptionsSeries, opts : ChartOptions) => string
+			const fun = series.formatter as (value : number, index : number, series : IChartOptionsSeries, opts : IChartOptions) => string
 			formatVal = fun(value, index, series, opts)
 		} else {
 			formatVal = `${value}`
@@ -3255,11 +3293,11 @@ function drawArrPointText(points : ChartOptionsChartDataCalPoints[], series : Ch
 		context.textAlign = 'left';
 	});
 }
-function drawPointText(points : ChartOptionsChartDataCalPoints[], series : ChartOptionsSeries, config : TuiChartConfig, context : CanvasRenderingContext2D, opts : ChartOptions) {
+function drawPointText(points : IChartOptionsChartDataCalPoints[], series : IChartOptionsSeries, config : ITuiChartConfig, context : CanvasRenderingContext2D, opts : IChartOptions) {
 	// 绘制数据文案
 	let data = series.data!;
 	let textOffset = series.textOffset ?? 0;
-	points.forEach((item : ChartOptionsChartDataCalPoints, index : number) => {
+	points.forEach((item : IChartOptionsChartDataCalPoints, index : number) => {
 		context.beginPath();
 		let fontSize = (series.textSize ?? config.fontSize) * opts.pixelRatio;
 		context.font = `${fontSize}px sans-serif`
@@ -3275,7 +3313,7 @@ function drawPointText(points : ChartOptionsChartDataCalPoints[], series : Chart
 		// let formatVal = series.formatter ? series.formatter(value, index, series, opts) : value;
 		let formatVal : string
 		if (series.formatter != null) {
-			const fun = series.formatter as (value : number, index : number, series : ChartOptionsSeries, opts : ChartOptions) => string
+			const fun = series.formatter as (value : number, index : number, series : IChartOptionsSeries, opts : IChartOptions) => string
 			formatVal = fun(value!, index, series, opts)
 		} else {
 			formatVal = `${value}`
@@ -3288,7 +3326,7 @@ function drawPointText(points : ChartOptionsChartDataCalPoints[], series : Chart
 		context.textAlign = 'left';
 	});
 }
-function drawActiveAreaPoint(points : ChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : ChartOptions, option : ChartOptionsExtraArea, seriesIndex : number) {
+function drawActiveAreaPoint(points : IChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : IChartOptions, option : IChartOptionsExtraArea, seriesIndex : number) {
 	if (opts.tooltip == null) return
 	if (opts.tooltip!.group.length > 0 && !opts.tooltip!.group.includes(seriesIndex)) {
 		return
@@ -3344,7 +3382,7 @@ function drawActiveAreaPoint(points : ChartOptionsChartDataCalPoints[], color : 
 	context.fill();
 	context.stroke();
 }
-function drawActivePoint(points : ChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : ChartOptions, option : ChartOptionsExtraLine, seriesIndex : number) {
+function drawActivePoint(points : IChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : IChartOptions, option : IChartOptionsExtraLine, seriesIndex : number) {
 	if (opts.tooltip == null) return
 	if (opts.tooltip!.group.length > 0 && opts.tooltip!.group.includes(seriesIndex) == false) {
 		return
@@ -3402,7 +3440,7 @@ function drawActivePoint(points : ChartOptionsChartDataCalPoints[], color : stri
 	context.fill();
 	context.stroke();
 }
-function drawPointShape(points : ChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : ChartOptions) {
+function drawPointShape(points : IChartOptionsChartDataCalPoints[], color : string, shape : string, context : CanvasRenderingContext2D, opts : IChartOptions) {
 	context.beginPath();
 	const xOffset = opts.xOffset
 	const yOffset = opts.yOffset
@@ -3447,9 +3485,9 @@ function drawPointShape(points : ChartOptionsChartDataCalPoints[], color : strin
 	context.fill();
 	context.stroke();
 }
-function splitCandlePoints(points : ChartOptionsChartDataCalPoints[][], eachSeries : ChartOptionsSeries) : ChartOptionsChartDataCalPoints[][][] {
-	let newPoints : ChartOptionsChartDataCalPoints[][][] = [];
-	let items : ChartOptionsChartDataCalPoints[][] = [];
+function splitCandlePoints(points : IChartOptionsChartDataCalPoints[][], eachSeries : IChartOptionsSeries) : IChartOptionsChartDataCalPoints[][][] {
+	let newPoints : IChartOptionsChartDataCalPoints[][][] = [];
+	let items : IChartOptionsChartDataCalPoints[][] = [];
 	points.forEach(function (item) {
 		if (eachSeries.connectNulls) {
 			items.push(item);
@@ -3471,9 +3509,9 @@ function splitCandlePoints(points : ChartOptionsChartDataCalPoints[][], eachSeri
 	}
 	return newPoints;
 }
-function splitPoints(points : ChartOptionsChartDataCalPoints[]) : ChartOptionsChartDataCalPoints[][] {
-	let newPoints : ChartOptionsChartDataCalPoints[][] = [];
-	let items : ChartOptionsChartDataCalPoints[] = [];
+function splitPoints(points : IChartOptionsChartDataCalPoints[]) : IChartOptionsChartDataCalPoints[][] {
+	let newPoints : IChartOptionsChartDataCalPoints[][] = [];
+	let items : IChartOptionsChartDataCalPoints[] = [];
 	points.forEach(function (item) {
 		items.push(item);
 		// if (eachSeries.connectNulls) {
@@ -3496,9 +3534,9 @@ function splitPoints(points : ChartOptionsChartDataCalPoints[]) : ChartOptionsCh
 	}
 	return newPoints;
 }
-function getLineDataPoints(data : ChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, lineOption : ChartOptionsExtraLine, process : number = 1) : ChartOptionsChartDataCalPoints[] {
+function getLineDataPoints(data : IChartOptionsSeriesData[], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, lineOption : IChartOptionsExtraLine, process : number = 1) : IChartOptionsChartDataCalPoints[] {
 	let boundaryGap = opts.xAxis.boundaryGap;
-	let points : ChartOptionsChartDataCalPoints[] = [];
+	let points : IChartOptionsChartDataCalPoints[] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	// let validWidth = opts.width - opts.area[1] - opts.area[3];
 	data.forEach(function (item, index) {
@@ -3543,13 +3581,13 @@ function getLineDataPoints(data : ChartOptionsSeriesData[], minRange : number, m
 	});
 	return points;
 }
-export function drawLineDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+export function drawLineDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let lineOption = opts.extra.line!
 	lineOption.width = lineOption.width * opts.pixelRatio;
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	const xOffset = opts.xOffset
 	const yOffset = opts.yOffset
 	context.save();
@@ -3574,7 +3612,7 @@ export function drawLineDataPoints(series : ChartOptionsSeries[], opts : ChartOp
 		let data = eachSeries.data!;
 		let points = getLineDataPoints(data, minRange, maxRange, xAxisPoints, eachSpacing, opts, lineOption, process);
 		calPoints.push(points);
-		let splitPointList : ChartOptionsChartDataCalPoints[][] = splitPoints(points);
+		let splitPointList : IChartOptionsChartDataCalPoints[][] = splitPoints(points);
 		if (eachSeries.lineType == 'dash') {
 			let dashLength = eachSeries.dashLength;
 			dashLength *= opts.pixelRatio;
@@ -3665,13 +3703,13 @@ export function drawLineDataPoints(series : ChartOptionsSeries[], opts : ChartOp
 	} as ChartColumnDataPoints
 }
 
-function drawAreaDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawAreaDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let areaOption = opts.extra.area!
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!
 	let endY = opts.height - opts.area[2];
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	const xOffset = opts.xOffset
 	const yOffset = opts.yOffset
 	context.save();
@@ -3847,7 +3885,7 @@ function drawAreaDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, 
 		eachSpacing: eachSpacing
 	} as ChartColumnDataPoints
 }
-function getPieDataPoints(series : ChartOptionsSeries[], radius : number, process : number = 1) : ChartOptionsSeries[] {
+function getPieDataPoints(series : IChartOptionsSeries[], radius : number, process : number = 1) : IChartOptionsSeries[] {
 	let count = 0;
 	let _start_ = 0;
 	for (let i = 0; i < series.length; i++) {
@@ -3877,7 +3915,7 @@ function getPieDataPoints(series : ChartOptionsSeries[], radius : number, proces
 function isSameSign(num1 : number, num2 : number) : boolean {
 	return Math.abs(num1) == num1 && Math.abs(num2) == num2 || Math.abs(num1) != num1 && Math.abs(num2) != num2;
 }
-function isCollision(obj1 : ChartOptionsChartDataLegendDataArea, obj2 : ChartOptionsChartDataLegendDataArea) : boolean {
+function isCollision(obj1 : IChartOptionsChartDataLegendDataArea, obj2 : IChartOptionsChartDataLegendDataArea) : boolean {
 	obj1.end.x = obj1.start.x + obj1.width;
 	obj1.end.y = obj1.start.y - obj1.height;
 	obj2.end.x = obj2.start.x + obj2.width;
@@ -3885,7 +3923,7 @@ function isCollision(obj1 : ChartOptionsChartDataLegendDataArea, obj2 : ChartOpt
 	let flag = obj2.start.x > obj1.end.x || obj2.end.x < obj1.start.x || obj2.end.y > obj1.start.y || obj2.start.y < obj1.end.y;
 	return !flag;
 }
-function avoidCollision(obj : ChartOptionsChartDataLegendDataArea, target : ChartOptionsChartDataLegendDataArea | null) : ChartOptionsChartDataLegendDataArea {
+function avoidCollision(obj : IChartOptionsChartDataLegendDataArea, target : IChartOptionsChartDataLegendDataArea | null) : IChartOptionsChartDataLegendDataArea {
 	if (target != null) {
 		while (isCollision(obj, target!)) {
 			if (obj.start.x > 0) {
@@ -3903,24 +3941,24 @@ function avoidCollision(obj : ChartOptionsChartDataLegendDataArea, target : Char
 	}
 	return obj;
 }
-function convertCoordinateOrigin(x : number, y : number, center : Offset) : ChartOptionsChartDataCalPoints {
+function convertCoordinateOrigin(x : number, y : number, center : IOffset) : IChartOptionsChartDataCalPoints {
 	const CoordinateOrigin = new ChartOptionsChartDataCalPoints()
 	CoordinateOrigin.x = center.x + x
 	CoordinateOrigin.y = center.y - y
 	return CoordinateOrigin;
 }
 
-function drawPieText(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, center : Offset) {
+function drawPieText(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, center : IOffset) {
 	let lineRadius = config.pieChartLinePadding;
-	let textObjectCollection : ChartOptionsChartDataLegendDataArea[] = [];
-	let lastTextObject : ChartOptionsChartDataLegendDataArea | null = null;
+	let textObjectCollection : IChartOptionsChartDataLegendDataArea[] = [];
+	let lastTextObject : IChartOptionsChartDataLegendDataArea | null = null;
 	const xOffset = opts.xOffset
 	const yOffset = opts.yOffset
-	let seriesConvert = series.map((item : ChartOptionsSeries, index : number) : ChartOptionsSeries => {
+	let seriesConvert = series.map((item : IChartOptionsSeries, index : number) : IChartOptionsSeries => {
 		// let text = item.formatter ? item.formatter(item, index, series, opts) : (item._proportion_ * 100).toFixed(2) + '%';
 		let text : string
 		if (item.formatter != null) {
-			const fun = item.formatter as (item : ChartOptionsSeries, index : number, series : ChartOptionsSeries[], opts : ChartOptions) => string
+			const fun = item.formatter as (item : IChartOptionsSeries, index : number, series : IChartOptionsSeries[], opts : IChartOptions) => string
 			text = fun(item, index, series, opts)
 		} else {
 			text = (item._proportion_ * 100).toFixed(2) + '%'
@@ -4029,7 +4067,7 @@ function drawPieText(series : ChartOptionsSeries[], opts : ChartOptions, config 
 		context.closePath();
 	}
 }
-function drawRingTitle(opts : ChartOptions, context : CanvasRenderingContext2D, center : Offset) {
+function drawRingTitle(opts : IChartOptions, context : CanvasRenderingContext2D, center : IOffset) {
 	let titlefontSize = opts.title.fontSize;
 	let subtitlefontSize = opts.subtitle.fontSize;
 	let title = opts.title.name ?? '';
@@ -4068,7 +4106,7 @@ function drawRingTitle(opts : ChartOptions, context : CanvasRenderingContext2D, 
 		context.stroke();
 	}
 }
-function drawRingDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
+function drawRingDataPoints(seriese : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
 	let pieOption = opts.extra.ring!
 	const centerPosition = new Offset()
 	centerPosition.x = opts.area[3] + (opts.width - opts.area[1] - opts.area[3]) / 2
@@ -4088,11 +4126,11 @@ function drawRingDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions,
 
 	let activeRadius = pieOption.activeRadius * opts.pixelRatio;
 	pieOption.customColor = fillCustomColor(pieOption.linearType, pieOption.customColor, series, config);
-	series = series.map((eachSeries : ChartOptionsSeries) : ChartOptionsSeries => {
+	series = series.map((eachSeries : IChartOptionsSeries) : IChartOptionsSeries => {
 		eachSeries._start_ += (pieOption.offsetAngle!) * Math.PI / 180;
 		return eachSeries;
 	});
-	series.forEach((eachSeries : ChartOptionsSeries, seriesIndex : number) => {
+	series.forEach((eachSeries : IChartOptionsSeries, seriesIndex : number) => {
 		if (opts.tooltip != null) {
 			if ((opts.tooltip!.index as number) == seriesIndex) {
 				context.beginPath();
@@ -4148,7 +4186,7 @@ function drawRingDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions,
 	piedata.series = series
 	return piedata;
 }
-function drawPieDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
+function drawPieDataPoints(seriese : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
 	let pieOption = opts.extra.pie!
 	const centerPosition = new Offset()
 	centerPosition.x = opts.area[3] + (opts.width - opts.area[1] - opts.area[3]) / 2
@@ -4168,11 +4206,11 @@ function drawPieDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions, 
 
 	let activeRadius = pieOption.activeRadius * opts.pixelRatio;
 	pieOption.customColor = fillCustomColor(pieOption.linearType, pieOption.customColor, series, config);
-	series = series.map((eachSeries : ChartOptionsSeries) : ChartOptionsSeries => {
+	series = series.map((eachSeries : IChartOptionsSeries) : IChartOptionsSeries => {
 		eachSeries._start_ += (pieOption.offsetAngle!) * Math.PI / 180;
 		return eachSeries;
 	});
-	series.forEach((eachSeries : ChartOptionsSeries, seriesIndex : number) => {
+	series.forEach((eachSeries : IChartOptionsSeries, seriesIndex : number) => {
 		if (opts.tooltip != null) {
 			if ((opts.tooltip!.index as number) == seriesIndex) {
 				context.beginPath();
@@ -4216,7 +4254,7 @@ function drawPieDataPoints(seriese : ChartOptionsSeries[], opts : ChartOptions, 
 	piedata.series = series
 	return piedata;
 }
-function getPieTextMaxLength(eseries : ChartOptionsSeries[], config : TuiChartConfig, opts : ChartOptions) : number {
+function getPieTextMaxLength(eseries : IChartOptionsSeries[], config : ITuiChartConfig, opts : IChartOptions) : number {
 	let series = getPieDataPoints(eseries, 0);
 	let maxLength = 0;
 	for (let i = 0; i < series.length; i++) {
@@ -4257,12 +4295,12 @@ function isInAngleRange(eangle : number, estartAngle : number, eendAngle : numbe
 	return angle >= startAngle && angle <= endAngle;
 }
 
-function isInExactPieChartArea(currentPoints : TouchPosition, center : Offset, radius : number) : boolean {
+function isInExactPieChartArea(currentPoints : TouchPosition, center : IOffset, radius : number) : boolean {
 	return Math.pow(currentPoints.x - center.x, 2) + Math.pow(currentPoints.y - center.y, 2) <= Math.pow(radius, 2);
 }
 
-export function findPieChartCurrentIndex(currentPoints : TouchPosition, pieData : ChartOptionsChartDataToolTiPData, opts : ChartOptions) : ChartOptionsTooltip {
-	let tooltip : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findPieChartCurrentIndex(currentPoints : TouchPosition, pieData : IChartOptionsChartDataToolTiPData, opts : IChartOptions) : IChartOptionsTooltip {
+	let tooltip : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let currentIndex = -1;
 	let series = getPieDataPoints(pieData.series, 0);
 	if (isInExactPieChartArea(currentPoints, pieData.center, pieData.radius)) {
@@ -4285,8 +4323,8 @@ export function findPieChartCurrentIndex(currentPoints : TouchPosition, pieData 
 	tooltip.index = currentIndex
 	return tooltip;
 }
-function calCandleMA(dayArr : number[], nameArr : string[], colorArr : string[], kdata : number[][]) : ChartOptionsSeries[] {
-	let seriesTemp : ChartOptionsSeries[] = [];
+function calCandleMA(dayArr : number[], nameArr : string[], colorArr : string[], kdata : number[][]) : IChartOptionsSeries[] {
+	let seriesTemp : IChartOptionsSeries[] = [];
 	for (let k = 0; k < dayArr.length; k++) {
 		let seriesItem = new ChartOptionsSeries()
 		seriesItem.data = []
@@ -4312,7 +4350,7 @@ function calCandleMA(dayArr : number[], nameArr : string[], colorArr : string[],
 	}
 	return seriesTemp;
 }
-function getRoseDataPoints(series : ChartOptionsSeries[], type : string, minRadius : number, radius : number, process : number = 1) : ChartOptionsSeries[] {
+function getRoseDataPoints(series : IChartOptionsSeries[], type : string, minRadius : number, radius : number, process : number = 1) : IChartOptionsSeries[] {
 	let count = 0;
 	let _start_ = 0;
 	let dataArr : number[] = [];
@@ -4348,7 +4386,7 @@ function getRoseDataPoints(series : ChartOptionsSeries[], type : string, minRadi
 	}
 	return series;
 }
-function drawRoseDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
+function drawRoseDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
 	let roseOption = opts.extra.rose!
 	if (config.pieChartLinePadding == 0) {
 		config.pieChartLinePadding = roseOption.activeRadius * opts.pixelRatio;
@@ -4374,7 +4412,7 @@ function drawRoseDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, 
 	series = getRoseDataPoints(series, roseOption.type, minRadius, radius, process);
 	let activeRadius = roseOption.activeRadius * opts.pixelRatio;
 	roseOption.customColor = fillCustomColor(roseOption.linearType, roseOption.customColor, series, config);
-	series = series.map((eachSeries : ChartOptionsSeries) : ChartOptionsSeries => {
+	series = series.map((eachSeries : IChartOptionsSeries) : IChartOptionsSeries => {
 		eachSeries._start_ += (roseOption.offsetAngle ?? 0) * Math.PI / 180;
 		return eachSeries;
 	});
@@ -4429,8 +4467,8 @@ function drawRoseDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, 
 	return tooldata
 }
 
-export function findRoseChartCurrentIndex(currentPoints : TouchPosition, pieData : ChartOptionsChartDataToolTiPData, opts : ChartOptions) : ChartOptionsTooltip {
-	let tooltip : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findRoseChartCurrentIndex(currentPoints : TouchPosition, pieData : IChartOptionsChartDataToolTiPData, opts : IChartOptions) : IChartOptionsTooltip {
+	let tooltip : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let currentIndex = -1;
 	let series = getRoseDataPoints(opts._series_!, opts.extra.rose!.type, pieData.radius, pieData.radius);
 	if (isInExactPieChartArea(currentPoints, pieData.center, pieData.radius)) {
@@ -4454,7 +4492,7 @@ export function findRoseChartCurrentIndex(currentPoints : TouchPosition, pieData
 function approximatelyEqual(num1 : number, num2 : number) : boolean {
 	return Math.abs(num1 - num2) < 1e-10;
 }
-function drawRadarLabel(angleList : number[], radius : number, centerPosition : Offset, opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawRadarLabel(angleList : number[], radius : number, centerPosition : IOffset, opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let radarOption = opts.extra.radar ?? new ChartOptionsExtraRadar();
 	const xOffset = opts.xOffset
 	const yOffset = opts.yOffset
@@ -4492,21 +4530,21 @@ function drawRadarLabel(angleList : number[], radius : number, centerPosition : 
 	});
 
 }
-function getRadarDataPoints(angleList : number[], center : Offset, radius : number, series : ChartOptionsSeries[], opts : ChartOptions, process : number = 1) : ChartOptionsSeries[] {
+function getRadarDataPoints(angleList : number[], center : IOffset, radius : number, series : IChartOptionsSeries[], opts : IChartOptions, process : number = 1) : IChartOptionsSeries[] {
 	let radarOption = opts.extra.radar ?? new ChartOptionsExtraRadar();
 	radarOption.max = radarOption.max ?? 0;
-	let flierSeries : ChartOptionsSeriesData[] = dataCombine(series)
-	let seriesValue : number[] = flierSeries.map((item : ChartOptionsSeriesData) : number => item.value!)
+	let flierSeries : IChartOptionsSeriesData[] = dataCombine(series)
+	let seriesValue : number[] = flierSeries.map((item : IChartOptionsSeriesData) : number => item.value!)
 	let maxData = Math.max(radarOption.max!, Math.max(...seriesValue));
-	let data : ChartOptionsSeries[] = [];
+	let data : IChartOptionsSeries[] = [];
 	for (let i = 0; i < series.length; i++) {
-		let each : ChartOptionsSeries = series[i];
+		let each : IChartOptionsSeries = series[i];
 		let listItem = new ChartOptionsSeries();
 		listItem.color = each.color;
 		listItem.legendShape = each.legendShape;
 		listItem.pointShape = each.pointShape;
 		listItem.data = [];
-		each.data!.forEach((item : ChartOptionsSeriesData, index : number) => {
+		each.data!.forEach((item : IChartOptionsSeriesData, index : number) => {
 			let tmp = new ChartOptionsSeriesData();
 			tmp.angle = angleList[index];
 			tmp.proportion = (item.value!) / maxData;
@@ -4535,8 +4573,8 @@ function getRadarCoordinateSeries(length : number) : number[] {
 		return -1 * item + Math.PI / 2;
 	});
 }
-function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
-	let radarOption : ChartOptionsExtraRadar = opts.extra.radar!
+function drawRadarDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
+	let radarOption : IChartOptionsExtraRadar = opts.extra.radar!
 	let coordinateAngle : number[] = getRadarCoordinateSeries(opts.categories!.length);
 	let centerPosition = new Offset()
 	centerPosition.x = opts.area[3] + (opts.width - opts.area[1] - opts.area[3]) / 2
@@ -4554,7 +4592,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 	context.lineWidth = 1 * opts.pixelRatio;
 	context.strokeStyle = radarOption.gridColor;
 	coordinateAngle.forEach(function (angle, index) {
-		let pos : ChartOptionsChartDataCalPoints = convertCoordinateOrigin(radius * Math.cos(angle), radius * Math.sin(angle), centerPosition);
+		let pos : IChartOptionsChartDataCalPoints = convertCoordinateOrigin(radius * Math.cos(angle), radius * Math.sin(angle), centerPosition);
 		context.moveTo(xOffset + centerPosition.x, centerPosition.y + yOffset);
 		if (index % radarOption.gridEval == 0) {
 			context.lineTo(pos.x + xOffset, pos.y + yOffset);
@@ -4565,7 +4603,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 
 	// 画背景网格
 	function _loop(i : number) {
-		let startPos = new ChartOptionsChartDataCalPoints();
+		let startPos : IChartOptionsChartDataCalPoints = new ChartOptionsChartDataCalPoints();
 		context.beginPath();
 		context.lineWidth = (1 * opts.pixelRatio);
 		context.strokeStyle = (radarOption.gridColor);
@@ -4592,8 +4630,8 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 		_loop(i);
 	}
 	radarOption.customColor = fillCustomColor(radarOption.linearType, radarOption.customColor, series, config);
-	let radarDataPoints : ChartOptionsSeries[] = getRadarDataPoints(coordinateAngle, centerPosition, radius, series, opts, process);
-	radarDataPoints.forEach((eachSeries : ChartOptionsSeries, seriesIndex : number) => {
+	let radarDataPoints : IChartOptionsSeries[] = getRadarDataPoints(coordinateAngle, centerPosition, radius, series, opts, process);
+	radarDataPoints.forEach((eachSeries : IChartOptionsSeries, seriesIndex : number) => {
 		// 绘制区域数据
 		context.beginPath();
 		context.lineWidth = radarOption.borderWidth * opts.pixelRatio;
@@ -4615,7 +4653,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 
 		context.fillStyle = fillcolor;
 
-		eachSeries.data!.forEach((item : ChartOptionsSeriesData, index : number) => {
+		eachSeries.data!.forEach((item : IChartOptionsSeriesData, index : number) => {
 			if (index == 0) {
 				context.moveTo(item.position.x + xOffset, item.position.y + yOffset);
 			} else {
@@ -4629,7 +4667,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 		}
 		context.closePath();
 		if (opts.dataPointShape != false) {
-			let points = eachSeries.data!.map((item : ChartOptionsSeriesData) : ChartOptionsChartDataCalPoints => {
+			let points = eachSeries.data!.map((item : IChartOptionsSeriesData) : IChartOptionsChartDataCalPoints => {
 				return item.position;
 			});
 			drawPointShape(points, eachSeries.color!, eachSeries.pointShape, context, opts);
@@ -4638,7 +4676,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 	// 画刻度值
 	if (radarOption.axisLabel == true) {
 		let flierSeries = dataCombine(series)
-		let seriesValue = flierSeries.map((item : ChartOptionsSeriesData) : number => item.value!)
+		let seriesValue = flierSeries.map((item : IChartOptionsSeriesData) : number => item.value!)
 		let maxData = Math.max(radarOption.max!, Math.max(...seriesValue));
 		const stepLength = radius / radarOption.gridCount;
 		const fontSize = opts.fontSize * opts.pixelRatio;
@@ -4663,7 +4701,7 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 			let fontSize = eachSeries.textSize != null ? eachSeries.textSize! * opts.pixelRatio : config.fontSize;
 			context.font = `${fontSize}px sans-serif`
 			context.fillStyle = eachSeries.textColor;
-			eachSeries.data!.forEach((item : ChartOptionsSeriesData) => {
+			eachSeries.data!.forEach((item : IChartOptionsSeriesData) => {
 				//如果是中心点垂直的上下点位
 				if (Math.abs(item.position.x - centerPosition.x) < 2) {
 					//如果在上面
@@ -4696,8 +4734,8 @@ function drawRadarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions,
 	tooltip.angleList = coordinateAngle
 	return tooltip;
 }
-export function findRadarChartCurrentIndex(currentPoints : TouchPosition, radarData : ChartOptionsChartDataToolTiPData, count : number) : ChartOptionsTooltip {
-	let tooltip : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findRadarChartCurrentIndex(currentPoints : TouchPosition, radarData : IChartOptionsChartDataToolTiPData, count : number) : IChartOptionsTooltip {
+	let tooltip : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let eachAngleArea = 2 * Math.PI / count;
 	let currentIndex = -1;
 	if (isInExactPieChartArea(currentPoints, radarData.center, radarData.radius)) {
@@ -4735,7 +4773,7 @@ export function findRadarChartCurrentIndex(currentPoints : TouchPosition, radarD
 	return tooltip;
 }
 //进度条
-function getArcbarDataPoints(series : ChartOptionsSeries[], arcbarOption : ChartOptionsExtraArcbar, eprocess : number = 1) : ChartOptionsSeries[] {
+function getArcbarDataPoints(series : IChartOptionsSeries[], arcbarOption : IChartOptionsExtraArcbar, eprocess : number = 1) : IChartOptionsSeries[] {
 	let process = eprocess
 	if (process == 1) {
 		process = 0.999999;
@@ -4773,8 +4811,8 @@ function getArcbarDataPoints(series : ChartOptionsSeries[], arcbarOption : Chart
 	return series;
 }
 //漏斗图 
-export function findFunnelChartCurrentIndex(currentPoints : TouchPosition, funnelData : ChartOptionsChartDataToolTiPData) : ChartOptionsTooltip {
-	let tooltip : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findFunnelChartCurrentIndex(currentPoints : TouchPosition, funnelData : IChartOptionsChartDataToolTiPData) : IChartOptionsTooltip {
+	let tooltip : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let currentIndex = -1;
 	for (let i = 0, len = funnelData.series.length; i < len; i++) {
 		let item = funnelData.series[i];
@@ -4787,7 +4825,7 @@ export function findFunnelChartCurrentIndex(currentPoints : TouchPosition, funne
 	tooltip.index = currentIndex
 	return tooltip;
 }
-function getFunnelDataPoints(series : ChartOptionsSeries[], radius : number, option : ChartOptionsExtraFunnel, eachSpacing : number, process : number = 1) : ChartOptionsSeries[] {
+function getFunnelDataPoints(series : IChartOptionsSeries[], radius : number, option : IChartOptionsExtraFunnel, eachSpacing : number, process : number = 1) : IChartOptionsSeries[] {
 	for (let i = 0; i < series.length; i++) {
 		const val = series[i].data![0].value!
 		if (option.type == 'funnel') {
@@ -4802,7 +4840,7 @@ function getFunnelDataPoints(series : ChartOptionsSeries[], radius : number, opt
 	// }
 	return series;
 }
-function drawFunnelText(series : ChartOptionsSeries[], opts : ChartOptions, context : CanvasRenderingContext2D, eachSpacing : number, labelAlign : string, activeWidth : number, centerPosition : Offset) {
+function drawFunnelText(series : IChartOptionsSeries[], opts : IChartOptions, context : CanvasRenderingContext2D, eachSpacing : number, labelAlign : string, activeWidth : number, centerPosition : IOffset) {
 	for (let i = 0; i < series.length; i++) {
 		let item = series[i];
 		if (item.labelShow == false) {
@@ -4815,7 +4853,7 @@ function drawFunnelText(series : ChartOptionsSeries[], opts : ChartOptions, cont
 		// let text = item.formatter ? item.formatter(item, i, series, opts) : (item._proportion_ * 100).toFixed(0) + '%';
 		let text : string
 		if (item.formatter != null) {
-			const fun = item.formatter as (item : ChartOptionsSeries, i : number, series : ChartOptionsSeries[], opts : ChartOptions) => string
+			const fun = item.formatter as (item : IChartOptionsSeries, i : number, series : IChartOptionsSeries[], opts : IChartOptions) => string
 			text = fun(item, i, series, opts)
 		} else {
 			text = (item._proportion_ * 100).toFixed(0) + '%'
@@ -4883,7 +4921,7 @@ function drawFunnelText(series : ChartOptionsSeries[], opts : ChartOptions, cont
 		}
 	}
 }
-function drawFunnelCenterText(series : ChartOptionsSeries[], opts : ChartOptions, context : CanvasRenderingContext2D, eachSpacing : number, centerPosition : Offset) {
+function drawFunnelCenterText(series : IChartOptionsSeries[], opts : IChartOptions, context : CanvasRenderingContext2D, eachSpacing : number, centerPosition : IOffset) {
 	for (let i = 0; i < series.length; i++) {
 		let item = series[i];
 		let startY : number
@@ -4900,15 +4938,15 @@ function drawFunnelCenterText(series : ChartOptionsSeries[], opts : ChartOptions
 		context.closePath();
 	}
 }
-function drawFunnelDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
-	let funnelOption : ChartOptionsExtraFunnel = opts.extra.funnel!;
+function drawFunnelDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
+	let funnelOption : IChartOptionsExtraFunnel = opts.extra.funnel!;
 	let eachSpacing : number = (opts.height - opts.area[0] - opts.area[2]) / series.length;
-	let centerPosition : Offset = new Offset();
+	let centerPosition : IOffset = new Offset();
 	centerPosition.x = opts.area[3] + (opts.width - opts.area[1] - opts.area[3]) / 2;
 	centerPosition.y = opts.height - opts.area[2];
 	let activeWidth = funnelOption.activeWidth * opts.pixelRatio;
 	let radius = Math.min((opts.width - opts.area[1] - opts.area[3]) / 2 - activeWidth, (opts.height - opts.area[0] - opts.area[2]) / 2 - activeWidth);
-	let seriesNew : ChartOptionsSeries[] = getFunnelDataPoints(series, radius, funnelOption, eachSpacing, process);
+	let seriesNew : IChartOptionsSeries[] = getFunnelDataPoints(series, radius, funnelOption, eachSpacing, process);
 	context.save();
 
 	// 添加偏移量到平移中心
@@ -5132,10 +5170,10 @@ function drawFunnelDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 	return tooltip;
 }
 
-function drawArcbarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
+function drawArcbarDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
 	let arcbarOption = opts.extra.arcbar!;
 	series = getArcbarDataPoints(series, arcbarOption, process);
-	let centerPosition : Offset = new Offset();
+	let centerPosition : IOffset = new Offset();
 	if (arcbarOption.centerX != null || arcbarOption.centerY != null) {
 		centerPosition.x = (arcbarOption.centerX ?? opts.width) / 2;
 		centerPosition.y = (arcbarOption.centerY ?? opts.height) / 2;
@@ -5195,7 +5233,7 @@ function drawArcbarDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 
 
 //词图云
-function collisionNew(area : number[], points : ChartOptionsSeries[], width : number, height : number) : boolean {
+function collisionNew(area : number[], points : IChartOptionsSeries[], width : number, height : number) : boolean {
 	let isIn = false;
 	for (let i = 0; i < points.length; i++) {
 		if (points[i].area != null) {
@@ -5224,7 +5262,7 @@ function normalInt(min : number, max : number, itere : number) : number {
 	let sum = arr.reduce((i : number, j : number) : number => i + j, 0);
 	return Math.floor(sum / iter * (max - min)) + min
 };
-function getWordCloudPoint(opts : ChartOptions, type : string) : ChartOptionsSeries[] {
+function getWordCloudPoint(opts : IChartOptions, type : string) : IChartOptionsSeries[] {
 	let points = opts.series!;
 	switch (type) {
 		case 'normal':
@@ -5315,7 +5353,7 @@ function getWordCloudPoint(opts : ChartOptions, type : string) : ChartOptionsSer
 	return points;
 }
 
-function drawWordCloudDataPoints(opts : ChartOptions, context : CanvasRenderingContext2D, process : number = 1) {
+function drawWordCloudDataPoints(opts : IChartOptions, context : CanvasRenderingContext2D, process : number = 1) {
 	let wordOption = opts.extra.word!
 	if (opts.chartData.wordCloudData == null) {
 		opts.chartData.wordCloudData = getWordCloudPoint(opts, wordOption.type);
@@ -5391,7 +5429,7 @@ function drawWordCloudDataPoints(opts : ChartOptions, context : CanvasRenderingC
 	}
 	context.restore();
 }
-export function findWordChartCurrentIndex(currentPoints : TouchPosition, wordData : ChartOptionsSeries[]) : ChartOptionsTooltip {
+export function findWordChartCurrentIndex(currentPoints : TouchPosition, wordData : IChartOptionsSeries[]) : IChartOptionsTooltip {
 	const tooltip = new ChartOptionsTooltip()
 	let currentIndex = -1;
 	for (let i = 0, len = wordData.length; i < len; i++) {
@@ -5406,7 +5444,7 @@ export function findWordChartCurrentIndex(currentPoints : TouchPosition, wordDat
 	return tooltip;
 }
 //仪表盘
-function drawGaugeLabel(gaugeOption : ChartOptionsExtraGauge, eradius : number, centerPosition : Offset, opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawGaugeLabel(gaugeOption : IChartOptionsExtraGauge, eradius : number, centerPosition : IOffset, opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let radius = eradius
 	radius -= gaugeOption.width / 2 + gaugeOption.labelOffset * opts.pixelRatio;
 	radius = radius < 10 ? 10 : radius;
@@ -5427,7 +5465,7 @@ function drawGaugeLabel(gaugeOption : ChartOptionsExtraGauge, eradius : number, 
 		pos.y = radius * Math.sin(nowAngle * Math.PI)
 		let labelText : string
 		if (gaugeOption.formatter != null) {
-			const fun = gaugeOption.formatter as (nowNumber : number, i : number, opts : ChartOptions) => string
+			const fun = gaugeOption.formatter as (nowNumber : number, i : number, opts : IChartOptions) => string
 			labelText = fun(nowNumber, i, opts)
 		} else {
 			labelText = `${nowNumber}`
@@ -5449,7 +5487,7 @@ function drawGaugeLabel(gaugeOption : ChartOptionsExtraGauge, eradius : number, 
 		nowNumber += splitNumber;
 	}
 }
-function getGaugeDataPoints(series : ChartOptionsSeries[], categories : ChartOptionsSeriesData[], gaugeOption : ChartOptionsExtraGauge, process : number = 1) : ChartOptionsSeries[] {
+function getGaugeDataPoints(series : IChartOptionsSeries[], categories : IChartOptionsSeriesData[], gaugeOption : IChartOptionsExtraGauge, process : number = 1) : IChartOptionsSeries[] {
 	for (let i = 0; i < series.length; i++) {
 		let item = series[i];
 		let val = item.data![0].value ?? 0
@@ -5485,7 +5523,7 @@ function getGaugeDataPoints(series : ChartOptionsSeries[], categories : ChartOpt
 	}
 	return series;
 }
-function getGaugeArcbarDataPoints(series : ChartOptionsSeries[], arcbarOption : ChartOptionsExtraGauge, eprocess : number = 1) : ChartOptionsSeries[] {
+function getGaugeArcbarDataPoints(series : IChartOptionsSeries[], arcbarOption : IChartOptionsExtraGauge, eprocess : number = 1) : IChartOptionsSeries[] {
 	let process = eprocess
 	if (process == 1) {
 		process = 0.999999;
@@ -5510,7 +5548,7 @@ function getGaugeArcbarDataPoints(series : ChartOptionsSeries[], arcbarOption : 
 	}
 	return series;
 }
-function getGaugeAxisPoints(categories : ChartOptionsSeriesData[], startAngle : number, endAngle : number) : ChartOptionsSeriesData[] {
+function getGaugeAxisPoints(categories : IChartOptionsSeriesData[], startAngle : number, endAngle : number) : IChartOptionsSeriesData[] {
 	let totalAngle : number;
 	if (endAngle < startAngle) {
 		totalAngle = 2 + endAngle - startAngle;
@@ -5529,8 +5567,8 @@ function getGaugeAxisPoints(categories : ChartOptionsSeriesData[], startAngle : 
 	}
 	return categories;
 }
-function drawGaugeDataPoints(categories : ChartOptionsSeriesData[], series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartOptionsChartDataToolTiPData {
-	let gaugeOption : ChartOptionsExtraGauge = opts.extra.gauge!;
+function drawGaugeDataPoints(categories : IChartOptionsSeriesData[], series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : IChartOptionsChartDataToolTiPData {
+	let gaugeOption : IChartOptionsExtraGauge = opts.extra.gauge!;
 	if (gaugeOption.oldAngle == null) {
 		gaugeOption.oldAngle = gaugeOption.startAngle;
 	}
@@ -5744,12 +5782,12 @@ function drawGaugeDataPoints(categories : ChartOptionsSeriesData[], series : Cha
 	return tooltip;
 }
 //散点图
-function drawScatterDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawScatterDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	// let scatterOption = opts.extra.scatter!
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	context.save();
 	// let leftSpace = 0;
 	// let rightSpace = opts.width + eachSpacing;
@@ -5760,7 +5798,7 @@ function drawScatterDataPoints(series : ChartOptionsSeries[], opts : ChartOption
 		// leftSpace = -(opts._scrollDistance_!) - eachSpacing * 2 + opts.area[3];
 		// rightSpace = leftSpace + (opts.xAxis.itemCount + 4) * eachSpacing;
 	}
-	series.forEach((eachSeries : ChartOptionsSeries) => {
+	series.forEach((eachSeries : IChartOptionsSeries) => {
 		let ranges = [...opts.chartData.yAxisData.ranges![eachSeries.index!]];
 		let minRange = parseFloat(ranges.pop()!);
 		let maxRange = parseFloat(ranges.shift()!);
@@ -5823,12 +5861,12 @@ function drawScatterDataPoints(series : ChartOptionsSeries[], opts : ChartOption
 
 //气泡图
 
-function drawBubbleDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) {
+function drawBubbleDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) {
 	let bubbleOption = opts.extra.bubble!;
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!;
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	context.save();
 	// let leftSpace = 0;
 	// let rightSpace = opts.width + eachSpacing;
@@ -5837,7 +5875,7 @@ function drawBubbleDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 		// leftSpace = -(opts._scrollDistance_!) - eachSpacing * 2 + opts.area[3];
 		// rightSpace = leftSpace + (opts.xAxis.itemCount + 4) * eachSpacing;
 	}
-	series.forEach(function (eachSeries : ChartOptionsSeries) {
+	series.forEach(function (eachSeries : IChartOptionsSeries) {
 		let ranges = [...opts.chartData.yAxisData.ranges![eachSeries.index!]];
 		let minRange = parseFloat(ranges.pop()!);
 		let maxRange = parseFloat(ranges.shift()!);
@@ -5878,15 +5916,15 @@ function drawBubbleDataPoints(series : ChartOptionsSeries[], opts : ChartOptions
 	} as ChartColumnDataPoints;
 }
 //K线图
-export function getCandleToolTipData(series : number[][], seriesData : ChartOptionsSeries[], opts : ChartOptions, eindex : any, extra : ChartOptionsExtraCandle) : ChartOptionsTooltipOption {
+export function getCandleToolTipData(series : number[][], seriesData : IChartOptionsSeries[], opts : IChartOptions, eindex : any, extra : IChartOptionsExtraCandle) : IChartOptionsTooltipOption {
 	let calPoints = opts.chartData.calMapPoints!;
 	let upColor = extra.color.upFill;
 	let downColor = extra.color.downFill;
 	let index = eindex as number
 	//颜色顺序为开盘，收盘，最低，最高
 	let color : string[] = [upColor, upColor, downColor, upColor];
-	let textList : TextList[] = [];
-	seriesData.forEach((item : ChartOptionsSeries) => {
+	let textList : ITextList[] = [];
+	seriesData.forEach((item : IChartOptionsSeries) => {
 		if (index == 0) {
 			if ((item.dataArr[0][1]) - (item.dataArr[0][0]) < 0) {
 				color[1] = downColor;
@@ -5927,7 +5965,7 @@ export function getCandleToolTipData(series : number[][], seriesData : ChartOpti
 		text4.legendShape = legendShape
 		textList.push(text1, text2, text3, text4);
 	});
-	let validCalPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let validCalPoints : IChartOptionsChartDataCalPoints[][] = [];
 	let offset = new Offset()
 	for (let i = 0; i < calPoints.length; i++) {
 		let points = calPoints[i];
@@ -5939,11 +5977,11 @@ export function getCandleToolTipData(series : number[][], seriesData : ChartOpti
 	tooltipOption.offset = offset
 	return tooltipOption
 }
-function getCandleDataPoints(data : number[][], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : ChartOptions, process : number = 1) : ChartOptionsChartDataCalPoints[][] {
-	let points : ChartOptionsChartDataCalPoints[][] = [];
+function getCandleDataPoints(data : number[][], minRange : number, maxRange : number, xAxisPoints : number[], eachSpacing : number, opts : IChartOptions, process : number = 1) : IChartOptionsChartDataCalPoints[][] {
+	let points : IChartOptionsChartDataCalPoints[][] = [];
 	let validHeight = opts.height - opts.area[0] - opts.area[2];
 	data.forEach(function (item, index) {
-		let cPoints : ChartOptionsChartDataCalPoints[] = [];
+		let cPoints : IChartOptionsChartDataCalPoints[] = [];
 		item.forEach(function (items) {
 			let point = new ChartOptionsChartDataCalPoints();
 			point.x = xAxisPoints[index] + Math.round(eachSpacing / 2);
@@ -5957,12 +5995,12 @@ function getCandleDataPoints(data : number[][], minRange : number, maxRange : nu
 	});
 	return points;
 }
-function drawCandleDataPoints(series : ChartOptionsSeries[], seriesMA : ChartOptionsSeries[], opts : ChartOptions, context : CanvasRenderingContext2D, process : number = 1) : ChartsCandleDataPoints {
+function drawCandleDataPoints(series : IChartOptionsSeries[], seriesMA : IChartOptionsSeries[], opts : IChartOptions, context : CanvasRenderingContext2D, process : number = 1) : ChartsCandleDataPoints {
 	let candleOption = opts.extra.candle!;
 	let xAxisData = opts.chartData.xAxisData;
 	let xAxisPoints = xAxisData.xAxisPoints;
 	let eachSpacing = xAxisData.eachSpacing!;
-	let calPoints : ChartOptionsChartDataCalPoints[][][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][][] = [];
 	const xOffset = opts.xOffset;
 	const yOffset = opts.yOffset;
 	context.save();
@@ -5981,7 +6019,7 @@ function drawCandleDataPoints(series : ChartOptionsSeries[], seriesMA : ChartOpt
 	}
 	//画均线
 	if (candleOption.average.show || seriesMA.length > 0) { //Merge pull request !12 from 邱贵翔
-		seriesMA.forEach((eachSeries : ChartOptionsSeries) => {
+		seriesMA.forEach((eachSeries : IChartOptionsSeries) => {
 			let ranges = [...opts.chartData.yAxisData.ranges![eachSeries.index!]];
 			let minRange = parseFloat(ranges.pop()!);
 			let maxRange = parseFloat(ranges.shift()!);
@@ -6131,15 +6169,15 @@ function isPoiWithinPoly(poi : number[], poly : number[][][][], mercator : boole
 		return false;
 	}
 }
-function pointToCoordinate(pointY : number, pointX : number, bounds : ChartMapBounds, scale : number, xoffset : number, yoffset : number) : Offset {
+function pointToCoordinate(pointY : number, pointX : number, bounds : IChartMapBounds, scale : number, xoffset : number, yoffset : number) : IOffset {
 	const offset = new Offset()
 	offset.x = (pointX - xoffset) / scale + bounds.xMin
 	offset.y = bounds.yMax - (pointY - yoffset) / scale
 	return offset
 }
 
-export function findMapChartCurrentIndex(currentPoints : TouchPosition, opts : ChartOptions) : ChartOptionsTooltip {
-	let tooltip : ChartOptionsTooltip = new ChartOptionsTooltip();
+export function findMapChartCurrentIndex(currentPoints : TouchPosition, opts : IChartOptions) : IChartOptionsTooltip {
+	let tooltip : IChartOptionsTooltip = new ChartOptionsTooltip();
 	let currentIndex = -1;
 	let cData = opts.chartData.mapData!;
 	let data = opts.series!;
@@ -6155,7 +6193,7 @@ export function findMapChartCurrentIndex(currentPoints : TouchPosition, opts : C
 	tooltip.index = currentIndex
 	return tooltip;
 }
-function coordinateToPoint(latitude : number, longitude : number, bounds : ChartMapBounds, scale : number, xoffset : number, yoffset : number) : Offset {
+function coordinateToPoint(latitude : number, longitude : number, bounds : IChartMapBounds, scale : number, xoffset : number, yoffset : number) : IOffset {
 	const offset = new Offset()
 	offset.x = (longitude - bounds.xMin) * scale + xoffset
 	offset.y = (bounds.yMax - latitude) * scale + yoffset
@@ -6170,7 +6208,7 @@ function lonlat2mercator(longitude : number, latitude : number) : number[] {
 	mercator.push(y);
 	return mercator;
 }
-function getBoundingBox(data : ChartOptionsSeries[]) : ChartMapBounds {
+function getBoundingBox(data : IChartOptionsSeries[]) : IChartMapBounds {
 	let bounds = new ChartMapBounds()
 	let datacoords : number[][] = []
 	for (let i = 0; i < data.length; i++) {
@@ -6195,12 +6233,12 @@ function getBoundingBox(data : ChartOptionsSeries[]) : ChartMapBounds {
 	}
 	return bounds;
 }
-function drawMapDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+function drawMapDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let mapOption = opts.extra.map!;
 	let coords : number[][] = [];
-	let point : Offset;
-	let data : ChartOptionsSeries[] = series;
-	let bounds : ChartMapBounds = getBoundingBox(data);
+	let point : IOffset;
+	let data : IChartOptionsSeries[] = series;
+	let bounds : IChartMapBounds = getBoundingBox(data);
 	const xOffset = opts.xOffset;
 	const yOffset = opts.yOffset;
 
@@ -6299,13 +6337,13 @@ function drawMapDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 	context.restore();
 }
 //混合图
-export function getMixToolTipData(seriesData : ChartOptionsSeries[], opts : ChartOptions, eindex : any, categories : string[], option : ChartOptionsTooltipOption) : ChartOptionsTooltipOption {
+export function getMixToolTipData(seriesData : IChartOptionsSeries[], opts : IChartOptions, eindex : any, categories : string[], option : IChartOptionsTooltipOption) : IChartOptionsTooltipOption {
 	const index = eindex as number
 	const points = opts.chartData.xAxisPoints![index] + opts.chartData.eachSpacing / 2;
-	let textList = seriesData.map((item : ChartOptionsSeries) : TextList => {
+	let textList = seriesData.map((item : IChartOptionsSeries) : ITextList => {
 		const list = new TextList()
 		if (option.formatter != null) {
-			const fun = option.formatter as (item : ChartOptionsSeries, categories : string, index : number, opts : ChartOptions) => string
+			const fun = option.formatter as (item : IChartOptionsSeries, categories : string, index : number, opts : IChartOptions) => string
 			list.text = fun(item, categories[index], index, opts)
 		} else {
 			list.text = item.name + ': ' + item.data![0].value!
@@ -6315,7 +6353,7 @@ export function getMixToolTipData(seriesData : ChartOptionsSeries[], opts : Char
 		list.disableLegend = item.disableLegend ? true : false
 		return list
 	});
-	textList = textList.filter((item : TextList) : boolean => {
+	textList = textList.filter((item : ITextList) : boolean => {
 		return item.disableLegend != true
 	});
 	const offset = new Offset()
@@ -6327,7 +6365,7 @@ export function getMixToolTipData(seriesData : ChartOptionsSeries[], opts : Char
 	return tooltipOption;
 }
 
-function drawMixDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
+function drawMixDataPoints(series : IChartOptionsSeries[], opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D, process : number = 1) : ChartColumnDataPoints {
 	let xAxisData = opts.chartData.xAxisData
 	let xAxisPoints = xAxisData.xAxisPoints
 	let eachSpacing = xAxisData.eachSpacing!
@@ -6336,7 +6374,7 @@ function drawMixDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 	let lineOption = opts.extra.mix?.line ?? new ChartOptionsExtraMixLine()
 
 	let endY = opts.height - opts.area[2];
-	let calPoints : ChartOptionsChartDataCalPoints[][] = [];
+	let calPoints : IChartOptionsChartDataCalPoints[][] = [];
 	let columnIndex = 0;
 	let columnLength = 0;
 	const xOffset = opts.xOffset
@@ -6579,11 +6617,11 @@ function drawMixDataPoints(series : ChartOptionsSeries[], opts : ChartOptions, c
 		eachSpacing: eachSpacing,
 	} as ChartColumnDataPoints
 }
-export function drawCharts(char : TuiChartsInterface, type : string, opts : ChartOptions, config : TuiChartConfig, context : CanvasRenderingContext2D) {
+export function drawCharts(char : TuiChartsInterface, type : string, opts : IChartOptions, config : ITuiChartConfig, context : CanvasRenderingContext2D) {
 	let _this = char;
 	let series = opts.series!;
 	//兼容ECharts饼图类数据格式 以下内容暂时未翻译需要保留
-	// let seriesData : ChartOptionsSeries[] = []
+	// let seriesData : IChartOptionsSeries[] = []
 	// if (type == 'pie' || type == 'ring' || type == 'mount' || type == 'rose' || type == 'funnel') {
 	// 	seriesData = fixPieSeries(series, opts, config);
 	// }
@@ -6599,7 +6637,7 @@ export function drawCharts(char : TuiChartsInterface, type : string, opts : Char
 	series = fillSeries(series, opts, config);
 	let duration = opts.animation ? opts.duration : 0;
 	if (_this.animationInstance != null) _this.animationInstance!.stop();
-	let seriesMA : ChartOptionsSeries[];
+	let seriesMA : IChartOptionsSeries[];
 	if (type == 'candle') {
 		let average = opts.extra.candle!.average;
 		if (average.show) {
@@ -6642,8 +6680,8 @@ export function drawCharts(char : TuiChartsInterface, type : string, opts : Char
 			opts.area[1] += legendWidth;
 			break;
 	}
-	let _calYAxisData = new ChartOptionsChartDataYAxisData(),
-		yAxisWidth : ChartOptionsChartDataYAxisDataYAxisWidth[] = [];
+	let _calYAxisData : IChartOptionsChartDataYAxisData = new ChartOptionsChartDataYAxisData(),
+		yAxisWidth : IChartOptionsChartDataYAxisDataYAxisWidth[] = [];
 	if (opts.type == 'line' || opts.type == 'column' || opts.type == 'mount' || opts.type == 'area' || opts.type == 'mix' || opts.type == 'candle' || opts.type == 'scatter' || opts.type == 'bubble' || opts.type == 'bar') {
 		_calYAxisData = calYAxisData(series, opts, config);
 		yAxisWidth = _calYAxisData.yAxisWidth!;

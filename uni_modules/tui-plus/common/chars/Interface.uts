@@ -3,14 +3,6 @@ export type TouchPosition = {
 	x : number;
 	y : number;
 }
-export class ChartScrollOption {
-	currentOffset : number = 0
-	startTouchX : number = 0
-	distance : number = 0
-	lastMoveTime : number = 0
-	position : string = ''
-	moveCount : number = 0
-}
 
 export type ChartAnimationOption = {
 	canvasContext : CanvasContext,
@@ -18,4 +10,846 @@ export type ChartAnimationOption = {
 	duration : number
 	onProcess : (process : number) => void
 	onAnimationFinish : () => void
+}
+export interface IChartScrollOption {
+	currentOffset : number;
+	startTouchX : number;
+	distance : number;
+	lastMoveTime : number;
+	position : string;
+	moveCount : number;
+}
+
+export interface IOffset {
+	x : number;
+	y : number;
+}
+
+export interface IChartCurveControlPoints {
+	ctrA : IOffset;
+	ctrB : IOffset;
+}
+
+export type ChartRange = {
+	minRange : number;
+	maxRange : number;
+};
+export interface IChartOptionsChartDataCalPoints {
+	color ?: string | null;
+	x : number;
+	y : number;
+	y0 : number;
+	x0 : number;
+	r : number;
+	t : number;
+	width ?: number;
+	height ?: number;
+	value : number;
+}
+export type ChartColumnDataPoints = {
+	yAxisPoints : number[];
+	xAxisPoints : number[];
+	calPoints : IChartOptionsChartDataCalPoints[][];
+	eachSpacing : number;
+};
+
+export type ChartsCandleDataPoints = {
+	yAxisPoints : number[];
+	xAxisPoints : number[];
+	calPoints : IChartOptionsChartDataCalPoints[][][];
+	eachSpacing : number;
+};
+
+export interface IChartMapBounds {
+	xMin : number;
+	xMax : number;
+	yMin : number;
+	yMax : number;
+}
+
+export interface IChartOptionsExtraTooltip {
+	showBox : boolean;
+	showArrow : boolean;
+	showCategory : boolean;
+	borderWidth : number;
+	borderRadius : number;
+	borderColor : string;
+	borderOpacity : number;
+	bgColor : string;
+	bgOpacity : number;
+	gridType : 'solid' | 'dash';
+	dashLength : number;
+	gridColor : string;
+	boxPadding : number;
+	fontSize : number;
+	lineHeight : number;
+	fontColor : string;
+	legendShow : boolean;
+	legendShape : 'auto' | 'diamond' | 'circle' | 'triangle' | 'square' | 'rect' | 'line';
+	splitLine : boolean;
+	horizentalLine : boolean;
+	xAxisLabel : boolean;
+	yAxisLabel : boolean;
+	labelBgColor : string;
+	labelBgOpacity : number;
+	labelFontColor : string;
+}
+export interface IChartOptionsExtraMarkLineData {
+	value ?: number | null;
+	labelText ?: string | null;
+	lineColor : string;
+	showLabel : boolean;
+	labelAlign : 'left' | 'right' | 'top' | 'bottom';
+	labelOffsetX : number;
+	labelOffsetY : number;
+	labelPadding : number;
+	labelFontSize : number;
+	labelFontColor : string;
+	labelBgColor : string;
+	labelBgOpacity : number;
+	yAxisIndex ?: number | null;
+	y ?: number | null;
+}
+
+export interface IChartOptionsExtraMarkLine {
+	type : 'solid' | 'dash';
+	dashLength : number;
+	data : IChartOptionsExtraMarkLineData[];
+}
+
+export interface IChartOptionsExtraColumn {
+	type : 'group' | 'stack' | 'meter';
+	width : number;
+	seriesGap : number;
+	categoryGap : number;
+	barBorderCircle : boolean;
+	barBorderRadius : number[];
+	linearType : 'none' | 'opacity' | 'custom';
+	linearOpacity : number;
+	customColor : string[];
+	colorStop : number;
+	meterBorder : number;
+	meterFillColor : string;
+	activeBgColor : string;
+	activeBgOpacity : number;
+	activeWidth : number;
+	labelPosition : 'outside' | 'insideTop' | 'center' | 'bottom';
+}
+
+export interface IChartOptionsExtraMount {
+	type : 'mount' | 'sharp' | 'triangle' | 'bar';
+	widthRatio : number;
+	borderWidth : number;
+	barBorderCircle : boolean;
+	barBorderRadius : number[];
+	linearType : 'none' | 'opacity' | 'custom';
+	linearOpacity : number;
+	customColor : string[];
+	colorStop : number;
+}
+
+export interface IChartOptionsExtraBar {
+	type : 'group' | 'stack';
+	width ?: number | null;
+	seriesGap : number;
+	categoryGap : number;
+	barBorderCircle : boolean;
+	barBorderRadius ?: number[] | null;
+	linearType : 'none' | 'opacity' | 'custom';
+	linearOpacity : number;
+	customColor ?: string[] | null;
+	colorStop : number;
+	activeBgColor : string;
+	activeBgOpacity : number;
+}
+
+export interface IChartOptionsExtraLine {
+	type : 'straight' | 'curve' | 'step';
+	width : number;
+	activeType : 'none' | 'hollow' | 'solid';
+	linearType : 'none' | 'custom';
+	onShadow : boolean;
+	animation : 'vertical' | 'horizontal';
+}
+
+export interface IChartOptionsExtraArea {
+	type : 'straight' | 'curve' | 'step';
+	opacity : number;
+	addLine : boolean;
+	width : number;
+	gradient : boolean;
+	activeType : 'none' | 'hollow' | 'solid';
+}
+
+export interface IChartOptionsExtraScatter {
+	id ?: string | null;
+}
+
+export interface IChartOptionsExtraBubble {
+	border : number;
+	opacity : number;
+}
+
+export interface IChartOptionsExtraMixColumn {
+	width ?: number | null;
+	seriesGap ?: number | null;
+	categoryGap ?: number | null;
+	barBorderCircle : boolean;
+	barBorderRadius ?: number[] | null;
+	linearType : 'none' | 'opacity' | 'custom';
+	linearOpacity : number;
+	customColor ?: string[] | null;
+	colorStop ?: number | null;
+}
+
+export interface IChartOptionsExtraMixArea {
+	gradient : boolean;
+	opacity : number;
+}
+export interface IChartOptionsExtraMixLine {
+	width : number;
+}
+
+export interface IChartOptionsExtraMix {
+	column ?: IChartOptionsExtraMixColumn | null;
+	area ?: IChartOptionsExtraMixArea | null;
+	line ?: IChartOptionsExtraMixLine | null;
+}
+
+export interface IChartOptionsExtraPie {
+	activeOpacity : number;
+	activeRadius : number;
+	offsetAngle ?: number | null;
+	customRadius ?: number | null;
+	labelWidth : number;
+	border : boolean;
+	borderWidth : number;
+	borderColor : string;
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraRing {
+	ringWidth : number;
+	centerColor : string;
+	activeOpacity : number;
+	activeRadius : number;
+	offsetAngle ?: number | null;
+	customRadius ?: number | null;
+	labelWidth : number;
+	border : boolean;
+	borderWidth : number;
+	borderColor : string;
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraRose {
+	type : 'area' | 'radius';
+	minRadius ?: number | null;
+	activeOpacity : number;
+	activeRadius : number;
+	offsetAngle ?: number | null;
+	labelWidth : number;
+	border : boolean;
+	borderWidth : number;
+	borderColor : string;
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraRadar {
+	gridType : 'radar' | 'circle';
+	gridColor : string;
+	gridCount : number;
+	gridEval : number;
+	radius ?: number | null;
+	axisLabel : boolean;
+	axisLabelTofix : number;
+	labelShow : boolean;
+	labelColor : string;
+	labelPointShow : boolean;
+	labelPointRadius : number;
+	labelPointColor : string;
+	opacity : number;
+	border : boolean;
+	borderWidth : number;
+	max ?: number | null;
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraArcbar {
+	type : 'default' | 'circle';
+	direction : 'cw' | 'ccw';
+	width : number;
+	lineCap : 'round' | 'square' | 'butt';
+	backgroundColor : string;
+	startAngle : number;
+	endAngle : number;
+	radius ?: number | null;
+	gap : number;
+	centerX ?: number | null;
+	centerY ?: number | null;
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraGaugeSplitLine {
+	fixRadius ?: number | null;
+	splitNumber : number;
+	width : number;
+	color : string;
+	childNumber : number;
+	childWidth : number;
+}
+
+export interface IChartOptionsExtraGaugePointer {
+	width : number;
+	color : string;
+}
+
+export interface IChartOptionsExtraGauge {
+	type : string;
+	width : number;
+	labelColor : string;
+	labelOffset : number;
+	startAngle : number;
+	endAngle : number;
+	startNumber ?: number | null;
+	endNumber : number;
+	formatter ?: any;
+	format ?: string;
+	splitLine ?: IChartOptionsExtraGaugeSplitLine | null;
+	pointer ?: IChartOptionsExtraGaugePointer | null;
+	oldAngle ?: number | null;
+	oldData ?: number | null;
+}
+
+export interface IChartOptionsExtraFunnel {
+	type : 'funnel' | 'triangle' | 'pyramid';
+	activeOpacity : number;
+	activeWidth : number;
+	border : boolean;
+	borderWidth : number;
+	borderColor : string;
+	fillOpacity : number;
+	minSize : number;
+	labelAlign : 'right' | 'left';
+	linearType : 'none' | 'custom';
+	customColor ?: string[] | null;
+}
+
+export interface IChartOptionsExtraWord {
+	type : 'normal' | 'vertical';
+	autoColors : boolean;
+}
+
+export interface IChartOptionsExtraCandleColor {
+	upLine : string;
+	upFill : string;
+	downLine : string;
+	downFill : string;
+}
+
+export interface IChartOptionsExtraCandleAverage {
+	show : boolean;
+	name ?: string[] | null;
+	day ?: number[] | null;
+	color ?: string[] | null;
+}
+
+export interface IChartOptionsExtraCandle {
+	color : IChartOptionsExtraCandleColor;
+	average : IChartOptionsExtraCandleAverage;
+}
+
+export interface IChartOptionsExtraMap {
+	border : boolean;
+	mercator : boolean;
+	borderWidth : number;
+	borderColor : string;
+	fillOpacity : number;
+	active : boolean;
+	activeTextColor : string;
+	activeBorderColor : string;
+	activeFillColor : string;
+	activeFillOpacity : number;
+}
+export interface IChartOptionsExtra {
+	tooltip ?: IChartOptionsExtraTooltip | null;
+	markLine ?: IChartOptionsExtraMarkLine | null;
+	column ?: IChartOptionsExtraColumn | null;
+	mount ?: IChartOptionsExtraMount | null;
+	bar ?: IChartOptionsExtraBar | null;
+	line ?: IChartOptionsExtraLine | null;
+	area ?: IChartOptionsExtraArea | null;
+	scatter ?: IChartOptionsExtraScatter | null;
+	bubble ?: IChartOptionsExtraBubble | null;
+	mix ?: IChartOptionsExtraMix | null;
+	pie ?: IChartOptionsExtraPie | null;
+	ring ?: IChartOptionsExtraRing | null;
+	rose ?: IChartOptionsExtraRose | null;
+	radar ?: IChartOptionsExtraRadar | null;
+	arcbar ?: IChartOptionsExtraArcbar | null;
+	gauge ?: IChartOptionsExtraGauge | null;
+	funnel ?: IChartOptionsExtraFunnel | null;
+	word ?: IChartOptionsExtraWord | null;
+	candle ?: IChartOptionsExtraCandle | null;
+	map ?: IChartOptionsExtraMap | null;
+}
+
+export interface IChartOptionsTitle {
+	name ?: string | null;
+	fontSize : number;
+	color : string;
+	offsetX ?: number | null;
+	offsetY ?: number | null;
+}
+
+export interface IChartOptionsSubTitle {
+	name ?: string | null;
+	fontSize : number;
+	color : string;
+	offsetX ?: number | null;
+	offsetY ?: number | null;
+}
+
+export interface IChartOptionsLegend {
+	show : boolean;
+	position : 'bottom' | 'top' | 'left' | 'right';
+	float : 'center' | 'left' | 'right' | 'top' | 'bottom';
+	padding : number;
+	margin : number;
+	backgroundColor : string;
+	borderColor : string;
+	borderWidth ?: number;
+	fontSize : number;
+	fontColor : string;
+	lineHeight : number;
+	hiddenColor : string;
+	itemGap : number;
+}
+
+export interface IChartOptionsYAxisData {
+	type ?: string | null;
+	position : 'left' | 'right' | 'center';
+	disabled : boolean;
+	axisLine : boolean;
+	axisLineColor : string;
+	calibration : boolean;
+	fontColor : string;
+	fontSize ?: number | null;
+	textAlign : 'left' | 'right' | 'center';
+	title ?: string | null;
+	titleFontSize ?: number | null;
+	titleOffsetY ?: number | null;
+	titleOffsetX ?: number | null;
+	titleFontColor : string;
+	min ?: number | null;
+	max ?: number | null;
+	tofix ?: number | null;
+	unit ?: string | null;
+	formatter ?: any;
+	format ?: string | null;
+	categories ?: string[] | null;
+}
+
+export interface IChartOptionsYAxis {
+	disabled : boolean;
+	disableGrid : boolean;
+	splitNumber : number;
+	gridType : 'solid' | 'dash';
+	dashLength : number;
+	gridColor : string;
+	padding : number;
+	showTitle : boolean;
+	data : IChartOptionsYAxisData[];
+	gridSet : string;
+	fontColor : string;
+	tofix : number;
+	unit : string;
+	fontSize ?: number | null;
+	formatter ?: any;
+	min ?: number | null;
+	max ?: number | null;
+}
+
+export interface IChartOptionsXAxis {
+	disabled : boolean;
+	axisLine : boolean;
+	axisLineColor : string;
+	calibration : boolean;
+	fontColor : string;
+	fontSize : number;
+	lineHeight : number;
+	marginTop : number;
+	rotateLabel : boolean;
+	rotateAngle : number;
+	labelCount ?: number | null;
+	itemCount : number;
+	boundaryGap : 'center' | 'justify';
+	disableGrid : boolean;
+	splitNumber ?: number;
+	gridColor : string;
+	gridType : 'solid' | 'dash';
+	dashLength : number;
+	gridEval : number;
+	scrollShow : boolean;
+	scrollAlign : 'left' | 'right';
+	scrollColor : string;
+	scrollBackgroundColor : string;
+	min ?: number | null;
+	max ?: number | null;
+	title ?: string | null;
+	titleFontSize : number;
+	titleOffsetY : number;
+	titleOffsetX : number;
+	titleFontColor : string;
+	formatter ?: any;
+	format ?: string | null;
+	scrollPosition ?: string | null;
+	data : IChartOptionsYAxisData[];
+}
+
+export interface IChartOptionsSeriesData {
+	value ?: number | null;
+	color ?: string | null;
+	name ?: string | null;
+	data ?: number | null;
+	labelText ?: string | null;
+	labelShow : boolean;
+	centerText ?: string | null;
+	centerTextSize ?: number | null;
+	centerTextColor : string;
+	formatter ?: any;
+	position : IChartOptionsChartDataCalPoints;
+	angle : number;
+	proportion : number;
+	textColor : string;
+	textSize ?: number | null;
+	_startAngle_ : number;
+	_endAngle_ : number;
+}
+
+export interface IChartOptionsMapSeriesPropertiesParent {
+	adcode : number;
+}
+
+export interface IChartOptionsMapSeriesProperties {
+	adcode : number;
+	name : string;
+	center : number[];
+	centroid : number[];
+	childrenNum : number;
+	level : string;
+	subFeatureIndex : number;
+	acroutes : number[];
+	parent : IChartOptionsMapSeriesPropertiesParent;
+}
+
+export interface IChartOptionsMapSeriesGeometry {
+	type : string;
+	coordinates : number[][][][];
+}
+
+export interface IChartOptionsSeries {
+	_data ?: number[] | null;
+	zeroPoints ?: number | null;
+	area ?: number[] | null;
+	index ?: number | null;
+	name ?: string | null;
+	legendText ?: string | null;
+	data ?: IChartOptionsSeriesData[] | null;
+	dataArr : number[][];
+	show : boolean;
+	color ?: string | null;
+	fillOpacity : number;
+	textColor : string;
+	textSize ?: number | null;
+	textOffset ?: number | null;
+	linearIndex ?: number | null;
+	type ?: string | null;
+	disableLegend : boolean;
+	connectNulls : boolean;
+	setShadow ?: string[] | null;
+	linearColor ?: string[][] | null;
+	style : 'curve' | 'straight';
+	addPoint : boolean;
+	lineType : 'solid' | 'dash';
+	dashLength : number;
+	pointShape : 'diamond' | 'circle' | 'triangle' | 'square' | 'none';
+	legendShape ?: 'diamond' | 'circle' | 'triangle' | 'square' | 'rect' | 'line' | 'none' | null;
+	formatter ?: any;
+	format ?: string | null;
+	rotate : boolean;
+	seriesMA ?: IChartOptionsSeries[] | null;
+	_radius_ : number;
+	_start_ : number;
+	_proportion_ : number;
+	_rose_proportion_ : number;
+	areav : number[];
+	radius : number;
+	funnelArea : number[];
+	labelShow : boolean;
+	labelText ?: string | null;
+	centerTextColor : string;
+	arc : number;
+	text : string;
+	properties : IChartOptionsMapSeriesProperties;
+	geometry : IChartOptionsMapSeriesGeometry;
+	_endAngle_ : number;
+	_oldAngle_ : number;
+}
+
+export interface IChartOptionsChartDataLegendDataAreaXY {
+	x : number;
+	y : number;
+}
+
+export interface IChartOptionsChartDataLegendDataArea {
+	start : IChartOptionsChartDataLegendDataAreaXY;
+	end : IChartOptionsChartDataLegendDataAreaXY;
+	lineStart : IChartOptionsChartDataLegendDataAreaXY;
+	lineEnd : IChartOptionsChartDataLegendDataAreaXY;
+	width : number;
+	height : number;
+	wholeWidth : number;
+	wholeHeight : number;
+	text : string;
+	color : string;
+	textColor : string;
+	textSize : number;
+}
+
+export interface IChartOptionsChartDataLegendData {
+	area : IChartOptionsChartDataLegendDataArea;
+	points : IChartOptionsSeries[][];
+	widthArr : number[];
+	heightArr : number[];
+}
+
+export interface IChartOptionsChartDataYAxisDataYAxisWidth {
+	position : string;
+	width : number;
+}
+
+export interface IChartOptionsChartDataYAxisData {
+	rangesFormat ?: string[][] | null;
+	ranges ?: string[][] | null;
+	yAxisWidth ?: IChartOptionsChartDataYAxisDataYAxisWidth[] | null;
+}
+
+export interface IChartOptionsChartDataXAxisData {
+	xAxisPoints : number[];
+	startX ?: number | null;
+	endX ?: number | null;
+	eachSpacing ?: number | null;
+	ranges ?: number[] | null;
+	angle : number;
+	xAxisHeight : number;
+	rangesFormat : number[];
+}
+
+export interface IChartOptionsChartDataCategoriesData {
+	angle : number;
+	xAxisHeight : number;
+}
+
+export interface IChartOptionsChartDataToolTiPData {
+	center : IOffset;
+	radius : number;
+	series : IChartOptionsSeries[];
+	angleList : number[];
+	innerRadius : number;
+	categories : IChartOptionsSeriesData[];
+	totalAngle : number;
+}
+
+export interface IChartOptionsChartDataMapData {
+	bounds : IChartMapBounds;
+	scale : number;
+	xoffset : number;
+	yoffset : number;
+	mercator : boolean;
+}
+
+export interface IChartOptionsChartData {
+	legendData : IChartOptionsChartDataLegendData;
+	yAxisData : IChartOptionsChartDataYAxisData;
+	xAxisData : IChartOptionsChartDataXAxisData;
+	categoriesData : IChartOptionsChartDataCategoriesData;
+	xAxisPoints ?: number[] | null;
+	yAxisPoints ?: number[] | null;
+	calPoints ?: IChartOptionsChartDataCalPoints[][] | null;
+	calMapPoints ?: IChartOptionsChartDataCalPoints[][][] | null;
+	eachSpacing : number;
+	pieData ?: IChartOptionsChartDataToolTiPData | null;
+	radarData ?: IChartOptionsChartDataToolTiPData | null;
+	funnelData ?: IChartOptionsChartDataToolTiPData | null;
+	arcbarData ?: IChartOptionsChartDataToolTiPData | null;
+	gaugeData ?: IChartOptionsChartDataToolTiPData | null;
+	wordCloudData ?: IChartOptionsSeries[] | null;
+	mapData ?: IChartOptionsChartDataMapData | null;
+}
+
+export interface ITextList {
+	text : string;
+	color : string;
+	legendShape : string;
+	disableLegend : boolean;
+}
+
+export interface IChartOptionsTooltipOption {
+	index ?: number | null;
+	offset ?: IOffset | null;
+	textList ?: ITextList[] | null;
+	formatter ?: any;
+}
+
+export interface IChartOptionsTooltip {
+	textList : ITextList[];
+	offset : IOffset;
+	option : IChartOptionsTooltipOption;
+	index ?: any;
+	group : number[];
+}
+
+export interface IChartOptions {
+	type : string;
+	context ?: CanvasRenderingContext2D | null;
+	canvasContext ?: CanvasContext | null;
+	width : number;
+	height : number;
+	categories ?: string[] | null;
+	categoriesObj ?: IChartOptionsSeriesData[] | null;
+	series ?: IChartOptionsSeries[] | null;
+	_series_ ?: IChartOptionsSeries[] | null;
+	area : number[];
+	xAxis : IChartOptionsXAxis;
+	yAxis : IChartOptionsYAxis;
+	legend : IChartOptionsLegend;
+	title : IChartOptionsTitle;
+	subtitle : IChartOptionsSubTitle;
+	extra : IChartOptionsExtra;
+	chartData : IChartOptionsChartData;
+	tooltip ?: IChartOptionsTooltip | null;
+	showTooltip : boolean;
+	canvas2d : boolean;
+	pixelRatio : number;
+	animation : boolean;
+	timing : 'easeOut' | 'easeIn' | 'easeInOut' | 'linear';
+	duration : number;
+	rotate : boolean;
+	rotateLock : boolean;
+	background : string;
+	color ?: string[] | null;
+	padding ?: number[] | null;
+	fontSize : number;
+	fontColor : string;
+	dataLabel : boolean;
+	dataPointShape : boolean;
+	dataPointShapeType : 'solid' | 'hollow';
+	touchMoveLimit : number;
+	enableScroll : boolean;
+	enableMarkLine : boolean;
+	scrollPosition : 'current' | 'left' | 'right';
+	_scrollDistance_ ?: number | null;
+	_rotate_ : boolean;
+	updateData : boolean;
+	seriesMA ?: IChartOptionsSeries[] | null;
+	yOffset : number;
+	xOffset : number;
+	DOMRect : DOMRect | null;
+	tapLegend : boolean;
+}
+
+export interface ITuiChartConfig {
+	version : string;
+	yAxisWidth : any;
+	xAxisHeight : number;
+	padding : number[];
+	rotate : boolean;
+	fontSize : number;
+	fontColor : string;
+	dataPointShape : string[];
+	color : string[];
+	linearColor : string[];
+	pieChartLinePadding : number;
+	pieChartTextPadding : number;
+	titleFontSize : number;
+	subtitleFontSize : number;
+	radarLabelTextMargin : number;
+	_xAxisTextAngle_ : number;
+	_pieTextMaxLength_ : number;
+}
+
+/**
+ * 定义图表事件发射器的行为契约。
+ */
+export interface ITuiChartsEvent {
+	trigger(type : string) : void;
+}
+
+/**
+ * 动画控制器接口
+ */
+export interface IAnimation {
+	/** 动画帧ID，用于取消动画 */
+	animationFrameId : number;
+	/** 动画是否已停止 */
+	isStop : boolean;
+	/** 动画持续时间 (毫秒) */
+	duration : number;
+	/** 动画缓动函数类型 */
+	timing : string;
+	/** 动画帧延迟时间 (毫秒) */
+	delay : number;
+	/** 动画开始时间戳 */
+	startTimeStamp : number;
+	/** 动画配置选项 */
+	opts : ChartAnimationOption;
+	/** Canvas 上下文 */
+	canvasContext : CanvasContext;
+
+	/**
+	 * 执行动画的每一步
+	 * 这是一个内部方法，但在接口中可以暴露出来以反映类的完整结构。
+	 * 通常，外部代码不会直接调用它。
+	 */
+	step() : void;
+
+	/**
+	 * 停止动画
+	 * 会立即跳转到动画结束状态并调用完成回调。
+	 */
+	stop() : void;
+}
+/**
+* 图表配置项接口
+* 定义了图表所需的各种配置属性
+*/
+
+export interface TuiChartsInterface {
+	opts : IChartOptions;
+	context : CanvasRenderingContext2D;
+	uevent : ITuiChartsEvent;
+	config : ITuiChartConfig;
+	scrollOption : IChartScrollOption;
+	animationInstance ?: IAnimation;
+	offsetWidth : number;
+	offsetHeight : number;
+	setCoordinates(e : UTSJSONObject) : void;
+	draw() : void;
+	clearTooltip() : void;
+	update(data : UTSJSONObject) : void;
+	zoom(e ?: IChartOptionsXAxis) : void;
+	dobuleZoom(e : UniTouchEvent) : void;
+	getLegendDataIndex(e : UniEvent) : number;
+	touchLegend(e : UniEvent) : number;
+	scrollStart(e : UniEvent) : void;
+	scroll(e : UniEvent) : void;
+	scrollEnd(e : UniEvent) : void;
+	showToolTip(...params : any[]) : number;
+	getCurrentDataIndex(e : UniEvent) : IChartOptionsTooltip;
 }

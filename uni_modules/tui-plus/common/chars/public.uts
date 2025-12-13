@@ -1,0 +1,95 @@
+import { TuiChartsInterface } from './Interface'
+import type { ComponentPublicInstance } from 'vue';
+export interface ITuiCharts {
+	/** 存储图表实例的 Map，key 为图表的 name (number)，value 为图表实例 */
+	chartsMap : Map<number, TuiChartsInterface>;
+
+	/** 图表的全局配置项 */
+	option : UTSJSONObject;
+
+	/** Canvas 2D 上下文 */
+	context : CanvasRenderingContext2D | null;
+
+	/** 设备像素比 */
+	dpr : number;
+
+	/** Canvas 元素的宽度 */
+	offsetWidth : number;
+
+	/** Canvas 元素的高度 */
+	offsetHeight : number;
+
+	/** 组件实例，用于触发事件 */
+	ins : ComponentPublicInstance | null;
+
+	/** 基准 X 坐标，用于计算触摸位置 */
+	baseX : number;
+
+	/** 基准 Y 坐标，用于计算触摸位置 */
+	baseY : number;
+
+	/** 上次显示提示框的图表索引 */
+	oldTipsName : number;
+
+	/** Canvas 元素的布局矩形信息 */
+	canvasRect : DOMRect | null;
+
+	/**
+	 * 根据触摸事件获取当前触摸的图表区域索引
+	 * @param e - UniApp 事件对象
+	 * @returns 返回触摸到的图表的 name (索引)，未触摸到任何图表则返回 -1
+	 */
+	getTouchCurrent(e : UniEvent) : number;
+
+	/**
+	 * 处理点击事件
+	 * @param e - UniApp 点击事件对象
+	 */
+	tap(e : UniPointerEvent) : void;
+
+	/**
+	 * 处理触摸开始事件
+	 * @param e - UniApp 触摸事件对象
+	 */
+	touchStart(e : UniTouchEvent) : void;
+
+	/**
+	 * 处理触摸移动事件
+	 * @param e - UniApp 触摸事件对象
+	 */
+	touchMove(e : UniTouchEvent) : void;
+
+	/**
+	 * 处理触摸结束事件
+	 * @param e - UniApp 触摸事件对象
+	 */
+	touchEnd(e : UniTouchEvent) : void;
+
+	/**
+	 * 设置组件实例和基准坐标
+	 * @param e - 组件公共实例
+	 * @param rect - 组件的布局矩形
+	 */
+	setInsMethod(e : ComponentPublicInstance, rect : DOMRect) : void;
+
+	/**
+	 * 设置 Canvas 上下文并初始化相关尺寸
+	 * @param context - Canvas 上下文
+	 */
+	setContext(context : CanvasContext) : void;
+
+	/**
+	 * 根据 name 获取图表实例
+	 * @param name - 图表的唯一标识
+	 * @returns 返回图表实例，如果不存在则返回 null
+	 */
+	getDrawCharts(name : number) : TuiChartsInterface | null;
+
+	/**
+	 * 添加一个新的图表实例
+	 * @param name - 图表的唯一标识
+	 * @param option - 图表的配置项
+	 * @returns 返回新创建的图表实例
+	 */
+	add(name : number, option : UTSJSONObject) : TuiChartsInterface;
+}

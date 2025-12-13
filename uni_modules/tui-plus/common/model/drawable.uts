@@ -21,8 +21,8 @@ export class TuiDrawableContext {
 		// #ifndef APP
 		this.ctx = ctx as CanvasRenderingContext2D
 		this.canvas = canvasEl
-		this.el = draw.$el as UniElement | null
 		// #endif
+		this.el = draw.$el as UniElement | null
 	}
 	get font() : string {
 		return this.ctx.font as string
@@ -229,7 +229,7 @@ export class TuiDrawableContext {
 		return this.canvas._width
 		// #endif
 		// #ifndef MP
-		return this.el?.getBoundingClientRect()?.width as number
+		return this.el?.getBoundingClientRect()?.width ?? 0
 		// #endif
 	}
 	set width(w : number) {
@@ -240,7 +240,7 @@ export class TuiDrawableContext {
 		return this.canvas._height
 		// #endif
 		// #ifndef MP
-		return this.el?.getBoundingClientRect()?.height as number
+		return this.el?.getBoundingClientRect()?.height ?? 0
 		// #endif
 	}
 	set height(h : number) {

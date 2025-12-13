@@ -6,8 +6,8 @@
 				<template v-for="(item,index) in headerData" :key="index">
 					<t-view
 						:main-class="`${extendsPadding} ${item.styles} ${border && index<headerData.length-1 ? `br-1px,s,${tableBorderColor} ${borderClass}` : ''}`">
-						<t-checkbox-state v-if="item.mode=='selection'" v-bind="extendsAttrs" main-class=""
-							ref="tablecheckboxallins" @select="selecChange"></t-checkbox-state>
+						<t-checkbox-state v-if="item.mode=='selection'" v-bind="extendsAttrs" main-class="p-0"
+							iconBoxClass="mr-0" ref="tablecheckboxallins" @select="selecChange"></t-checkbox-state>
 						<t-text v-bind="extendsAttrs"
 							:main-class="`sfwb ${item.textStyles} ${labelClass} ${item.labelClass}`"
 							v-else>{{item.label}}</t-text>
