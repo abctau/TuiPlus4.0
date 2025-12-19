@@ -59,7 +59,7 @@ export class TuiAxios {
 		this.task?.abort()
 	}
 	joinUrl(path : string) : string {
-		const baseUrl = this.reqConfig.get('baseURL') as string;
+		const baseUrl = this.reqConfig.get('baseURL') as string | null ?? '';
 		let url : string
 		if (path.startsWith('http://') || path.startsWith('https://')) {
 			url = path
