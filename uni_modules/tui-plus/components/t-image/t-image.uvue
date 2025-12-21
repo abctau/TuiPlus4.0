@@ -1,7 +1,7 @@
 <template>
 	<t-view v-bind="extendsAttrs" :main-class="`h-320 oh dr ${mainClass} ${autosize}`" @click="onclick" ref="imageins">
 		<image v-if="!iserror" class="image-class" :class="{'image-tran':fadeShow}" :style="{opacity:opacity}"
-			:src="splicingUrl" :mode="mode" @error="error" @load="load"></image>
+			:src="src" :mode="mode" @error="error" @load="load"></image>
 		<image v-if="opacity==0&&placeholder" class="image-class" :src="defaultImage" mode="scaleToFill"></image>
 		<t-row v-if="opacity==0 && loading && !iserror" main-class='da di fc'>
 			<t-loading v-bind="loadingAttrs"></t-loading>
@@ -74,9 +74,9 @@
 	 * @event {Function} load 图片加载完成时触发
 	 * @event {Function} click 点击时触发
 	 */
-	import { baseimage, prefix } from './index'
+	import { baseimage } from './index'
 	import { CommonProps, useTuiThemes } from '../../common/props/index.uts';
-	interface ViewProps extends CommonProps {
+	interface ImageProps extends CommonProps {
 		src : string
 		mode : string
 		placeholder : boolean
@@ -92,7 +92,7 @@
 	const iserror = ref(false)
 	const autosize = ref('')
 	const imageins = ref<ComponentPublicInstance | null>(null)
-	const props = withDefaults(defineProps<ViewProps>(), {
+	const props = withDefaults(defineProps<ImageProps>(), {
 		path: '',
 		hover: false,
 		type: '',
@@ -120,14 +120,6 @@
 			opacity.value = 1
 		}
 	)
-
-	const splicingUrl = computed(() : string => {
-		let url : string = props.src
-		if (!((url.includes('://') || (url.startsWith('data:'))) || url.startsWith('/'))) {
-			url = prefix + '/' + url
-		}
-		return url
-	})
 
 	const defaultImage = computed(() : string => {
 		return props.placeholderImage == '' ? baseimage : props.placeholderImage
