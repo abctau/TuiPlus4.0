@@ -1,5 +1,5 @@
 <template>
-	<t-view :main-class="mainStyles" :hover="false" @click="onTreeItemClick">
+	<t-view :main-class="mainStyles" class="t-tree-item" :hover="false" @click="onTreeItemClick">
 		<t-row main-class="faic pl-10">
 			<t-animation ref="fodiconins" :main-class="treeCheckBoxStyles">
 				<t-icon v-if="isChild" v-bind="extendsAttrs" main-class="ocr" type="info" name="arrow-right"></t-icon>
@@ -180,7 +180,7 @@
 	})
 
 	const mainStyles = computed(() : string => {
-		return `tdb fl faic fjcb h-${props.rowHeight}px`
+		return `atr-0 ocr tdb fl faic fjcb h-${props.rowHeight}px`
 	})
 	function partenUpdateChaildCheck(e : boolean) {
 		checkState.value = e ? 1 : 0
@@ -323,3 +323,11 @@
 	}
 	defineExpose({ partenUpdateChaildCheck, accordionFolds })
 </script>
+<style>
+	/* #ifndef APP */
+	.t-tree-item:hover {
+		background-color: #f8f8f8f8 !important;
+	}
+
+	/* #endif */
+</style>
