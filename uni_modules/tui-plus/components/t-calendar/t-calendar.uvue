@@ -421,7 +421,9 @@
 		activeTime.value = t
 	}
 	function touchmove(e : UniTouchEvent) {
+		// #ifndef APP
 		e.preventDefault()
+		// #endif
 	}
 	function selectListFormat(time : string) {
 		switch (props.mode) {
@@ -487,7 +489,8 @@
 				const data = grid.data
 				activeTime.value = data.fullDate
 				selectListFormat(activeTime.value)
-				drawWeek(current.value, activeTime.value)
+				// drawWeek(current.value, activeTime.value)
+				updateDraw(activeTime.value)
 				emit('click', calendar.getDateInfo(data.fullDate))
 				emit('update:modelValue', selectTimers)
 				emit('change', selectTimers)
