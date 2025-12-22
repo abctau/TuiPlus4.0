@@ -2,7 +2,7 @@
 	<t-view :main-class="mainStyles" :hover="false" @click="onTreeItemClick">
 		<t-row main-class="faic pl-10">
 			<t-animation ref="fodiconins" :main-class="treeCheckBoxStyles">
-				<t-icon v-if="isChild" v-bind="extendsAttrs" main-class="" type="info" name="arrow-right"></t-icon>
+				<t-icon v-if="isChild" v-bind="extendsAttrs" main-class="ocr" type="info" name="arrow-right"></t-icon>
 			</t-animation>
 			<t-checkbox-state v-if="showCheckbox" v-bind="extendsAttrs" :state="checkState" main-class="mr-20"
 				iconBoxClass="mr-0" :stop="true" @select="checkChange"></t-checkbox-state>
@@ -180,7 +180,7 @@
 	})
 
 	const mainStyles = computed(() : string => {
-		return `fl faic fjcb h-${props.rowHeight}px`
+		return `tdb fl faic fjcb h-${props.rowHeight}px`
 	})
 	function partenUpdateChaildCheck(e : boolean) {
 		checkState.value = e ? 1 : 0
