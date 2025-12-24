@@ -104,7 +104,10 @@
 	const collapse = computed(() : boolean => {
 		return collapseIds?.value?.includes(props.value) ?? false
 	})
+	let isani = false
 	function updateCollapseState(e : boolean) {
+		if (isani) return
+		isani = true
 		nextTick(() => {
 			getDomRect('.tui-collapse-item-content', instance).then((a : NodeInfo) => {
 				let h : number = 0
@@ -115,6 +118,7 @@
 				const ani : TuiAnimation = ins.createAnimation({ duration: 100 }) as TuiAnimation
 				ani.height(h + 'px').step()
 				ins.exports()
+				isani = false
 			})
 		})
 	}
