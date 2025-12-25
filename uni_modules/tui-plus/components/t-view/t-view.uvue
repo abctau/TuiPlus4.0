@@ -1,7 +1,7 @@
 <template>
 	<view class='tui-visible' @click="mainOnclick" @transitionend="transitionend" :hover-stop-propagation="true"
 		:hover-stay-time="0" :hover-start-time="0" :hover-class="hover?'tui-hove-class':''"
-		:style="[extendsViewStyle,themeDisabled]" @touchmove="touchmove">
+		:style="[themeDisabled,extendsViewStyle]" @touchmove="touchmove">
 		<!-- #ifdef MP -->
 		<view v-if="stop && touchStop" @touchmove.stop="touchmove" @click.stop="mainOnclick"
 			:style="['width: 100%;height: 100%;',extendsViewFilterPmStyle]">
