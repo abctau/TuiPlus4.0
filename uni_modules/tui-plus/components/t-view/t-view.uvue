@@ -100,7 +100,7 @@
 		}
 	}
 	function touchmove(e : UniTouchEvent) {
-		// #ifndef APP-ANDROID
+		// #ifndef APP
 		if (props.touchStop) e.preventDefault()
 		// #endif
 	}
