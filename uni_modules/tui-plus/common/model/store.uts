@@ -27,13 +27,13 @@ export class TuiStore {
 		this.value = TuiResolve
 	}
 	clearExpiresData() {
-		expires.forEach((val : TypeExpires, key : string) => {
+		for (const [key, val] of expires) {
 			const t : number = val.exp
-			if (t > 0) {
-				const curT = new Date().getTime()
-				if ((curT - val.time) < 0) this.delete(key)
-			}
-		})
+			if (t <= 0) continue
+			const nowDT = new Date().getTime();
+			if (nowDT - val.time < t) continue;
+			this.delete(key);
+		}
 	}
 	delete(...params : string[]) {
 		params.forEach((key : string) => {
@@ -86,10 +86,12 @@ export class TuiStore {
 	get(key : string) : UTSJSONObject {
 		this.clearExpiresData()
 		const val = TuiResolve.get(key) as UTSJSONObject | null
-		if (val == null) TuiResolve.set(key, {})
+		if (val == null) {
+			TuiResolve.set(key, {})
+		}
 		return TuiResolve.get(key) as UTSJSONObject
 	}
-	set(key : string, data : any | null, expire : number = 86400000) {
+	set(key : string, data : any | null, expire : number = -1) {
 		if (data != null) {
 			if (typeof (data) == 'string') {
 				TuiResolve.set(key, data)
@@ -111,7 +113,7 @@ export class TuiStore {
 				}
 			}
 			uni.setStorageSync(key, data!)
-			expires.set(key, { exp: new Date().getTime(), time: expire } as TypeExpires)
+			expires.set(key, { exp: expire, time: new Date().getTime() } as TypeExpires)
 			uni.setStorageSync('expires', Array.from<any>(expires))
 		}
 	}
